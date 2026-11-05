@@ -15,7 +15,8 @@ log exists), real time and distance, freeform roads and plots, labour by family.
 
 Where the tech spec conflicts with `CLAUDE.md` or `docs/decisions/`, the decisions win.
 
-## Per-system docs
+## Live changes
 
-One file per system is being split out of the GDD (see the planning conversation).
-Tasks cite rule IDs; keep the IDs when moving rules between files.
+The GDD stays the design source until systems are playable. Owner decisions made since
+v0.4 are in **`gdd-amendments.md`**, which wins where it disagrees with the GDD.
+Read both. Tasks cite rule IDs from either.
