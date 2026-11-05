@@ -1,0 +1,27 @@
+* text=auto
+
+*.cs      text diff=csharp
+*.uxml    text
+*.uss     text
+*.md      text
+*.json    text
+
+# Unity YAML: merge with UnityYAMLMerge (agent-noc init sets up the driver when it can find Unity)
+*.unity   merge=unityyamlmerge eol=lf
+*.prefab  merge=unityyamlmerge eol=lf
+*.asset   merge=unityyamlmerge eol=lf
+*.mat     merge=unityyamlmerge eol=lf
+*.anim    merge=unityyamlmerge eol=lf
+*.controller merge=unityyamlmerge eol=lf
+*.meta    merge=unityyamlmerge eol=lf
+
+# Binary
+*.png  binary
+*.jpg  binary
+*.psd  binary
+*.fbx  binary
+*.wav  binary
+*.mp3  binary
+*.ogg  binary
+*.ttf  binary
+*.otf  binary

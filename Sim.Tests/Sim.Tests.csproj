@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Headless test project for the simulation core.
+    It compiles the same .cs files Unity compiles from Assets/Sim, so agents can
+    build and test game logic in seconds without opening the Unity Editor.
+    LangVersion 9 matches Unity's C# compiler, so code that builds here builds there.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>NetSim.Sim.Tests</RootNamespace>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- Restore only from nuget.org, ignoring any machine-wide sources or fallback
+         folders (e.g. a missing Visual Studio offline package folder). -->
+    <RestoreSources>https://api.nuget.org/v3/index.json</RestoreSources>
+    <RestoreAdditionalProjectSources></RestoreAdditionalProjectSources>
+    <RestoreFallbackFolders>clear</RestoreFallbackFolders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Assets/Sim/**/*.cs" Link="Sim/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,33 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+crashlytics-buildid.txt
+*.apk
+*.aab
+*.unitypackage
+
+# IDE / generated project files
+.vs/
+.vscode/
+.idea/
+*.csproj
+!Sim.Tests/Sim.Tests.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+
+# Headless test build output
+Sim.Tests/bin/
+Sim.Tests/obj/
