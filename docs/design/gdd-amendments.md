@@ -13,15 +13,30 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 - **Namespaces:** the template's `NetSim` is removed and replaced by `LordsLegacy.Sim` /
   `LordsLegacy.Game` (not "Legacy", which reads as "legacy code").
 
-## Time (TIME, CLK) — partly OPEN
+## Time (TIME, CLK)
 
 - Units: durations in game minutes, speeds in m per game minute (decision 0004).
 - Calendar: 365 days, game starts 1 March, Year 1, 06:00. Seasons are meteorological:
   Spring Mar–May, Summer Jun–Aug, Autumn Sep–Nov, Winter Dec–Feb. Top bar shows
   e.g. `14 Mar · Spring · Year 1 · 08:40`. (PROPOSED)
 - Days per year and game minutes per real second are tuning values, not code. (DECIDED)
-- Real-time pace, speed buttons, seasonal daylight and the day/night display toggle are
-  **OPEN**, being discussed.
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| TIME-A1 | **Target pace:** one game year takes about 2–6 real hours of normal play (mixing 4–8× for building, 16–32× for waiting, 1× for watching) | DECIDED |
+| TIME-A2 | A game day lasts **15 real minutes at 1×** (clock runs 96× real time), replacing TIME-02's 45 minutes. Year = 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×, 2.9 h at 32× | DECIDED (PLACEHOLDER value, tune in playtests) |
+| TIME-A3 | Speeds: pause, 1×, 2×, 4×, 8×, 16×, 32× (replaces TIME-03). Walking still looks like real walking speed at 1× | DECIDED |
+| TIME-A4 | Consequence, accepted: fewer trips fit into a game day, so distances are shorter to compensate (WORLD-A1) and production and food are tuned per day with that in mind | DECIDED |
+| TIME-A5 | **Seasonal daylight:** sunrise and sunset follow the calendar, about 8 h of daylight in midwinter and 16 h in midsummer (southern-England-like). Families work from sunrise to sunset, with a meal break. Night length varies to match | DECIDED |
+| TIME-A6 | **Steady light** toggle in the top bar: freezes the on-screen lighting at daytime. It is visual only; the Sim's day, night and schedules are unchanged | DECIDED |
+| TIME-A7 | Combat (later) must feel good at 1–4×; the pace will be retuned when combat exists | DECIDED |
+
+## World scale
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| WORLD-A1 | Target full maps are about 6×6 km, not much larger. Distances are kept slightly tighter than real life, so villages sit 2–3 km apart (2–4 game days' walk) instead of 5–8 km (adjusts TIME-07) | DECIDED (PLACEHOLDER values) |
+| WORLD-A2 | The test map generator's size is a setting: 2×2 km for MVP-0 to MVP-1, and 6×6 km for scale tests once the MVPs are playable | DECIDED |
 
 ## Storage and items (INV, WCO, BLD) — replaces the single "storage yard" idea
 
@@ -39,12 +54,19 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | INV-A10 | Processing buildings (e.g. later sawmill) get inputs delivered by an ox and handler, work at the building, and store output locally until a hauler collects it | DECIDED |
 
 Woodcutting loop (replaces WCO step 3 wording): the woodcutter walks to the work area,
-fells and processes the tree, and leaves the logs on the ground. A separate citizen leads
-an ox to drag them to the operation's log storage. (Which citizen: OPEN.)
+fells and processes the tree, and leaves the logs on the ground. **Another member of the
+same assigned family** leads an ox to drag them to the operation's log storage.
+
+### Helpers (unassigned citizens)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| TSK-A1 | Citizens from unassigned families pick up helper tasks (e.g. leading an ox to move logs from a log bay to a sawmill). Which task types they may take is set **per task type in data** (decision 0005) | DECIDED |
+| TSK-A2 | MVP helper tasks: construction (Deliver, Build) and hauling for construction (POP-04). More helper task types are added later as data | DECIDED |
 
 ## Oxen
 
-- Starting oxen count is a tuning value; standard start may become 2 (balancing, PLACEHOLDER 1 for now).
+- Standard start has **2 oxen** (CON-10 changed from 1). The count is a tuning value. (DECIDED, PLACEHOLDER)
 - Later: oxen can be assigned to buildings; an oxen stand (fixed footprint, 1 ox) upgrades
   in place to a stable (fixed footprint, several oxen). (DECIDED, later MVP)
 
@@ -60,8 +82,9 @@ an ox to drag them to the operation's log storage. (Which citizen: OPEN.)
 | ID | Rule | Tag |
 | --- | --- | --- |
 | POP-A1 | Until a family has a house, its home is the camp-site: it eats and sleeps there and is flagged **Homeless**. Later, homelessness lowers happiness | DECIDED |
-| POP-A2 | Children work from age 10 (light steps only; age OPEN, see questions). Serving age for troops is 14+ | DECIDED (age PLACEHOLDER) |
-| POP-A3 | Each process stage says in data whether it is light or heavy; children only take light steps | DECIDED |
+| POP-A2 | Children aged 8–13 work, but only on **light** steps. From 14 they do everything, including heavy steps, and can serve as troops. Replaces POP-10 and the earlier "10" | DECIDED (ages PLACEHOLDER) |
+| POP-A3 | Each process stage and task step says in data whether it is light or heavy. **Heavy (starting list):** construction work, felling, bucking, leading oxen or cattle, sawing timber into planks. **Light (starting list):** gathering willow sticks for wattle, gathering mud for daub, gathering grass or reeds, foraging. The list will be refined | DECIDED (list PROPOSED) |
+| POP-A3b | Consequence in MVP-1: woodcutting is all heavy, so children at the woodcutter don't work. A family's output counts only the members who can take the step (POP-23) | DECIDED |
 | POP-A4 | No births for now (POP-25 disabled). Children age to 18 and then leave to form their own family when a free house exists (POP-19) | DECIDED |
 | POP-A5 | Arrivals (MVP-3) happen only when there is free housing. While no space exists, nobody arrives | DECIDED |
 | POP-A6 | Arriving adults first fill a missing role in an incomplete family. Otherwise they form a new family unit, which may be incomplete and waits for a partner | DECIDED |
@@ -73,4 +96,5 @@ an ox to drag them to the operation's log storage. (Which citizen: OPEN.)
 | ID | Rule | Tag |
 | --- | --- | --- |
 | FOOD-A1 | One food unit = one person-day ration. Rations per person per day and starting food are tuning values, editable at runtime from a debug sim-tuning panel in dev builds | DECIDED (values OPEN) |
+| FOOD-A3 | The UI shows food mainly as **days of food left** (stock ÷ daily use), with the raw count secondary | PROPOSED |
 | FOOD-A2 | MVP-2 hunger is a status that lowers work output. Starvation deaths and leaving are later mechanics | DECIDED |

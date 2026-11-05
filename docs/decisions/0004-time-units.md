@@ -2,7 +2,7 @@
 
 **Context.** The GDD mixes real seconds, game seconds and "worker-seconds". With a
 1 game-minute tick (CLK-01), anything shorter than a minute is meaningless, and the real-time
-pace (how many game minutes pass per real second) is still being tuned (TIME-08).
+pace (how many game minutes pass per real second) will keep being tuned (TIME-08, TIME-A2).
 
 **Decision.**
 - The Sim tick is 1 game minute. The Sim only knows ticks and game time.
@@ -11,8 +11,11 @@ pace (how many game minutes pass per real second) is still being tuned (TIME-08)
   2 workers for 8 game hours). Work only counts while its materials are on site.
 - Every speed in data is in **metres per game minute**.
 - How many game minutes run per real second at 1× is a single tuning value
-  (`GameMinutesPerRealSecondAt1x`, today 32/60), used only by the Unity layer's tick pacer.
+  (`GameMinutesPerRealSecondAt1x`, default 1.6 = a 15-minute day, TIME-A2), used only
+  by the Unity layer's tick pacer.
 
-**Consequences.** Retuning the real-time pace never changes Sim data. Walking at 5 km/h
-on screen at 1× with a 32× clock is 2.6 m per game minute; if the pace changes, walking
-speed data is re-derived from that once, in the tuning file, not in code.
+**Consequences.** Retuning the pace never changes Sim code. Speeds that should *look*
+real at 1× are derived once in the tuning data: at 1.6 game min per real second, walking at
+5 km/h on screen is 0.87 m per game minute, and an ox at 3 km/h is 0.52. At 32× the Sim runs
+about 51 ticks per real second, so per-tick work must stay cheap (pathfinding on demand and
+cached, not per tick).

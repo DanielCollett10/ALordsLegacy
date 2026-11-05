@@ -15,5 +15,7 @@ own serialiser anyway (SAV-03); ticks are rare (1 game minute, ~0.5/s at 1×, ~1
 so 500–1,000 citizens is well within plain C# with sensible data layout.
 
 **Consequences.** Sim uses its own math types. If profiling (P1, P5) shows a hot loop
-(pathfinding) is too slow, optimise it inside the Sim first (caching, hierarchical search);
-moving it to Burst needs a new decision. Tech spec sections that say "ECS" mean "Sim state".
+(pathfinding) is too slow, optimise it inside the Sim first (caching, hierarchical search,
+parallel pure queries applied in a fixed order). Escape hatch: the Sim defines an interface
+(e.g. `IPathfinder`) and the Unity layer may supply a Burst implementation, while tests use
+the plain C# one. Using it needs a new decision. Tech spec sections that say "ECS" mean "Sim state".
