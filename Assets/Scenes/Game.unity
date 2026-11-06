@@ -147,7 +147,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 41d199ca093807a4394fc080c611d6ca, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.CameraRig
   MinHeight: 3
   MaxHeight: 400
@@ -450,7 +450,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c3d1f5e9a6b4e2d91a7c0b4e5f63a18, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.SimHost
 --- !u!4 &983788686
 Transform:

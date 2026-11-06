@@ -1,0 +1,9 @@
+.ground-readout {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    padding: 6px 10px;
+    font-size: 16px;
+    color: rgb(240, 230, 210);
+    background-color: rgba(30, 24, 18, 0.85);
+}

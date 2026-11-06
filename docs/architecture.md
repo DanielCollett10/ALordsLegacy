@@ -76,6 +76,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 - `SimHost` (above) is a MonoBehaviour in the Game scene. `Update` → `Tick(Time.deltaTime)` drives the pacer and
   `World.Step`. Views only read `SimHost.World`, `SimHost.Pacer`, `SimHost.TickFraction` and `SimHost.Stats`;
   they send commands (pause, speed) through `SimHost.TogglePause` and `TickPacer.SetSpeed`.
+- Cursor ground readout (`Assets/Game/Picking/`): `GroundPicker` casts a ray from the camera (screen position or
+  `Ray`) and keeps only the hit's x/z. Height and slope come from `SimHost.World.Terrain` at that x/z, never from the
+  collider. `GroundSample` is the result (`Format()` gives the label text). `GroundReadoutView` (UI Toolkit,
+  `Assets/Game/UI/GroundReadout/`) shows it in one label each frame. `ReadAt(x,z)` reads the Sim without a ray.
 - `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` (last Step wall time) and
   `TicksPerSecond` (ticks run in the last real second). Sim code never reads it.
 - Views on screen so far: the terrain (Unity Terrain, map-1) and `TopBarController` (UI Toolkit, `TopBar.uxml`).
