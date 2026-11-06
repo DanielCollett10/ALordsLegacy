@@ -48,6 +48,9 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
   truncation throw `MapDataFormatException`) and `SyntheticMap.CreateRamp()` (200x200 m test map, 5 trees).
 - `SimWorld.Terrain` (`IHeightField`) and `SimWorld.Trees` (`TreeRegistry`) are never null. `new SimWorld(tuning)`
   gives `FlatHeightField` and no trees; `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees.
+- Tree authoring: menu `Lords Legacy/Map/Scatter Forest Trees` (`ForestScatter`, Assets/Editor/MapGen/Forest) reads
+  `forest-region.json` and writes the seeded `TreeAuthoringData` asset `Assets/Maps/TestMap/TestMapTrees.asset`
+  (`LordsLegacy.Game.Authoring`; ids 0..n-1, trunk 12-20 m). Unity terrain trees are not used.
 - Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y.
 
 ## Unity layer
