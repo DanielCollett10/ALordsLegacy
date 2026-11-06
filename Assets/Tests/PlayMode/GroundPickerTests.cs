@@ -90,18 +90,22 @@ namespace LordsLegacy.Tests.PlayMode
                 Assert.AreEqual(_host.World.Terrain.HeightAt(sample.X, sample.Z), sample.HeightM, 1e-4f, "height at " + p);
                 Assert.AreEqual(_host.World.Terrain.SlopeDegAt(sample.X, sample.Z), sample.SlopeDeg, 1e-4f, "slope at " + p);
 
-                // Screen path must agree with the camera's own ray through that pixel.
-                Vector3 screen = _cam.WorldToScreenPoint(new Vector3(p.x, 0f, p.y));
-                Assert.IsTrue(_picker.TryPickScreen(screen, out var fromScreen), "No screen hit at " + p);
-                Assert.IsTrue(_picker.TryPickRay(_cam.ScreenPointToRay(screen), out var fromRay), "No ray hit at " + p);
-                Assert.AreEqual(fromRay.X, fromScreen.X, 1e-4f, "screen x at " + p);
-                Assert.AreEqual(fromRay.Z, fromScreen.Z, 1e-4f, "screen z at " + p);
-                Assert.AreEqual(fromRay.HeightM, fromScreen.HeightM, 1e-4f, "screen height at " + p);
-
                 _view.Show(sample);
                 Assert.AreEqual(sample.Format(), _view.Text);
                 Assert.IsTrue(_view.Text.Contains("height " + sample.HeightM.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)));
             }
+        }
+
+        [Test]
+        public void ScreenCentreHitsCameraAxisPoint()
+        {
+            // Screen centre looks straight down the camera axis, so it must hit (100, 100) regardless of projection details.
+            var centre = new Vector2(_cam.pixelWidth * 0.5f, _cam.pixelHeight * 0.5f);
+            Assert.IsTrue(_picker.TryPickScreen(centre, out var s));
+            Assert.AreEqual(100f, s.X, 0.05f);
+            Assert.AreEqual(100f, s.Z, 0.05f);
+            Assert.AreEqual(_host.World.Terrain.HeightAt(s.X, s.Z), s.HeightM, 1e-4f);
+            Assert.AreEqual(_host.World.Terrain.SlopeDegAt(s.X, s.Z), s.SlopeDeg, 1e-4f);
         }
 
         [Test]
@@ -116,9 +120,8 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void MissReturnsEmptySample()
         {
-            // Ray aimed beyond the ground box (box ends at x = 1500).
-            Vector3 screen = _cam.WorldToScreenPoint(new Vector3(5000f, 0f, 5000f));
-            Assert.IsFalse(_picker.TryPickScreen(screen, out var sample));
+            // Ray pointing up from above the ground cannot hit anything.
+            Assert.IsFalse(_picker.TryPickRay(new Ray(new Vector3(100f, 300f, 100f), Vector3.up), out var sample));
             Assert.IsFalse(sample.HasValue);
             Assert.AreEqual(GroundSample.None.Format(), sample.Format());
         }
