@@ -22,8 +22,10 @@ forest scatter and by editor-run tests. Regions are not in the Sim map file yet.
 `Assets/StreamingAssets/Maps/<MapId>.lsmap`; at runtime the Sim host reads those bytes
 from `Application.streamingAssetsPath` and passes them to the Sim's MapData reader.
 **Coordinates:** Sim x/z = Unity world x/z in metres, Sim height = Unity world y. The terrain
-sits at world (0,0,0) and covers x and z from 0 to its size (2,000 m for the test map), so the
-HeightGrid origin is (0,0). Tree positions, forest-region.json and every scene use this frame.
+sits at world (0,0,0) and covers x and z from 0 to its size, so the HeightGrid origin is (0,0).
+The test map is **2,048 × 2,048 m with a 1025 × 1025 heightmap**, so Unity's height samples are
+exactly 2 m apart and line up with the Sim's 2 m grid nodes (Unity heightmaps must be 2^n+1).
+Other map sizes must keep size ÷ (resolution − 1) equal to the bake cell size. Tree positions, forest-region.json and every scene use this frame.
 The baked file is committed as a plain git binary (`*.lsmap binary` in `.gitattributes`);
 the repo does not use Git LFS yet. The 2 km test map is a few MB. Move map files and art
 to LFS (tech spec DEV-01) before maps reach 6 km or the owner's models arrive.
