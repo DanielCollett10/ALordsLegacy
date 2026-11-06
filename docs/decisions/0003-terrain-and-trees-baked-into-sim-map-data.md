@@ -18,6 +18,9 @@ Files: tree authoring data is a `TreeAuthoringData` ScriptableObject (tree id, x
 trunk length) next to the terrain in `Assets/Maps/<MapId>/`. The bake writes
 `Assets/StreamingAssets/Maps/<MapId>.lsmap`; at runtime the Sim host reads those bytes
 from `Application.streamingAssetsPath` and passes them to the Sim's MapData reader.
+The baked file is committed as a plain git binary (`*.lsmap binary` in `.gitattributes`);
+the repo does not use Git LFS yet. The 2 km test map is a few MB. Move map files and art
+to LFS (tech spec DEV-01) before maps reach 6 km or the owner's models arrive.
 The world target is 25×25 km (WORLD-A1): one uniform 2 m grid would be ~156M cells, so
 Sim code queries terrain through a height-field interface. The single `HeightGrid` serves
 the MVP maps; a tiled version with coarser cells where nobody builds replaces it later.
