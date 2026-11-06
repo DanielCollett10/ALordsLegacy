@@ -21,3 +21,9 @@ How you work:
 6. Commit with messages starting with the task ID. Never commit Library/ or Temp/.
 
 Your final answer is the structured report.
+
+## Lessons learned
+
+Rules added after reviews kept catching the same mistakes. Follow them like any other rule.
+
+- Before reporting, the editor agent must (1) commit the .meta file for every new asset or asmdef, so GUIDs stay stable; (2) create each asset the task needs, such as PanelSettings, as a valid committed asset or via an Editor script, and not defer it; (3) confirm the console shows no compile errors and the EditMode/PlayMode smoke tests pass, or list exactly what could not be run in human_steps; (4) state in human_steps any Unity restart needed, for example after changing Active Input Handling. _(learned from T-005)_
