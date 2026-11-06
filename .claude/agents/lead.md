@@ -29,3 +29,9 @@ Drafting the backlog:
 - Order work so each step produces something testable, and declare dependencies.
 - List the files each task will change in `touches`. Tasks that share files never run at
   the same time, so split work so parallel tasks touch different files where you can.
+
+## Lessons learned
+
+Rules added after reviews kept catching the same mistakes. Follow them like any other rule.
+
+- Before re-dispatching a task after a failed review, check that the lane has permission to do each required change (for example `git checkout main -- <path>`). If it doesn't, route the task to a lane that can, or escalate it to the human with the exact command to run. Don't send it back to the same lane unchanged. _(learned from T-031)_
