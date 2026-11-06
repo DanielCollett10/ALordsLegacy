@@ -105,16 +105,23 @@ namespace LordsLegacy.Game
         private void Start()
         {
             if (!_poseSet) { _x = _startXZ.x; _z = _startXZ.y; _height = _startHeight; _pitch = _startPitch; _yaw = _startYaw; }
-            if (_terrain == null)
-            {
-                var host = FindFirstObjectByType<SimHost>();
-                if (host != null && host.IsInitialized) _terrain = host.World.Terrain;
-            }
+            TryAcquireTerrain();
             Apply();
+        }
+
+        private SimHost _host;
+
+        /// <summary>Looks the terrain up from SimHost; SimHost may initialise after our Start, so Update retries.</summary>
+        private void TryAcquireTerrain()
+        {
+            if (_terrain != null) return;
+            if (_host == null) _host = FindFirstObjectByType<SimHost>();
+            if (_host != null && _host.IsInitialized) { _terrain = _host.World.Terrain; Apply(); }
         }
 
         private void Update()
         {
+            TryAcquireTerrain();
             var kb = Keyboard.current;
             var mouse = Mouse.current;
             float dt = Time.unscaledDeltaTime;
