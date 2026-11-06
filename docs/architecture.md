@@ -21,6 +21,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds every PLACEHOLDER number from
   `docs/design/tuning.md`. Defaults are instance properties set by object initializer; derived
   values are computed properties. The Sim never hard-codes these numbers.
+- `Assets/Sim/Time/TickPacer.cs` (`LordsLegacy.Sim.Calendar`) owns the selected speed (`SetSpeed(index)`,
+  `CurrentSpeed`, `Speeds` from tuning) and real-time pacing. `Advance(realSeconds)` returns the whole
+  ticks due and carries the rest (`Fraction`, in [0,1)). Capped at `MaxTicksPerFrame`; over the cap it
+  drops the excess and sets `SlowedDown`. `Reset()` clears the carry-over (the host calls it while paused).
+  The pacer has no pause state; `SimWorld` owns pause (decision 0006).
 
 ## Map pipeline
 
