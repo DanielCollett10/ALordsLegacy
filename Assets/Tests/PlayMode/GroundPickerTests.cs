@@ -81,13 +81,22 @@ namespace LordsLegacy.Tests.PlayMode
             var points = new[] { new Vector2(100f, 100f), new Vector2(37.5f, 60.25f), new Vector2(150f, 20f) };
             foreach (var p in points)
             {
-                Vector3 screen = _cam.WorldToScreenPoint(new Vector3(p.x, 0f, p.y));
-                Assert.IsTrue(_picker.TryPickScreen(screen, out var sample), "No ground hit at " + p);
+                // Geometry check uses an explicit downward ray so it does not depend on Camera matrices.
+                var ray = new Ray(new Vector3(p.x, 300f, p.y), Vector3.down);
+                Assert.IsTrue(_picker.TryPickRay(ray, out var sample), "No ground hit at " + p);
                 Assert.IsTrue(sample.HasValue);
                 Assert.AreEqual(p.x, sample.X, 0.05f, "x at " + p);
                 Assert.AreEqual(p.y, sample.Z, 0.05f, "z at " + p);
                 Assert.AreEqual(_host.World.Terrain.HeightAt(sample.X, sample.Z), sample.HeightM, 1e-4f, "height at " + p);
                 Assert.AreEqual(_host.World.Terrain.SlopeDegAt(sample.X, sample.Z), sample.SlopeDeg, 1e-4f, "slope at " + p);
+
+                // Screen path must agree with the camera's own ray through that pixel.
+                Vector3 screen = _cam.WorldToScreenPoint(new Vector3(p.x, 0f, p.y));
+                Assert.IsTrue(_picker.TryPickScreen(screen, out var fromScreen), "No screen hit at " + p);
+                Assert.IsTrue(_picker.TryPickRay(_cam.ScreenPointToRay(screen), out var fromRay), "No ray hit at " + p);
+                Assert.AreEqual(fromRay.X, fromScreen.X, 1e-4f, "screen x at " + p);
+                Assert.AreEqual(fromRay.Z, fromScreen.Z, 1e-4f, "screen z at " + p);
+                Assert.AreEqual(fromRay.HeightM, fromScreen.HeightM, 1e-4f, "screen height at " + p);
 
                 _view.Show(sample);
                 Assert.AreEqual(sample.Format(), _view.Text);
