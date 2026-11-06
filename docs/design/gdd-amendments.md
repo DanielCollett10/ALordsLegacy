@@ -31,7 +31,7 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | TIME-A1 | **Target pace:** one game year takes about 2–6 real hours of normal play (mixing 4–8× for building, 16–32× for waiting, 1× for watching) | DECIDED |
 | TIME-A2 | A game day lasts **15 real minutes at 1×** (clock runs 96× real time), replacing TIME-02's 45 minutes. Year = 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×, 2.9 h at 32×. Set by one tuning value, `RealMinutesPerGameDayAt1x`, so other day lengths can be tried without code changes | DECIDED (value PLACEHOLDER) |
 | TIME-A3 | Speeds: pause, 1×, 2×, 4×, 8×, 16×, 32× (replaces TIME-03). Walking still looks like real walking speed at 1× | DECIDED |
-| TIME-A4 | Consequence, accepted: fewer trips fit into a game day, so distances are shorter to compensate (WORLD-A1) and production and food are tuned per day with that in mind | DECIDED |
+| TIME-A4 | Consequence, accepted: fewer trips fit into a game day, so local work distances (work areas, hauls) are kept short and production and food are tuned per day with that in mind. Long distances between villages are deliberate (WORLD-A1) | DECIDED |
 | TIME-A5 | **Seasonal daylight:** sunrise and sunset follow the calendar, about 8 h of daylight in midwinter and 16 h in midsummer (southern-England-like). Families work from sunrise to sunset, with a meal break. Night length varies to match | DECIDED |
 | TIME-A6 | **Steady light** toggle in the top bar: freezes the on-screen lighting at daytime. It is visual only; the Sim's day, night and schedules are unchanged | DECIDED |
 | TIME-A7 | Combat (later) must feel good at 1–4×; the pace will be retuned when combat exists | DECIDED |
@@ -40,8 +40,10 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| WORLD-A1 | Target full maps are about 6×6 km, not much larger. Distances are kept slightly tighter than real life, so villages sit 2–3 km apart (2–4 game days' walk) instead of 5–8 km (adjusts TIME-07) | DECIDED (PLACEHOLDER values) |
-| WORLD-A2 | The test map generator's size is a setting: 2×2 km for MVP-0 to MVP-1, and 6×6 km for scale tests once the MVPs are playable | DECIDED |
+| WORLD-A1 | The full world targets about **25×25 km**, bigger than Manor Lords, so distance matters. Villages may sit several km apart. Crossing the whole world on foot takes about 20 game days (5 real hours at 1×) | DECIDED (size PLACEHOLDER) |
+| WORLD-A1b | Not all of the world has to be buildable. Large parts may be locked to building and only travelled through (armies marching, merchants), and shown in detail only when something of yours is there. How locking works is OPEN; the long-term **Regions** system (GDD section 12: regions granted by a lord or king) is the likely answer | OPEN |
+| WORLD-A2 | The test map generator's size is a setting: 2×2 km for MVP-0 to MVP-1, 6×6 km for scale tests once the MVPs are playable, then a **25×25 km world-scale stress test (map size × 5,000 citizens) after the final MVP** | DECIDED |
+| WORLD-A3 | Technical consequences, accepted: a floating origin is required (PLT-06, over 8 km); terrain and height data must be tiled with coarser resolution where nobody builds (decision 0003); long trips must use roads and a coarse route search, not a fine grid across the whole world (NAV-09) | DECIDED |
 
 ## Storage and items (INV, WCO, BLD) — replaces the single "storage yard" idea
 
@@ -100,9 +102,35 @@ same assigned family** leads an ox to drag them to the operation's log storage.
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| FOOD-A1 | Food is counted in **items** (a piece of meat, a basket of berries). Each food item definition has a **rations per item** value (how many person-days one item feeds). An adult needs 1 ration per day; a child under 14 needs 0.5. Each day the village eats `adults × 1 + children × 0.5` rations, taken from items in stock. Replaces FOOD-03 | PROPOSED (values PLACEHOLDER) |
+| FOOD-A1 | Food is counted in **items** (a piece of meat, a basket of berries). Each food item definition has a **rations per item** value (how many person-days one item feeds). An adult needs 1 ration per day; a child under 14 needs 0.5. Replaces FOOD-03 | DECIDED (values PLACEHOLDER) |
 | FOOD-A1b | Starting values: meat 3 rations per item, berries and mushrooms 1 ration per basket. Standard start: 400 meat (1,200 rations). For 6 adults + 4 children (8 rations/day) that lasts 150 days; one adult alone would make it last 1,200 days | PLACEHOLDER |
-| FOOD-A4 | **How rations are drawn from items** (village pool deducted daily with part-used items carried over, or a weekly allotment into household larders, e.g. on a Sunday market day). Agents: do not implement food consumption until this is decided | OPEN (under discussion) |
 | FOOD-A1c | Rations per person, rations per item and starting food are tuning values, editable at runtime from a debug sim-tuning panel in dev builds | DECIDED |
 | FOOD-A3 | The UI shows food mainly as **days of food left** (stock ÷ daily use), with the raw count secondary | PROPOSED |
 | FOOD-A2 | MVP-2 hunger is a status that lowers work output. Starvation deaths and leaving are later mechanics | DECIDED |
+
+### Weekly allotment and larders (replaces ECO-03's single village deduction)
+
+The week has a day of rest (Sunday). Once a week each household fetches a week of food
+and then eats from its own larder every day. This gives shortages a visible shape and a
+weekly rhythm of village life.
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| FOOD-A4 | The calendar has weekdays. **Sunday** is allotment day (day of rest: no work that day) | DECIDED (rest day PROPOSED) |
+| FOOD-A5 | Every house has a **larder** (a food inventory location, LED-01 "house store"). Homeless families at the camp-site have a camp larder each | DECIDED |
+| FOOD-A6 | **Allotment:** at Sunday dawn, for each village, households are sorted by walking distance from home to their **supply point** (nearest first). Each is allotted rations to fill its larder up to 7 days of its own need, from the supply point's stock, until stock runs out. Allotted food is **reserved** at the supply point. Nearest households are served fully first, so **far houses go hungry first** in a shortage (ECO-11) | DECIDED |
+| FOOD-A7 | **Sunday trip:** one adult per household walks to the supply point, collects the reserved food (Transfer into the carrier), and walks home (Transfer into the larder). Food in transit is real and can later be stolen (MIL-09). Trips are spread across the morning so they don't all start on the same tick | DECIDED |
+| FOOD-A8 | Food types are allotted in proportion to what the supply point holds, so households get a mix (supports "diverse food", HSE-12) | PROPOSED |
+| FOOD-A9 | **Daily eating:** each household consumes its daily need (adults × 1 + children × 0.5 rations) from its larder, whole items first and the leftover fraction carried over. If the larder can't cover the day, the household is **Hungry** that day (FOOD-A2) | DECIDED |
+| FOOD-A10 | Supply point before markets exist: the household's nearest granary (or the camp-site stockpile at the start) | DECIDED |
+| FOOD-A11 | Larder leftovers carry over; weekly spoilage (FOOD-09) applies to larders as well as stores | PROPOSED |
+
+### Markets (later MVP; direction DECIDED, details OPEN)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| MKT-01 | A village can have several markets. Once markets exist, a household's supply point is its market (ECO-11 market range) | DECIDED |
+| MKT-02 | The player **links** granaries and storage yards to markets, choosing which stores feed which market (LOG-02 / LGS-08 "linked only") | DECIDED |
+| MKT-03 | A market holds **stalls, one per family**. A stall family stocks its stall from the linked stores and mans it to sell goods | DECIDED |
+| MKT-04 | Storage families keep their store filled from production buildings (INV-A8 haulers) | DECIDED |
+| MKT-05 | Whether households outside any market's range still collect food straight from a granary; what each stall sells; stall capacity; how many stalls a market has | OPEN |

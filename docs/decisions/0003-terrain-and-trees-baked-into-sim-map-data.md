@@ -14,3 +14,6 @@ Sim map data file. The Unity layer draws the terrain mesh; the Sim never asks Un
 source only means writing a new bake step. Terrain is read-only at runtime in the MVPs.
 Re-baking the map changes tree IDs only if trees change; saves reference the map version.
 Unity's built-in terrain trees are authoring-only (PLT-09).
+The world target is 25×25 km (WORLD-A1): one uniform 2 m grid would be ~156M cells, so
+Sim code queries terrain through a height-field interface. The single `HeightGrid` serves
+the MVP maps; a tiled version with coarser cells where nobody builds replaces it later.
