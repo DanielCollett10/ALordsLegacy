@@ -1,0 +1,17 @@
+{
+    "name": "LordsLegacy.Game",
+    "rootNamespace": "LordsLegacy.Game",
+    "references": [
+        "LordsLegacy.Sim",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
