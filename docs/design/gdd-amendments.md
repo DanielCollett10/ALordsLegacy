@@ -24,7 +24,7 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | ID | Rule | Tag |
 | --- | --- | --- |
 | TIME-A1 | **Target pace:** one game year takes about 2–6 real hours of normal play (mixing 4–8× for building, 16–32× for waiting, 1× for watching) | DECIDED |
-| TIME-A2 | A game day lasts **15 real minutes at 1×** (clock runs 96× real time), replacing TIME-02's 45 minutes. Year = 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×, 2.9 h at 32× | DECIDED (PLACEHOLDER value, tune in playtests) |
+| TIME-A2 | A game day lasts **15 real minutes at 1×** (clock runs 96× real time), replacing TIME-02's 45 minutes. Year = 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×, 2.9 h at 32×. Set by one tuning value, `RealMinutesPerGameDayAt1x`, so other day lengths can be tried without code changes | DECIDED (value PLACEHOLDER) |
 | TIME-A3 | Speeds: pause, 1×, 2×, 4×, 8×, 16×, 32× (replaces TIME-03). Walking still looks like real walking speed at 1× | DECIDED |
 | TIME-A4 | Consequence, accepted: fewer trips fit into a game day, so distances are shorter to compensate (WORLD-A1) and production and food are tuned per day with that in mind | DECIDED |
 | TIME-A5 | **Seasonal daylight:** sunrise and sunset follow the calendar, about 8 h of daylight in midwinter and 16 h in midsummer (southern-England-like). Families work from sunrise to sunset, with a meal break. Night length varies to match | DECIDED |
@@ -95,6 +95,8 @@ same assigned family** leads an ox to drag them to the operation's log storage.
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| FOOD-A1 | One food unit = one person-day ration. Rations per person per day and starting food are tuning values, editable at runtime from a debug sim-tuning panel in dev builds | DECIDED (values OPEN) |
+| FOOD-A1 | Food is counted in **items** (a piece of meat, a basket of berries). Each food item definition has a **rations per item** value (how many person-days one item feeds). An adult needs 1 ration per day; a child under 14 needs 0.5. Each day the village eats `adults × 1 + children × 0.5` rations, taken from items in stock. Replaces FOOD-03 | PROPOSED (values PLACEHOLDER) |
+| FOOD-A1b | Starting values: meat 3 rations per item, berries and mushrooms 1 ration per basket. Standard start: 400 meat (1,200 rations). For 6 adults + 4 children (8 rations/day) that lasts 150 days; one adult alone would make it last 1,200 days | PLACEHOLDER |
+| FOOD-A1c | Rations per person, rations per item and starting food are tuning values, editable at runtime from a debug sim-tuning panel in dev builds | DECIDED |
 | FOOD-A3 | The UI shows food mainly as **days of food left** (stock ÷ daily use), with the raw count secondary | PROPOSED |
 | FOOD-A2 | MVP-2 hunger is a status that lowers work output. Starvation deaths and leaving are later mechanics | DECIDED |

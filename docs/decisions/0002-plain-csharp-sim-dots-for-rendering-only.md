@@ -1,5 +1,8 @@
 # 0002: Plain C# simulation; Unity DOTS only for rendering
 
+**Status: PROVISIONAL.** Being verified by the performance spike (M1, epic "Architecture
+check"). Locked or revised once `docs/findings/perf-spike.md` exists.
+
 **Context.** Tech spec v0.2 (ARC-02, ENG-02, DEV-11, NAV-08) puts all game state in Unity
 ECS/DOTS with Burst jobs. Decision 0001 and `CLAUDE.md` put all rules in `Assets/Sim` as
 plain C# with no UnityEngine, tested with `dotnet test`. The owner asked the lead to choose.
