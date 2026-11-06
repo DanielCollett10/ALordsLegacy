@@ -8,31 +8,35 @@ the section it belongs to; the section headings below are fixed and keep this or
 | Layer | Folder | Namespace / assembly | Depends on | Tested by |
 |---|---|---|---|---|
 | Simulation core | `Assets/Sim/` | `LordsLegacy.Sim` (asmdef `LordsLegacy.Sim`, `noEngineReferences`) | nothing | `Sim.Tests/` via `dotnet test` |
-| Unity layer | `Assets/Game/` | `LordsLegacy.Game` | `LordsLegacy.Sim`, UnityEngine | Unity EditMode/PlayMode tests |
-| Editor tooling | `Assets/Editor/` | `LordsLegacy.EditorTools` | UnityEditor | by hand / editor lane |
+| Unity layer | `Assets/Game/` | `LordsLegacy.Game` (asmdef `LordsLegacy.Game`) | `LordsLegacy.Sim`, UnityEngine, Unity.InputSystem | Unity EditMode/PlayMode tests |
+| Editor tooling | `Assets/Editor/` | asmdef `LordsLegacy.Editor`, namespace `LordsLegacy.EditorTools` | `LordsLegacy.Sim`, `LordsLegacy.Game`, UnityEditor | by hand / editor lane |
+| Unity tests | `Assets/Tests/` | asmdefs `LordsLegacy.Tests.EditMode`, `LordsLegacy.Tests.PlayMode` | Unity layer, Sim | Unity Test Runner (editor lane, decision 0007) |
 
 ## Simulation core
 
 _Owner: the task that changes the Sim core. Other tasks do not edit this section._
 
-- `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) owns the tick clock and is built from a
-  `SimTuning` (`new SimWorld(tuning)`, exposed read-only as `Tuning`). **One tick = one game minute.**
-  `Step(n)` advances `Tick` by n; nothing else does. `Now` returns the `GameTime` for the current tick
-  (via a `GameCalendar` built from the tuning's start date, weekday and `DaysPerYear`). `Pause()` and
-  `Resume()` set `Paused`; while paused `Step` does nothing. `SimWorld` has no notion of real seconds.
-- `Assets/Sim/Time/` uses namespace `LordsLegacy.Sim.Calendar` to avoid clashing with `UnityEngine.Time`.
-- Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/` and compile the same `Assets/Sim/**/*.cs`.
-- `Assets/Sim/Time/Daylight.cs` (`LordsLegacy.Sim.Calendar`): seasonal sunrise and sunset from plain
-  min/max daylight hours. `For(dayOfYear)` returns `SunTimes`; `IsDaylight(GameTime)` and
-  `SunProgress(GameTime, tickFraction)` serve the lighting view. Pure, no state.
-- `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds every PLACEHOLDER number from
-  `docs/design/tuning.md`. Defaults are instance properties set by object initializer; derived
-  values are computed properties. The Sim never hard-codes these numbers.
-- `Assets/Sim/Time/TickPacer.cs` (`LordsLegacy.Sim.Calendar`) owns the selected speed (`SetSpeed(index)`,
-  `CurrentSpeed`, `Speeds` from tuning) and real-time pacing. `Advance(realSeconds)` returns the whole
-  ticks due and carries the rest (`Fraction`, in [0,1)). Capped at `MaxTicksPerFrame`; over the cap it
-  drops the excess and sets `SlowedDown`. `Reset()` clears the carry-over (the host calls it while paused).
-  The pacer has no pause state; `SimWorld` owns pause (decision 0006).
+- `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) is the root. It owns the tick clock, pause, `Terrain`
+  (`IHeightField`) and `Trees` (`TreeRegistry`). Build it with `new SimWorld(tuning)` (flat ground, no trees) or
+  `SimWorld.FromMapData(map, tuning)`. **One tick = one game minute.** `Step(n)` advances `Tick` by n and does
+  nothing while `Paused`; `Pause()` and `Resume()` set it. `Now` is the `GameTime` for the current tick.
+  The Sim has no notion of real seconds.
+- `Assets/Sim/Time/` (namespace `LordsLegacy.Sim.Calendar`, to avoid clashing with `UnityEngine.Time`):
+  - `GameCalendar`: tick → `GameTime` (year, date, weekday, time, season). 365-day year, no leap years,
+    the year number increments on 1 January.
+  - `Daylight`: seasonal sunrise and sunset from min/max daylight hours. `For(dayOfYear)` gives `SunTimes`;
+    `IsDaylight` and `SunProgress` serve the lighting view. Pure, no state.
+  - `TickPacer`: owns the selected speed (`SetSpeed`, `CurrentSpeed`, `Speeds`) and turns real seconds into
+    whole ticks (`Advance`), carrying the remainder (`Fraction`). Over `MaxTicksPerFrame` it drops the excess
+    and sets `SlowedDown`. `Reset()` clears the carry (the host calls it while paused). No pause state (decision 0006).
+- `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the numbers the Sim uses today: pace, speeds,
+  start date, daylight, walk and ox speed, log and trunk lengths, starting oxen, rest-day switch. Defaults are
+  auto-properties; derived values are computed properties. The Sim never hard-codes these. The other values in
+  `docs/design/tuning.md` (food, markets, construction, population) are not in code yet.
+- `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
+  uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
+  length and `State` (only `Standing` exists yet). Trees come from the baked map; nothing adds or removes them at runtime.
+- Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/`, which compiles the same `Assets/Sim/**/*.cs`.
 
 ## Map pipeline
 
@@ -42,24 +46,27 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
   terrain; an editor bake step writes a versioned map file that the Sim reads.
 - `Assets/Sim/Terrain/`: `IHeightField` (HeightAt, SlopeDegAt, Contains, Bounds; out-of-bounds queries clamp)
   is the only terrain API Sim code uses. `HeightGrid` (metres, bilinear, central-difference slope; ~36 MB for
-  6 km at 2 m) and `FlatHeightField` (no map) implement it.
+  6 km at 2 m) and `FlatHeightField` (no map) implement it. `Bounds2` is the rectangle type.
 - `Assets/Sim/Map/` (`LordsLegacy.Sim.Map`): `MapData` (format version, map id, `HeightGrid`, `MapTree` list),
   `MapDataIO` (binary read/write via `System.IO`, from `byte[]` or `Stream`; unknown version, bad magic or
   truncation throw `MapDataFormatException`) and `SyntheticMap.CreateRamp()` (200x200 m test map, 5 trees).
-- `SimWorld.Terrain` (`IHeightField`) and `SimWorld.Trees` (`TreeRegistry`) are never null. `new SimWorld(tuning)`
-  gives `FlatHeightField` and no trees; `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees.
+- `SimWorld.Terrain` and `SimWorld.Trees` are never null. `new SimWorld(tuning)` gives `FlatHeightField` and no
+  trees; `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees.
 - Tree authoring: menu `Lords Legacy/Map/Scatter Forest Trees` (`ForestScatter`, Assets/Editor/MapGen/Forest) reads
-  `forest-region.json` and writes the seeded `TreeAuthoringData` asset `Assets/Maps/TestMap/TestMapTrees.asset`
-  (`LordsLegacy.Game.Authoring`; ids 0..n-1, trunk 12-20 m). Unity terrain trees are not used.
+  `Assets/Maps/TestMap/forest-region.json` and writes the seeded `TreeAuthoringData` asset
+  `Assets/Maps/TestMap/TestMapTrees.asset` (`LordsLegacy.Game.Authoring`; ids 0..n-1, trunk 12-20 m).
+  Unity terrain trees are not used.
+- Terrain authoring: menu `Lords Legacy/Map/Generate Test Terrain` (`TestTerrainGenerator`) writes
+  `Assets/Maps/TestMap/TestMapTerrain.asset`, the scene `TestMap.unity` and `forest-region.json`. Same seed, same result.
 - Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y. The terrain sits at
   world (0,0,0); the HeightGrid origin is (0,0).
 - Size/resolution rule: terrain size ÷ (heightmapResolution − 1) must equal the bake cell size (2 m), so Unity
   height samples coincide with Sim grid nodes. Test map: 2,048 × 2,048 m, 1025 × 1025 heightmap.
-- Flow: authoring (`TestMapTerrain.asset`, `TestMapTrees.asset`) → bake (menu `Lords Legacy/Map/Bake Test Map`,
-  `MapBaker`, Assets/Editor/MapGen/Bake; needs TestMap.unity open; fails with a clear error if the terrain is
-  moved or the rule is broken) → `Assets/StreamingAssets/Maps/testmap.lsmap` (committed plain binary,
-  `*.lsmap binary`, no LFS) → runtime reads the bytes from `Application.streamingAssetsPath` and passes them to
-  `MapDataIO.Read`. Tree ids in the file equal the TreeAuthoringData ids.
+- Flow: authoring assets → bake (menu `Lords Legacy/Map/Bake Test Map`, `MapBaker`, Assets/Editor/MapGen/Bake;
+  needs TestMap.unity open; fails with a clear error if the terrain is moved or the rule is broken) →
+  `Assets/StreamingAssets/Maps/testmap.lsmap` (committed plain binary, `*.lsmap binary`, no LFS) → runtime reads
+  the bytes from `Application.streamingAssetsPath` and passes them to `MapDataIO.Read`. Tree ids in the file
+  equal the TreeAuthoringData ids.
 - **Re-baking after any terrain or tree change is a manual menu step**; commit the new `.lsmap`.
   Runtime tests use the committed file and never run the bake.
 
@@ -69,35 +76,41 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 
 - `Assets/Game/` reads Sim state and draws it; it turns player input into Sim commands and holds
   no game rules (see `CLAUDE.md`).
-- `Assets/Game/Bootstrap/SimHost` owns `SimWorld` and `TickPacer` (decision 0006). `Initialize(SimTuning, MapData)`;
-  if not initialised, `Start` reads `StreamingAssets/Maps/testmap.lsmap` (`TryLoadMap` logs an error naming the path
-  and the map-2 bake menu item if missing). `Tick(realSeconds)` runs `World.Step(Pacer.Advance(..))`, or resets the
-  pacer while paused; `Update` calls it only when `AutoUpdate`. `SimStats` holds last Step ms and rolling ticks/s.
-- `SimHost` (above) is a MonoBehaviour in the Game scene. `Update` → `Tick(Time.deltaTime)` drives the pacer and
-  `World.Step`. Views only read `SimHost.World`, `SimHost.Pacer`, `SimHost.TickFraction` and `SimHost.Stats`;
-  they send commands (pause, speed) through `SimHost.TogglePause` and `TickPacer.SetSpeed`.
+- `SimHost` (`Assets/Game/Bootstrap/`, MonoBehaviour in the Game scene) owns `SimWorld` and `TickPacer` (decision 0006).
+  `Initialize(SimTuning, MapData)`; if not initialised, `Start` reads `StreamingAssets/Maps/testmap.lsmap` (`TryLoadMap`
+  logs an error naming the path and the bake menu item if missing). `Update` calls `Tick(Time.deltaTime)` when
+  `AutoUpdate`. `Tick` runs `World.Step(Pacer.Advance(..))`, or resets the pacer while paused. Views read
+  `World`, `Pacer`, `TickFraction` and `Stats`, and send commands only through `TogglePause` and `TickPacer.SetSpeed`.
+- `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` and `TicksPerSecond`
+  (ticks in the last real second). Sim code never reads it.
+- Terrain: Unity Terrain built from `TestMapTerrain.asset` is drawn by Unity and is the collider for picking.
+  It is not built from Sim data.
+- Trees (`Assets/Game/Visuals/TreeRenderer`): draws every standing tree in `World.Trees` with the
+  `visual.tree.generic` definition. Trees are grouped in 64 m cells, frustum-culled, and drawn with
+  `Graphics.RenderMeshInstanced` in batches of 1023. Each tree is scaled to its trunk length and yawed from its id.
+  There are no per-tree GameObjects and no colliders (decision 0008).
+- Sun and sky (`Assets/Game/Lighting/`): `SunLightModel` is pure maths (Sim `GameTime` + `Daylight` → elevation,
+  azimuth, colour, intensity). `SunLightController` writes the result to the directional light and ambient in
+  `LateUpdate`. Steady light is `ViewSettings.SteadyLight` (set by the top bar): fixed sun, visual only.
+- Top bar (`TopBarController`, UI Toolkit, `Assets/Game/UI/TopBar/`): date and time, pause, speed buttons from
+  `Pacer.Speeds`, steady-light toggle, "running slower" notice (`SlowedDown`). Sends commands through `SimHost`.
+- `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
+- Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
+  terrain, not from the collider.
 - Cursor ground readout (`Assets/Game/Picking/`): `GroundPicker` casts a ray from the camera (screen position or
   `Ray`) and keeps only the hit's x/z. Height and slope come from `SimHost.World.Terrain` at that x/z, never from the
   collider. `GroundSample` is the result (`Format()` gives the label text). `GroundReadoutView` (UI Toolkit,
   `Assets/Game/UI/GroundReadout/`) shows it in one label each frame. `ReadAt(x,z)` reads the Sim without a ray.
 - Debug overlay (`Assets/Game/UI/DebugOverlay/`): `DebugOverlayView` (UI Toolkit, F3 toggles) shows FPS, tree count,
   `SimStats` tick ms and ticks/s, and the tree nearest the cursor ground point (id, trunk, log yield) via
-  `TreeRegistry.QueryRadius`. Read-only; one named label per value (`debug-*`). Restored in T-036 after the T-034 revert.
-- `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` (last Step wall time) and
-  `TicksPerSecond` (ticks run in the last real second). Sim code never reads it.
-- Views on screen so far: the terrain (Unity Terrain, map-1) and `TopBarController` (UI Toolkit, `TopBar.uxml`).
-  The terrain is the real map and is not drawn from Sim data; the view tasks add forest and daylight from Sim state.
+  `TreeRegistry.QueryRadius`. Read-only; one named label per value (`debug-*`).
 - Visuals (`LordsLegacy.Game.Visuals`, `Assets/Game/Visuals/`): every drawn thing gets its mesh and materials from a
-  `VisualDefinition` asset referenced by string id (e.g. `visual.tree.generic`). Sim data holds only the id.
+  `VisualDefinition` asset referenced by string id (e.g. `visual.tree.generic`). Sim data holds only the id (decision 0009).
   `VisualRegistry.asset` maps ids to definitions: `TryGet(id, out def)` for lookup, `Get(id)` logs an error and
   returns a built-in fallback placeholder for unknown ids. `IsPlaceholder` marks stand-in art; menu
   `LordsLegacy/Art/List placeholder visuals` (`PlaceholderVisualLister`) logs them (ART-03). The placeholder
   assets are written by `LordsLegacy/Art/Generate placeholder visuals` (`PlaceholderVisualGenerator`, idempotent);
   the tree material has GPU instancing enabled. Swap art by editing the definition's mesh and materials.
-- Game scene: `Assets/Scenes/Game.unity` is generated by `LordsLegacy/Scenes/Generate Game scene`
-  (`GameSceneGenerator`, Assets/Editor/Scenes) and is scene 0 in Build Settings. It is rebuilt from scratch each run.
-  Its one method per component (`CreateTerrain`, `CreateSimHost`, `CreateCamera`, `CreateLight`) is where later
-  view tasks add steps.
 
 ## Data flow
 
@@ -117,10 +130,12 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
 
 - `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
   menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
-  so two runs give the same file. Serialized references are wired in code.
+  and `SceneYamlNormalizer` gives its objects stable fileIDs, so two runs give the same file. Serialized references are wired in code.
 - Contents: `Terrain`; `SimHost`; `Main Camera` (Camera + `CameraRig`); `Directional Light` (Light + `SunLightController`
   -> SimHost, light, TopBar); `TreeRenderer` (-> SimHost, `VisualRegistry.asset`, main camera); `GroundPicker`
   (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `GroundReadout` (`GroundReadoutView` -> picker) and
   `DebugOverlay` (`DebugOverlayView` -> SimHost, picker; F3 toggles). All UIDocuments use
   `Assets/Game/UI/PanelSettings.asset`.
+- Other editor tools (`Assets/Editor/`): `AgentFriendlyProjectSettings` forces text serialization and visible
+  .meta files when the Editor loads; `CreatePanelSettings` makes the shared PanelSettings asset.
 - `GameSceneTests.GameSceneHasEveryM1PieceWired` (PlayMode) loads the scene and checks each piece and its references.

@@ -15,8 +15,8 @@ source only means writing a new bake step. Terrain is read-only at runtime in th
 Re-baking the map changes tree IDs only if trees change; saves reference the map version.
 Unity's built-in terrain trees are authoring-only (PLT-09).
 Files: tree authoring data is a `TreeAuthoringData` ScriptableObject (tree id, x, z, usable
-trunk length) next to the terrain in `Assets/Maps/<MapId>/`. Authoring regions (for now
-just the forest rectangle) are a plain JSON file, `Assets/Maps/<MapId>/forest-region.json`
+trunk length) next to the terrain in `Assets/Maps/TestMap/`. Authoring regions (for now
+just the forest rectangle) are a plain JSON file, `Assets/Maps/TestMap/forest-region.json`
 (`{"minX","minZ","maxX","maxZ"}` in metres), written by the terrain generator and read by the
 forest scatter and by editor-run tests. Regions are not in the Sim map file yet. The bake writes
 `Assets/StreamingAssets/Maps/<MapId>.lsmap`; at runtime the Sim host reads those bytes
