@@ -32,7 +32,8 @@ namespace LordsLegacy.Tests.PlayMode
             var host = _hostGo.AddComponent<SimHost>();
             host.AutoUpdate = false;
             host.Initialize(new SimTuning(), SyntheticMap.CreateRamp());
-            var tree = host.World.Trees.Add(new TreeId(9001), 100f, 100f, 17.3);
+            // Synthetic ramp map already has tree 3 at (100,100), trunk 11 m: the camera looks straight at it.
+            Assert.IsTrue(host.World.Trees.TryGet(new TreeId(3), out var tree));
             host.Tick(1f);
 
             _camGo = new GameObject("Cam");
@@ -61,8 +62,8 @@ namespace LordsLegacy.Tests.PlayMode
             view.InspectScreen(new Vector2(cam.pixelWidth * 0.5f, cam.pixelHeight * 0.5f));
 
             Assert.IsTrue(view.Visible);
-            Assert.AreEqual("Tree id 9001", view.TextOf(DebugOverlayView.TreeIdName));
-            Assert.AreEqual("Trunk 17.3 m", view.TextOf(DebugOverlayView.TreeTrunkName));
+            Assert.AreEqual("Tree id 3", view.TextOf(DebugOverlayView.TreeIdName));
+            Assert.AreEqual("Trunk 11.0 m", view.TextOf(DebugOverlayView.TreeTrunkName));
             Assert.AreEqual("Logs " + tree.LogYield(host.World.Tuning), view.TextOf(DebugOverlayView.TreeLogsName));
             Assert.AreEqual("Trees " + host.World.Trees.Count, view.TextOf(DebugOverlayView.TreeCountName));
             StringAssert.IsMatch(@"^Tick \d+\.\d+ ms$", view.TextOf(DebugOverlayView.TickMsName));
