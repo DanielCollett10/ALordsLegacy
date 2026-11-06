@@ -25,7 +25,10 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
 
 - Terrain and trees are baked into Sim map data (decision 0003). The Sim never asks Unity for
   terrain; an editor bake step writes a versioned map file that the Sim reads.
-- Planned Sim types: `HeightGrid` (heights in metres, bilinear sampling, slope in degrees) and a
+- `Assets/Sim/Terrain/`: `IHeightField` (HeightAt, SlopeDegAt, Contains, Bounds; out-of-bounds queries clamp)
+  is the only terrain API Sim code uses. `HeightGrid` (metres, bilinear, central-difference slope; ~36 MB for
+  6 km at 2 m) and `FlatHeightField` (no map) implement it.
+- Planned Sim types: a
   tree list (stable ID, x/z position, usable trunk length).
 - Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y.
 
