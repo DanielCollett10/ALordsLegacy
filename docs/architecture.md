@@ -43,8 +43,11 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
 - `Assets/Sim/Terrain/`: `IHeightField` (HeightAt, SlopeDegAt, Contains, Bounds; out-of-bounds queries clamp)
   is the only terrain API Sim code uses. `HeightGrid` (metres, bilinear, central-difference slope; ~36 MB for
   6 km at 2 m) and `FlatHeightField` (no map) implement it.
-- Planned Sim types: a
-  tree list (stable ID, x/z position, usable trunk length).
+- `Assets/Sim/Map/` (`LordsLegacy.Sim.Map`): `MapData` (format version, map id, `HeightGrid`, `MapTree` list),
+  `MapDataIO` (binary read/write via `System.IO`, from `byte[]` or `Stream`; unknown version, bad magic or
+  truncation throw `MapDataFormatException`) and `SyntheticMap.CreateRamp()` (200x200 m test map, 5 trees).
+- `SimWorld.Terrain` (`IHeightField`) and `SimWorld.Trees` (`TreeRegistry`) are never null. `new SimWorld(tuning)`
+  gives `FlatHeightField` and no trees; `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees.
 - Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y.
 
 ## Unity layer

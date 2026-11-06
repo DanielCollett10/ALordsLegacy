@@ -1,5 +1,8 @@
 using System;
 using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Forestry;
+using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Terrain;
 using LordsLegacy.Sim.Tuning;
 
 namespace LordsLegacy.Sim.Core
@@ -25,10 +28,31 @@ namespace LordsLegacy.Sim.Core
         /// <summary>True while the simulation is paused; <see cref="Step"/> does nothing.</summary>
         public bool Paused { get; private set; }
 
-        /// <summary>Creates a world whose calendar starts at the tuning's start date, weekday and year length.</summary>
-        public SimWorld(SimTuning tuning)
+        /// <summary>The ground. Never null; a <see cref="FlatHeightField"/> when built without a map.</summary>
+        public IHeightField Terrain { get; }
+
+        /// <summary>All trees. Never null; empty when built without a map.</summary>
+        public TreeRegistry Trees { get; }
+
+        /// <summary>Builds a world whose terrain and trees come from baked map data.</summary>
+        public static SimWorld FromMapData(MapData map, SimTuning tuning)
+        {
+            if (map == null) throw new ArgumentNullException(nameof(map));
+            var trees = new TreeRegistry();
+            foreach (var t in map.Trees) trees.Add(t.Id, t.X, t.Z, t.TrunkLengthM);
+            return new SimWorld(tuning, map.Heights, trees);
+        }
+
+        /// <summary>Creates a world with flat terrain and no trees.</summary>
+        public SimWorld(SimTuning tuning) : this(tuning, new FlatHeightField(), new TreeRegistry())
+        {
+        }
+
+        private SimWorld(SimTuning tuning, IHeightField terrain, TreeRegistry trees)
         {
             Tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+            Terrain = terrain;
+            Trees = trees;
             _calendar = new GameCalendar(tuning.StartMonth, tuning.StartDay, tuning.StartHour,
                 tuning.StartMinute, tuning.StartWeekday, tuning.DaysPerYear);
         }

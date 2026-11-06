@@ -15,6 +15,10 @@ namespace LordsLegacy.Sim.Terrain
         private readonly float _originX;
         private readonly float _originZ;
 
+        /// <summary>World x of node column 0.</summary>
+        public float OriginX => _originX;
+        /// <summary>World z of node row 0.</summary>
+        public float OriginZ => _originZ;
         /// <summary>Distance between nodes in metres.</summary>
         public float CellSize { get; }
         /// <summary>Number of nodes along x.</summary>
