@@ -35,6 +35,13 @@ namespace LordsLegacy.Game
         /// <summary>Scroll units per notch of the mouse wheel (Input System reports 120 per notch).</summary>
         public float ScrollUnitsPerStep = 120f;
 
+        [Header("Initial pose (applied at Start)")]
+        [SerializeField] private Vector2 _startXZ = new Vector2(1024f, 1024f);
+        [SerializeField] private float _startHeight = 120f;
+        [SerializeField] private float _startPitch = 55f;
+        [SerializeField] private float _startYaw;
+
+        private bool _poseSet;
         private IHeightField _terrain;
         private float _x, _z, _height = 100f, _pitch = 60f, _yaw;
 
@@ -59,6 +66,7 @@ namespace LordsLegacy.Game
         /// <summary>Places the camera. Values are clamped to bounds and zoom limits.</summary>
         public void SetPose(float x, float z, float heightAboveGround, float pitchDeg, float yawDeg)
         {
+            _poseSet = true;
             _x = x; _z = z; _height = heightAboveGround; _pitch = pitchDeg; _yaw = yawDeg;
             Apply();
         }
@@ -96,6 +104,7 @@ namespace LordsLegacy.Game
 
         private void Start()
         {
+            if (!_poseSet) { _x = _startXZ.x; _z = _startXZ.y; _height = _startHeight; _pitch = _startPitch; _yaw = _startYaw; }
             if (_terrain == null)
             {
                 var host = FindFirstObjectByType<SimHost>();
