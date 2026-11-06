@@ -22,10 +22,20 @@ namespace NetSim.Sim.Core
         /// <summary>Total simulated time in seconds.</summary>
         public double SimulatedSeconds => Tick * SecondsPerTick;
 
+        /// <summary>True while the simulation is paused; <see cref="Step"/> does nothing.</summary>
+        public bool IsPaused { get; private set; }
+
+        /// <summary>Pause the simulation. Safe to call when already paused.</summary>
+        public void Pause() => IsPaused = true;
+
+        /// <summary>Resume the simulation. Safe to call when not paused.</summary>
+        public void Resume() => IsPaused = false;
+
         /// <summary>Advance the simulation by <paramref name="ticks"/> ticks.</summary>
         public void Step(int ticks = 1)
         {
             if (ticks < 0) throw new System.ArgumentOutOfRangeException(nameof(ticks));
+            if (IsPaused) return;
             for (var i = 0; i < ticks; i++) Tick++;
         }
     }
