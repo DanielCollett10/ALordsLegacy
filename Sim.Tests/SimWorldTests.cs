@@ -1,7 +1,7 @@
-using NetSim.Sim.Core;
+using LordsLegacy.Sim.Core;
 using NUnit.Framework;
 
-namespace NetSim.Sim.Tests
+namespace LordsLegacy.Sim.Tests
 {
     public class SimWorldTests
     {

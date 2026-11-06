@@ -1,24 +1,50 @@
 # Architecture
 
-_Living document. Agents update it when they change how parts fit together._
+_Living document. Agents update it when they change how parts fit together. Each task edits only
+the section it belongs to; the section headings below are fixed and keep this order._
 
 ## Layers
 
-| Layer | Folder | Depends on | Tested by |
-|---|---|---|---|
-| Simulation core | `Assets/Sim/` (asmdef `NetSim.Sim`, no UnityEngine) | nothing | `Sim.Tests/` via `dotnet test` |
-| Unity layer | `Assets/Game/` | `NetSim.Sim`, UnityEngine | Unity EditMode/PlayMode tests |
-| Editor tooling | `Assets/Editor/` | UnityEditor | by hand / editor lane |
+| Layer | Folder | Namespace / assembly | Depends on | Tested by |
+|---|---|---|---|---|
+| Simulation core | `Assets/Sim/` | `LordsLegacy.Sim` (asmdef `LordsLegacy.Sim`, `noEngineReferences`) | nothing | `Sim.Tests/` via `dotnet test` |
+| Unity layer | `Assets/Game/` | `LordsLegacy.Game` | `LordsLegacy.Sim`, UnityEngine | Unity EditMode/PlayMode tests |
+| Editor tooling | `Assets/Editor/` | `LordsLegacy.EditorTools` | UnityEditor | by hand / editor lane |
 
 ## Simulation core
 
-- `SimWorld` owns the tick clock. `Step(n)` advances time; nothing else does.
-- (Add devices, links, packets, economy here as they are built.)
+_Owner: the task that changes the Sim core. Other tasks do not edit this section._
+
+- `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) owns the tick clock. `Step(n)` advances
+  time; nothing else does. `Pause()` and `Resume()` set whether `Step` does anything.
+- Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/` and compile the same `Assets/Sim/**/*.cs`.
+
+## Map pipeline
+
+_Owner: the map and terrain tasks. Other tasks do not edit this section._
+
+- Terrain and trees are baked into Sim map data (decision 0003). The Sim never asks Unity for
+  terrain; an editor bake step writes a versioned map file that the Sim reads.
+- Planned Sim types: `HeightGrid` (heights in metres, bilinear sampling, slope in degrees) and a
+  tree list (stable ID, x/z position, usable trunk length).
+- Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y.
 
 ## Unity layer
 
+_Owner: the Unity-layer tasks. Other tasks do not edit this section._
+
+- `Assets/Game/` reads Sim state and draws it; it turns player input into Sim commands and holds
+  no game rules (see `CLAUDE.md`).
 - (Describe the view: how Sim state becomes something on screen.)
 
 ## Data flow
 
+_Owner: whichever task changes the flow between layers. Other tasks do not edit this section._
+
 Player input → Unity layer → Sim command → `SimWorld.Step` → Sim state → Unity layer renders.
+
+## Scene
+
+_Owner: the scene and prefab tasks. Other tasks do not edit this section._
+
+- (Describe the scenes and how they are generated: Editor scripts write scenes and prefabs.)

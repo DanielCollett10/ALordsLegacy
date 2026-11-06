@@ -1,6 +1,6 @@
 {
-    "name": "NetSim.Sim",
-    "rootNamespace": "NetSim.Sim",
+    "name": "LordsLegacy.Sim",
+    "rootNamespace": "LordsLegacy.Sim",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

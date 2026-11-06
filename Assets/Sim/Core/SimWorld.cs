@@ -1,7 +1,7 @@
-namespace NetSim.Sim.Core
+namespace LordsLegacy.Sim.Core
 {
     /// <summary>
-    /// Root of the simulation. Owns the clock and, later, every device, link and packet.
+    /// Root of the simulation. Owns the clock and, later, all game state.
     /// Pure C#: no UnityEngine. The Unity layer calls <see cref="Step"/> on a fixed timestep
     /// and reads state to render it.
     /// </summary>
