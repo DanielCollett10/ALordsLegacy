@@ -80,9 +80,6 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `Ray`) and keeps only the hit's x/z. Height and slope come from `SimHost.World.Terrain` at that x/z, never from the
   collider. `GroundSample` is the result (`Format()` gives the label text). `GroundReadoutView` (UI Toolkit,
   `Assets/Game/UI/GroundReadout/`) shows it in one label each frame. `ReadAt(x,z)` reads the Sim without a ray.
-- Debug overlay (`Assets/Game/UI/DebugOverlay/`): `DebugOverlayView` (UI Toolkit, F3 toggles) shows FPS, tree count,
-  `SimStats` tick ms and ticks/s, and the tree nearest the cursor ground point (id, trunk, log yield) via
-  `TreeRegistry.QueryRadius`. Read-only; one named label per value (`debug-*`). Not yet in Game.unity (view-8).
 - `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` (last Step wall time) and
   `TicksPerSecond` (ticks run in the last real second). Sim code never reads it.
 - Views on screen so far: the terrain (Unity Terrain, map-1) and `TopBarController` (UI Toolkit, `TopBar.uxml`).
