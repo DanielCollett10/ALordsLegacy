@@ -1,0 +1,27 @@
+{
+    "name": "LordsLegacy.Tests.EditMode",
+    "rootNamespace": "LordsLegacy.Tests.EditMode",
+    "references": [
+        "LordsLegacy.Sim",
+        "LordsLegacy.Game",
+        "LordsLegacy.Editor",
+        "Unity.InputSystem",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
