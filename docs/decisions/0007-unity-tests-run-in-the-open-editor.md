@@ -15,6 +15,8 @@ in the Editor can't also be opened by a batch-mode Unity (decision 0001).
 - Screenshots and builds (e.g. the perf benchmark) are triggered the same way: menu item via
   MCP, or by the owner.
 
-**Consequences.** Connecting the Unity MCP is strongly recommended; without it every editor
+**Status.** The owner chose the Unity MCP route (agents run Unity tests themselves).
+
+**Consequences.** If the MCP is ever disconnected, without it every editor
 task ends with a short human step (run the tests, report). Editor-lane tasks run one at a
 time against the open Editor.
