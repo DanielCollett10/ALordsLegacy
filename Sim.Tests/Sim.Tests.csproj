@@ -11,7 +11,7 @@
     <LangVersion>9.0</LangVersion>
     <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>
-    <RootNamespace>NetSim.Sim.Tests</RootNamespace>
+    <RootNamespace>LordsLegacy.Sim.Tests</RootNamespace>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <!-- Restore only from nuget.org, ignoring any machine-wide sources or fallback
          folders (e.g. a missing Visual Studio offline package folder). -->

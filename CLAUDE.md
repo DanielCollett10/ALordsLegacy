@@ -25,7 +25,7 @@ touching the simulation.
 
 - C# 9 language level (Unity's compiler). No `record struct`, no file-scoped namespaces,
   no global usings.
-- Namespace `NetSim.Sim` (and sub-namespaces) for Sim code, `NetSim.Game` for Unity code.
+- Namespace `LordsLegacy.Sim` (and sub-namespaces) for Sim code, `LordsLegacy.Game` for Unity code.
 - Sim code: no static mutable state, no `DateTime.Now`, no `System.Random` without a seed.
   Time only advances through the Sim tick.
 - Every new Sim behaviour gets an NUnit test in `Sim.Tests/`.
