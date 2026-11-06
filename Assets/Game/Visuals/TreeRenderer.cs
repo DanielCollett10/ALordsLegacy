@@ -28,7 +28,11 @@ namespace LordsLegacy.Game.Visuals
         {
             public Matrix4x4[] Matrices;
             public float MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+            public float MaxHeight;
         }
+
+        private Mesh _builtMesh;
+        private float _builtScale;
 
         private readonly List<Cell> _cells = new List<Cell>();
         private readonly Plane[] _planes = new Plane[6];
@@ -73,14 +77,19 @@ namespace LordsLegacy.Game.Visuals
             var mats = def.Materials;
             if (mesh == null) return;
 
-            // Inflate cell bounds by the mesh size so tall or wide trees near an edge are not culled early.
-            float pad = def.Scale * mesh.bounds.extents.magnitude;
+            if (mesh != _builtMesh || !Mathf.Approximately(def.Scale, _builtScale))
+            {
+                Build();
+                mesh = def.Mesh;
+            }
             GeometryUtility.CalculateFrustumPlanes(cullCamera, _planes);
 
             foreach (var cell in _cells)
             {
-                var min = new Vector3(cell.MinX - pad, cell.MinY - pad, cell.MinZ - pad);
-                var max = new Vector3(cell.MaxX + pad, cell.MaxY + pad * 2f, cell.MaxZ + pad);
+                // Inflate by the tallest tree in the cell so trees near an edge are not culled early.
+                float pad = cell.MaxHeight;
+                var min = new Vector3(cell.MinX - pad, cell.MinY, cell.MinZ - pad);
+                var max = new Vector3(cell.MaxX + pad, cell.MaxY + pad, cell.MaxZ + pad);
                 var b = new Bounds((min + max) * 0.5f, max - min);
                 if (!GeometryUtility.TestPlanesAABB(_planes, b)) continue;
                 VisibleCellCount++;
@@ -111,7 +120,13 @@ namespace LordsLegacy.Game.Visuals
             _built = true;
             _cells.Clear();
             var world = host.World;
-            float scale = registry.Get(TreeVisualId).Scale;
+            var def = registry.Get(TreeVisualId);
+            // Each tree is scaled so its mesh is (trunk length x definition scale) metres tall, and its base
+            // sits on the terrain. Without this a 1 m placeholder mesh is invisible at forest distances.
+            _builtMesh = def.Mesh;
+            _builtScale = def.Scale;
+            var mb = _builtMesh != null ? _builtMesh.bounds : new Bounds(Vector3.zero, Vector3.one);
+            float meshHeight = Mathf.Max(0.001f, mb.size.y);
             var groups = new Dictionary<long, List<TreeRecord>>();
             foreach (var t in world.Trees.All)
             {
@@ -139,7 +154,11 @@ namespace LordsLegacy.Game.Visuals
                     float y = world.Terrain.HeightAt(t.X, t.Z);
                     // Deterministic yaw from the tree id so the forest does not look like copies.
                     float yaw = (t.Id.Value * 137.508f) % 360f;
-                    cell.Matrices[i] = Matrix4x4.TRS(new Vector3(t.X, y, t.Z), Quaternion.Euler(0f, yaw, 0f), Vector3.one * scale);
+                    float height = Mathf.Max(0.1f, (float)t.TrunkLengthM) * def.Scale;
+                    float s = height / meshHeight;
+                    var pos = new Vector3(t.X, y - mb.min.y * s, t.Z);
+                    cell.Matrices[i] = Matrix4x4.TRS(pos, Quaternion.Euler(0f, yaw, 0f), Vector3.one * s);
+                    cell.MaxHeight = Mathf.Max(cell.MaxHeight, height);
                     cell.MinX = Mathf.Min(cell.MinX, t.X); cell.MaxX = Mathf.Max(cell.MaxX, t.X);
                     cell.MinZ = Mathf.Min(cell.MinZ, t.Z); cell.MaxZ = Mathf.Max(cell.MaxZ, t.Z);
                     cell.MinY = Mathf.Min(cell.MinY, y); cell.MaxY = Mathf.Max(cell.MaxY, y);
