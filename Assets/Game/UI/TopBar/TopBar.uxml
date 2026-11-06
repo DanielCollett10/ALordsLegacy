@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="top-bar" class="top-bar">
+        <ui:Label name="date-label" class="top-bar__date" text="" />
+        <ui:Label name="slowed-notice" class="top-bar__notice" text="Running slower than real time" />
+        <ui:VisualElement class="top-bar__spacer" />
+        <ui:Button name="pause-button" class="top-bar__button" text="Pause" />
+        <ui:VisualElement name="speed-buttons" class="top-bar__speeds" />
+        <ui:Button name="steady-light-toggle" class="top-bar__button" text="Steady light" />
+    </ui:VisualElement>
+</ui:UXML>
