@@ -18,6 +18,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) owns the tick clock. `Step(n)` advances
   time; nothing else does. `Pause()` and `Resume()` set whether `Step` does anything.
 - Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/` and compile the same `Assets/Sim/**/*.cs`.
+- `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds every PLACEHOLDER number from
+  `docs/design/tuning.md`. Defaults are instance properties set by object initializer; derived
+  values are computed properties. The Sim never hard-codes these numbers.
 
 ## Map pipeline
 
