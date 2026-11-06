@@ -19,7 +19,7 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 - **Combat:** large Total War-style battles are a long-term **goal, not a milestone**. They
   come only after all core city-builder systems work. Don't design MVP systems around them,
   but don't rule them out either (PRIN-08 style).
-- **Namespaces:** the template's `NetSim` is removed and replaced by `LordsLegacy.Sim` /
+- **Namespaces:** the project template's namespace is removed and replaced by `LordsLegacy.Sim` /
   `LordsLegacy.Game` (not "Legacy", which reads as "legacy code").
 
 ## Time (TIME, CLK)
