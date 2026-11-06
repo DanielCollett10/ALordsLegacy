@@ -41,27 +41,27 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(cam, "No main camera.");
             Assert.IsNotNull(cam.GetComponent<CameraRig>(), "CameraRig missing on main camera.");
 
-            var trees = Object.FindObjectOfType<LordsLegacy.Game.Visuals.TreeRenderer>();
+            var trees = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.TreeRenderer>();
             Assert.IsNotNull(trees, "TreeRenderer missing.");
             AssertNoNullRefs(trees);
 
-            var sun = Object.FindObjectOfType<SunLightController>();
+            var sun = Object.FindFirstObjectByType<SunLightController>();
             Assert.IsNotNull(sun, "SunLightController missing.");
             AssertNoNullRefs(sun);
             Assert.AreEqual(LightType.Directional, sun.GetComponent<Light>().type);
 
-            var picker = Object.FindObjectOfType<GroundPicker>();
+            var picker = Object.FindFirstObjectByType<GroundPicker>();
             Assert.IsNotNull(picker, "GroundPicker missing.");
             AssertNoNullRefs(picker);
 
-            var topBar = Object.FindObjectOfType<TopBarController>();
+            var topBar = Object.FindFirstObjectByType<TopBarController>();
             Assert.IsNotNull(topBar, "TopBarController missing.");
             AssertNoNullRefs(topBar);
-            var readout = Object.FindObjectOfType<GroundReadoutView>();
+            var readout = Object.FindFirstObjectByType<GroundReadoutView>();
             Assert.IsNotNull(readout, "GroundReadoutView missing.");
             AssertNoNullRefs(readout);
 
-            var overlay = Object.FindObjectOfType<DebugOverlayView>();
+            var overlay = Object.FindFirstObjectByType<DebugOverlayView>();
             Assert.IsNotNull(overlay, "DebugOverlayView missing.");
             AssertNoNullRefs(overlay);
 
@@ -70,7 +70,8 @@ namespace LordsLegacy.Tests.PlayMode
             foreach (var doc in docs)
             {
                 Assert.IsNotNull(doc.panelSettings, doc.name + " has no PanelSettings.");
-                Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                // GroundReadoutView clones its UXML from its own _visualTree field, so its UIDocument has none.
+                if (doc.name != "GroundReadout") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
@@ -85,7 +86,7 @@ namespace LordsLegacy.Tests.PlayMode
             yield return load;
             yield return null; // let SimHost.Start run
 
-            var host = Object.FindObjectOfType<SimHost>();
+            var host = Object.FindFirstObjectByType<SimHost>();
             Assert.IsNotNull(host, "No SimHost in Game scene.");
             Assert.IsTrue(host.IsInitialized, "SimHost did not initialise from testmap.lsmap.");
             Assert.Greater(host.World.Trees.Count, 0);
