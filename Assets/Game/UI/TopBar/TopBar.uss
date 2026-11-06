@@ -1,0 +1,13 @@
+.top-bar {
+    flex-direction: row;
+    align-items: center;
+    height: 48px;
+    padding: 0 12px;
+    background-color: rgba(30, 24, 18, 0.9);
+}
+.top-bar__date { color: rgb(240, 230, 210); font-size: 20px; -unity-font-style: bold; }
+.top-bar__notice { color: rgb(240, 170, 80); margin-left: 16px; }
+.top-bar__spacer { flex-grow: 1; }
+.top-bar__speeds { flex-direction: row; margin: 0 8px; }
+.top-bar__button { min-width: 44px; margin: 0 2px; color: rgb(240, 230, 210); background-color: rgb(70, 58, 44); }
+.top-bar__button--active { background-color: rgb(190, 140, 50); color: rgb(20, 14, 8); }
