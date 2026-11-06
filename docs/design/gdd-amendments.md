@@ -40,6 +40,13 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | TIME-A6 | **Steady light** toggle in the top bar: freezes the on-screen lighting at daytime. It is visual only; the Sim's day, night and schedules are unchanged | DECIDED |
 | TIME-A7 | Combat (later) must feel good at 1–4×; the pace will be retuned when combat exists | DECIDED |
 
+## Visuals (ART)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| ART-A1 | **Visible loads (future fidelity):** what a citizen, ox or cart carries is shown and matches its carrier inventory exactly: a cart with 10 planks shows 10 stacked planks, unloaded one by one in order; a cart with 3 baskets shows 3 baskets, each showing its contents (apples, pears, carrots). Same principle as stockpiles (INV-06, PRS-04) | DECIDED (future) |
+| ART-A2 | Until then, carried loads use a simple placeholder (e.g. a generic sack or crate shape, optionally with a count label). The Sim already tracks carrier contents (LED-01), so the full version is presentation work only | DECIDED |
+
 ## World scale
 
 | ID | Rule | Tag |
