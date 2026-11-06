@@ -29,6 +29,8 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
   Spring Mar–May, Summer Jun–Aug, Autumn Sep–Nov, Winter Dec–Feb. Top bar shows
   e.g. `14 Mar · Spring · Year 1 · 08:40`. (PROPOSED)
 - Days per year and game minutes per real second are tuning values, not code. (DECIDED)
+- Year rollover: the year number increments on 1 January; Year 1 is a short year starting
+  1 Mar. DayOfYear is counted from 1 Jan (1 Mar = day 60). No leap years. (DECIDED)
 
 | ID | Rule | Tag |
 | --- | --- | --- |

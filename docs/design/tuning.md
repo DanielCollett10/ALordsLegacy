@@ -16,6 +16,11 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 | Start | 1 Mar, Year 1, 06:00, Monday | | gdd-amendments Time |
 | Min / max daylight | 8 / 16 | game hours | TIME-A5 |
 | Rest day | Sunday, on | switch | FOOD-A4 |
+| MaxTicksPerFrame | 8 | ticks | CLK-05 (above this the game slows down instead of skipping) |
+
+Calendar: DayOfYear counts from 1 Jan (1 Jan = day 1, so 1 Mar = day 60). The year number
+goes up on **1 January**, so Year 1 is a short first year (1 Mar – 31 Dec) and Year 2 starts
+on 1 Jan. No leap years.
 
 Derived: clock runs 96× real time at 1×. A year is 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×,
 2.9 h at 32×. At 32× the Sim runs about 51 ticks per real second.
