@@ -18,6 +18,11 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 | Rest day | Sunday, on | switch | FOOD-A4 |
 | MaxTicksPerFrame | 8 | ticks | CLK-05 (above this the game slows down instead of skipping) |
 
+> Implementation note (MaxTicksPerFrame, CLK-05): `TickPacer.Advance` returns the cap and drops the excess
+> ticks and the fractional carry, so game time falls behind real time and `SlowedDown` shows the top-bar notice.
+> Dropped ticks are never run later. The tech spec says "slows itself rather than skipping simulation steps".
+> Owner to decide whether dropping is the intended behaviour or whether due ticks should be carried and run later.
+
 Calendar: DayOfYear counts from 1 Jan (1 Jan = day 1, so 1 Mar = day 60). The year number
 goes up on **1 January**, so Year 1 is a short first year (1 Mar – 31 Dec) and Year 2 starts
 on 1 Jan. No leap years.
