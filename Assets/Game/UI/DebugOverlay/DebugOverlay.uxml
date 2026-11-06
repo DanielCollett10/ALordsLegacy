@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="debug-overlay" class="debug-overlay" picking-mode="Ignore">
+        <ui:Label name="debug-fps" text="FPS --" />
+        <ui:Label name="debug-tree-count" text="Trees --" />
+        <ui:Label name="debug-tick-ms" text="Tick -- ms" />
+        <ui:Label name="debug-tps" text="Ticks/s --" />
+        <ui:Label name="debug-tree-id" text="Tree id --" />
+        <ui:Label name="debug-tree-trunk" text="Trunk -- m" />
+        <ui:Label name="debug-tree-logs" text="Logs --" />
+    </ui:VisualElement>
+</ui:UXML>

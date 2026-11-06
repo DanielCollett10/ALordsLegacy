@@ -1,0 +1,9 @@
+.debug-overlay {
+    position: absolute;
+    top: 48px;
+    right: 12px;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: rgb(240, 230, 210);
+    background-color: rgba(30, 24, 18, 0.85);
+}
