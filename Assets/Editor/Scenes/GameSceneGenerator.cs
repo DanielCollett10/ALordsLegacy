@@ -66,6 +66,7 @@ namespace LordsLegacy.EditorTools.Scenes
             var go = new GameObject("Main Camera");
             go.tag = "MainCamera";
             go.AddComponent<Camera>();
+            go.AddComponent<CameraRig>();
             go.transform.position = new Vector3(1024f, 150f, 700f);
             go.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
             return go;
