@@ -16,7 +16,7 @@ still applies, implemented as plain C# in `Assets/Sim`.
 **Why.** Agents build and test sim code in seconds without opening Unity; save/load is our
 own serialiser anyway (SAV-03); ticks are rare (1 game minute, ~0.5/s at 1×, ~17/s at 32×),
 so moving thousands of citizens per tick is cheap with sensible data layout. The target
-is now 2,000–5,000 citizens (gdd-amendments.md); the perf spike measures at 5,000.
+is now 5,000–10,000 citizens (gdd-amendments.md); the perf spike measures at 10,000.
 
 **Consequences.** Sim uses its own math types. If profiling (P1, P5) shows a hot loop
 (pathfinding) is too slow, optimise it inside the Sim first (caching, hierarchical search,
