@@ -43,6 +43,8 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateSunController(host, light, topBar);
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
+            SceneYamlNormalizer.Normalize(ScenePath);
+            AssetDatabase.ImportAsset(ScenePath);
             AddToBuildSettings(ScenePath);
             AssetDatabase.SaveAssets();
             Debug.Log("GameSceneGenerator: wrote " + ScenePath);
