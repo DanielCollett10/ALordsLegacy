@@ -124,23 +124,30 @@ weekly rhythm of village life.
 | FOOD-A4 | The calendar has weekdays. **Sunday** is allotment day and a **day of rest** (no work that day). Whether a rest day applies is a tuning switch, so it can be turned off | DECIDED (for now) |
 | FOOD-A4b | Idea for later: tie the rest day into other systems, e.g. only households with church access rest (and gain happiness), or rest affects output or mood | OPEN (idea) |
 | FOOD-A5 | Every house has a **larder** (a food inventory location, LED-01 "house store"). Homeless families at the camp-site have a camp larder each | DECIDED |
-| FOOD-A6 | **Allotment:** at Sunday dawn, for each village, households are sorted by walking distance from home to their **supply point** (nearest first). Each is allotted rations to fill its larder up to 7 days of its own need, from the supply point's stock, until stock runs out. Allotted food is **reserved** at the supply point. Nearest households are served fully first, so **far houses go hungry first** in a shortage (ECO-11) | DECIDED |
+| FOOD-A6 | **Allotment:** at Sunday dawn, for each market, households it supplies are sorted by walking distance from home to the market (nearest first). Each is allotted rations to fill its larder up to 7 days of its own need, from the stock on that market's stalls, until stock runs out. Allotted food is **reserved** on the stalls. Nearest households are served fully first, so **far houses go hungry first** in a shortage (ECO-11) | DECIDED |
 | FOOD-A7 | **Sunday trip:** one adult per household walks to the supply point, collects the reserved food (Transfer into the carrier), and walks home (Transfer into the larder). Food in transit is real and can later be stolen (MIL-09). Trips are spread across the morning so they don't all start on the same tick | DECIDED |
 | FOOD-A8 | Food types are allotted in proportion to what the supply point holds, so households get a mix (supports "diverse food", HSE-12) | PROPOSED |
 | FOOD-A9 | **Daily eating:** each household consumes its daily need (adults × 1 + children × 0.5 rations) from its larder, whole items first and the leftover fraction carried over. If the larder can't cover the day, the household is **Hungry** that day (FOOD-A2) | DECIDED |
-| FOOD-A10 | Supply point before markets exist: the household's nearest granary (or the camp-site stockpile at the start) | DECIDED |
+| FOOD-A10 | Households get food **only from a market** (MKT rules below). Granaries never supply households directly. A household's supply point is the nearest market in range | DECIDED |
+| FOOD-A10b | Start of game: the camp-site works as a small market for the starting stockpile (with the same range rule), so the opening has food before any market is built | PROPOSED |
 | FOOD-A11 | Larder leftovers carry over; weekly spoilage (FOOD-09) applies to larders as well as stores | PROPOSED |
 
-### Markets (later MVP; direction DECIDED, details OPEN)
+### Markets (arrive with food, MVP-2)
+
+Markets are how food reaches households, so they arrive together with food.
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| MKT-01 | A village can have several markets. Once markets exist, a household's supply point is its market (ECO-11 market range) | DECIDED |
-| MKT-02 | The player **links** granaries and storage yards to markets, choosing which stores feed which market (LOG-02 / LGS-08 "linked only") | DECIDED |
-| MKT-03 | A market holds **stalls, one per family**. A stall family stocks its stall from the linked stores and mans it to sell goods | DECIDED |
-| MKT-04 | Storage families keep their store filled from production buildings (INV-A8 haulers) | DECIDED |
-| MKT-05 | Once markets exist, households outside every market's range **get nothing** from the allotment. Markets are the only supply point | DECIDED (may change) |
+| MKT-01 | A village can have several markets. A household's supply point is the nearest market whose range covers it (ECO-11) | DECIDED |
+| MKT-02 | The player **links** granaries (later also storage yards) to markets, choosing which stores feed which market (LOG-02 / LGS-08 "linked only") | DECIDED |
+| MKT-03 | Placing a market (a drawn area) is **free**. Inside it the player builds **stalls**. A tier 1 stall is a rudimentary table costing **2 planks** (no roof cover yet) | DECIDED (cost PLACEHOLDER) |
+| MKT-03b | Stalls are staffed by **granary families**: each family assigned to a granary linked to the market staffs one stall, as a whole family. The same family also hauls goods from production buildings (e.g. a bakery) to its granary (INV-A8). A granary family with no stall built only hauls | DECIDED |
+| MKT-03c | During the week the stall family restocks its stall from its granary. On Sunday, households collect from stalls. A stall can only hand out what is on it, so **stall capacity limits how many households a market can serve** (capacity PLACEHOLDER). Stall families work on Sundays (exception to the rest day) | PROPOSED |
+| MKT-04 | Market upgrade (later): fabric covers (needs linen), families assigned directly to the market instead of via a granary, more stalls in total | OPEN (idea) |
+| MKT-04b | Tier 3 idea: a travelling or moving market for remote towns | OPEN (idea) |
+| MKT-05 | Households outside every market's range **get nothing** from the allotment. In practice players build homes in range of a market | DECIDED (may change) |
 | MKT-06 | Market range is a walking distance along paths and roads, held in data (start: 630 m ≈ half a game day's walk at current tuning). The range is shown as an overlay of reachable ground when placing or selecting a market | DECIDED (value PLACEHOLDER) |
 | MKT-07 | Design intent: towns end up with several markets, e.g. a large central market in the main town with advanced goods (where higher-level artisan households live), and satellite village markets with basic goods only. Satellite villages don't need high household levels | DECIDED (intent) |
 | MKT-08 | What each stall sells, stall capacity, number of stalls, market sizes or tiers | OPEN |
+| MKT-10 | Planks don't exist until the sawpit (MVP-4), but stalls need them in MVP-2. Either the start includes a few planks, or MVP-2 stalls cost logs as a placeholder (like HSE-23 houses) | OPEN |
 | MKT-09 | Fallback if the weekly trip doesn't play well: keep the weekly allotment but drop the walk (food appears in larders), or drop the weekly cycle entirely | NOTE |
