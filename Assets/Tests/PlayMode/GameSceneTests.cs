@@ -16,6 +16,56 @@ namespace LordsLegacy.Tests.PlayMode
             new Vector2(1500.25f, 1400f), new Vector2(1900f, 300f),
         };
 
+        private static void AssertNoNullRefs(Component c)
+        {
+            const System.Reflection.BindingFlags F = System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+            foreach (var f in c.GetType().GetFields(F))
+            {
+                bool serialized = f.IsPublic || f.GetCustomAttributes(typeof(SerializeField), true).Length > 0;
+                if (!serialized || !typeof(Object).IsAssignableFrom(f.FieldType)) continue;
+                var v = (Object)f.GetValue(c);
+                Assert.IsTrue(v != null, c.GetType().Name + "." + f.Name + " is a null serialized reference.");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator GameSceneHasEveryM1PieceWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var cam = Camera.main;
+            Assert.IsNotNull(cam, "No main camera.");
+            Assert.IsNotNull(cam.GetComponent<CameraRig>(), "CameraRig missing on main camera.");
+
+            var trees = Object.FindObjectOfType<LordsLegacy.Game.Visuals.TreeRenderer>();
+            Assert.IsNotNull(trees, "TreeRenderer missing.");
+            AssertNoNullRefs(trees);
+
+            var sun = Object.FindObjectOfType<SunLightController>();
+            Assert.IsNotNull(sun, "SunLightController missing.");
+            AssertNoNullRefs(sun);
+            Assert.AreEqual(LightType.Directional, sun.GetComponent<Light>().type);
+
+            var picker = Object.FindObjectOfType<GroundPicker>();
+            Assert.IsNotNull(picker, "GroundPicker missing.");
+            AssertNoNullRefs(picker);
+
+            var topBar = Object.FindObjectOfType<TopBarController>();
+            Assert.IsNotNull(topBar, "TopBarController missing.");
+            AssertNoNullRefs(topBar);
+            var readout = Object.FindObjectOfType<GroundReadoutView>();
+            Assert.IsNotNull(readout, "GroundReadoutView missing.");
+            AssertNoNullRefs(readout);
+
+            foreach (var doc in Object.FindObjectsOfType<UnityEngine.UIElements.UIDocument>())
+                Assert.IsNotNull(doc.panelSettings, doc.name + " has no PanelSettings.");
+            Assert.GreaterOrEqual(Object.FindObjectsOfType<UnityEngine.UIElements.UIDocument>().Length, 2);
+        }
+
         [UnityTest]
         public IEnumerator GameSceneInitialisesSimFromBakedMap()
         {

@@ -112,4 +112,12 @@ written by views, and Sim code never reads Unity terrain (the baked map is the o
 
 _Owner: the scene and prefab tasks. Other tasks do not edit this section._
 
-- (Describe the scenes and how they are generated: Editor scripts write scenes and prefabs.)
+- `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
+  menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
+  so two runs give the same file. Serialized references are wired in code.
+- Contents: `Terrain`; `SimHost`; `Main Camera` (Camera + `CameraRig`); `Directional Light` (Light + `SunLightController`
+  -> SimHost, light, TopBar); `TreeRenderer` (-> SimHost, `VisualRegistry.asset`, main camera); `GroundPicker`
+  (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `GroundReadout` (`GroundReadoutView` -> picker) and
+  `DebugOverlay` (added only when `DebugOverlayView` exists; T-034 is currently reverted). All UIDocuments use
+  `Assets/Game/UI/PanelSettings.asset`.
+- `GameSceneTests.GameSceneHasEveryM1PieceWired` (PlayMode) loads the scene and checks each piece and its references.

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using LordsLegacy.Game;
+using LordsLegacy.Game.Visuals;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -31,9 +32,15 @@ namespace LordsLegacy.EditorTools.Scenes
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             CreateTerrain();
-            CreateSimHost();
-            CreateCamera();
-            CreateLight();
+            var host = CreateSimHost().GetComponent<SimHost>();
+            var cam = CreateCamera().GetComponent<Camera>();
+            var light = CreateLight().GetComponent<Light>();
+            CreateTreeRenderer(host, cam);
+            CreateGroundPicker(host, cam);
+            var topBar = CreateTopBar(host);
+            CreateGroundReadout();
+            CreateDebugOverlay(host);
+            CreateSunController(host, light, topBar);
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
             AddToBuildSettings(ScenePath);
@@ -80,6 +87,107 @@ namespace LordsLegacy.EditorTools.Scenes
             light.type = LightType.Directional;
             go.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
             return go;
+        }
+
+        /// <summary>Shared PanelSettings asset (core-3).</summary>
+        public const string PanelSettingsPath = "Assets/Game/UI/PanelSettings.asset";
+        /// <summary>Visual registry asset (view-2a).</summary>
+        public const string RegistryPath = "Assets/Game/Visuals/VisualRegistry.asset";
+
+        private static void SetRef(Component c, string field, Object value)
+        {
+            var so = new SerializedObject(c);
+            var p = so.FindProperty(field);
+            if (p == null) { Debug.LogError("GameSceneGenerator: " + c.GetType().Name + " has no field " + field); return; }
+            p.objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static T Load<T>(string path) where T : Object
+        {
+            var a = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (a == null) Debug.LogError("GameSceneGenerator: missing asset " + path);
+            return a;
+        }
+
+        private static GameObject CreateUiDocument(string name, string uxmlPath)
+        {
+            var go = new GameObject(name);
+            var doc = go.AddComponent<UnityEngine.UIElements.UIDocument>();
+            doc.panelSettings = Load<UnityEngine.UIElements.PanelSettings>(PanelSettingsPath);
+            if (uxmlPath != null) doc.visualTreeAsset = Load<UnityEngine.UIElements.VisualTreeAsset>(uxmlPath);
+            return go;
+        }
+
+        /// <summary>Adds the TreeRenderer wired to SimHost, the visual registry and the main camera.</summary>
+        public static GameObject CreateTreeRenderer(SimHost host, Camera cam)
+        {
+            var go = new GameObject("TreeRenderer");
+            var c = go.AddComponent<TreeRenderer>();
+            SetRef(c, "host", host);
+            SetRef(c, "registry", Load<LordsLegacy.Game.Visuals.VisualRegistry>(RegistryPath));
+            SetRef(c, "cullCamera", cam);
+            return go;
+        }
+
+        /// <summary>Adds the GroundPicker wired to the camera and SimHost.</summary>
+        public static GameObject CreateGroundPicker(SimHost host, Camera cam)
+        {
+            var go = new GameObject("GroundPicker");
+            var c = go.AddComponent<GroundPicker>();
+            SetRef(c, "_camera", cam);
+            SetRef(c, "_host", host);
+            return go;
+        }
+
+        /// <summary>Adds the top bar UIDocument and controller.</summary>
+        public static TopBarController CreateTopBar(SimHost host)
+        {
+            var go = CreateUiDocument("TopBar", "Assets/Game/UI/TopBar/TopBar.uxml");
+            var c = go.AddComponent<TopBarController>();
+            SetRef(c, "_host", host);
+            SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/TopBar/TopBar.uss"));
+            return c;
+        }
+
+        /// <summary>Adds the cursor ground readout UIDocument and view.</summary>
+        public static GameObject CreateGroundReadout()
+        {
+            var go = CreateUiDocument("GroundReadout", null);
+            var c = go.AddComponent<GroundReadoutView>();
+            SetRef(c, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/GroundReadout/GroundReadout.uxml"));
+            SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/GroundReadout/GroundReadout.uss"));
+            return go;
+        }
+
+        /// <summary>
+        /// Adds the debug overlay UIDocument if a <c>LordsLegacy.Game.DebugOverlayView</c> type exists.
+        /// T-034 (view-5) was reverted on main, so the type is looked up by name until it returns.
+        /// </summary>
+        public static GameObject CreateDebugOverlay(SimHost host)
+        {
+            var type = typeof(SimHost).Assembly.GetType("LordsLegacy.Game.DebugOverlayView");
+            if (type == null)
+            {
+                Debug.LogWarning("GameSceneGenerator: DebugOverlayView not found (T-034 reverted); overlay not added.");
+                return null;
+            }
+            var go = CreateUiDocument("DebugOverlay", "Assets/Game/UI/DebugOverlay/DebugOverlay.uxml");
+            var c = (Component)go.AddComponent(type);
+            var so = new SerializedObject(c);
+            var p = so.FindProperty("_host") ?? so.FindProperty("host");
+            if (p != null) { p.objectReferenceValue = host; so.ApplyModifiedPropertiesWithoutUndo(); }
+            return go;
+        }
+
+        /// <summary>Adds the SunLightController on the directional light's object.</summary>
+        public static void CreateSunController(SimHost host, Light sun, TopBarController topBar)
+        {
+            var c = sun.gameObject.AddComponent<SunLightController>();
+            SetRef(c, "_simHost", host);
+            SetRef(c, "_sun", sun);
+            SetRef(c, "_topBar", topBar);
         }
 
         /// <summary>Puts the scene first in Build Settings, keeping other scenes once each.</summary>
