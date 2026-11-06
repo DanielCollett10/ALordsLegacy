@@ -69,6 +69,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 
 - `Assets/Game/` reads Sim state and draws it; it turns player input into Sim commands and holds
   no game rules (see `CLAUDE.md`).
+- `Assets/Game/Bootstrap/SimHost` owns `SimWorld` and `TickPacer` (decision 0006). `Initialize(SimTuning, MapData)`;
+  if not initialised, `Start` reads `StreamingAssets/Maps/testmap.lsmap` (`TryLoadMap` logs an error naming the path
+  and the map-2 bake menu item if missing). `Tick(realSeconds)` runs `World.Step(Pacer.Advance(..))`, or resets the
+  pacer while paused; `Update` calls it only when `AutoUpdate`. `SimStats` holds last Step ms and rolling ticks/s.
 - (Describe the view: how Sim state becomes something on screen.)
 
 ## Data flow

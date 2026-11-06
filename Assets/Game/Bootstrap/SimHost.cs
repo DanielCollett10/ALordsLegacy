@@ -1,0 +1,100 @@
+using System.Diagnostics;
+using System.IO;
+using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Tuning;
+using UnityEngine;
+
+namespace LordsLegacy.Game
+{
+    /// <summary>Owns the SimWorld and TickPacer, loads the map and drives ticks (decision 0006).</summary>
+    public sealed class SimHost : MonoBehaviour
+    {
+        /// <summary>Map file name under StreamingAssets/Maps.</summary>
+        public const string DefaultMapFile = "testmap.lsmap";
+
+        /// <summary>When false, Update does nothing and callers (tests) call <see cref="Tick"/>.</summary>
+        public bool AutoUpdate { get; set; } = true;
+
+        /// <summary>The simulation. Null until initialised. Views must not write to it.</summary>
+        public SimWorld World { get; private set; }
+
+        /// <summary>Real-time pacer. Null until initialised.</summary>
+        public TickPacer Pacer { get; private set; }
+
+        /// <summary>Sim cost measurements.</summary>
+        public SimStats Stats { get; } = new SimStats();
+
+        /// <summary>Fraction of the next tick already elapsed, [0,1).</summary>
+        public double TickFraction => Pacer == null ? 0 : Pacer.Fraction;
+
+        /// <summary>True once <see cref="Initialize"/> has run.</summary>
+        public bool IsInitialized => World != null;
+
+        private readonly Stopwatch _clock = Stopwatch.StartNew();
+
+        /// <summary>Creates the world and pacer from the tuning and map.</summary>
+        public void Initialize(SimTuning tuning, MapData map)
+        {
+            World = SimWorld.FromMapData(map, tuning);
+            Pacer = new TickPacer(tuning);
+        }
+
+        private void Start()
+        {
+            if (IsInitialized) return;
+            string path = Path.Combine(Application.streamingAssetsPath, "Maps", DefaultMapFile);
+            var map = TryLoadMap(path);
+            if (map != null) Initialize(new SimTuning(), map);
+        }
+
+        /// <summary>Reads a map file; logs a clear error and returns null if missing or unreadable.</summary>
+        public static MapData TryLoadMap(string path)
+        {
+            const string hint = " Bake it with the menu item 'Lords Legacy/Map/Bake Test Map' (map-2).";
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    UnityEngine.Debug.LogError("SimHost: map file not found at '" + path + "'." + hint);
+                    return null;
+                }
+                return MapDataIO.Read(File.ReadAllBytes(path));
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogError("SimHost: could not read map file '" + path + "': " + e.Message + hint);
+                return null;
+            }
+        }
+
+        private void Update()
+        {
+            if (AutoUpdate) Tick(Time.deltaTime);
+        }
+
+        /// <summary>Advances the Sim by the given real seconds (no ticks and a pacer reset while paused).</summary>
+        public void Tick(float realSeconds)
+        {
+            if (World == null) return;
+            if (World.Paused)
+            {
+                Pacer.Reset();
+                Stats.Record(0, 0, _clock.Elapsed.TotalSeconds);
+                return;
+            }
+            int n = Pacer.Advance(realSeconds);
+            long start = Stopwatch.GetTimestamp();
+            World.Step(n);
+            Stats.Record(Stopwatch.GetTimestamp() - start, n, _clock.Elapsed.TotalSeconds);
+        }
+
+        /// <summary>Pauses or resumes the Sim.</summary>
+        public void TogglePause()
+        {
+            if (World == null) return;
+            if (World.Paused) World.Resume(); else World.Pause();
+        }
+    }
+}
