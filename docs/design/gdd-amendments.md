@@ -166,4 +166,8 @@ direction only. MVP code uses the single hand-carry value in `tuning.md`.
 | CNT-04 | Containers are made locally: wicker crafters (baskets) and later the carpenter (boxes, hand carts, ox carts). Boxes last longer and/or hold more than baskets | WISHLIST |
 | CNT-05 | The player sets **production caps** per item at workshops (e.g. "keep 30 baskets"), as the way to decide how many containers the village needs | WISHLIST |
 | CNT-06 | Containers wear out (durability), so they need replacing over time | WISHLIST (idea) |
+| CNT-07 | **Capacity is by weight (and/or size), not per item type.** Every item has a weight (kg); every container and cart has a capacity in kg | WISHLIST (direction DECIDED) |
+| CNT-08 | Every item has a **packing kind** (e.g. loose grain or powder, produce, small hardware, bulky/heavy, later liquid). Each container lists which packing kinds it accepts. Examples: flour, oats, rye and barley **must** go in bags (a basket loses too much); apples can go in a bag or a basket; nails never go in bags | WISHLIST (direction DECIDED) |
+| CNT-09 | Some items are carried **one at a time by hand** or only by cart (e.g. iron), and the heaviest only by ox (logs, INV-12). This replaces the simple light/heavy transport class with the packing kind | WISHLIST (direction DECIDED) |
+| CNT-10 | Later: barrels from the cooper for liquids (ale, cider) | WISHLIST (idea) |
 | MKT-09 | Fallback if the weekly trip doesn't play well: keep the weekly allotment but drop the walk (food appears in larders), or drop the weekly cycle entirely | NOTE |
