@@ -100,7 +100,8 @@ namespace LordsLegacy.EditorTools.Scenes
         {
             var so = new SerializedObject(c);
             var p = so.FindProperty(field);
-            if (p == null) { Debug.LogError("GameSceneGenerator: " + c.GetType().Name + " has no field " + field); return; }
+            if (p == null) throw new System.InvalidOperationException("GameSceneGenerator: " + c.GetType().Name + " has no field " + field);
+            if (value == null) throw new System.InvalidOperationException("GameSceneGenerator: " + c.GetType().Name + "." + field + " would be null");
             p.objectReferenceValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -108,7 +109,7 @@ namespace LordsLegacy.EditorTools.Scenes
         private static T Load<T>(string path) where T : Object
         {
             var a = AssetDatabase.LoadAssetAtPath<T>(path);
-            if (a == null) Debug.LogError("GameSceneGenerator: missing asset " + path);
+            if (a == null) throw new System.InvalidOperationException("GameSceneGenerator: missing asset " + path);
             return a;
         }
 
@@ -163,23 +164,15 @@ namespace LordsLegacy.EditorTools.Scenes
             return go;
         }
 
-        /// <summary>
-        /// Adds the debug overlay UIDocument if a <c>LordsLegacy.Game.DebugOverlayView</c> type exists.
-        /// T-034 (view-5) was reverted on main, so the type is looked up by name until it returns.
-        /// </summary>
+        /// <summary>Adds the debug overlay UIDocument and view, wired to SimHost and the GroundPicker.</summary>
         public static GameObject CreateDebugOverlay(SimHost host)
         {
-            var type = typeof(SimHost).Assembly.GetType("LordsLegacy.Game.DebugOverlayView");
-            if (type == null)
-            {
-                Debug.LogWarning("GameSceneGenerator: DebugOverlayView not found (T-034 reverted); overlay not added.");
-                return null;
-            }
             var go = CreateUiDocument("DebugOverlay", "Assets/Game/UI/DebugOverlay/DebugOverlay.uxml");
-            var c = (Component)go.AddComponent(type);
-            var so = new SerializedObject(c);
-            var p = so.FindProperty("_host") ?? so.FindProperty("host");
-            if (p != null) { p.objectReferenceValue = host; so.ApplyModifiedPropertiesWithoutUndo(); }
+            var c = go.AddComponent<DebugOverlayView>();
+            SetRef(c, "_host", host);
+            SetRef(c, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/DebugOverlay/DebugOverlay.uxml"));
+            SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/DebugOverlay/DebugOverlay.uss"));
             return go;
         }
 

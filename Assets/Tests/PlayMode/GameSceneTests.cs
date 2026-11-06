@@ -61,9 +61,20 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(readout, "GroundReadoutView missing.");
             AssertNoNullRefs(readout);
 
-            foreach (var doc in Object.FindObjectsOfType<UnityEngine.UIElements.UIDocument>())
+            var overlay = Object.FindObjectOfType<DebugOverlayView>();
+            Assert.IsNotNull(overlay, "DebugOverlayView missing.");
+            AssertNoNullRefs(overlay);
+
+            var docs = Object.FindObjectsOfType<UnityEngine.UIElements.UIDocument>();
+            var names = new System.Collections.Generic.List<string>();
+            foreach (var doc in docs)
+            {
                 Assert.IsNotNull(doc.panelSettings, doc.name + " has no PanelSettings.");
-            Assert.GreaterOrEqual(Object.FindObjectsOfType<UnityEngine.UIElements.UIDocument>().Length, 2);
+                Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                names.Add(doc.name);
+            }
+            names.Sort(System.StringComparer.Ordinal);
+            CollectionAssert.AreEqual(new[] { "DebugOverlay", "GroundReadout", "TopBar" }, names);
         }
 
         [UnityTest]
