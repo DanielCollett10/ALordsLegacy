@@ -51,7 +51,17 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
 - Tree authoring: menu `Lords Legacy/Map/Scatter Forest Trees` (`ForestScatter`, Assets/Editor/MapGen/Forest) reads
   `forest-region.json` and writes the seeded `TreeAuthoringData` asset `Assets/Maps/TestMap/TestMapTrees.asset`
   (`LordsLegacy.Game.Authoring`; ids 0..n-1, trunk 12-20 m). Unity terrain trees are not used.
-- Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y.
+- Coordinates: Sim x/z equal Unity world x/z in metres; Sim height equals Unity world y. The terrain sits at
+  world (0,0,0); the HeightGrid origin is (0,0).
+- Size/resolution rule: terrain size ÷ (heightmapResolution − 1) must equal the bake cell size (2 m), so Unity
+  height samples coincide with Sim grid nodes. Test map: 2,048 × 2,048 m, 1025 × 1025 heightmap.
+- Flow: authoring (`TestMapTerrain.asset`, `TestMapTrees.asset`) → bake (menu `Lords Legacy/Map/Bake Test Map`,
+  `MapBaker`, Assets/Editor/MapGen/Bake; needs TestMap.unity open; fails with a clear error if the terrain is
+  moved or the rule is broken) → `Assets/StreamingAssets/Maps/testmap.lsmap` (committed plain binary,
+  `*.lsmap binary`, no LFS) → runtime reads the bytes from `Application.streamingAssetsPath` and passes them to
+  `MapDataIO.Read`. Tree ids in the file equal the TreeAuthoringData ids.
+- **Re-baking after any terrain or tree change is a manual menu step**; commit the new `.lsmap`.
+  Runtime tests use the committed file and never run the bake.
 
 ## Unity layer
 
