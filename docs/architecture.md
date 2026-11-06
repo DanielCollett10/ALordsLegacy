@@ -15,8 +15,12 @@ the section it belongs to; the section headings below are fixed and keep this or
 
 _Owner: the task that changes the Sim core. Other tasks do not edit this section._
 
-- `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) owns the tick clock. `Step(n)` advances
-  time; nothing else does. `Pause()` and `Resume()` set whether `Step` does anything.
+- `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) owns the tick clock and is built from a
+  `SimTuning` (`new SimWorld(tuning)`, exposed read-only as `Tuning`). **One tick = one game minute.**
+  `Step(n)` advances `Tick` by n; nothing else does. `Now` returns the `GameTime` for the current tick
+  (via a `GameCalendar` built from the tuning's start date, weekday and `DaysPerYear`). `Pause()` and
+  `Resume()` set `Paused`; while paused `Step` does nothing. `SimWorld` has no notion of real seconds.
+- `Assets/Sim/Time/` uses namespace `LordsLegacy.Sim.Calendar` to avoid clashing with `UnityEngine.Time`.
 - Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/` and compile the same `Assets/Sim/**/*.cs`.
 - `Assets/Sim/Time/Daylight.cs` (`LordsLegacy.Sim.Calendar`): seasonal sunrise and sunset from plain
   min/max daylight hours. `For(dayOfYear)` returns `SunTimes`; `IsDaylight(GameTime)` and
