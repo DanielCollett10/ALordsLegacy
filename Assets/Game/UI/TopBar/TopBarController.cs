@@ -21,6 +21,7 @@ namespace LordsLegacy.Game
         private Button _pauseButton;
         private Button _steadyButton;
         private Button[] _speedButtons = new Button[0];
+        private VisualElement _speedsRoot;
 
         /// <summary>Presentation-only settings shared with the view.</summary>
         public ViewSettings ViewSettings { get; } = new ViewSettings();
@@ -50,17 +51,26 @@ namespace LordsLegacy.Game
             _pauseButton.clicked += TogglePause;
             _steadyButton.clicked += ToggleSteadyLight;
 
-            int count = _host != null && _host.Pacer != null ? _host.Pacer.Speeds.Count : 0;
+            _speedsRoot = speeds;
+            _speedButtons = new Button[0];
+            BuildSpeedButtons();
+            Refresh();
+        }
+
+        // The SimHost may initialise after OnEnable (it loads the map in Start), so this is retried from Refresh.
+        private void BuildSpeedButtons()
+        {
+            if (_speedsRoot == null || _speedButtons.Length > 0 || _host == null || !_host.IsInitialized) return;
+            int count = _host.Pacer.Speeds.Count;
             _speedButtons = new Button[count];
             for (int i = 0; i < count; i++)
             {
                 int index = i;
                 var b = new Button(() => SetSpeed(index)) { name = "speed-" + i, text = _host.Pacer.Speeds[i] + "x" };
                 b.AddToClassList("top-bar__button");
-                speeds.Add(b);
+                _speedsRoot.Add(b);
                 _speedButtons[i] = b;
             }
-            Refresh();
         }
 
         private static void BuildFallback(VisualElement root)
@@ -104,6 +114,7 @@ namespace LordsLegacy.Game
         public void Refresh()
         {
             if (_dateLabel == null || _host == null || !_host.IsInitialized) return;
+            BuildSpeedButtons();
             _dateLabel.text = _host.World.Paused ? "Paused" : _host.World.Now.Format();
             _pauseButton.EnableInClassList(ActiveClass, _host.World.Paused);
             _steadyButton.EnableInClassList(ActiveClass, ViewSettings.SteadyLight);

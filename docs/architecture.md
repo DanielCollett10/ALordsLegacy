@@ -80,6 +80,9 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `Ray`) and keeps only the hit's x/z. Height and slope come from `SimHost.World.Terrain` at that x/z, never from the
   collider. `GroundSample` is the result (`Format()` gives the label text). `GroundReadoutView` (UI Toolkit,
   `Assets/Game/UI/GroundReadout/`) shows it in one label each frame. `ReadAt(x,z)` reads the Sim without a ray.
+- Debug overlay (`Assets/Game/UI/DebugOverlay/`): `DebugOverlayView` (UI Toolkit, F3 toggles) shows FPS, tree count,
+  `SimStats` tick ms and ticks/s, and the tree nearest the cursor ground point (id, trunk, log yield) via
+  `TreeRegistry.QueryRadius`. Read-only; one named label per value (`debug-*`). Restored in T-036 after the T-034 revert.
 - `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` (last Step wall time) and
   `TicksPerSecond` (ticks run in the last real second). Sim code never reads it.
 - Views on screen so far: the terrain (Unity Terrain, map-1) and `TopBarController` (UI Toolkit, `TopBar.uxml`).
@@ -112,4 +115,12 @@ written by views, and Sim code never reads Unity terrain (the baked map is the o
 
 _Owner: the scene and prefab tasks. Other tasks do not edit this section._
 
-- (Describe the scenes and how they are generated: Editor scripts write scenes and prefabs.)
+- `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
+  menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
+  so two runs give the same file. Serialized references are wired in code.
+- Contents: `Terrain`; `SimHost`; `Main Camera` (Camera + `CameraRig`); `Directional Light` (Light + `SunLightController`
+  -> SimHost, light, TopBar); `TreeRenderer` (-> SimHost, `VisualRegistry.asset`, main camera); `GroundPicker`
+  (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `GroundReadout` (`GroundReadoutView` -> picker) and
+  `DebugOverlay` (`DebugOverlayView` -> SimHost, picker; F3 toggles). All UIDocuments use
+  `Assets/Game/UI/PanelSettings.asset`.
+- `GameSceneTests.GameSceneHasEveryM1PieceWired` (PlayMode) loads the scene and checks each piece and its references.
