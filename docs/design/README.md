@@ -20,3 +20,6 @@ Where the tech spec conflicts with `CLAUDE.md` or `docs/decisions/`, the decisio
 The GDD stays the design source until systems are playable. Owner decisions made since
 v0.4 are in **`gdd-amendments.md`**, which wins where it disagrees with the GDD.
 Read both. Tasks cite rule IDs from either.
+
+**`tuning.md`** lists every placeholder number (time, movement, food, markets, construction),
+its unit and where it lives, plus the derived timing tables. Update it whenever a default changes.

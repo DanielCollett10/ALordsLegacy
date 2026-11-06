@@ -144,7 +144,7 @@ Markets are how food reaches households, so they arrive together with food.
 | MKT-03b | Stalls are staffed by **store families**: each family assigned to a granary or storage yard that is set to supply a market gets **one stall** at that market, staffed by the whole family. Assigning the family queues the stall as an ordinary construction site in free space inside the market area. The same family also hauls goods from production buildings (e.g. a bakery) to its store (INV-A8) | DECIDED (auto-placement PROPOSED) |
 | MKT-03c | **Stalls never draw straight from a store's stock.** The stall family physically carries goods from its store to its stall during the week (food by hand, INV-12). On Sunday, households collect only what is on the stalls. So how many households a market can feed **emerges** from: the number of stall families, the distance from store to market, and walking time. Fixes for a hungry market: more store families, a store closer to the market, or a market closer to the store | DECIDED |
 | MKT-03d | Each stall carries a **mix** of goods from its store: different foods from a granary; from storage yards later linen, clothes, shoes and fuel (charcoal, dried firewood) | DECIDED |
-| MKT-03e | Hand-carry capacity per trip is a tuning value (start: 10 items) and is now a key throughput number. Stall families work on Sundays (exception to the rest day) | PLACEHOLDER |
+| MKT-03e | Hand-carry capacity per trip is a tuning value (start: 10 items) and is now a key throughput number; see `tuning.md` for the throughput formula and table. Stall families work on Sundays (exception to the rest day) | PLACEHOLDER |
 | MKT-03f | Future: a **pack station** (depot) where goods are moved in bulk as a buffer between distant stores and markets | DECIDED (future) |
 | MKT-04 | Market upgrade (later): fabric covers (needs linen), families assigned directly to the market instead of via a granary, more stalls in total | OPEN (idea) |
 | MKT-04b | Tier 3 idea: a travelling or moving market for remote towns | OPEN (idea) |
@@ -152,4 +152,18 @@ Markets are how food reaches households, so they arrive together with food.
 | MKT-06 | Market range is a walking distance along paths and roads, held in data (start: 630 m ≈ half a game day's walk at current tuning). The range is shown as an overlay of reachable ground when placing or selecting a market | DECIDED (value PLACEHOLDER) |
 | MKT-07 | Design intent: towns end up with several markets, e.g. a large central market in the main town with advanced goods (where higher-level artisan households live), and satellite village markets with basic goods only. Satellite villages don't need high household levels | DECIDED (intent) |
 | MKT-08 | Stall table capacity (if any), how the mix on a stall is chosen, market sizes or tiers | OPEN |
+
+## Containers and carriers (WISHLIST: do not implement)
+
+The owner is mapping the construction and crafting tree in draw.io. Until that lands, this is
+direction only. MVP code uses the single hand-carry value in `tuning.md`.
+
+| ID | Idea | Tag |
+| --- | --- | --- |
+| CNT-01 | Goods are carried in **containers** that are real items: bags (grain, flour, rye, barley), wicker baskets (apples, carrots…), later boxes and crates. Each container type holds a set amount per item type (e.g. a wicker basket holds 20 apples) | WISHLIST |
+| CNT-02 | Carriers move more per trip with a container (citizen with a basket or bag), a hand cart, or an ox cart. Container and cart capacity therefore drives trips and how many people a market can serve | WISHLIST |
+| CNT-03 | Starting kit at the camp-site: about 10 bags, 10 wicker baskets and 1 hand cart | WISHLIST |
+| CNT-04 | Containers are made locally: wicker crafters (baskets) and later the carpenter (boxes, hand carts, ox carts). Boxes last longer and/or hold more than baskets | WISHLIST |
+| CNT-05 | The player sets **production caps** per item at workshops (e.g. "keep 30 baskets"), as the way to decide how many containers the village needs | WISHLIST |
+| CNT-06 | Containers wear out (durability), so they need replacing over time | WISHLIST (idea) |
 | MKT-09 | Fallback if the weekly trip doesn't play well: keep the weekly allotment but drop the walk (food appears in larders), or drop the weekly cycle entirely | NOTE |
