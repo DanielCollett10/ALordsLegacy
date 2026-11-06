@@ -122,14 +122,14 @@ weekly rhythm of village life.
 | ID | Rule | Tag |
 | --- | --- | --- |
 | FOOD-A4 | The calendar has weekdays. **Sunday** is allotment day and a **day of rest** (no work that day). Whether a rest day applies is a tuning switch, so it can be turned off | DECIDED (for now) |
-| FOOD-A4b | Idea for later: tie the rest day into other systems, e.g. only households with church access rest (and gain happiness), or rest affects output or mood | OPEN (idea) |
+| FOOD-A4b | **Future mechanic (not in scope now):** the day of rest needs a church. Without one, the village is still small and villagers keep working seven days a week. With church access they rest on Sunday (and later gain happiness) | DECIDED (future) |
 | FOOD-A5 | Every house has a **larder** (a food inventory location, LED-01 "house store"). Homeless families at the camp-site have a camp larder each | DECIDED |
 | FOOD-A6 | **Allotment:** at Sunday dawn, for each market, households it supplies are sorted by walking distance from home to the market (nearest first). Each is allotted rations to fill its larder up to 7 days of its own need, from the stock on that market's stalls, until stock runs out. Allotted food is **reserved** on the stalls. Nearest households are served fully first, so **far houses go hungry first** in a shortage (ECO-11) | DECIDED |
 | FOOD-A7 | **Sunday trip:** one adult per household walks to the supply point, collects the reserved food (Transfer into the carrier), and walks home (Transfer into the larder). Food in transit is real and can later be stolen (MIL-09). Trips are spread across the morning so they don't all start on the same tick | DECIDED |
 | FOOD-A8 | Food types are allotted in proportion to what the supply point holds, so households get a mix (supports "diverse food", HSE-12) | PROPOSED |
 | FOOD-A9 | **Daily eating:** each household consumes its daily need (adults × 1 + children × 0.5 rations) from its larder, whole items first and the leftover fraction carried over. If the larder can't cover the day, the household is **Hungry** that day (FOOD-A2) | DECIDED |
 | FOOD-A10 | Households get food **only from a market** (MKT rules below). Granaries never supply households directly. A household's supply point is the nearest market in range | DECIDED |
-| FOOD-A10b | Start of game: the camp-site works as a small market for the starting stockpile (with the same range rule), so the opening has food before any market is built | PROPOSED |
+| FOOD-A10b | Start of game: the camp-site works as a small market for the starting stockpile (with the same range rule), so the opening has food before any market is built | DECIDED |
 | FOOD-A11 | Larder leftovers carry over; weekly spoilage (FOOD-09) applies to larders as well as stores | PROPOSED |
 
 ### Markets (arrive with food, MVP-2)
@@ -140,14 +140,16 @@ Markets are how food reaches households, so they arrive together with food.
 | --- | --- | --- |
 | MKT-01 | A village can have several markets. A household's supply point is the nearest market whose range covers it (ECO-11) | DECIDED |
 | MKT-02 | The player **links** granaries (later also storage yards) to markets, choosing which stores feed which market (LOG-02 / LGS-08 "linked only") | DECIDED |
-| MKT-03 | Placing a market (a drawn area) is **free**. Inside it the player builds **stalls**. A tier 1 stall is a rudimentary table costing **2 planks** (no roof cover yet) | DECIDED (cost PLACEHOLDER) |
-| MKT-03b | Stalls are staffed by **granary families**: each family assigned to a granary linked to the market staffs one stall, as a whole family. The same family also hauls goods from production buildings (e.g. a bakery) to its granary (INV-A8). A granary family with no stall built only hauls | DECIDED |
-| MKT-03c | During the week the stall family restocks its stall from its granary. On Sunday, households collect from stalls. A stall can only hand out what is on it, so **stall capacity limits how many households a market can serve** (capacity PLACEHOLDER). Stall families work on Sundays (exception to the rest day) | PROPOSED |
+| MKT-03 | Placing a market (a drawn area) is **free** and has no requirements. A tier 1 stall is a rudimentary table (no roof cover). Its final cost is 2 planks; **until planks exist it costs 1 log** (placeholder, like HSE-23) | DECIDED (cost PLACEHOLDER) |
+| MKT-03b | Stalls are staffed by **store families**: each family assigned to a granary or storage yard that is set to supply a market gets **one stall** at that market, staffed by the whole family. Assigning the family queues the stall as an ordinary construction site in free space inside the market area. The same family also hauls goods from production buildings (e.g. a bakery) to its store (INV-A8) | DECIDED (auto-placement PROPOSED) |
+| MKT-03c | **Stalls never draw straight from a store's stock.** The stall family physically carries goods from its store to its stall during the week (food by hand, INV-12). On Sunday, households collect only what is on the stalls. So how many households a market can feed **emerges** from: the number of stall families, the distance from store to market, and walking time. Fixes for a hungry market: more store families, a store closer to the market, or a market closer to the store | DECIDED |
+| MKT-03d | Each stall carries a **mix** of goods from its store: different foods from a granary; from storage yards later linen, clothes, shoes and fuel (charcoal, dried firewood) | DECIDED |
+| MKT-03e | Hand-carry capacity per trip is a tuning value (start: 10 items) and is now a key throughput number. Stall families work on Sundays (exception to the rest day) | PLACEHOLDER |
+| MKT-03f | Future: a **pack station** (depot) where goods are moved in bulk as a buffer between distant stores and markets | DECIDED (future) |
 | MKT-04 | Market upgrade (later): fabric covers (needs linen), families assigned directly to the market instead of via a granary, more stalls in total | OPEN (idea) |
 | MKT-04b | Tier 3 idea: a travelling or moving market for remote towns | OPEN (idea) |
 | MKT-05 | Households outside every market's range **get nothing** from the allotment. In practice players build homes in range of a market | DECIDED (may change) |
 | MKT-06 | Market range is a walking distance along paths and roads, held in data (start: 630 m ≈ half a game day's walk at current tuning). The range is shown as an overlay of reachable ground when placing or selecting a market | DECIDED (value PLACEHOLDER) |
 | MKT-07 | Design intent: towns end up with several markets, e.g. a large central market in the main town with advanced goods (where higher-level artisan households live), and satellite village markets with basic goods only. Satellite villages don't need high household levels | DECIDED (intent) |
-| MKT-08 | What each stall sells, stall capacity, number of stalls, market sizes or tiers | OPEN |
-| MKT-10 | Planks don't exist until the sawpit (MVP-4), but stalls need them in MVP-2. Either the start includes a few planks, or MVP-2 stalls cost logs as a placeholder (like HSE-23 houses) | OPEN |
+| MKT-08 | Stall table capacity (if any), how the mix on a stall is chosen, market sizes or tiers | OPEN |
 | MKT-09 | Fallback if the weekly trip doesn't play well: keep the weekly allotment but drop the walk (food appears in larders), or drop the weekly cycle entirely | NOTE |
