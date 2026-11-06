@@ -25,3 +25,5 @@
 *.ogg  binary
 *.ttf  binary
 *.otf  binary
+
+*.lsmap binary
