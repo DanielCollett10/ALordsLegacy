@@ -960,6 +960,7 @@ MonoBehaviour:
   _areas: {fileID: 100002}
   _panel: {fileID: 100051}
   _controller: {fileID: 100047}
+  _topBar: {fileID: 0}
 --- !u!1 &100042
 GameObject:
   m_ObjectHideFlags: 0
@@ -1011,6 +1012,7 @@ MonoBehaviour:
   _areas: {fileID: 100002}
   _panel: {fileID: 100051}
   _controller: {fileID: 100047}
+  _topBar: {fileID: 0}
 --- !u!1 &100045
 GameObject:
   m_ObjectHideFlags: 0
