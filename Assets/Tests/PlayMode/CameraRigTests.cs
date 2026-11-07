@@ -72,6 +72,56 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [Test]
+        public void OrbitChangesYawAndPitchButNotFocusDistance()
+        {
+            _rig.SetPose(500, 500, 60, 50, 20);
+            float d0 = _rig.FocusDistance();
+            Vector3 f0 = _rig.FocusPoint();
+            _rig.Orbit(30f, -10f);
+            Assert.AreEqual(50f, _rig.YawDeg, 0.01f);
+            Assert.AreEqual(40f, _rig.PitchDeg, 0.01f);
+            Assert.AreEqual(d0, _rig.FocusDistance(), d0 * 0.01f);
+            Assert.AreEqual(0f, Vector2.Distance(new Vector2(f0.x, f0.z), new Vector2(_rig.FocusPoint().x, _rig.FocusPoint().z)), 0.5f);
+            AssertValid();
+        }
+
+        [Test]
+        public void OrbitPitchIsLimited()
+        {
+            _rig.SetPose(500, 500, 60, 50, 0);
+            _rig.Orbit(0, -500f);
+            Assert.AreEqual(_rig.MinOrbitPitch, _rig.PitchDeg, 0.01f);
+            _rig.Orbit(0, 500f);
+            Assert.AreEqual(_rig.MaxOrbitPitch, _rig.PitchDeg, 0.01f);
+        }
+
+        [Test]
+        public void TiltingTowardsAHillKeepsCameraAboveGround()
+        {
+            foreach (float yaw in new[] { 0f, 90f, 180f, 270f })
+            {
+                _rig.SetPose(300, 300, 8, 80, yaw);
+                for (int i = 0; i < 80; i++) { _rig.Orbit(0, -1f); AssertValid(); }
+                for (int i = 0; i < 80; i++) { _rig.Orbit(2f, 1f); AssertValid(); }
+            }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator QAndEDoNothing()
+        {
+            var kb = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+            _rig.SetPose(300, 300, 50, 50, 10);
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Q, UnityEngine.InputSystem.Key.E));
+            for (int i = 0; i < 5; i++) yield return null;
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.RemoveDevice(kb);
+            Assert.AreEqual(10f, _rig.YawDeg, 0.001f);
+            Assert.AreEqual(50f, _rig.PitchDeg, 0.001f);
+        }
+
+        [Test]
         public void RotateWrapsYaw()
         {
             _rig.SetPose(100, 100, 50, 45, 350);

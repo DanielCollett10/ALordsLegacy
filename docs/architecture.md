@@ -193,7 +193,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Holds no tool rules. Placed in the Game
   scene by `GameSceneGenerator.CreateRoadTool`.
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
-- Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
+- Camera (`CameraRig` on Main Camera): pan, scroll zoom and middle-drag orbit (yaw + tilt around the ground point at screen centre, pitch 10-85 degrees, camera held above terrain + clearance) over the terrain. Q/E and right mouse are not camera inputs. Reads ground height from the Sim
   terrain, not from the collider.
 - Cursor ground readout (`Assets/Game/Picking/`): `GroundPicker` casts a ray from the camera (screen position or
   `Ray`) and keeps only the hit's x/z. Height and slope come from `SimHost.World.Terrain` at that x/z, never from the

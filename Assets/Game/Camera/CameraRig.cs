@@ -24,8 +24,14 @@ namespace LordsLegacy.Game
         /// <summary>Pan speed in metres/second per metre of height.</summary>
         public float PanSpeedPerHeight = 1.5f;
         public float MinPanSpeed = 8f;
-        public float RotateSpeedDegPerSec = 90f;
+        /// <summary>Middle-drag yaw, degrees per pixel moved horizontally.</summary>
         public float MouseRotateDegPerPixel = 0.25f;
+        /// <summary>Middle-drag tilt, degrees per pixel moved vertically (drag up tilts towards the horizon).</summary>
+        public float MouseTiltDegPerPixel = 0.2f;
+        /// <summary>Lowest orbit pitch in degrees (closest to the horizon). Default 10.</summary>
+        public float MinOrbitPitch = 10f;
+        /// <summary>Highest orbit pitch in degrees (closest to straight down). Default 85.</summary>
+        public float MaxOrbitPitch = 85f;
         /// <summary>Minimum distance kept between camera and ground.</summary>
         public float GroundMargin = 1.5f;
         /// <summary>Distance kept inside the map edge.</summary>
@@ -101,13 +107,67 @@ namespace LordsLegacy.Game
             Apply();
         }
 
-        /// <summary>Zooms by scroll steps; positive zooms in (lower).</summary>
+        /// <summary>Zooms by scroll steps; positive zooms in (lower). A tilt set by the player is kept.</summary>
         public void Zoom(float steps)
         {
+            float before = Mathf.InverseLerp(MinHeight, MaxHeight, _height);
             _height *= Mathf.Pow(1f - ZoomStep, steps);
             _height = Mathf.Clamp(_height, MinHeight, MaxHeight);
-            float t = Mathf.InverseLerp(MinHeight, MaxHeight, _height);
-            _pitch = Mathf.Lerp(NearPitch, FarPitch, t);
+            float after = Mathf.InverseLerp(MinHeight, MaxHeight, _height);
+            _pitch += Mathf.Lerp(NearPitch, FarPitch, after) - Mathf.Lerp(NearPitch, FarPitch, before);
+            Apply();
+        }
+
+        private Vector3 Forward()
+        {
+            float p = _pitch * Mathf.Deg2Rad, y = _yaw * Mathf.Deg2Rad;
+            return new Vector3(Mathf.Sin(y) * Mathf.Cos(p), -Mathf.Sin(p), Mathf.Cos(y) * Mathf.Cos(p));
+        }
+
+        private float GroundAt(float x, float z) => _terrain != null ? _terrain.HeightAt(x, z) : 0f;
+
+        /// <summary>
+        /// Distance along the view direction from the camera to the Sim terrain (the point under the screen centre),
+        /// found by marching then bisecting. This is the orbit radius.
+        /// </summary>
+        public float FocusDistance()
+        {
+            float h = Mathf.Max(_height, GroundMargin);
+            Vector3 o = new Vector3(_x, GroundAt(_x, _z) + h, _z);
+            Vector3 f = Forward();
+            float lo = 0f, hi = h / Mathf.Max(Mathf.Sin(_pitch * Mathf.Deg2Rad), 0.05f);
+            for (int i = 0; i < 32 && o.y + f.y * hi > GroundAt(o.x + f.x * hi, o.z + f.z * hi); i++) { lo = hi; hi *= 1.5f; }
+            for (int i = 0; i < 24; i++)
+            {
+                float mid = 0.5f * (lo + hi);
+                if (o.y + f.y * mid > GroundAt(o.x + f.x * mid, o.z + f.z * mid)) lo = mid; else hi = mid;
+            }
+            return 0.5f * (lo + hi);
+        }
+
+        /// <summary>Ground point under the screen centre.</summary>
+        public Vector3 FocusPoint()
+        {
+            float d = FocusDistance();
+            Vector3 f = Forward();
+            float x = _x + f.x * d, z = _z + f.z * d;
+            return new Vector3(x, GroundAt(x, z), z);
+        }
+
+        /// <summary>
+        /// Orbits around the ground point under the screen centre at constant distance: yaw turns, pitch tilts
+        /// (positive tilts down). Pitch is limited; the camera is held above the terrain and inside the map.
+        /// </summary>
+        public void Orbit(float deltaYawDeg, float deltaPitchDeg)
+        {
+            float d = FocusDistance();
+            Vector3 pivot = FocusPoint();
+            _yaw = Mathf.Repeat(_yaw + deltaYawDeg, 360f);
+            _pitch = Mathf.Clamp(_pitch + deltaPitchDeg, MinOrbitPitch, MaxOrbitPitch);
+            Vector3 f = Forward();
+            _x = pivot.x - f.x * d;
+            _z = pivot.z - f.z * d;
+            _height = Mathf.Clamp(pivot.y - f.y * d - GroundAt(_x, _z), GroundMargin, MaxHeight);
             Apply();
         }
 
@@ -145,12 +205,14 @@ namespace LordsLegacy.Game
                     if (p.y <= ScreenEdgePixels) f -= 1; else if (p.y >= Screen.height - ScreenEdgePixels) f += 1;
                 }
                 if (r != 0 || f != 0) Move(Mathf.Clamp(r, -1, 1), Mathf.Clamp(f, -1, 1), dt);
-                float rot = (kb.eKey.isPressed ? 1 : 0) - (kb.qKey.isPressed ? 1 : 0);
-                if (rot != 0) Rotate(rot * RotateSpeedDegPerSec * dt);
             }
             if (mouse != null)
             {
-                if (AcceptsMouseButton(2) && mouse.middleButton.isPressed) Rotate(mouse.delta.ReadValue().x * MouseRotateDegPerPixel);
+                if (AcceptsMouseButton(2) && mouse.middleButton.isPressed)
+                {
+                    Vector2 md = mouse.delta.ReadValue();
+                    if (md != Vector2.zero) Orbit(md.x * MouseRotateDegPerPixel, -md.y * MouseTiltDegPerPixel);
+                }
                 float scroll = mouse.scroll.ReadValue().y;
                 if (scroll != 0) Zoom(scroll / ScrollUnitsPerStep);
             }
