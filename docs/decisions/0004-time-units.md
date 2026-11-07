@@ -12,7 +12,8 @@ pace (how many game minutes pass per real second) will keep being tuned (TIME-08
 - Every speed in data is in **metres per game minute**.
 - The real-time pace is a single tuning value, **`RealMinutesPerGameDayAt1x`**
   (default 15, TIME-A2). Everything else (game minutes per real second = 1440 ÷ (value × 60),
-  i.e. 1.6 at 15) is derived from it. Only the Unity layer's tick pacer uses it.
+  i.e. 1.6 at 15) is derived from it. Only the Sim's `TickPacer` uses it, via
+  `SimTuning.GameMinutesPerRealSecondAt1x` (decision 0006 puts the pacer in `Assets/Sim/Time`).
 
 **Consequences.** Retuning the pace never changes Sim code. Speeds that should *look*
 real at 1× are derived once in the tuning data: at 1.6 game min per real second, walking at

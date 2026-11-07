@@ -28,6 +28,8 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 - Calendar: 365 days, game starts 1 March, Year 1, 06:00. Seasons are meteorological:
   Spring Mar–May, Summer Jun–Aug, Autumn Sep–Nov, Winter Dec–Feb. Top bar shows
   e.g. `14 Mar · Spring · Year 1 · 08:40`. (PROPOSED)
+  > Implementation note: the top bar also shows the weekday first, e.g. `Sun 14 Mar · Spring · Year 1 · 08:40`
+  > (`GameTime.Format`). The weekday matters for the Sunday rest rule (FOOD-A4). Owner to confirm the format.
 - Days per year and game minutes per real second are tuning values, not code. (DECIDED)
 - Year rollover: the year number increments on 1 January; Year 1 is a short year starting
   1 Mar. DayOfYear is counted from 1 Jan (1 Mar = day 60). No leap years. (DECIDED)
