@@ -74,7 +74,16 @@ namespace LordsLegacy.Game.Tools
         /// <summary>Sets the view settings (snapping on/off and distance). Without them the top bar's, or defaults (snapping on, 12 px).</summary>
         public void SetViewSettings(ViewSettings settings) { _settings = settings; }
 
-        private ViewSettings Settings => _settings ?? (_topBar != null ? _topBar.ViewSettings : (_settings = new ViewSettings()));
+        private ViewSettings Settings
+        {
+            get
+            {
+                if (_settings != null) return _settings;
+                // Unwired scene: use the top bar's shared settings so the Snapping toggle still works.
+                if (_topBar == null) _topBar = FindFirstObjectByType<TopBarController>();
+                return _topBar != null ? _topBar.ViewSettings : (_settings = new ViewSettings());
+            }
+        }
 
         /// <inheritdoc />
         public void Activate()

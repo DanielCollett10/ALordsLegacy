@@ -284,12 +284,12 @@ namespace LordsLegacy.Tests.PlayMode
 
             // Snapping off: a first click a few pixels off the road is placed where it was clicked.
             _tool.SetViewSettings(new ViewSettings { Snapping = false });
-            _tool.PointerDown(PressButton.Left, end); _tool.PointerUp(PressButton.Left, end, _time += 2f);
-            Assert.Greater(System.Math.Abs(_tool.Points[0].ZMetres - 100.0), 0.5, "No snapping when off.");
-            Click(60, 140);
-            var near = Screen(80, 100) + new Vector2(0f, 6f);
-            _tool.PointerDown(PressButton.Left, near); _tool.PointerUp(PressButton.Left, near, _time += 2f);
-            Assert.Greater(System.Math.Abs(_tool.Points[2].ZMetres - 100.0), 0.5, "Placed points do not snap when off.");
+            // 4 m off the road is outside its 2.5 m drawn width at any screen size, but would be inside a 12 px snap
+            // radius on a small view; with snapping off it must be placed where clicked.
+            Click(40, 104);
+            Assert.AreEqual(104.0, _tool.Points[0].ZMetres, 0.5, "No snapping when off.");
+            Click(80, 104);
+            Assert.AreEqual(104.0, _tool.Points[1].ZMetres, 0.5, "Placed points do not snap when off.");
         }
 
         [UnityTest]
