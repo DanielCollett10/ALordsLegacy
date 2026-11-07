@@ -55,12 +55,44 @@ namespace LordsLegacy.Sim.Roads
             List<PlannedJunction> junctions = PlanJunctions(samples, others, widthMm, lengthM, cuts);
 
             RoadRefusal reason = RoadRefusal.Valid;
+            string crossedName = "";
             if (outside) reason = RoadRefusal.OutsideMap;
             else if (ranges.Count > 0) reason = RoadRefusal.TooSteep;
             else if (selfCross) reason = RoadRefusal.CrossesItself;
             else if (Overlaps(samples, others, junctions, cuts, widthMm)) reason = RoadRefusal.OverlapsRoad;
+            else
+            {
+                Areas.AreaRecord crossed = FindCrossedBuildingArea(world, samples, typeId);
+                if (crossed != null) { reason = RoadRefusal.CrossesArea; crossedName = crossed.Name; }
+            }
 
-            return new RoadPreview(samples, ranges, junctions, lengthM, maxGrade, reason);
+            return new RoadPreview(samples, ranges, junctions, lengthM, maxGrade, reason, crossedName);
+        }
+
+        // RD-13: the lowest-id building area whose overlap with the new corridor exceeds the tolerance, or null.
+        // Work areas are never in the building grid, so they never block roads.
+        private static Areas.AreaRecord FindCrossedBuildingArea(SimWorld world, IReadOnlyList<PointMm> samples, string typeId)
+        {
+            if (world.Areas.Count == 0) return null;
+            PointMm[] corridor = new RoadSegment(0, 0, 0, typeId, CurveKind.CatmullRomCentripetal,
+                new PointMm[0], ToArray(samples)).CorridorPolygon();
+            if (corridor.Length < 3) return null;
+            BoundsMm b = Polygons.Bounds(corridor);
+            Areas.AreaRecord best = null;
+            foreach (Areas.AreaRecord a in world.Areas.QueryOverlapCandidates(b))
+            {
+                if (best != null && a.Id >= best.Id) continue;
+                if (!a.Bounds.Intersects(b)) continue;
+                if (PolygonOverlap.Overlaps(corridor, a.Polygon, world.Tuning.OverlapToleranceM2)) best = a;
+            }
+            return best;
+        }
+
+        private static PointMm[] ToArray(IReadOnlyList<PointMm> pts)
+        {
+            var a = new PointMm[pts.Count];
+            for (int i = 0; i < a.Length; i++) a[i] = pts[i];
+            return a;
         }
 
         private static List<InvalidRange> CheckGrade(SimWorld world, IReadOnlyList<PointMm> samples, double maxGrade, out double worst)
