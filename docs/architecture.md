@@ -43,6 +43,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
   min distance). Predicates are exact; distances are double mm.
+  `SpatialGrid<T>` (decision 0012, GEO-16) is a uniform-grid index over `BoundsMm` with a cell size in metres
+  (rounded to mm, `SimTuning.SpatialIndexCellM` is the value to pass). `Insert(item, bounds)`, `Remove(item)`
+  (false if unknown), `QueryRect(bounds)` and `QueryPoint(point)` return each item once, in ascending insertion
+  order; edges are inclusive. Items are stored in every cell their bounds touch. Not yet used by any system.
 - `Assets/Sim/Roads/` (`LordsLegacy.Sim.Roads`, decision 0013):
   - Types: `RoadTypes` (code-built list; `road.dirt_path`: 2.5 m, 15% max grade) of `RoadTypeDef`. The speed
     multiplier is stored but nothing reads it.
