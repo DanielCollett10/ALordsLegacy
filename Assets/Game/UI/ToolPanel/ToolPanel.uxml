@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="tool-panel-root" class="tool-panel-root" picking-mode="Ignore">
+        <ui:VisualElement name="tool-panel" class="tool-panel">
+            <ui:VisualElement class="tool-panel__text">
+                <ui:Label name="tool-panel-status" class="tool-panel__status" text="" />
+                <ui:Label name="tool-panel-hint" class="tool-panel__hint" text="" />
+            </ui:VisualElement>
+            <ui:Button name="tool-panel-cancel" class="tool-panel__button tool-panel__button--cancel" text="Cancel" />
+            <ui:Button name="tool-panel-confirm" class="tool-panel__button tool-panel__button--confirm" text="Confirm" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
