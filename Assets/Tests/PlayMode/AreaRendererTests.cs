@@ -115,7 +115,10 @@ namespace LordsLegacy.Tests.PlayMode
 
         private static bool HasColor(Mesh mesh, Color c)
         {
-            foreach (var col in mesh.colors) if (col == c) return true;
+            // Mesh vertex colours are stored as 8-bit, so compare with a tolerance, not Color ==.
+            foreach (var col in mesh.colors)
+                if (Mathf.Abs(col.r - c.r) < 0.01f && Mathf.Abs(col.g - c.g) < 0.01f &&
+                    Mathf.Abs(col.b - c.b) < 0.01f && Mathf.Abs(col.a - c.a) < 0.01f) return true;
             return false;
         }
     }
