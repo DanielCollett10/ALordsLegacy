@@ -24,8 +24,8 @@ namespace LordsLegacy.Game
             return new[]
             {
                 new ToolEntry("road", "Road", true),
-                new ToolEntry("test-area", "Test area", false),
-                new ToolEntry("test-work-area", "Test work area", false),
+                new ToolEntry("test-area", "Test area", true),
+                new ToolEntry("test-work-area", "Test work area", true),
                 new ToolEntry("woodcutting", "Woodcutting", false, "Coming later"),
                 new ToolEntry("storage-yard", "Storage yard", false, "Coming later"),
                 new ToolEntry("house", "House", false, "Coming later"),

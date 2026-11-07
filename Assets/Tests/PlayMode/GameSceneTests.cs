@@ -105,6 +105,13 @@ namespace LordsLegacy.Tests.PlayMode
             var tool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.RoadTool>();
             Assert.IsNotNull(tool, "RoadTool missing.");
             AssertNoNullRefs(tool);
+
+            var areaRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.AreaRenderer>();
+            Assert.IsNotNull(areaRenderer, "AreaRenderer missing.");
+            AssertNoNullRefs(areaRenderer);
+            var areaTools = Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None);
+            Assert.AreEqual(2, areaTools.Length, "Test area and Test work area tools expected.");
+            foreach (var t in areaTools) AssertNoNullRefs(t);
         }
 
         [UnityTest]
