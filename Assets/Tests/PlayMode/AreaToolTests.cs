@@ -357,6 +357,103 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _host.World.Areas.Count);
         }
 
+        private void Drag(Vector2 from, Vector2 to)
+        {
+            _tool.PointerDown(PressButton.Left, from);
+            _tool.PointerMove(Vector2.Lerp(from, to, 0.5f));
+            _tool.PointerMove(to);
+            _tool.PointerUp(PressButton.Left, to, _time += 2f);
+        }
+
+        private void FourSquare() { Click(40, 40); Click(80, 40); Click(80, 80); Click(40, 80); }
+
+        private void DrawEastWestRoad()
+        {
+            Assert.IsTrue(_host.Execute(new DrawRoad(
+                new[] { PointMm.FromMetres(20, 100), PointMm.FromMetres(180, 100) }, "road.dirt_path")).IsAccepted);
+        }
+
+        [UnityTest]
+        public IEnumerator ClickOnEdgeInsertsPointThereUpToMax()
+        {
+            yield return Setup();
+            FourSquare();
+            Click(50, 40); // on edge 0, away from its handle at (60, 40)
+            Assert.AreEqual(5, _tool.PointCount);
+            Assert.AreEqual(50.0, _tool.Points[1].XMetres, 0.5);
+            Assert.AreEqual(40.0, _tool.Points[1].ZMetres, 0.5);
+            Assert.AreEqual(80.0, _tool.Points[2].XMetres, 0.5, "Later points shift up by one.");
+            Click(72, 40); Click(80, 50); Click(80, 74);
+            Assert.AreEqual(8, _tool.PointCount);
+            int before = _tool.PointCount;
+            Click(40, 60);
+            Assert.AreEqual(before, _tool.PointCount, "No insert beyond the maximum.");
+        }
+
+        [UnityTest]
+        public IEnumerator DraggingHandleBendsEdgeThroughCursorAndDoubleClickStraightens()
+        {
+            yield return Setup();
+            FourSquare();
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind);
+            Drag(Screen(60, 40), Screen(60, 28));
+            Assert.AreEqual(4, _tool.PointCount, "Dragging a handle adds no point.");
+            Assert.AreEqual(AreaEdgeKind.Bent, _tool.Edges[0].Kind);
+            Assert.AreEqual(28.0, _tool.Edges[0].Handle.ZMetres, 0.5);
+            double min = double.MaxValue;
+            foreach (var p in _tool.CurrentPreview.Polygon)
+                min = System.Math.Min(min, p.DistanceTo(PointMm.FromMetres(60, 28)));
+            Assert.Less(min, 1500.0, "The flattened outline passes through the cursor.");
+
+            var h = Screen(60, 28);
+            _tool.PointerDown(PressButton.Left, h); _tool.PointerUp(PressButton.Left, h, _time += 2f);
+            Assert.AreEqual(AreaEdgeKind.Bent, _tool.Edges[0].Kind, "A single click on a handle does nothing.");
+            _tool.PointerDown(PressButton.Left, h); _tool.PointerUp(PressButton.Left, h, _time += 0.1f);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(0, _host.World.Areas.Count, "Straightening does not close the shape.");
+        }
+
+        [UnityTest]
+        public IEnumerator SnappedVerticesOnSameRoadSideMakeEdgeFollowRoad()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            Click(60, 100.9f); Click(140, 100.9f); Click(140, 150); Click(60, 150);
+            var seg = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
+            double sideZ = seg.SideLine(_tool.Edges[0].Side)[0].ZMetres;
+            Assert.AreEqual(100.0 + (sideZ > 100 ? 1.25 : -1.25), _tool.Points[0].ZMetres, 0.01, "Point snapped to the side line.");
+            Assert.AreEqual(AreaEdgeKind.FollowsRoad, _tool.Edges[0].Kind);
+            Assert.AreEqual(seg.Id, _tool.Edges[0].SegmentId);
+            for (int i = 1; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoad, _tool.Edges[i].Kind);
+        }
+
+        [UnityTest]
+        public IEnumerator SnappingOffNothingSnapsAndNoEdgeFollowsRoad()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            Click(60, 100.9f); Click(140, 100.9f); Click(140, 150); Click(60, 150);
+            Assert.AreEqual(100.9, _tool.Points[0].ZMetres, 0.05, "No snapping to the road side.");
+            for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoad, _tool.Edges[i].Kind);
+        }
+
+        [UnityTest]
+        public IEnumerator SnapsToAreaVertexWithinSnapDistance()
+        {
+            yield return Setup();
+            _tool.SetViewSettings(new ViewSettings());
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(), AreaTypes.TestId)).IsAccepted);
+            Click(40.3f, 40.3f);
+            Assert.AreEqual(PointMm.FromMetres(40, 40), _tool.Points[0]);
+            _panel.ClickCancel();
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            Click(40.3f, 40.3f);
+            Assert.AreNotEqual(PointMm.FromMetres(40, 40), _tool.Points[0]);
+        }
+
         [Test]
         public void BuildBarEnablesBothAreaEntries()
         {
