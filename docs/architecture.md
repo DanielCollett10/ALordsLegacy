@@ -40,6 +40,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   every Add or Remove, so views rebuild only when it changes. `Count`, `All` and the queries show standing trees only.
   `TreeClearing` (static) removes the trees under a polygon (`RemoveInPolygon`) or within a distance of a polyline
   (`RemoveNearPolyline`), using geo-1 on trunk positions rounded to mm; both return the removed ids sorted.
+- `Assets/Sim/Areas/` (`LordsLegacy.Sim.Areas`, decision 0014): `AreaTypeDef`/`AreaTypes` (`area.test` Building,
+  `area.test_work` Work; limits per `tuning.md`), `AreaShape` (vertices plus one `AreaEdge` per vertex: Straight,
+  Bent with an on-curve handle, FollowsRoad with segment id and `RoadSide`) and `AreaFlattener.Flatten(shape, roads)`,
+  which gives a CCW `PointMm` polygon: bent edges are quadratics sampled every `CurveFlattenSpacingM`, road edges copy
+  the road side line between the vertices' nearest positions, a missing segment falls back to Straight.
+  `RoadSegment.SideLine(side)` (half-width offset of the samples; Left is left of NodeA→NodeB) and `CorridorPolygon()`
+  (CCW) support this. Not built yet: validation, the area registry, commands, tree clearing on confirm.
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
   min distance), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
