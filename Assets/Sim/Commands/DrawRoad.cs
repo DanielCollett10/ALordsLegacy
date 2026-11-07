@@ -136,7 +136,8 @@ namespace LordsLegacy.Sim.Commands
             {
                 case RoadRefusal.UnknownType:
                 case RoadRefusal.NotEnoughPoints: return CommandRejectCode.InvalidArgument;
-                case RoadRefusal.OverlapsRoad: return CommandRejectCode.Conflict;
+                case RoadRefusal.OverlapsRoad:
+                case RoadRefusal.CrossesArea: return CommandRejectCode.Conflict;
                 default: return CommandRejectCode.NotAllowed;
             }
         }

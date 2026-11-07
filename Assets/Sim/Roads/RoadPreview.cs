@@ -20,6 +20,8 @@ namespace LordsLegacy.Sim.Roads
         CrossesItself = 5,
         /// <summary>The corridor overlaps another road away from a junction (RD-09).</summary>
         OverlapsRoad = 6,
+        /// <summary>The corridor overlaps a building area by more than the tolerance (RD-13); see <see cref="RoadPreview.CrossedAreaName"/>.</summary>
+        CrossesArea = 7,
     }
 
     /// <summary>How a new road meets an existing one.</summary>
@@ -98,14 +100,20 @@ namespace LordsLegacy.Sim.Roads
                     case RoadRefusal.TooSteep: return "too steep";
                     case RoadRefusal.CrossesItself: return "crosses itself";
                     case RoadRefusal.OverlapsRoad: return "overlaps road";
+                    case RoadRefusal.CrossesArea: return "crosses " + CrossedAreaName;
                     default: return string.Empty;
                 }
             }
         }
 
+        /// <summary>Name of the building area crossed when <see cref="Reason"/> is CrossesArea; otherwise empty.</summary>
+        public string CrossedAreaName { get; }
+
         internal RoadPreview(IReadOnlyList<PointMm> samples, IReadOnlyList<InvalidRange> ranges,
-            IReadOnlyList<PlannedJunction> junctions, double lengthM, double maxGrade, RoadRefusal reason)
+            IReadOnlyList<PlannedJunction> junctions, double lengthM, double maxGrade, RoadRefusal reason,
+            string crossedAreaName = "")
         {
+            CrossedAreaName = crossedAreaName ?? string.Empty;
             Samples = samples; InvalidRanges = ranges; Junctions = junctions;
             LengthM = lengthM; MaxGrade = maxGrade; Reason = reason;
         }

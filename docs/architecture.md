@@ -93,7 +93,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   - `SimWorld.Execute(cmd)` runs validate-then-apply immediately, works while paused, never changes `Tick`, and appends
     every call (accepted or rejected) to `CommandLog`. A rejected command changes nothing. Unity calls it only through `SimHost`.
 - Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/`, which compiles the same `Assets/Sim/**/*.cs`.
-- Not built yet: areas (M4), tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data)
+- Area commands (`Assets/Sim/Commands/`): `DesignateArea(shape, typeId)` re-runs `AreaValidator`; if valid it adds the
+  area through `AreaRegistry` and, for types with `ClearsTrees` (building kinds), removes the trees inside the
+  flattened outline (ids in `CommandResult.RemovedTreeIds`; the new area id is in `Created`). `DeleteArea(areaId)`
+  removes it (unknown id → `NotFound`); trees do not return. Both work while paused. `RoadValidator` has a last check
+  after "overlaps road": a corridor overlapping a building area by more than `OverlapToleranceM2` is refused with
+  `RoadRefusal.CrossesArea` ("crosses <name>", `RoadPreview.CrossedAreaName`; `DrawRoad` rejects as `Conflict`).
+  Work areas are not in the building index so never block roads. With no areas the road checks are unchanged.
+- Not built yet: areas in the Unity layer (M4), tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data)
   describes future work with no code.
 
 ## Map pipeline
