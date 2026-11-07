@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Visuals.VisualRegistry
   definitions:
   - {fileID: 11400000, guid: 7164540fd3db1ef4c8b0caf403992af4, type: 2}
+  - {fileID: 11400000, guid: 2b4bc47e9c8d71d47acfde32f34bb268, type: 2}
