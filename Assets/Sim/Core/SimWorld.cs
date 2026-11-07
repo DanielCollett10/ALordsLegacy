@@ -3,6 +3,7 @@ using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Terrain;
 using LordsLegacy.Sim.Tuning;
 
@@ -40,6 +41,9 @@ namespace LordsLegacy.Sim.Core
 
         /// <summary>All trees. Never null; empty when built without a map.</summary>
         public TreeRegistry Trees { get; }
+
+        /// <summary>The road graph. Never null; empty at the start.</summary>
+        public RoadNetwork Roads { get; } = new RoadNetwork();
 
         /// <summary>Builds a world whose terrain and trees come from baked map data.</summary>
         public static SimWorld FromMapData(MapData map, SimTuning tuning)
