@@ -185,6 +185,7 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(tool, "_roads", rr);
             SetRef(tool, "_panel", panel);
             SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            SetRef(tool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             return go;
         }
 

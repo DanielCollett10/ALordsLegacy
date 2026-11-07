@@ -169,6 +169,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `GroundPicker.TryWorldToScreen`) and a drag (`PressTracker`) moves that point live; the preview follows. Backspace
   removes the last point. A double click replaces the point its first click added with one final point at the cursor, then confirms.
   `GameSceneGenerator.CreateRoadTool` adds `RoadRenderer`, `ToolPanel` and `RoadTool` to the scene; the tool registers itself with `ToolController`.
+  T-102: `RoadTool` reads `ViewSettings` (top bar, or `SetViewSettings`). Snapping on: clicks and drags snap to a road end, then a centre line,
+  within `SnapDistancePx` (`RoadNetwork.FindNearest` + `SnapPicker`, screen distance of the hit). Snapping off: no snapping, except that a
+  no-draft click on the road's drawn width starts a branch from the centre line (T-junction made by `DrawRoad`). With no draft, a right
+  click (not a drag) on a road sends `DeleteRoadSegment` for the hit segment; on empty ground nothing happens.
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
 - Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
   terrain, not from the collider.

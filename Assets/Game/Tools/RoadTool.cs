@@ -28,7 +28,9 @@ namespace LordsLegacy.Game.Tools
         [SerializeField] private GroundPicker _picker;
         [SerializeField] private RoadRenderer _roads;
         [SerializeField] private ToolPanelView _panel;
+        [SerializeField] private TopBarController _topBar;
 
+        private ViewSettings _settings;
         private readonly List<PointMm> _points = new List<PointMm>();
         private readonly PressTracker _press = new PressTracker();
         [SerializeField] private ToolController _controller;
@@ -67,6 +69,20 @@ namespace LordsLegacy.Game.Tools
             if (_subscribed) Unsubscribe();
             _host = host; _picker = picker; _roads = roads; _panel = panel; _controller = controller;
             if (_active) Subscribe();
+        }
+
+        /// <summary>Sets the view settings (snapping on/off and distance). Without them the top bar's, or defaults (snapping on, 12 px).</summary>
+        public void SetViewSettings(ViewSettings settings) { _settings = settings; }
+
+        private ViewSettings Settings
+        {
+            get
+            {
+                if (_settings != null) return _settings;
+                // Unwired scene: use the top bar's shared settings so the Snapping toggle still works.
+                if (_topBar == null) _topBar = FindFirstObjectByType<TopBarController>();
+                return _topBar != null ? _topBar.ViewSettings : (_settings = new ViewSettings());
+            }
         }
 
         /// <inheritdoc />
@@ -127,7 +143,11 @@ namespace LordsLegacy.Game.Tools
             _dragIndex = -1;
             _lastReleaseAddedPoint = false;
             if (r.Kind == PressKind.None || r.Kind == PressKind.Drag) return;
-            if (button == PressButton.Right) { if (HasDraft) ClearDraft(); return; }
+            if (button == PressButton.Right)
+            {
+                if (HasDraft) ClearDraft(); else DeleteRoadUnder(r.EndPosition);
+                return;
+            }
             if (r.Kind == PressKind.DoubleClick)
             {
                 FinishWithDoubleClick(r.EndPosition, previousClickAddedPoint);
@@ -194,11 +214,61 @@ namespace LordsLegacy.Game.Tools
             return hit.Kind == ToolHitKind.Vertex ? hit.Id : -1;
         }
 
+        /// <summary>Metres per screen pixel near the position (0 if unknown).</summary>
+        private double MetresPerPixel(Vector2 screenPos, GroundSample g)
+        {
+            if (!_picker.TryPickScreen(screenPos + Vector2.right, out var g2) || !g2.HasValue) return 0;
+            double dx = g2.X - g.X, dz = g2.Z - g.Z;
+            return System.Math.Sqrt(dx * dx + dz * dz);
+        }
+
+        /// <summary>
+        /// Finds the road feature under the cursor. Snapping on: radius is SnapDistancePx, ends before centre lines
+        /// (RoadNetwork.FindNearest + SnapPicker). Snapping off: only the drawn road width counts, so a click on a road
+        /// still hits it (roads.md steps 5-6) but nothing near it snaps.
+        /// </summary>
+        private bool TryHitRoad(Vector2 screenPos, GroundSample g, out RoadHit hit)
+        {
+            hit = RoadHit.None;
+            if (_host == null || !_host.IsInitialized || _picker == null) return false;
+            double mpp = MetresPerPixel(screenPos, g);
+            if (mpp <= 0) return false;
+            double pxLimit = Settings.Snapping
+                ? Settings.SnapDistancePx
+                : RoadTypes.Find(RoadTypes.DirtPathId).WidthM * 0.5 / mpp;
+            double maxMm = pxLimit * mpp * 1000.0 * 1.5 + 1;
+            var h = _host.World.Roads.FindNearest(PointMm.FromMetres(g.X, g.Z), maxMm);
+            if (h.Kind == RoadHitKind.None) return false;
+            if (!_picker.TryWorldToScreen((float)h.Point.XMetres, (float)h.Point.ZMetres, out var hs)) return false;
+            var cand = new List<SnapCandidate> { new SnapCandidate((int)h.Kind, h.SegmentId, (hs - screenPos).magnitude) };
+            var order = new[] { (int)RoadHitKind.End, (int)RoadHitKind.Line };
+            if (!SnapPicker.TryPick(cand, order, (float)pxLimit, true, out _)) return false;
+            hit = h;
+            return true;
+        }
+
+        /// <summary>The point for a click or drag: the snapped road point when snapping applies, else the ground point.</summary>
+        private bool TryResolvePoint(Vector2 screenPos, out PointMm point)
+        {
+            point = default;
+            if (_picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return false;
+            point = PointMm.FromMetres(s.X, s.Z);
+            // Snapping off: only a click on the road itself with no draft starts a branch.
+            if ((Settings.Snapping || !HasDraft) && TryHitRoad(screenPos, s, out var hit)) point = hit.Point;
+            return true;
+        }
+
+        private void DeleteRoadUnder(Vector2 screenPos)
+        {
+            if (_host == null || _picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
+            if (!TryHitRoad(screenPos, s, out var hit)) return;
+            _host.Execute(new DeleteRoadSegment(hit.SegmentId));
+        }
+
         private void MoveDraggedPoint(Vector2 screenPos)
         {
             if (_dragIndex < 0 || _dragIndex >= _points.Count) return;
-            if (_picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
-            var p = PointMm.FromMetres(s.X, s.Z);
+            if (!TryResolvePoint(screenPos, out var p)) return;
             if (p == _points[_dragIndex]) return;
             _points[_dragIndex] = p;
             _rejection = null;
@@ -207,8 +277,8 @@ namespace LordsLegacy.Game.Tools
 
         private bool AddPointAt(Vector2 screenPos)
         {
-            if (_picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return false;
-            _points.Add(PointMm.FromMetres(s.X, s.Z));
+            if (!TryResolvePoint(screenPos, out var p)) return false;
+            _points.Add(p);
             _rejection = null;
             Refresh();
             return true;
