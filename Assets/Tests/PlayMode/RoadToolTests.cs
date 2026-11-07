@@ -255,6 +255,87 @@ namespace LordsLegacy.Tests.PlayMode
             yield return null;
         }
 
+        private void DrawExisting(float x1, float z1, float x2, float z2)
+        {
+            var r = _host.Execute(new LordsLegacy.Sim.Commands.DrawRoad(
+                new[] { LordsLegacy.Sim.Geometry.PointMm.FromMetres(x1, z1), LordsLegacy.Sim.Geometry.PointMm.FromMetres(x2, z2) },
+                RoadTypes.DirtPathId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+        }
+
+        [UnityTest]
+        public IEnumerator SnapOnSnapsToRoadEndAndLineSnapOffDoesNot()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 120, 100);
+            // 60 px = 12 px snap distance at ~1.0 px/m? use a few pixels off the end (and the line).
+            var end = Screen(40, 100) + new Vector2(0f, 5f);
+            _tool.SetViewSettings(new ViewSettings { Snapping = true });
+            _tool.PointerDown(PressButton.Left, end); _tool.PointerUp(PressButton.Left, end, _time += 2f);
+            Assert.AreEqual(40.0, _tool.Points[0].XMetres, 0.01, "Snaps to the road end.");
+            Assert.AreEqual(100.0, _tool.Points[0].ZMetres, 0.01);
+            _tool.Cancel();
+
+            var line = Screen(80, 100) + new Vector2(0f, 6f);
+            _tool.PointerDown(PressButton.Left, line); _tool.PointerUp(PressButton.Left, line, _time += 2f);
+            Assert.AreEqual(80.0, _tool.Points[0].XMetres, 1.0);
+            Assert.AreEqual(100.0, _tool.Points[0].ZMetres, 0.01, "Snaps onto the centre line.");
+            _tool.Cancel();
+
+            // Snapping off: a first click a few pixels off the road is placed where it was clicked.
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            _tool.PointerDown(PressButton.Left, end); _tool.PointerUp(PressButton.Left, end, _time += 2f);
+            Assert.Greater(System.Math.Abs(_tool.Points[0].ZMetres - 100.0), 0.5, "No snapping when off.");
+            Click(60, 140);
+            var near = Screen(80, 100) + new Vector2(0f, 6f);
+            _tool.PointerDown(PressButton.Left, near); _tool.PointerUp(PressButton.Left, near, _time += 2f);
+            Assert.Greater(System.Math.Abs(_tool.Points[2].ZMetres - 100.0), 0.5, "Placed points do not snap when off.");
+        }
+
+        [UnityTest]
+        public IEnumerator BranchFromRoadCreatesJunction()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 120, 100);
+            Assert.AreEqual(1, _host.World.Roads.SegmentCount);
+            var p = Screen(80, 100) + new Vector2(0f, 4f);
+            _tool.PointerDown(PressButton.Left, p); _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            Assert.AreEqual(1, _tool.PointCount);
+            Assert.AreEqual(100.0, _tool.Points[0].ZMetres, 0.01, "First point is on the road centre line.");
+            Click(80, 150);
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            _tool.Confirm();
+            Assert.IsFalse(_tool.HasDraft);
+            Assert.AreEqual(3, _host.World.Roads.SegmentCount, "Original split in two plus the branch.");
+            int any = -1, other = -1;
+            foreach (var s in _host.World.Roads.Segments)
+            {
+                if (any < 0) any = s.Id; else other = s.Id;
+            }
+            Assert.IsTrue(_host.World.Roads.AreConnected(any, other));
+        }
+
+        [UnityTest]
+        public IEnumerator RightClickDeletesOneSegmentRightDragAndEmptyGroundDoNot()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 120, 100);
+            DrawExisting(40, 160, 120, 160);
+            Assert.AreEqual(2, _host.World.Roads.SegmentCount);
+
+            var on = Screen(80, 100);
+            _tool.PointerDown(PressButton.Right, on);
+            _tool.PointerMove(on + new Vector2(30f, 0f));
+            _tool.PointerUp(PressButton.Right, on + new Vector2(30f, 0f), _time += 2f);
+            Assert.AreEqual(2, _host.World.Roads.SegmentCount, "Right drag deletes nothing.");
+
+            Click(80, 130, PressButton.Right);
+            Assert.AreEqual(2, _host.World.Roads.SegmentCount, "Empty ground does nothing.");
+
+            Click(80, 100, PressButton.Right);
+            Assert.AreEqual(1, _host.World.Roads.SegmentCount, "Exactly one segment deleted.");
+        }
+
         [UnityTest]
         public IEnumerator DoubleClickAddsExactlyOnePointAndConfirms()
         {
