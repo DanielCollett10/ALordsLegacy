@@ -38,6 +38,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateTreeRenderer(host, cam);
             CreateGroundPicker(host, cam);
             var topBar = CreateTopBar(host);
+            CreateBuildBar();
             CreateGroundReadout();
             CreateDebugOverlay(host);
             CreateSunController(host, light, topBar);
@@ -151,6 +152,18 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(c, "_host", host);
             SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/TopBar/TopBar.uss"));
             return c;
+        }
+
+        /// <summary>Adds the build bar UIDocument and the ToolController wired to it and the camera rig.</summary>
+        public static GameObject CreateBuildBar()
+        {
+            var go = CreateUiDocument("BuildBar", "Assets/Game/UI/BuildBar/BuildBar.uxml");
+            var view = go.AddComponent<BuildBarView>();
+            SetRef(view, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/BuildBar/BuildBar.uss"));
+            var tools = new GameObject("ToolController").AddComponent<LordsLegacy.Game.Tools.ToolController>();
+            SetRef(tools, "_bar", view);
+            SetRef(tools, "_camera", Object.FindFirstObjectByType<CameraRig>());
+            return go;
         }
 
         /// <summary>Adds the cursor ground readout UIDocument and view.</summary>
