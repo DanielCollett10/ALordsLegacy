@@ -12,7 +12,7 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
     /// is idle it picks its next trip: <see cref="RepeatTripShare"/> (80%) go to the other end of their pair
     /// (home if they are not at work), the rest go to a random target 50 to 1,500 m away. After arriving the
     /// agent dwells <see cref="DwellTicks"/>. Starts are staggered over <see cref="StaggerTicks"/> so the first
-    /// tick is not a burst. Optional pair-path cache: repeat trips between the two ends reuse the first path.
+    /// tick is not a burst. Path queries go through the planner (T-010: batched; its optional (start, end) cache serves repeat trips).
     /// Seeded and deterministic; timing is never read back into state.
     /// </summary>
     public sealed class SpikeTripCrowd
@@ -36,17 +36,15 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
         private readonly SpikePathPlanner _planner;
         private readonly SpikeCostGrid _grid;
         private readonly SpikeRng _rng;
-        private readonly bool _cachePairPaths;
         private readonly int[] _homeX, _homeZ, _workX, _workZ;
         private readonly SpikeWalker[] _walkers;
         private readonly int[] _pairOf;
         private readonly Place[] _place;
         private readonly bool[] _tripEndsAtPair;
         private readonly int[] _dwell;
-        private readonly Dictionary<int, IReadOnlyList<CellRef>> _cache = new Dictionary<int, IReadOnlyList<CellRef>>();
 
         /// <summary>Creates the pairs and agents (all at home) from <paramref name="seed"/>.</summary>
-        public SpikeTripCrowd(SpikePathPlanner planner, int agentCount, ulong seed, bool cachePairPaths = false)
+        public SpikeTripCrowd(SpikePathPlanner planner, int agentCount, ulong seed)
         {
             if (planner == null) throw new ArgumentNullException(nameof(planner));
             if (agentCount < 1) throw new ArgumentOutOfRangeException(nameof(agentCount));
@@ -54,7 +52,6 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
             _planner = planner;
             _grid = planner.Grid;
             _rng = new SpikeRng(seed);
-            _cachePairPaths = cachePairPaths;
 
             PairCount = Math.Max(1, agentCount / AgentsPerPair);
             _homeX = new int[PairCount];
@@ -93,9 +90,6 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
         /// <summary>Trips chosen as random-target trips.</summary>
         public long RandomTrips { get; private set; }
 
-        /// <summary>Repeat trips served from the pair-path cache (no A*).</summary>
-        public long CacheHits { get; private set; }
-
         /// <summary>The agents' walkers, by agent index.</summary>
         public IReadOnlyList<SpikeWalker> Walkers => _walkers;
 
@@ -110,13 +104,17 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
         {
             RepeatTrips = 0;
             RandomTrips = 0;
-            CacheHits = 0;
         }
 
-        /// <summary>Advances every agent one tick.</summary>
+        /// <summary>
+        /// Advances every agent one tick in three phases: walk/dwell and choose trips (agent order, all RNG use here),
+        /// run the queued path queries as one batch (<see cref="SpikePathPlanner.Execute"/>), then apply the results
+        /// in agent order. Same outcome for any planner parallelism or cache setting.
+        /// </summary>
         public void Tick()
         {
             float cell = _grid.CellSize;
+            _planner.BeginBatch();
             for (int i = 0; i < _walkers.Length; i++)
             {
                 SpikeWalker w = _walkers[i];
@@ -135,44 +133,48 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
                     _dwell[i]--;
                     continue;
                 }
-                if (!StartTrip(i, w)) _dwell[i] = 1;
+                if (!ChooseTrip(i, w)) _dwell[i] = 1;
+            }
+
+            _planner.Execute();
+
+            for (int n = 0; n < _planner.BatchCount; n++)
+            {
+                SpikePlanRequest r = _planner.Request(n);
+                int i = r.Tag >> 2;
+                bool repeat = (r.Tag & 1) != 0;
+                bool toWork = (r.Tag & 2) != 0;
+                if (!r.Found)
+                {
+                    _dwell[i] = 1;
+                    continue;
+                }
+                if (repeat)
+                {
+                    RepeatTrips++;
+                    _place[i] = toWork ? Place.Work : Place.Home;
+                    _tripEndsAtPair[i] = true;
+                }
+                else
+                {
+                    RandomTrips++;
+                    _tripEndsAtPair[i] = false;
+                }
             }
         }
 
-        private bool StartTrip(int i, SpikeWalker w)
+        private bool ChooseTrip(int i, SpikeWalker w)
         {
             int p = _pairOf[i];
             if (_rng.NextFloat() < RepeatTripShare)
             {
                 bool toWork = _place[i] == Place.Home;
-                int gx = toWork ? _workX[p] : _homeX[p];
-                int gz = toWork ? _workZ[p] : _homeZ[p];
-                if (!PlanRepeat(i, w, p, toWork, gx, gz)) return false;
-                RepeatTrips++;
-                _place[i] = toWork ? Place.Work : Place.Home;
-                _tripEndsAtPair[i] = true;
+                _planner.Add(w, toWork ? _workX[p] : _homeX[p], toWork ? _workZ[p] : _homeZ[p], (i << 2) | 1 | (toWork ? 2 : 0));
                 return true;
             }
 
             if (!PickRandomTarget(w, out int rx, out int rz)) return false;
-            if (!_planner.Plan(w, rx, rz)) return false;
-            RandomTrips++;
-            _tripEndsAtPair[i] = false;
-            return true;
-        }
-
-        private bool PlanRepeat(int i, SpikeWalker w, int pair, bool toWork, int gx, int gz)
-        {
-            bool atPairEnd = _place[i] != Place.Elsewhere;
-            int key = pair * 2 + (toWork ? 1 : 0);
-            if (_cachePairPaths && atPairEnd && _cache.TryGetValue(key, out IReadOnlyList<CellRef> cached))
-            {
-                w.SetPath(cached);
-                CacheHits++;
-                return true;
-            }
-            if (!_planner.Plan(w, gx, gz)) return false;
-            if (_cachePairPaths && atPairEnd) _cache[key] = w.Path;
+            _planner.Add(w, rx, rz, i << 2);
             return true;
         }
 
