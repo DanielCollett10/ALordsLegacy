@@ -26,7 +26,7 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 - Invalid reasons are also labelled in the world near the problem when the tool can tell where it is
   (e.g. the red stretch of a too-steep road, or the overlapped area).
 
-> Implementation note (panel visibility): the road tool shows the panel whenever it is active, with an idle hint
+> Implementation note (panel visibility): the road tool and both area tools show the panel whenever they are active, with an idle hint
 > ("Road · no points yet"). That matches `roads.md` ("the tool panel shows while the tool is active") but not the
 > sentence above ("shown only while a tool has a draft"). Owner to pick one.
 >
@@ -50,7 +50,7 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Escape | cancel the draft, or leave the tool | same |
 | Alt (press) | toggle snapping on/off | same |
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
-| Middle-drag | camera orbit: turn and tilt (tilt from M5) | same |
+| Middle-drag | camera orbit: turn and tilt | same |
 
 Game pause and speed are unchanged by tools. Drawing works while paused.
 
@@ -73,11 +73,11 @@ never on a right press or drag. Right-drag is kept free for a possible later use
 | UIK-01 | Game UI buttons (top bar, build bar, tool panel) never take keyboard focus. Clicking them must not leave a focused element | DECIDED |
 | UIK-02 | Keyboard UI navigation (WASD, arrows, Tab) is off in game. Camera and tool keys must never change UI selection (bug: A/D cycled the speed buttons) | DECIDED |
 
-## Camera controls (planned, milestone M5)
+## Camera controls (milestone M5, in code)
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| CAM-A1 | **Middle-drag orbits** the camera around the ground point under the screen centre, at the current zoom distance: horizontal drag turns (yaw), vertical drag tilts (pitch) down towards the ground or up towards the horizon, within pitch limits. Today middle-drag only turns; this adds tilt | DECIDED |
+| CAM-A1 | **Middle-drag orbits** the camera around the ground point under the screen centre, at the current zoom distance: horizontal drag turns (yaw), vertical drag tilts (pitch) down towards the ground or up towards the horizon, within pitch limits. Middle-drag turns and tilts (in code) | DECIDED |
 | CAM-A2 | **Scroll** zooms as now: in = down towards the ground, out = up | DECIDED |
 | CAM-A3 | The camera never goes below the ground (Sim terrain height + clearance) or outside the map, while orbiting, tilting, zooming or panning. If a tilt would push it into a hill, it is held above the ground | DECIDED |
 | CAM-A4 | **Q/E rotation is removed.** Q and E are left free (no binding) for now | DECIDED |

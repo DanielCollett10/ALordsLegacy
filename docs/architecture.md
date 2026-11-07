@@ -17,8 +17,8 @@ the section it belongs to; the section headings below are fixed and keep this or
 _Owner: the task that changes the Sim core. Other tasks do not edit this section._
 
 - `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) is the root and owns all game state: the tick clock, pause,
-  `Terrain` (`IHeightField`), `Trees` (`TreeRegistry`), `Roads` (`RoadNetwork`) and `CommandLog`. The last three
-  are never null. Build it with `new SimWorld(tuning)` (flat ground, no trees) or `SimWorld.FromMapData(map, tuning)`.
+  `Terrain` (`IHeightField`), `Trees` (`TreeRegistry`), `Roads` (`RoadNetwork`), `Areas` (`AreaRegistry`) and `CommandLog`. All are
+  never null. Build it with `new SimWorld(tuning)` (flat ground, no trees) or `SimWorld.FromMapData(map, tuning)`.
   **One tick = one game minute.** `Step(n)` advances `Tick` by n and does nothing while `Paused`; `Pause()` and
   `Resume()` set it. `Now` is the `GameTime` for the current tick. The Sim has no notion of real seconds.
 - `Assets/Sim/Time/` (namespace `LordsLegacy.Sim.Calendar`, to avoid clashing with `UnityEngine.Time`):
@@ -30,8 +30,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     and sets `SlowedDown`. `Reset()` clears the carry (the host calls it while paused). No pause state (decision 0006).
 - `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the balancing numbers. Read by code today: pace,
   speeds, start date, daylight, standard log length, road sample spacing, road minimum point spacing, road tree
-  clearance. Defined but read by nothing yet: walk and ox speed, trunk length range, starting oxen, rest-day switch,
-  curve flattening, slope grid, overlap tolerance, spatial index cell (the area values; see `tuning.md`). Food,
+  clearance, and the area values (curve flattening, slope grid, overlap tolerance, spatial index cell). Defined but
+  read by nothing yet: walk and ox speed, trunk length range, starting oxen, rest-day switch (see `tuning.md`). Food,
   market, construction and population numbers are not in code yet. The Sim never hard-codes these.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
@@ -52,10 +52,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   (Vertex/Edge, vertices preferred; edge index is the shape edge, measured on the flattened outline).
   `RoadSegment.SideLine(side)` (half-width offset of the samples; Left is left of NodeA→NodeB) and `CorridorPolygon()`
   (CCW) support this. `AreaValidator.Validate(world, shape, typeId)` is pure and returns an `AreaPreview` (flattened polygon, m²,
-  point count, `AreaRefusal`). Shape checks only, in order: point count, FollowsRoad vertices within 5 cm of the road
-  side ("not on road"; a missing segment also fails), edges cross (repeated shape points or non-simple outline), outside
-  the map (any flattened point), size. Placement checks (slope, overlap, road crossing) are not built yet, nor are
-  commands or tree clearing on confirm.
+  point count, `AreaRefusal`, overlapped area name). Checks in order: point count, FollowsRoad vertices within 5 cm of
+  the road side ("not on road"; a missing segment also fails), edges cross (repeated shape points or non-simple
+  outline), outside the map (any flattened point), size. Building kinds then run `AreaPlacementChecks` (internal):
+  slope (AR-14), overlap with another building area (AR-15), road corridor crossing (AR-16). Work kinds stop after size.
+  `DesignateArea` and `DeleteArea` are in `Commands/` (see below).
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
   min distance), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
@@ -63,7 +64,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `SpatialGrid<T>` (decision 0012, GEO-16) is a uniform-grid index over `BoundsMm` with a cell size in metres
   (rounded to mm, `SimTuning.SpatialIndexCellM` is the value to pass). `Insert(item, bounds)`, `Remove(item)`
   (false if unknown), `QueryRect(bounds)` and `QueryPoint(point)` return each item once, in ascending insertion
-  order; edges are inclusive. Items are stored in every cell their bounds touch. Not yet used by any system.
+  order; edges are inclusive. Items are stored in every cell their bounds touch. Used only by `AreaRegistry` (building-area bounds).
+  `PolygonOverlap.Overlaps` is the tolerance overlap test (decision 0012).
 - `Assets/Sim/Roads/` (`LordsLegacy.Sim.Roads`, decision 0013):
   - Types: `RoadTypes` (code-built list; `road.dirt_path`: 2.5 m, 15% max grade) of `RoadTypeDef`. The speed
     multiplier is stored but nothing reads it.
@@ -77,7 +79,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `ReachableSegmentCount`.
   - `RoadValidator.Validate(world, controlPoints, typeId, ignoreSegmentId = -1)` is pure. It samples the curve and
     returns a `RoadPreview` (samples, `InvalidRanges`, `PlannedJunction`s in order along the road, length, max grade,
-    `RoadRefusal`). Refusal order: outside map, too steep, crosses itself, overlaps road. Junction kinds: `T`, `X`,
+    `RoadRefusal`). Refusal order: outside map, too steep, crosses itself, overlaps road, crosses area (last; building areas only). Junction kinds: `T`, `X`,
     `JoinNode`. The tool preview and `DrawRoad` both call it.
   - `RoadCutter` (internal) cuts a new road's samples and control points at its junctions.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
@@ -100,7 +102,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   after "overlaps road": a corridor overlapping a building area by more than `OverlapToleranceM2` is refused with
   `RoadRefusal.CrossesArea` ("crosses <name>", `RoadPreview.CrossedAreaName`; `DrawRoad` rejects as `Conflict`).
   Work areas are not in the building index so never block roads. With no areas the road checks are unchanged.
-- Not built yet: areas in the Unity layer (M4), tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data)
+- Not built yet: tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data)
   describes future work with no code.
 
 ## Map pipeline
@@ -160,6 +162,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   samples, the type width and the Sim terrain height + 0.05 m. `Sync()` (every frame) rebuilds only when
   `RoadNetwork.Version` changes: new segments get meshes, removed ones are destroyed. `ShowPreview(RoadPreview, width)`
   draws the draft as one mesh, red where `InvalidRanges` apply. No colliders (decision 0016).
+- Areas (`AreaRenderer`, `Assets/Game/Visuals/`): one child object per confirmed area (tinted fill plus outline, draped
+  on Sim terrain; building areas solid, work areas dashed blue), built from the flattened polygon. Rebuilt when
+  `AreaRegistry.Version` changes. `ShowPreview(AreaPreview, AreaShape)` draws the draft (vertex dots, edge handles,
+  red when invalid); `HidePreview()` hides it. Colours are constants in the class, not `VisualDefinition`s. No colliders.
 - No DOTS/ECS code yet. Rendering is `Graphics.RenderMeshInstanced` and MonoBehaviours (decision 0002 is still provisional).
 - Sun and sky (`Assets/Game/Lighting/`): `SunLightModel` is pure maths (Sim `GameTime` + `Daylight` → elevation,
   azimuth, colour, intensity). `SunLightController` writes the result to the directional light and ambient in
@@ -176,7 +182,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 - Tools (`Assets/Game/Tools/`):
   - `ITool` (Id, HasDraft, Activate, Deactivate, Cancel, HandleEscape). `ToolController` keeps exactly one active tool:
     `Register(tool)`, `Toggle(id)` (second click deactivates; switching cancels and deactivates the old tool),
-    `HandleEscape()` (tool first, deactivate only if it returns false), `IsPointerOverUi(At)`. It sets
+    `HandleEscape()` (tool first, deactivate only if it returns false), `IsPointerOverUi` / `IsPointerOverUiAt(screenPos)`. It sets
     `CameraRig.ToolActive`; the rig then refuses left/right mouse (`AcceptsMouseButton`), middle/scroll/keys/edge pan unchanged.
   - `RoadTool` (id `road`, registers itself in `OnEnable`) holds only draft points. It calls `RoadValidator` for the preview
     and `SimHost.Execute` for `DrawRoad` and `DeleteRoadSegment`. Holds no road rules. Rules: roads.md; input: ui.md.
@@ -188,7 +194,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     edge via `AreaRegistry.FindNearestSnap`) within `SnapDistancePx`; two consecutive points snapped to the same road side
     make that edge FollowsRoad. Snapping off: no snap, no FollowsRoad.
 - Build bar (`BuildBarView`, `Assets/Game/UI/BuildBar/`, UXML/USS): non-focusable buttons built from `ToolEntry.Defaults()`
-  (Road enabled; the rest greyed, future ones tooltip "Coming later"). Raises `ToolClicked`.
+  (Road, Test area and Test work area enabled; the rest greyed, tooltip "Coming later"). Raises `ToolClicked`.
 - Tool panel (`ToolPanelView`, `Assets/Game/UI/ToolPanel/`, UXML/USS): status line, hint line, Cancel/Confirm.
   `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Holds no tool rules. Placed in the Game
   scene by `GameSceneGenerator.CreateRoadTool`.
@@ -230,6 +236,9 @@ Road drawing, as an example: `RoadTool` gets a click, snaps it (`RoadNetwork.Fin
 it to the draft. `RoadValidator.Validate` gives a preview for `RoadRenderer.ShowPreview`. Confirm sends `DrawRoad` through
 `SimHost.Execute`; the Sim validates, splits and adds segments, and clears trees. The next `RoadRenderer.Sync` sees the
 new `RoadNetwork.Version` and builds meshes for the new segments only.
+
+Area drawing follows the same path: `AreaTool` previews with `AreaValidator.Validate`, confirm sends `DesignateArea`
+through `SimHost.Execute` (which also clears trees), and `AreaRenderer.Sync` sees the new `AreaRegistry.Version`.
 
 ## Scene
 

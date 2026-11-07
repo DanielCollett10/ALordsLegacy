@@ -70,10 +70,6 @@ Where they live: per-type values (road width, max grade, area points, m², max s
 spacing, slope sample grid, overlap tolerance, spatial index cell) are in `SimTuning`. Snap distance is a
 presentation value in `ViewSettings`.
 
-> Implementation note (spatial index cell and area values, decision 0012): `SimTuning.SpatialIndexCellM` (32) is not
-> read. `TreeRegistry` uses its own grid (16 m, constructor default). Curve flattening, slope grid and overlap
-> tolerance are also unread: they belong to the area tasks (M4), and `AreaTypeDef` does not exist yet.
-
 ## Population and oxen
 
 | Value | Default | Unit | Rule |
