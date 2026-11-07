@@ -32,7 +32,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the balancing numbers defined so far. Defaults are
   auto-properties; derived values are computed properties. Read by code today: pace, speeds, start date, daylight,
   standard log length. Defined but not yet read by any system: walk and ox speed, trunk length range, starting oxen,
-  rest-day switch. The Sim never hard-codes these. Food, markets, construction and population numbers from
+  rest-day switch. Road and area shared values (`RoadSampleSpacingM`, `RoadMinPointSpacingM`, `RoadTreeClearanceM`,
+  `CurveFlattenSpacingM`, `SlopeSampleGridM`, `OverlapToleranceM2`, `SpatialIndexCellM`) are defined, read by roads/areas
+  (not built yet). The Sim never hard-codes these. Food, markets, construction and population numbers from
   `docs/design/tuning.md` are not in code yet.
 - Not built yet: tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data) describes
   future work with no code.
