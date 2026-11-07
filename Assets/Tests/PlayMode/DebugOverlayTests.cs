@@ -1,7 +1,10 @@
 using System.IO;
 using LordsLegacy.Game;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Forestry;
+using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
@@ -70,6 +73,54 @@ namespace LordsLegacy.Tests.PlayMode
             StringAssert.IsMatch(@"^Ticks/s \d+\.\d+$", view.TextOf(DebugOverlayView.TpsName));
 
             SaveScreenshot();
+        }
+
+        [Test]
+        public void OverlayShowsRoadCountsAndSegmentUnderCursor()
+        {
+            _hostGo = new GameObject("SimHost");
+            var host = _hostGo.AddComponent<SimHost>();
+            host.AutoUpdate = false;
+            host.Initialize(new SimTuning(), SyntheticMap.CreateRamp());
+            // A straight road through the ground point the camera looks at, (100,100).
+            var road = host.Execute(new DrawRoad(new[] { PointMm.FromMetres(60, 100), PointMm.FromMetres(140, 100) },
+                RoadTypes.DirtPathId));
+            Assert.IsTrue(road.IsAccepted, "Test road was rejected.");
+            int segId = (int)road.Created[0];
+            var seg = host.World.Roads.GetSegment(segId);
+            Assert.IsNotNull(seg);
+
+            _camGo = new GameObject("Cam");
+            _camGo.transform.SetPositionAndRotation(new Vector3(100f, 300f, 100f), Quaternion.Euler(90f, 0f, 0f));
+            var cam = _camGo.AddComponent<Camera>();
+            _groundGo = new GameObject("Ground");
+            _groundGo.transform.position = new Vector3(500f, -0.5f, 500f);
+            _groundGo.AddComponent<BoxCollider>().size = new Vector3(2000f, 1f, 2000f);
+            Physics.SyncTransforms();
+            _pickGo = new GameObject("Picker");
+            var picker = _pickGo.AddComponent<GroundPicker>();
+            picker.PickCamera = cam;
+            picker.Host = host;
+
+            _uiGo = new GameObject("DebugOverlay");
+            _uiGo.SetActive(false);
+            _uiGo.AddComponent<UIDocument>().panelSettings = LoadPanel();
+            var view = _uiGo.AddComponent<DebugOverlayView>();
+            view.Live = false;
+            view.Picker = picker;
+            view.Host = host;
+            _uiGo.SetActive(true);
+
+            view.SetVisible(true);
+            view.RefreshStats(60f);
+            view.InspectScreen(new Vector2(cam.pixelWidth * 0.5f, cam.pixelHeight * 0.5f));
+
+            Assert.AreEqual("Road nodes 2", view.TextOf(DebugOverlayView.RoadNodesName));
+            Assert.AreEqual("Road segments 1", view.TextOf(DebugOverlayView.RoadSegmentsName));
+            Assert.AreEqual("Road networks 1", view.TextOf(DebugOverlayView.RoadNetworksName));
+            Assert.AreEqual("Segment id " + segId, view.TextOf(DebugOverlayView.SegIdName));
+            Assert.AreEqual("Ends " + seg.NodeA + " " + seg.NodeB, view.TextOf(DebugOverlayView.SegEndsName));
+            Assert.AreEqual("Reachable segments 1", view.TextOf(DebugOverlayView.SegReachName));
         }
 
         private static void SaveScreenshot()
