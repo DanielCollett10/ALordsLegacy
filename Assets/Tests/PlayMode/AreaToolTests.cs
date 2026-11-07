@@ -35,7 +35,7 @@ namespace LordsLegacy.Tests.PlayMode
         {
             foreach (var go in new[] { _hostGo, _rendererGo, _panelGo, _toolGo, _camGo, _groundGo })
                 if (go != null) Object.Destroy(go);
-            if (_panelSettings != null) Object.Destroy(_panelSettings);
+            _panelSettings = null; // shared asset: never destroy
         }
 
         private IEnumerator Setup(string toolId = AreaTool.TestToolId, string typeId = AreaTypes.TestId)
@@ -68,7 +68,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             _panelGo = new GameObject("ToolPanel");
             _panelGo.SetActive(false);
-            _panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+            _panelSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/Game/UI/PanelSettings.asset");
             _panelGo.AddComponent<UIDocument>().panelSettings = _panelSettings;
             _panel = _panelGo.AddComponent<ToolPanelView>();
             _panelGo.SetActive(true);
@@ -227,12 +227,10 @@ namespace LordsLegacy.Tests.PlayMode
         {
             yield return Setup();
             Click(40, 40); Click(80, 40); Click(80, 80);
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
-            yield return null;
+            // Keyboard events are not delivered while the Game view is unfocused, so call what the key calls.
+            _tool.RemoveLastPoint();
             Assert.AreEqual(2, _tool.PointCount);
             Assert.AreEqual(80.0, _tool.Points[1].XMetres, 0.5);
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
-            yield return null;
         }
 
         [UnityTest]
@@ -301,6 +299,9 @@ namespace LordsLegacy.Tests.PlayMode
         public IEnumerator InvalidReasonShownAndConfirmBlocked()
         {
             yield return Setup();
+            // Zoom in so points 2 m apart are further apart than the 12 px hit radius at any Game view size.
+            _camGo.transform.position = new Vector3(41f, 50f, 41f);
+            _cam.orthographicSize = 1.5f;
             Click(40, 40); Click(42, 40); Click(42, 42); Click(40, 42); // 4 m², too small
             Assert.IsFalse(_tool.CurrentPreview.IsValid);
             StringAssert.Contains("too small", _panel.Status);

@@ -34,7 +34,7 @@ namespace LordsLegacy.Tests.PlayMode
         {
             foreach (var go in new[] { _hostGo, _rendererGo, _panelGo, _toolGo, _camGo, _groundGo })
                 if (go != null) Object.Destroy(go);
-            if (_panelSettings != null) Object.Destroy(_panelSettings);
+            _panelSettings = null; // shared asset: never destroy
         }
 
         private IEnumerator Setup(MapData map)
@@ -67,7 +67,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             _panelGo = new GameObject("ToolPanel");
             _panelGo.SetActive(false);
-            _panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+            _panelSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/Game/UI/PanelSettings.asset");
             _panelGo.AddComponent<UIDocument>().panelSettings = _panelSettings;
             _panel = _panelGo.AddComponent<ToolPanelView>();
             _panelGo.SetActive(true);
