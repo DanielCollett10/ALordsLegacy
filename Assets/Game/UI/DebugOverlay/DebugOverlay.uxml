@@ -13,5 +13,9 @@
         <ui:Label name="debug-seg-id" text="Segment id --" />
         <ui:Label name="debug-seg-ends" text="Ends -- --" />
         <ui:Label name="debug-seg-reach" text="Reachable segments --" />
+        <ui:Label name="debug-area-count" text="Areas --" />
+        <ui:Label name="debug-area-name" text="Area --" />
+        <ui:Label name="debug-area-type" text="Type --" />
+        <ui:Label name="debug-area-m2" text="Area -- m²" />
     </ui:VisualElement>
 </ui:UXML>

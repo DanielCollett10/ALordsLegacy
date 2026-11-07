@@ -115,6 +115,31 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM4AreaToolsAndOverlayWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var renderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.AreaRenderer>();
+            Assert.IsNotNull(renderer, "AreaRenderer missing.");
+            AssertNoNullRefs(renderer);
+
+            var ids = new System.Collections.Generic.List<string>();
+            foreach (var t in Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None))
+                ids.Add(t.Id);
+            ids.Sort(System.StringComparer.Ordinal);
+            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId }, ids);
+
+            // The overlay's area labels are in the UXML the generator wires (T-116).
+            var overlay = Object.FindFirstObjectByType<DebugOverlayView>();
+            Assert.IsNotNull(overlay, "DebugOverlayView missing.");
+            Assert.AreEqual("Areas --", overlay.TextOf(DebugOverlayView.AreaCountName), "Area count label missing from the overlay.");
+            Assert.AreEqual("Area --", overlay.TextOf(DebugOverlayView.AreaNameName), "Area name label missing from the overlay.");
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneInitialisesSimFromBakedMap()
         {
             var load = SceneManager.LoadSceneAsync("Game");

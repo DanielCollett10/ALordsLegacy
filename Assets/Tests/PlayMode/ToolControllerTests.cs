@@ -103,7 +103,8 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void DisabledButtonDoesNothing()
         {
-            _view.Click("test-area");
+            // "house" is greyed out ("Coming later"); test-area is enabled since T-114.
+            _view.Click("house");
             Assert.IsNull(_ctl.ActiveTool);
         }
 
