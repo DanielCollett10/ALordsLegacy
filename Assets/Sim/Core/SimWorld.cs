@@ -1,4 +1,5 @@
 using System;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Forestry;
@@ -45,6 +46,9 @@ namespace LordsLegacy.Sim.Core
         /// <summary>The road graph. Never null; empty at the start.</summary>
         public RoadNetwork Roads { get; } = new RoadNetwork();
 
+        /// <summary>All player areas. Never null; empty at the start.</summary>
+        public AreaRegistry Areas { get; }
+
         /// <summary>Builds a world whose terrain and trees come from baked map data.</summary>
         public static SimWorld FromMapData(MapData map, SimTuning tuning)
         {
@@ -64,6 +68,7 @@ namespace LordsLegacy.Sim.Core
             Tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
             Terrain = terrain;
             Trees = trees;
+            Areas = new AreaRegistry(tuning.SpatialIndexCellM);
             _calendar = new GameCalendar(tuning.StartMonth, tuning.StartDay, tuning.StartHour,
                 tuning.StartMinute, tuning.StartWeekday, tuning.DaysPerYear);
         }
