@@ -1,5 +1,6 @@
 using System;
 using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.Terrain;
@@ -27,6 +28,12 @@ namespace LordsLegacy.Sim.Core
 
         /// <summary>True while the simulation is paused; <see cref="Step"/> does nothing.</summary>
         public bool Paused { get; private set; }
+
+        /// <summary>
+        /// Every command passed to <see cref="Execute"/>, accepted or rejected, with its tick.
+        /// Never null; grows for the life of the world.
+        /// </summary>
+        public CommandLog CommandLog { get; } = new CommandLog();
 
         /// <summary>The ground. Never null; a <see cref="FlatHeightField"/> when built without a map.</summary>
         public IHeightField Terrain { get; }
@@ -69,6 +76,26 @@ namespace LordsLegacy.Sim.Core
             if (ticks < 0) throw new ArgumentOutOfRangeException(nameof(ticks));
             if (Paused) return;
             Tick += ticks;
+        }
+
+        /// <summary>
+        /// Runs a player command now: <see cref="ISimCommand.Validate"/>, then
+        /// <see cref="ISimCommand.Apply"/> only if accepted. Works while paused and never changes
+        /// <see cref="Tick"/>. Every call is appended to <see cref="CommandLog"/> with the current tick.
+        /// A rejected command changes nothing. Decision 0011.
+        /// </summary>
+        /// <param name="command">The command to run. Must not be null.</param>
+        /// <returns>The accepted or rejected result. Never null.</returns>
+        public CommandResult Execute(ISimCommand command)
+        {
+            if (command == null) throw new ArgumentNullException(nameof(command));
+            CommandLog.Append(Tick, command);
+            CommandResult result = command.Validate(this);
+            if (result == null) throw new InvalidOperationException("Validate returned null for " + command.GetType().Name);
+            if (result.IsRejected) return result;
+            result = command.Apply(this);
+            if (result == null) throw new InvalidOperationException("Apply returned null for " + command.GetType().Name);
+            return result;
         }
     }
 }
