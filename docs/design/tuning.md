@@ -57,7 +57,7 @@ changes, recompute these and the market table below.
 | Min distance between road points | 1 | m | RD-02 |
 | Tree clearance beyond road half width | 0.5 | m | RD-11 |
 | Snap distance | 12 | screen pixels (Unity side) | roads.md |
-| Area points | 3–16 | vertices | AR-02 |
+| Area points | 4–8 | vertices | AR-02 |
 | Curve flattening spacing | 1 | m | AR-05 |
 | Test area size / max slope | 100–5,000 / 10 | m² / degrees | AR-13, AR-14 |
 | Test work area size | 100–40,000 | m² | AR-13 |

@@ -111,7 +111,7 @@ Full rules: **`roads.md`**, **`areas.md`** and **`ui.md`** (they win over GDD se
 | WORLD-08-A | The trunk road is **not baked** into the map. Starting roads are ordinary roads created at game start, and the player can delete or reroute them | DECIDED |
 | ROAD-11-A | Right-click on a road in road mode deletes that segment, with no popup. Editing a confirmed road's curve is still later | DECIDED |
 | ROAD-13-A | Road curves pass through the clicked points (Catmull-Rom). A Bézier option may be tried later (decision 0013) | DECIDED |
-| AREA-01-A | Areas are drawn point by point (3 to 16 points, any angles), not dragged as a square. Edges can be bent into curves by dragging their middle. Fixed-footprint buildings (e.g. a stable) are placed as one piece and need no area | DECIDED |
+| AREA-01-A | Areas are drawn point by point (4 to 8 points, any angles; replaces AREA-03's 16), not dragged as a square. Edges can be bent into curves by dragging their middle. Fixed-footprint buildings (e.g. a stable) are placed as one piece and need no area | DECIDED |
 
 ## Population (POP)
 

@@ -7,9 +7,10 @@ below. **Where this file and the GDD disagree, this file wins.** Geometry: decis
 
 1. Click **Test area** (or **Test work area**) on the build bar.
 2. **Left-click** places points one at a time: point 1, point 2 draws a line, point 3 shows a
-   triangle, point 4 a four-sided shape with any angles (not forced square), and so on up to the maximum.
-   The shape closes back to point 1 automatically in the preview.
-3. **Close** the shape with a double-click, **Enter**, a click on point 1, or the panel's **Confirm**.
+   triangle preview (not yet a valid area), point 4 makes a four-sided shape with any angles (not forced
+   square). More points can follow, up to the maximum. The preview closes back to point 1 automatically.
+3. **Close** the shape (only once it has at least 4 points) with a double-click, **Enter**, a click on point 1, or
+   the panel's **Confirm**.
 4. Reshape before confirming:
    - **Drag a point** to move it.
    - **Click on an edge** to insert a point there.
@@ -25,7 +26,7 @@ Reshaping a confirmed area (AREA-11) is later work.
 | ID | Rule | Tag |
 | --- | --- | --- |
 | AR-01 | An area is a closed polygon of **vertices** joined by **edges**. Each edge is *straight*, *bent* (curve) or *follows road* | DECIDED |
-| AR-02 | Points: minimum **3**, maximum **16** per area (from the area type). Only vertices count; curved edges add no points | DECIDED (values PLACEHOLDER) |
+| AR-02 | Points: minimum **4**, maximum **8** per area (from the area type). An area with fewer than 4 points is never complete: no 3-point areas. Only vertices count; bent and road-following edges add no points, so curves are how players get rounder shapes | DECIDED (max PLACEHOLDER, may be lowered after play) |
 | AR-03 | **Bent edge:** a quadratic curve between its two vertices. The handle the player drags lies **on** the curve at its midpoint, so the edge goes through where the mouse is | DECIDED |
 | AR-04 | **Follows road:** with snapping on, when two consecutive vertices snap to the **same side** of the same road segment, the edge between them follows that road side's curve exactly (AREA-05, GEO-14) | DECIDED |
 | AR-05 | For every check the Sim **flattens** the shape into a plain polygon (integer mm): bent edges are sampled every **1 m**, followed road edges use the road side's samples. The flattened outline is stored with the area, so deleting the road later doesn't change the area | DECIDED (spacing PLACEHOLDER) |
