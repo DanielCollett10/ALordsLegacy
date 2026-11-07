@@ -39,7 +39,7 @@ future `ReshapeRoadSegment` command only re-samples and re-validates one segment
 | RD-10 | The whole centre line must be inside the map (refused: "outside the map") | DECIDED |
 | RD-11 | **Trees in the corridor are removed** on confirmation: any tree whose trunk is within half width + **0.5 m** of the centre line. They yield nothing and simply disappear (same rule as BLD-10-A) | DECIDED (MVP; clearance PLACEHOLDER) |
 | RD-12 | **Delete:** right-click removes one **segment** (the stretch between two nodes: road ends or junctions). A node left with no segments is removed. Trees do not come back (no regrowth exists; see `gdd-amendments.md` BLD-10-D) | DECIDED |
-| RD-13 | Roads may not cross building areas or plots (ROAD-08). Checked once areas exist (M4): refused with "crosses <area name>". Work areas don't block roads | DECIDED |
+| RD-13 | Roads may not cross building areas or plots (ROAD-08). Checked: refused with "crosses <area name>". Work areas don't block roads | DECIDED |
 | RD-14 | No pre-placed (baked) trunk road. Any starting road (WORLD-08) is an ordinary road created when the game starts, and the player can delete or reroute it. Not needed in M3 | DECIDED |
 | RD-15 | Commands work while the game is paused | DECIDED |
 
@@ -73,6 +73,9 @@ the map, too steep, crosses itself, overlaps road, crosses area.
   clicking the button; it stays changed until toggled again). Not a hold.
 - Road snap targets (in this order): road ends, points on a road's centre line, and later area vertices
   and area edges (M4). Snap distance: **12 screen pixels** (tool-side only, PLACEHOLDER).
+
+> Implementation note (road snapping to areas): `RoadTool` does not snap to area vertices or area edges yet; only the
+> area tools do (`AreaTool`). Owner to confirm whether the road tool should snap to them.
 
 ## Out of scope for M3
 

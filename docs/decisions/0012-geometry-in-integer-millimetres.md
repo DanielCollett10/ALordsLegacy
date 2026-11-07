@@ -18,8 +18,9 @@ in the tool preview and in the Sim (GEO-02, CMD-02). Floating-point polygon math
 - Curves (road centre lines, bent area edges, road-following edges) are **flattened** into points at fixed spacing
   before any check. Checks only ever see straight segments.
 - Overlap and touching use polygon intersection area with a small tolerance (areas.md AR-15), not exact touching tests.
-- A uniform-grid spatial index (`SpatialGrid`, cell 32 m PLACEHOLDER) holds area outlines and road corridors for
-  "what is here" and "what overlaps this" queries (GEO-16).
+- A uniform-grid spatial index (`SpatialGrid`, cell 32 m PLACEHOLDER) holds the bounds of building areas
+  (`AreaRegistry`) for "what overlaps this" queries (GEO-16). Road corridors are not indexed yet; `CrossesRoad`
+  scans every segment.
 
 **Consequences.** Results are exact and repeatable; tests use whole-mm coordinates. Unity code converts
 `Vector3` to `PointMm` once and never does its own geometry checks.

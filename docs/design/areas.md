@@ -3,8 +3,7 @@
 Implements GDD section 3 (AREA, WORK) and tech spec section 9 (GEO), with the owner decisions
 below. **Where this file and the GDD disagree, this file wins.** Geometry: decision 0012.
 
-> Implementation note (status): nothing in this file is in code yet (M4). There are no area types, area commands or
-> area tool. Decision 0011 names `DesignateArea` and `DeleteArea` as the planned commands.
+Status: built in M4 (see `docs/architecture.md`, Areas). Reshaping a confirmed area is not built.
 
 ## What the player does
 
@@ -23,6 +22,9 @@ below. **Where this file and the GDD disagree, this file wins.** Geometry: decis
 6. With no draft in progress, **right-click on an area of the active tool's kind deletes it**. No popup.
 
 Reshaping a confirmed area (AREA-11) is later work.
+
+> Implementation note (right-click removes a point): `AreaTool` removes the point with no minimum check, so the draft
+> can drop below 4 points; it then shows "too few points" instead of refusing the click. Owner to decide which is right.
 
 ## Rules
 
