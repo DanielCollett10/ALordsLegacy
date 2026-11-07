@@ -20,6 +20,7 @@ namespace LordsLegacy.Game.Tools
         /// <summary>Id matching the build bar entry.</summary>
         public const string ToolId = "road";
 
+        private const string IdleHint = "Left-click the ground to place the first point · Esc leaves the tool";
         private const string DraftHint = "Left-click adds a point · Enter confirms · Right-click or Esc cancels";
 
         [SerializeField] private SimHost _host;
@@ -171,7 +172,10 @@ namespace LordsLegacy.Game.Tools
             _preview = null;
             _rejection = null;
             if (_roads != null) _roads.HidePreview();
-            if (_panel != null) _panel.Hide();
+            if (_panel == null) return;
+            // While the tool is active the panel stays up so the player can see it is waiting for a first click.
+            if (_active) _panel.Show("Road · no points yet", IdleHint, false);
+            else _panel.Hide();
         }
 
         private void Subscribe()

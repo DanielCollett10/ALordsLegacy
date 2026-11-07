@@ -119,8 +119,19 @@ namespace LordsLegacy.Tests.PlayMode
             _tool.Confirm();
             Assert.GreaterOrEqual(_host.World.Roads.SegmentCount, 1);
             Assert.IsFalse(_tool.HasDraft);
-            Assert.IsFalse(_panel.IsShown);
+            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
             Assert.IsNull(_renderer.PreviewMesh);
+        }
+
+        [UnityTest]
+        public IEnumerator PanelShowsAsSoonAsToolIsActive()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            Assert.IsTrue(_panel.IsShown, "Panel should be visible right after clicking Road.");
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+            _controller.Deselect();
+            Assert.IsFalse(_panel.IsShown, "Panel hides when the tool is left.");
         }
 
         [UnityTest]
@@ -164,7 +175,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             Click(60, 120, PressButton.Right);
             Assert.IsFalse(_tool.HasDraft);
-            Assert.IsFalse(_panel.IsShown);
+            StringAssert.Contains("no points", _panel.Status);
             Assert.IsNull(_renderer.PreviewMesh);
         }
 
