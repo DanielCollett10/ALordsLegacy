@@ -1,5 +1,8 @@
+using System;
 using System.Globalization;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Forestry;
+using LordsLegacy.Sim.Geometry;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -40,6 +43,14 @@ namespace LordsLegacy.Game
         public const string SegEndsName = "debug-seg-ends";
         /// <summary>Label element names (road segment under the cursor).</summary>
         public const string SegReachName = "debug-seg-reach";
+        /// <summary>Label element names (area count and the area under the cursor, T-116).</summary>
+        public const string AreaCountName = "debug-area-count";
+        /// <summary>Label element names (area under the cursor).</summary>
+        public const string AreaNameName = "debug-area-name";
+        /// <summary>Label element names (area under the cursor).</summary>
+        public const string AreaTypeName = "debug-area-type";
+        /// <summary>Label element names (area under the cursor).</summary>
+        public const string AreaM2Name = "debug-area-m2";
         private const string RootName = "debug-overlay";
 
         [SerializeField] private GroundPicker _picker;
@@ -52,6 +63,7 @@ namespace LordsLegacy.Game
         private VisualElement _root;
         private Label _fps, _count, _tickMs, _tps, _treeId, _trunk, _logs;
         private Label _roadNodes, _roadSegments, _roadNetworks, _segId, _segEnds, _segReach;
+        private Label _areaCount, _areaName, _areaType, _areaM2;
         private float _fpsSmoothed;
 
         /// <summary>When true, Update toggles on F3, measures FPS and picks under the mouse. Tests set false.</summary>
@@ -100,6 +112,7 @@ namespace LordsLegacy.Game
             _roadNodes.text = "Road nodes " + roads.NodeCount.ToString(c);
             _roadSegments.text = "Road segments " + roads.SegmentCount.ToString(c);
             _roadNetworks.text = "Road networks " + roads.ComponentCount.ToString(c);
+            if (_areaCount != null) _areaCount.text = "Areas " + host.World.Areas.Count.ToString(c);
         }
 
         /// <summary>Finds the tree nearest the ground under a screen position and shows it. Clears the tree labels if none.</summary>
@@ -108,8 +121,9 @@ namespace LordsLegacy.Game
             var picker = _picker != null ? _picker : (_picker = FindFirstObjectByType<GroundPicker>());
             var host = ResolveHost();
             if (picker == null || host == null || !host.IsInitialized
-                || !picker.TryPickScreen(screenPos, out var g)) { ShowTree(null); ShowSegment(null, null); return; }
+                || !picker.TryPickScreen(screenPos, out var g)) { ShowTree(null); ShowSegment(null, null); ShowArea(null); return; }
             InspectRoad(host, g);
+            ShowArea(FindAreaAt(host, g));
             TreeRecord best = null;
             double bestD = double.MaxValue;
             foreach (var t in host.World.Trees.QueryRadius(g.X, g.Z, _treeRadiusM))
@@ -126,6 +140,28 @@ namespace LordsLegacy.Game
             var hit = roads.FindNearest(LordsLegacy.Sim.Geometry.PointMm.FromMetres(g.X, g.Z), _roadRadiusM * 1000.0);
             var seg = hit.Kind == LordsLegacy.Sim.Roads.RoadHitKind.None ? null : roads.GetSegment(hit.SegmentId);
             ShowSegment(seg, roads);
+        }
+
+        /// <summary>The area under a ground point: a building area first, then a work area (Sim lookup, read-only).</summary>
+        private static AreaRecord FindAreaAt(SimHost host, GroundSample g)
+        {
+            var p = PointMm.FromMetres(g.X, g.Z);
+            return host.World.Areas.FindAt(p, AreaKind.Building) ?? host.World.Areas.FindAt(p, AreaKind.Work);
+        }
+
+        private void ShowArea(AreaRecord area)
+        {
+            if (_areaName == null) return;
+            if (area == null)
+            {
+                _areaName.text = "Area --"; _areaType.text = "Type --"; _areaM2.text = "Area -- m²";
+                return;
+            }
+            var type = AreaTypes.Find(area.TypeId);
+            var c = CultureInfo.InvariantCulture;
+            _areaName.text = "Area " + area.Name;
+            _areaType.text = "Type " + (type != null ? type.NamePrefix : area.TypeId);
+            _areaM2.text = "Area " + Math.Abs(Polygons.SignedAreaM2(area.Polygon)).ToString("F0", c) + " m²";
         }
 
         private void ShowSegment(LordsLegacy.Sim.Roads.RoadSegment seg, LordsLegacy.Sim.Roads.RoadNetwork roads)
@@ -181,6 +217,10 @@ namespace LordsLegacy.Game
             _segId = root.Q<Label>(SegIdName);
             _segEnds = root.Q<Label>(SegEndsName);
             _segReach = root.Q<Label>(SegReachName);
+            _areaCount = root.Q<Label>(AreaCountName);
+            _areaName = root.Q<Label>(AreaNameName);
+            _areaType = root.Q<Label>(AreaTypeName);
+            _areaM2 = root.Q<Label>(AreaM2Name);
             SetVisible(Visible);
         }
 
@@ -191,7 +231,8 @@ namespace LordsLegacy.Game
             box.style.top = 48;
             box.style.right = 12;
             foreach (var n in new[] { FpsName, TreeCountName, TickMsName, TpsName, TreeIdName, TreeTrunkName, TreeLogsName,
-                RoadNodesName, RoadSegmentsName, RoadNetworksName, SegIdName, SegEndsName, SegReachName })
+                RoadNodesName, RoadSegmentsName, RoadNetworksName, SegIdName, SegEndsName, SegReachName,
+                AreaCountName, AreaNameName, AreaTypeName, AreaM2Name })
                 box.Add(new Label(n) { name = n });
             root.Add(box);
         }

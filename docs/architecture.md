@@ -202,7 +202,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 - Debug overlay (`Assets/Game/UI/DebugOverlay/`): `DebugOverlayView` (UI Toolkit, F3 toggles) shows FPS, tree count,
   `SimStats` tick ms and ticks/s, the tree nearest the cursor ground point (`TreeRegistry.QueryRadius`), road node,
   segment and network counts, and the road segment under the cursor (`RoadNetwork.FindNearest` within 4 m) with its
-  end nodes and reachable segment count. Read-only; one named label per value (`debug-*`, `debug-road-*`, `debug-seg-*`).
+  end nodes and reachable segment count. Also shows the area count (`AreaRegistry.Count`) and the area under the cursor
+  (building area first, then work area, via `AreaRegistry.FindAt` on the ground point): name, type name and m² from the
+  flattened polygon (`debug-area-count`, `debug-area-name`, `debug-area-type`, `debug-area-m2`; "Area --" when none).
+  Read-only; one named label per value (`debug-*`, `debug-road-*`, `debug-seg-*`).
 - Visuals (`LordsLegacy.Game.Visuals`, `Assets/Game/Visuals/`): every drawn thing gets its mesh and materials from a
   `VisualDefinition` asset referenced by string id (e.g. `visual.tree.generic`, `visual.road.dirt_path`). Sim data holds
   only the id (decision 0009). `VisualRegistry.asset` maps ids to definitions: `TryGet(id, out def)` for lookup,
@@ -240,11 +243,14 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `BuildBar` (`BuildBarView`, plus `ToolController`
   -> build bar, camera rig), `ToolPanel` (`ToolPanelView`), `GroundReadout` (`GroundReadoutView` -> picker) and
   `DebugOverlay` (`DebugOverlayView` -> SimHost, picker; F3 toggles); `RoadRenderer` (-> SimHost, `VisualRegistry.asset`);
-  `RoadTool` (-> SimHost, picker, RoadRenderer, ToolPanel, ToolController, TopBar). All UIDocuments use
+  `RoadTool` (-> SimHost, picker, RoadRenderer, ToolPanel, ToolController, TopBar); `AreaRenderer` (-> SimHost) and two
+  `AreaTool`s, `TestAreaTool` (`test-area`, `area.test`) and `TestWorkAreaTool` (`test-work-area`, `area.test_work`), each
+  -> SimHost, picker, AreaRenderer, ToolPanel, ToolController, TopBar (`GameSceneGenerator.CreateAreaTools`, T-116). All UIDocuments use
   `Assets/Game/UI/PanelSettings.asset`. `GameSceneGenerator.CreateBuildBar` and `CreateRoadTool` wire these in code.
 - Other editor tools (`Assets/Editor/`): `AgentFriendlyProjectSettings` forces text serialization and visible
   .meta files when the Editor loads; `CreatePanelSettings` (menu `Lords Legacy/Create Shared PanelSettings`) makes the
   shared PanelSettings asset. Scenes and placeholder assets are generated, not hand-edited (decision 0010).
 - `GameSceneTests.GameSceneHasEveryM1PieceWired` (PlayMode) loads the scene and checks each piece and its references.
   `GameSceneTests.GameSceneHasM3RoadToolWired` does the same for BuildBarView, ToolPanelView, ToolController,
-  RoadRenderer and RoadTool; the UIDocument list must match the generator.
+  RoadRenderer and RoadTool; the UIDocument list must match the generator. `GameSceneTests.GameSceneHasM4AreaToolsAndOverlayWired`
+  checks AreaRenderer, the two AreaTool ids and the overlay's area labels (T-116).
