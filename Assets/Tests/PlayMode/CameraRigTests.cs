@@ -65,10 +65,108 @@ namespace LordsLegacy.Tests.PlayMode
                 _rig.SetPose(100, 100, 100, 60, yaw);
                 for (int i = 0; i < 200; i++) { _rig.Move(d[0], d[1], 0.1f); AssertValid(); }
                 for (int i = 0; i < 100; i++) { _rig.Zoom(1f); AssertValid(); }
-                Assert.AreEqual(_rig.MinHeight, _rig.HeightAboveGround, 0.001f);
+                Assert.Less(_rig.FocusDistance(), _rig.MinDistance * 1.5f);
                 for (int i = 0; i < 100; i++) { _rig.Zoom(-1f); AssertValid(); }
-                Assert.AreEqual(_rig.MaxHeight, _rig.HeightAboveGround, 0.001f);
+                Assert.Greater(_rig.FocusDistance(), _rig.MinDistance * 5f);
             }
+        }
+
+        [Test]
+        public void OrbitChangesYawAndPitchButNotFocusDistance()
+        {
+            _rig.SetPose(100, 100, 30, 50, 20);
+            float d0 = _rig.FocusDistance();
+            Vector3 f0 = _rig.FocusPoint();
+            _rig.Orbit(30f, -10f);
+            Assert.AreEqual(50f, _rig.YawDeg, 0.01f);
+            Assert.AreEqual(40f, _rig.PitchDeg, 0.01f);
+            Assert.AreEqual(d0, _rig.FocusDistance(), d0 * 0.01f);
+            Assert.AreEqual(0f, Vector2.Distance(new Vector2(f0.x, f0.z), new Vector2(_rig.FocusPoint().x, _rig.FocusPoint().z)), 0.5f);
+            AssertValid();
+        }
+
+        [Test]
+        public void ScrollZoomStillWorksAfterTiltingLow()
+        {
+            _rig.SetPose(100, 100, 30, 50, 0);
+            _rig.Orbit(0, -45f);
+            float d0 = _rig.FocusDistance();
+            _rig.Zoom(3f);
+            float dIn = _rig.FocusDistance();
+            Assert.Less(dIn, d0 * 0.8f);
+            _rig.Zoom(-6f);
+            Assert.Greater(_rig.FocusDistance(), dIn * 1.5f);
+        }
+
+        [Test]
+        public void ZoomingInTiltsTowardsHorizon()
+        {
+            _rig.SetPose(100, 100, 40, 50, 0);
+            float p0 = _rig.PitchDeg;
+            _rig.Zoom(5f);
+            Assert.Less(_rig.PitchDeg, p0);
+        }
+
+        [Test]
+        public void OrbitPitchIsLimited()
+        {
+            _rig.SetPose(100, 100, 30, 50, 0);
+            _rig.Orbit(0, -500f);
+            Assert.AreEqual(_rig.MinOrbitPitch, _rig.PitchDeg, 0.01f);
+            _rig.Orbit(0, 500f);
+            Assert.AreEqual(_rig.MaxOrbitPitch, _rig.PitchDeg, 0.01f);
+        }
+
+        [Test]
+        public void TiltingTowardsAHillKeepsCameraAboveGround()
+        {
+            foreach (float yaw in new[] { 0f, 90f, 180f, 270f })
+            {
+                _rig.SetPose(100, 100, 8, 80, yaw);
+                for (int i = 0; i < 80; i++) { _rig.Orbit(0, -1f); AssertValid(); }
+                for (int i = 0; i < 80; i++) { _rig.Orbit(2f, 1f); AssertValid(); }
+            }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator QAndEDoNothing()
+        {
+            var kb = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+            _rig.SetPose(300, 300, 50, 50, 10);
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Q, UnityEngine.InputSystem.Key.E));
+            for (int i = 0; i < 5; i++) yield return null;
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.RemoveDevice(kb);
+            Assert.AreEqual(10f, _rig.YawDeg, 0.001f);
+            Assert.AreEqual(50f, _rig.PitchDeg, 0.001f);
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator MiddleDragThroughInputChangesYawAndPitchNotDistance()
+        {
+            var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+            _rig.EdgePanEnabled = false;
+            _rig.SetPose(100, 100, 30, 50, 0);
+            yield return null;
+            float d0 = _rig.FocusDistance();
+            var centre = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            for (int i = 0; i < 4; i++)
+            {
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse, new UnityEngine.InputSystem.LowLevel.MouseState
+                {
+                    position = centre,
+                    delta = new Vector2(20f, 10f),
+                }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Middle));
+                yield return null;
+            }
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse, new UnityEngine.InputSystem.LowLevel.MouseState { position = centre });
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+            Assert.Greater(Mathf.Abs(Mathf.DeltaAngle(0f, _rig.YawDeg)), 0.5f);
+            Assert.Greater(Mathf.Abs(_rig.PitchDeg - 50f), 0.5f);
+            Assert.AreEqual(d0, _rig.FocusDistance(), d0 * 0.02f);
         }
 
         [Test]
