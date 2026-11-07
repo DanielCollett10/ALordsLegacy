@@ -26,6 +26,8 @@ namespace LordsLegacy.Game.Visuals
 
         private sealed class Cell
         {
+            public long Key;
+            public int[] Ids;
             public Matrix4x4[] Matrices;
             public float MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
             public float MaxHeight;
@@ -35,8 +37,10 @@ namespace LordsLegacy.Game.Visuals
         private float _builtScale;
 
         private readonly List<Cell> _cells = new List<Cell>();
+        private readonly Dictionary<long, Cell> _byKey = new Dictionary<long, Cell>();
         private readonly Plane[] _planes = new Plane[6];
         private bool _built;
+        private int _builtVersion;
 
         /// <summary>Cells that passed the frustum test in the last drawn frame.</summary>
         public int VisibleCellCount { get; private set; }
@@ -46,6 +50,9 @@ namespace LordsLegacy.Game.Visuals
 
         /// <summary>Total number of cells that contain trees.</summary>
         public int CellCount => _cells.Count;
+
+        /// <summary>The instance matrix array of the cell at <paramref name="index"/> (cells are in key order). For tests.</summary>
+        public Matrix4x4[] GetCellMatrices(int index) => _cells[index].Matrices;
 
         /// <summary>Sets the references (for code that adds the component at run time).</summary>
         public void Configure(SimHost simHost, VisualRegistry visualRegistry, Camera camera)
@@ -70,7 +77,10 @@ namespace LordsLegacy.Game.Visuals
             VisibleCellCount = 0;
             DrawnInstanceCount = 0;
             if (host == null || !host.IsInitialized || registry == null || cullCamera == null) return;
-            if (!_built) Build();
+            // Full build on first use or Invalidate(); when only the Sim's tree set changed
+            // (TreeRegistry.Version) just the cells whose trees differ are rebuilt.
+            if (!_built) Build(true);
+            else if (host.World.Trees.Version != _builtVersion) Build(false);
 
             var def = registry.Get(TreeVisualId);
             var mesh = def.Mesh;
@@ -79,7 +89,7 @@ namespace LordsLegacy.Game.Visuals
 
             if (mesh != _builtMesh || !Mathf.Approximately(def.Scale, _builtScale))
             {
-                Build();
+                Build(true);
                 mesh = def.Mesh;
             }
             GeometryUtility.CalculateFrustumPlanes(cullCamera, _planes);
@@ -115,11 +125,17 @@ namespace LordsLegacy.Game.Visuals
             }
         }
 
-        private void Build()
+        /// <summary>
+        /// Syncs the cells with the Sim. <paramref name="full"/> rebuilds every cell; otherwise a cell is rebuilt
+        /// only when its standing tree ids differ from what was built (unchanged cells keep their Matrices array),
+        /// and cells with no trees are dropped.
+        /// </summary>
+        private void Build(bool full)
         {
             _built = true;
             _cells.Clear();
             var world = host.World;
+            _builtVersion = world.Trees.Version;
             var def = registry.Get(TreeVisualId);
             // Each tree is scaled so its mesh is (trunk length x definition scale) metres tall, and its base
             // sits on the terrain. Without this a 1 m placeholder mesh is invisible at forest distances.
@@ -142,8 +158,15 @@ namespace LordsLegacy.Game.Visuals
             foreach (var key in keys)
             {
                 var list = groups[key];
+                if (!full && _byKey.TryGetValue(key, out var existing) && SameTrees(existing.Ids, list))
+                {
+                    _cells.Add(existing);
+                    continue;
+                }
                 var cell = new Cell
                 {
+                    Key = key,
+                    Ids = new int[list.Count],
                     Matrices = new Matrix4x4[list.Count],
                     MinX = float.MaxValue, MinY = float.MaxValue, MinZ = float.MaxValue,
                     MaxX = float.MinValue, MaxY = float.MinValue, MaxZ = float.MinValue,
@@ -151,6 +174,7 @@ namespace LordsLegacy.Game.Visuals
                 for (int i = 0; i < list.Count; i++)
                 {
                     var t = list[i];
+                    cell.Ids[i] = t.Id.Value;
                     float y = world.Terrain.HeightAt(t.X, t.Z);
                     // Deterministic yaw from the tree id so the forest does not look like copies.
                     float yaw = (t.Id.Value * 137.508f) % 360f;
@@ -165,6 +189,17 @@ namespace LordsLegacy.Game.Visuals
                 }
                 _cells.Add(cell);
             }
+
+            _byKey.Clear();
+            foreach (var c in _cells) _byKey[c.Key] = c;
+        }
+
+        private static bool SameTrees(int[] ids, List<TreeRecord> trees)
+        {
+            if (ids.Length != trees.Count) return false;
+            for (int i = 0; i < ids.Length; i++)
+                if (ids[i] != trees[i].Id.Value) return false;
+            return true;
         }
     }
 }
