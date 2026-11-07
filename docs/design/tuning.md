@@ -23,6 +23,8 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 > Dropped ticks are never run later. The tech spec says "slows itself rather than skipping simulation steps".
 > Owner to decide whether dropping is the intended behaviour or whether due ticks should be carried and run later.
 
+> Implementation note (Rest day, FOOD-A4): `SimTuning.RestDayEnabled` exists (default on), but no Sim system reads it yet.
+
 Calendar: DayOfYear counts from 1 Jan (1 Jan = day 1, so 1 Mar = day 60). The year number
 goes up on **1 January**, so Year 1 is a short first year (1 Mar – 31 Dec) and Year 2 starts
 on 1 Jan. No leap years.
@@ -38,6 +40,9 @@ Derived: clock runs 96× real time at 1×. A year is 91 h at 1×, 11.4 h at 8×,
 | Ox speed | 0.52 | m per game minute (= 3 km/h on screen at 1×) | TIME-04 |
 | Road speed multiplier | 1.5 | × | ROAD-10 |
 
+> Implementation note (Walk and ox speed, TIME-04): `SimTuning` holds both values, but no Sim system moves anyone yet.
+> The road multiplier is not in code.
+
 Derived (walking, off-road): 52 m per game hour; quarter day ≈ 310 m; half day ≈ 630 m;
 full day ≈ 1.25 km. Crossing a 25 km world ≈ 20 game days. If walk speed or day length
 changes, recompute these and the market table below.
@@ -52,6 +57,8 @@ changes, recompute these and the market table below.
 | Adult, may marry from | 18 | years | POP-17 |
 | Ageing rate | 2 | × calendar | POP-27 |
 | Starting oxen | 2 | | Oxen |
+
+> Implementation note (Starting oxen): `SimTuning.StartingOxen` = 2 exists, but no oxen are created yet.
 
 ## Food
 
@@ -101,6 +108,11 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 | Ox load | 4 | logs per trip | WCO-07 |
 | Log storage | 20 | logs at minimum size | INV-A3 |
 | Woodcutting family slots | 2 | per hut | WCO |
+
+> Implementation note (Trunk length and tree density, TMB-06, DEF-03): the 12–20 m trunk range is in both
+> `SimTuning` (`TrunkLengthMinM`/`MaxM`, read by nothing) and `ForestScatter` (`MinTrunkM`/`MaxTrunkM`, which the
+> scatter actually uses). Tree density (493 per hectare) and the seed are editor constants in `ForestScatter`, not in
+> `SimTuning`. Owner to decide where these belong.
 
 Woodcutting check: trees 100 m from the log storage → ox round trip about 6.4 game hours
 → about 2 trips per summer day → about 8 logs per ox per day.

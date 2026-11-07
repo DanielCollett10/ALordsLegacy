@@ -29,10 +29,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   - `TickPacer`: owns the selected speed (`SetSpeed`, `CurrentSpeed`, `Speeds`) and turns real seconds into
     whole ticks (`Advance`), carrying the remainder (`Fraction`). Over `MaxTicksPerFrame` it drops the excess
     and sets `SlowedDown`. `Reset()` clears the carry (the host calls it while paused). No pause state (decision 0006).
-- `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the numbers the Sim uses today: pace, speeds,
-  start date, daylight, walk and ox speed, log and trunk lengths, starting oxen, rest-day switch. Defaults are
-  auto-properties; derived values are computed properties. The Sim never hard-codes these. The other values in
-  `docs/design/tuning.md` (food, markets, construction, population) are not in code yet.
+- `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the balancing numbers defined so far. Defaults are
+  auto-properties; derived values are computed properties. Read by code today: pace, speeds, start date, daylight,
+  standard log length. Defined but not yet read by any system: walk and ox speed, trunk length range, starting oxen,
+  rest-day switch. The Sim never hard-codes these. Food, markets, construction and population numbers from
+  `docs/design/tuning.md` are not in code yet.
+- Not built yet: tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data) describes
+  future work with no code.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
   length and `State` (only `Standing` exists yet). Trees come from the baked map; nothing adds or removes them at runtime.
@@ -52,6 +55,8 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
   truncation throw `MapDataFormatException`) and `SyntheticMap.CreateRamp()` (200x200 m test map, 5 trees).
 - `SimWorld.Terrain` and `SimWorld.Trees` are never null. `new SimWorld(tuning)` gives `FlatHeightField` and no
   trees; `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees.
+- File format: little-endian binary, magic `LLMP`, int32 format version (`MapData.CurrentVersion` = 1), map id,
+  height grid, then trees. Other versions are rejected.
 - Tree authoring: menu `Lords Legacy/Map/Scatter Forest Trees` (`ForestScatter`, Assets/Editor/MapGen/Forest) reads
   `Assets/Maps/TestMap/forest-region.json` and writes the seeded `TreeAuthoringData` asset
   `Assets/Maps/TestMap/TestMapTrees.asset` (`LordsLegacy.Game.Authoring`; ids 0..n-1, trunk 12-20 m).
@@ -89,6 +94,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `visual.tree.generic` definition. Trees are grouped in 64 m cells, frustum-culled, and drawn with
   `Graphics.RenderMeshInstanced` in batches of 1023. Each tree is scaled to its trunk length and yawed from its id.
   There are no per-tree GameObjects and no colliders (decision 0008).
+- No DOTS/ECS code yet. Rendering is `Graphics.RenderMeshInstanced` and MonoBehaviours (decision 0002 is still provisional).
 - Sun and sky (`Assets/Game/Lighting/`): `SunLightModel` is pure maths (Sim `GameTime` + `Daylight` → elevation,
   azimuth, colour, intensity). `SunLightController` writes the result to the directional light and ambient in
   `LateUpdate`. Steady light is `ViewSettings.SteadyLight` (set by the top bar): fixed sun, visual only.
@@ -99,8 +105,9 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   terrain, not from the collider.
 - Cursor ground readout (`Assets/Game/Picking/`): `GroundPicker` casts a ray from the camera (screen position or
   `Ray`) and keeps only the hit's x/z. Height and slope come from `SimHost.World.Terrain` at that x/z, never from the
-  collider. `GroundSample` is the result (`Format()` gives the label text). `GroundReadoutView` (UI Toolkit,
-  `Assets/Game/UI/GroundReadout/`) shows it in one label each frame. `ReadAt(x,z)` reads the Sim without a ray.
+  collider. `GroundSample` is the result (`Format()` gives the label text). `GroundReadoutView` (script in
+  `Assets/Game/Picking/`, UI Toolkit assets in `Assets/Game/UI/GroundReadout/`) shows it in one label each frame.
+  `ReadAt(x,z)` reads the Sim without a ray.
 - Debug overlay (`Assets/Game/UI/DebugOverlay/`): `DebugOverlayView` (UI Toolkit, F3 toggles) shows FPS, tree count,
   `SimStats` tick ms and ticks/s, and the tree nearest the cursor ground point (id, trunk, log yield) via
   `TreeRegistry.QueryRadius`. Read-only; one named label per value (`debug-*`).
@@ -137,5 +144,6 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   `DebugOverlay` (`DebugOverlayView` -> SimHost, picker; F3 toggles). All UIDocuments use
   `Assets/Game/UI/PanelSettings.asset`.
 - Other editor tools (`Assets/Editor/`): `AgentFriendlyProjectSettings` forces text serialization and visible
-  .meta files when the Editor loads; `CreatePanelSettings` makes the shared PanelSettings asset.
+  .meta files when the Editor loads; `CreatePanelSettings` (menu `Lords Legacy/Create Shared PanelSettings`) makes the
+  shared PanelSettings asset. Scenes and placeholder assets are generated, not hand-edited (decision 0010).
 - `GameSceneTests.GameSceneHasEveryM1PieceWired` (PlayMode) loads the scene and checks each piece and its references.
