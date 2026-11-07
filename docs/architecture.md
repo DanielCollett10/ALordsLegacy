@@ -65,6 +65,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   centre line, snapped to the nearest point), `JoinNode` (that point is an existing segment end, no split) and `X`
   (centre lines cross). Overlap ignores samples within one width of a junction and the stretch next to it that is still
   moving away from the road. A flat (no-map) world counts every point as inside. It never changes the world.
+- `DrawRoad` (Commands, with internal `RoadCutter`) re-runs `RoadValidator` (rejects with its reason: unknown type / too few
+  points → InvalidArgument, overlap → Conflict, other → NotAllowed). If valid it splits each existing segment at its T/X
+  junction (`SplitSegmentAt`), then cuts the new road's samples at every junction (cut point added as a sample and as a
+  control point on both sides; all original samples kept; a T/JoinNode end is snapped by adding the node position as a new
+  first/last sample and control point) and adds one segment per piece. `Created` = new segments plus split halves,
+  `Removed` = the split originals (both segment ids).
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
   `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created/removed ids,
   or Rejected with `CommandRejectCode` and text), `CommandLog` (append-only `(tick, command)` entries).
