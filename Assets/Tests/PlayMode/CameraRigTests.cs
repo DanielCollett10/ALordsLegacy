@@ -74,7 +74,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void OrbitChangesYawAndPitchButNotFocusDistance()
         {
-            _rig.SetPose(500, 500, 60, 50, 20);
+            _rig.SetPose(100, 100, 30, 50, 20);
             float d0 = _rig.FocusDistance();
             Vector3 f0 = _rig.FocusPoint();
             _rig.Orbit(30f, -10f);
@@ -88,7 +88,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void ScrollZoomStillWorksAfterTiltingLow()
         {
-            _rig.SetPose(500, 500, 60, 50, 0);
+            _rig.SetPose(100, 100, 30, 50, 0);
             _rig.Orbit(0, -45f);
             float d0 = _rig.FocusDistance();
             _rig.Zoom(3f);
@@ -101,7 +101,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void ZoomingInTiltsTowardsHorizon()
         {
-            _rig.SetPose(500, 500, 100, 50, 0);
+            _rig.SetPose(100, 100, 40, 50, 0);
             float p0 = _rig.PitchDeg;
             _rig.Zoom(5f);
             Assert.Less(_rig.PitchDeg, p0);
@@ -110,7 +110,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void OrbitPitchIsLimited()
         {
-            _rig.SetPose(500, 500, 60, 50, 0);
+            _rig.SetPose(100, 100, 30, 50, 0);
             _rig.Orbit(0, -500f);
             Assert.AreEqual(_rig.MinOrbitPitch, _rig.PitchDeg, 0.01f);
             _rig.Orbit(0, 500f);
@@ -122,7 +122,7 @@ namespace LordsLegacy.Tests.PlayMode
         {
             foreach (float yaw in new[] { 0f, 90f, 180f, 270f })
             {
-                _rig.SetPose(300, 300, 8, 80, yaw);
+                _rig.SetPose(100, 100, 8, 80, yaw);
                 for (int i = 0; i < 80; i++) { _rig.Orbit(0, -1f); AssertValid(); }
                 for (int i = 0; i < 80; i++) { _rig.Orbit(2f, 1f); AssertValid(); }
             }
