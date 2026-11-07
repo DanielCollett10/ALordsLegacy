@@ -107,14 +107,28 @@ namespace LordsLegacy.Game
             Apply();
         }
 
-        /// <summary>Zooms by scroll steps; positive zooms in (lower). A tilt set by the player is kept.</summary>
+        /// <summary>Closest focus distance (metres) reachable by zooming.</summary>
+        public float MinDistance => MinHeight / Mathf.Sin(NearPitch * Mathf.Deg2Rad);
+        /// <summary>Farthest focus distance (metres) reachable by zooming.</summary>
+        public float MaxDistance => MaxHeight / Mathf.Sin(FarPitch * Mathf.Deg2Rad);
+
+        /// <summary>
+        /// Zooms by scroll steps; positive zooms in. Moves the camera along the view ray towards (or away from) the
+        /// ground point at screen centre, and tilts it a little towards the horizon as it gets closer (and back
+        /// down when zooming out). Works at any tilt because it scales the focus distance, not the height.
+        /// </summary>
         public void Zoom(float steps)
         {
-            float before = Mathf.InverseLerp(MinHeight, MaxHeight, _height);
-            _height *= Mathf.Pow(1f - ZoomStep, steps);
-            _height = Mathf.Clamp(_height, MinHeight, MaxHeight);
-            float after = Mathf.InverseLerp(MinHeight, MaxHeight, _height);
-            _pitch += Mathf.Lerp(NearPitch, FarPitch, after) - Mathf.Lerp(NearPitch, FarPitch, before);
+            float d = FocusDistance();
+            Vector3 pivot = FocusPoint();
+            float d2 = Mathf.Clamp(d * Mathf.Pow(1f - ZoomStep, steps), MinDistance, MaxDistance);
+            float before = Mathf.InverseLerp(MinDistance, MaxDistance, d);
+            float after = Mathf.InverseLerp(MinDistance, MaxDistance, d2);
+            _pitch = Mathf.Clamp(_pitch + Mathf.Lerp(NearPitch, FarPitch, after) - Mathf.Lerp(NearPitch, FarPitch, before), MinOrbitPitch, MaxOrbitPitch);
+            Vector3 f = Forward();
+            _x = pivot.x - f.x * d2;
+            _z = pivot.z - f.z * d2;
+            _height = Mathf.Clamp(pivot.y - f.y * d2 - GroundAt(_x, _z), GroundMargin, MaxHeight);
             Apply();
         }
 

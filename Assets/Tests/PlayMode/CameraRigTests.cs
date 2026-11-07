@@ -65,9 +65,9 @@ namespace LordsLegacy.Tests.PlayMode
                 _rig.SetPose(100, 100, 100, 60, yaw);
                 for (int i = 0; i < 200; i++) { _rig.Move(d[0], d[1], 0.1f); AssertValid(); }
                 for (int i = 0; i < 100; i++) { _rig.Zoom(1f); AssertValid(); }
-                Assert.AreEqual(_rig.MinHeight, _rig.HeightAboveGround, 0.001f);
+                Assert.Less(_rig.FocusDistance(), _rig.MinDistance * 1.5f);
                 for (int i = 0; i < 100; i++) { _rig.Zoom(-1f); AssertValid(); }
-                Assert.AreEqual(_rig.MaxHeight, _rig.HeightAboveGround, 0.001f);
+                Assert.Greater(_rig.FocusDistance(), _rig.MinDistance * 5f);
             }
         }
 
@@ -83,6 +83,28 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(d0, _rig.FocusDistance(), d0 * 0.01f);
             Assert.AreEqual(0f, Vector2.Distance(new Vector2(f0.x, f0.z), new Vector2(_rig.FocusPoint().x, _rig.FocusPoint().z)), 0.5f);
             AssertValid();
+        }
+
+        [Test]
+        public void ScrollZoomStillWorksAfterTiltingLow()
+        {
+            _rig.SetPose(500, 500, 60, 50, 0);
+            _rig.Orbit(0, -45f);
+            float d0 = _rig.FocusDistance();
+            _rig.Zoom(3f);
+            float dIn = _rig.FocusDistance();
+            Assert.Less(dIn, d0 * 0.8f);
+            _rig.Zoom(-6f);
+            Assert.Greater(_rig.FocusDistance(), dIn * 1.5f);
+        }
+
+        [Test]
+        public void ZoomingInTiltsTowardsHorizon()
+        {
+            _rig.SetPose(500, 500, 100, 50, 0);
+            float p0 = _rig.PitchDeg;
+            _rig.Zoom(5f);
+            Assert.Less(_rig.PitchDeg, p0);
         }
 
         [Test]
