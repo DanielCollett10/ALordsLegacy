@@ -46,6 +46,13 @@ future `ReshapeRoadSegment` command only re-samples and re-validates one segment
 Refusal reasons are shown in the tool panel, and the first one found is the one shown. Order: outside
 the map, too steep, crosses itself, overlaps road, crosses area.
 
+> Implementation note (RD-03, sample spacing): each control-point span is split into `round(span length ÷ 1 m)` equal
+> steps, so the spacing is close to 1 m, not exact.
+>
+> Implementation note (RD-09, exemption): besides the samples within one width of a junction, the code also exempts
+> samples that move away from the junction while they get further from the road, until they are a full width away
+> (`RoadValidator.Walk`). The rule above does not mention this. Owner to confirm.
+
 ## Network
 
 - **Node:** a road end or junction, at an x/z position (mm).
@@ -54,6 +61,10 @@ the map, too steep, crosses itself, overlaps road, crosses area.
   the player deletes segments, not "roads").
 - Splitting a segment at a junction keeps the curve shape exactly: both halves keep the same centre-line
   samples, cut at the junction point.
+
+> Implementation note (segment fields): a `RoadSegment` stores its id, nodes, type id, curve kind, control points,
+> samples and length. It does **not** store a corridor (the corridor is the centre line ± half the type width, worked
+> out when needed) and does not record which command drew it. Owner to decide whether to store either.
 - Two nodes are "connected" if a chain of segments links them. The debug overlay can show node and segment ids.
 
 ## Snapping (shared with areas, GEO-13..15)
