@@ -50,6 +50,27 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
         /// <summary>Queries that found no path.</summary>
         public long FailedQueries { get; set; }
 
+        /// <summary>Searchers used for path queries (1 = no parallel queries).</summary>
+        public int Parallelism { get; set; } = 1;
+
+        /// <summary>True if the (start, end) path cache was on.</summary>
+        public bool CacheEnabled { get; set; }
+
+        /// <summary>Cache lookups that hit, in the timed ticks.</summary>
+        public long CacheHits { get; set; }
+
+        /// <summary>Cache lookups that missed, in the timed ticks.</summary>
+        public long CacheMisses { get; set; }
+
+        /// <summary>Paths held in the cache at the end.</summary>
+        public int CacheEntries { get; set; }
+
+        /// <summary>Approximate bytes of cached path cells at the end.</summary>
+        public long CacheBytes { get; set; }
+
+        /// <summary>Cache hits / lookups, 0 when there were none.</summary>
+        public double CacheHitRate => CacheHits + CacheMisses == 0 ? 0.0 : (double)CacheHits / (CacheHits + CacheMisses);
+
         /// <summary>Free-text notes shown under the table (trip mix, cache hits...).</summary>
         public string Notes { get; set; } = "";
 
@@ -104,6 +125,12 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
                     r.Name, r.Agents, r.TickMaxMs, r.WorstTickIndex,
                     r.WorstTickOverFrameBudget ? "YES" : "no", r.BelowTargetRate ? "YES" : "no"));
                 if (r.Notes.Length > 0) sb.AppendLine("  " + r.Notes);
+                sb.AppendLine(string.Format(c, "  path cache: {0}; parallel path queries: {1}",
+                    r.CacheEnabled
+                        ? string.Format(c, "ON, hit rate {0:F1}% ({1} hits / {2} lookups), {3} paths held (~{4:F1} MB)",
+                            100.0 * r.CacheHitRate, r.CacheHits, r.CacheHits + r.CacheMisses, r.CacheEntries, r.CacheBytes / 1048576.0)
+                        : "off",
+                    r.Parallelism > 1 ? "ON (" + r.Parallelism + " searchers)" : "off"));
                 sb.AppendLine(string.Format(c, "  path cost by distance  {0,-12} {1,8} {2,10} {3,10}", "band", "queries", "p50 ms", "p95 ms"));
                 foreach (BandRow b in r.Bands)
                 {

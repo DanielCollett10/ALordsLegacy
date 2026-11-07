@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using LordsLegacy.Prototypes.PerfSpike.Grid;
 
@@ -18,23 +19,49 @@ namespace LordsLegacy.Prototypes.PerfSpike.Scenarios
         /// <see cref="SpikeTripCrowd.StaggerTicks"/> so every agent is already cycling when timing starts.
         /// </summary>
         public static SpikeScenarioResult RunMixedTrips(SpikeCostGrid grid, int agents, ulong seed, int ticks,
-            int warmupTicks, bool cachePairPaths = false)
+            int warmupTicks, bool useCache = false, int parallelism = 1)
         {
-            var planner = new SpikePathPlanner(grid);
-            var crowd = new SpikeTripCrowd(planner, agents, seed, cachePairPaths);
+            var planner = new SpikePathPlanner(grid, useCache, parallelism);
+            var crowd = new SpikeTripCrowd(planner, agents, seed);
             for (int i = 0; i < warmupTicks; i++) crowd.Tick();
             planner.ResetStats();
             crowd.ResetStats();
 
             double[] samples = TimeTicks(ticks, crowd.Tick);
 
-            SpikeScenarioResult r = Summarise(cachePairPaths ? "mixed trips (pair cache)" : "mixed trips", grid, agents, samples, planner);
+            string name = "mixed trips" + (useCache ? " +cache" : "") + (parallelism > 1 ? " +par" + parallelism : "");
+            SpikeScenarioResult r = Summarise(name, grid, agents, samples, planner);
+            r.Parallelism = parallelism;
+            if (planner.Cache != null)
+            {
+                r.CacheEnabled = true;
+                r.CacheHits = planner.Cache.Hits;
+                r.CacheMisses = planner.Cache.Misses;
+                r.CacheEntries = planner.Cache.Count;
+                r.CacheBytes = planner.Cache.ApproxBytes;
+            }
             int total = (int)(crowd.RepeatTrips + crowd.RandomTrips);
             r.Notes = string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                "{0} pairs; trips started: {1} repeat, {2} random ({3:F1}% repeat); cache hits: {4}; failed queries: {5}",
+                "{0} pairs; trips started: {1} repeat, {2} random ({3:F1}% repeat); A* queries: {4}; failed queries: {5}",
                 crowd.PairCount, crowd.RepeatTrips, crowd.RandomTrips,
-                total == 0 ? 0.0 : 100.0 * crowd.RepeatTrips / total, crowd.CacheHits, planner.Failed);
+                total == 0 ? 0.0 : 100.0 * crowd.RepeatTrips / total, r.Queries, planner.Failed);
             return r;
+        }
+
+        /// <summary>
+        /// The same mixed-trip run four ways: plain, cache, parallel, cache + parallel. All four end in the same
+        /// agent positions (see the determinism tests); only the cost differs.
+        /// </summary>
+        public static List<SpikeScenarioResult> RunCacheParallelMatrix(SpikeCostGrid grid, int agents, ulong seed, int ticks,
+            int warmupTicks, int parallelism)
+        {
+            return new List<SpikeScenarioResult>
+            {
+                RunMixedTrips(grid, agents, seed, ticks, warmupTicks, false, 1),
+                RunMixedTrips(grid, agents, seed, ticks, warmupTicks, true, 1),
+                RunMixedTrips(grid, agents, seed, ticks, warmupTicks, false, parallelism),
+                RunMixedTrips(grid, agents, seed, ticks, warmupTicks, true, parallelism)
+            };
         }
 
         /// <summary>

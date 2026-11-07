@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LordsLegacy.Prototypes.PerfSpike.Grid;
+using LordsLegacy.Prototypes.PerfSpike.Nav;
 using LordsLegacy.Prototypes.PerfSpike.Scenarios;
 using NUnit.Framework;
 
@@ -58,10 +59,11 @@ namespace LordsLegacy.Prototypes.PerfSpike.Tests
         public void MixedTrips_PairCacheServesRepeatTrips()
         {
             var grid = SmallMap();
-            var planner = new SpikePathPlanner(grid);
-            var crowd = new SpikeTripCrowd(planner, 200, 2UL, cachePairPaths: true);
+            var planner = new SpikePathPlanner(grid, useCache: true);
+            var crowd = new SpikeTripCrowd(planner, 200, 2UL);
             for (int i = 0; i < 2000; i++) crowd.Tick();
-            Assert.That(crowd.CacheHits, Is.GreaterThan(0));
+            Assert.That(planner.Cache.Hits, Is.GreaterThan(0));
+            Assert.That(planner.Cache.HitRate, Is.GreaterThan(0.0));
         }
 
         [Test]
@@ -144,12 +146,112 @@ namespace LordsLegacy.Prototypes.PerfSpike.Tests
                 results.Add(SpikeScenarioRunner.RunMixedTrips(grid, agents, 1UL, 1200, SpikeTripCrowd.StaggerTicks + 100));
                 results.Add(SpikeScenarioRunner.RunSundayRush(grid, agents, 1UL, true));
             }
-            results.Add(SpikeScenarioRunner.RunMixedTrips(grid, 10000, 1UL, 1200, SpikeTripCrowd.StaggerTicks + 100, cachePairPaths: true));
 
             string table = SpikeScenarioResult.FormatTable(results);
             TestContext.Out.WriteLine(table);
             System.IO.File.WriteAllText(System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "perf-scenarios.txt"), table);
-            Assert.That(results.Count, Is.EqualTo(7));
+            Assert.That(results.Count, Is.EqualTo(6));
+        }
+
+        /// <summary>Path cache x parallel queries at 10,000 agents. Run with: dotnet test Perf.Tests/Perf.Tests.csproj --filter "Name~FullSize_CacheParallel" --logger "console;verbosity=detailed"</summary>
+        [Explicit("Full-size cache/parallel matrix on the 6 km map. Takes minutes and ~600 MB.")]
+        [Category("Perf")]
+        [Test]
+        public void FullSize_CacheParallelMatrix_PrintTable()
+        {
+            SpikeCostGrid grid = SpikeMapGenerator.Generate(1);
+            int par = System.Math.Max(2, System.Math.Min(4, System.Environment.ProcessorCount));
+            List<SpikeScenarioResult> results = SpikeScenarioRunner.RunCacheParallelMatrix(
+                grid, 10000, 1UL, 1200, SpikeTripCrowd.StaggerTicks + 100, par);
+
+            string table = "Logical processors: " + System.Environment.ProcessorCount + "\n" + SpikeScenarioResult.FormatTable(results);
+            TestContext.Out.WriteLine(table);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "perf-cache-parallel.txt"), table);
+            Assert.That(results.Count, Is.EqualTo(4));
+        }
+
+        private static float[] Positions(SpikeCostGrid grid, int agents, ulong seed, int ticks, bool cache, int parallelism)
+        {
+            var planner = new SpikePathPlanner(grid, cache, parallelism);
+            var crowd = new SpikeTripCrowd(planner, agents, seed);
+            for (int i = 0; i < ticks; i++) crowd.Tick();
+            var p = new float[agents * 3];
+            for (int i = 0; i < agents; i++)
+            {
+                p[3 * i] = crowd.Walkers[i].X;
+                p[3 * i + 1] = crowd.Walkers[i].Z;
+                p[3 * i + 2] = crowd.Walkers[i].Next;
+            }
+            return p;
+        }
+
+        [Test]
+        public void Determinism_CacheAndParallelGiveIdenticalState()
+        {
+            var grid = SmallMap();
+            float[] plain = Positions(grid, 60, 11UL, 800, false, 1);
+            Assert.That(Positions(grid, 60, 11UL, 800, true, 1), Is.EqualTo(plain), "cache");
+            Assert.That(Positions(grid, 60, 11UL, 800, false, 4), Is.EqualTo(plain), "parallel");
+            Assert.That(Positions(grid, 60, 11UL, 800, true, 4), Is.EqualTo(plain), "cache + parallel");
+        }
+
+        [Test]
+        public void Cache_ReturnsSamePathAsSearchAndCountsHits()
+        {
+            var grid = SmallMap();
+            var planner = new SpikePathPlanner(grid, useCache: true);
+            var a = new SpikeWalker { X = 11f, Z = 11f };
+            var b = new SpikeWalker { X = 11f, Z = 11f };
+            Assert.That(planner.Plan(a, 200, 200), Is.True);
+            Assert.That(planner.Plan(b, 200, 200), Is.True);
+            Assert.That(planner.Cache.Hits, Is.EqualTo(1));
+            Assert.That(planner.Cache.Misses, Is.EqualTo(1));
+            Assert.That(planner.Cache.HitRate, Is.EqualTo(0.5));
+            Assert.That(planner.Samples.TotalCount, Is.EqualTo(1), "hit does not run A*");
+            Assert.That(b.Path, Is.SameAs(a.Path));
+        }
+
+        [Test]
+        public void ParallelBatch_AppliesResultsInQueueOrder()
+        {
+            var grid = SmallMap();
+            var planner = new SpikePathPlanner(grid, useCache: false, parallelism: 4);
+            var walkers = new List<SpikeWalker>();
+            planner.BeginBatch();
+            for (int i = 0; i < 40; i++)
+            {
+                var w = new SpikeWalker { X = 11f + 4f * i, Z = 11f };
+                walkers.Add(w);
+                planner.Add(w, 300 + i, 300, i);
+            }
+            planner.Execute();
+            Assert.That(planner.BatchCount, Is.EqualTo(40));
+            for (int i = 0; i < 40; i++)
+            {
+                Assert.That(planner.Request(i).Tag, Is.EqualTo(i));
+                Assert.That(planner.Request(i).Found, Is.True);
+                Assert.That(walkers[i].Path, Is.SameAs(planner.Request(i).Cells));
+                CellRef last = walkers[i].Path[walkers[i].Path.Count - 1];
+                Assert.That(last.X, Is.EqualTo(300 + i));
+            }
+            Assert.That(planner.Samples.TotalCount, Is.EqualTo(40));
+        }
+
+        [Test]
+        public void Runner_CacheParallelMatrix_ReportsHitRate()
+        {
+            var grid = SmallMap();
+            List<SpikeScenarioResult> results = SpikeScenarioRunner.RunCacheParallelMatrix(grid, 100, 1UL, 100, 700, 2);
+            string table = SpikeScenarioResult.FormatTable(results);
+            TestContext.Out.WriteLine(table);
+
+            Assert.That(results.Count, Is.EqualTo(4));
+            Assert.That(results[0].CacheEnabled, Is.False);
+            Assert.That(results[1].CacheEnabled, Is.True);
+            Assert.That(results[1].CacheHitRate, Is.GreaterThan(0.0));
+            Assert.That(results[1].Queries, Is.LessThan(results[0].Queries));
+            Assert.That(results[2].Parallelism, Is.EqualTo(2));
+            Assert.That(table, Does.Contain("hit rate").And.Contain("parallel path queries: ON"));
         }
     }
 }
