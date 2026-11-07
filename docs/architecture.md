@@ -41,6 +41,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
   length and `State` (only `Standing` exists yet). Trees come from the baked map; nothing adds or removes them at runtime.
+- `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
+  classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
+  min distance). Predicates are exact; distances are double mm.
 - Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/`, which compiles the same `Assets/Sim/**/*.cs`.
 
 ## Map pipeline
