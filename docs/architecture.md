@@ -51,7 +51,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Roads/` (`LordsLegacy.Sim.Roads`, decision 0013): `RoadTypeDef` / `RoadTypes` (`road.dirt_path`),
   `CurveKind`, `ICurveSampler` and `CatmullRomSampler` (centripetal; per span it samples evenly by arc length so
   samples are ~`RoadSampleSpacingM` apart and hit every control point). `ControlPointFilter.Clean` applies RD-02
-  (`RoadMinPointSpacingM`). Network, commands and checks are not built yet.
+  (`RoadMinPointSpacingM`).
+  `RoadNetwork` (`SimWorld.Roads`, never null) holds `RoadNode`s and `RoadSegment`s (type id, curve kind, control
+  points, samples, length m), with ascending-id iteration and ids never reused. `AddSegment` reuses a node at the exact
+  end position. `SplitSegmentAt` cuts the samples and control points as decision 0013 says, removes the original id and
+  issues two new ones (no-op at an end). `RemoveSegment` drops emptied nodes. `Version` rises on every change;
+  `AreConnected`, `ComponentCount`, `ReachableSegmentCount`; `FindNearest` returns a `RoadHit` (None/End/Line), preferring
+  a node in range over a line point. Commands and checks are not built yet.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
   `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created/removed ids,
   or Rejected with `CommandRejectCode` and text), `CommandLog` (append-only `(tick, command)` entries).
