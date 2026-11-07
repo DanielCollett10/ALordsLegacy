@@ -28,6 +28,18 @@ namespace LordsLegacy.Game
         public const string TreeTrunkName = "debug-tree-trunk";
         /// <summary>Label element names.</summary>
         public const string TreeLogsName = "debug-tree-logs";
+        /// <summary>Label element names (road network counts).</summary>
+        public const string RoadNodesName = "debug-road-nodes";
+        /// <summary>Label element names (road network counts).</summary>
+        public const string RoadSegmentsName = "debug-road-segments";
+        /// <summary>Label element names (road network counts).</summary>
+        public const string RoadNetworksName = "debug-road-networks";
+        /// <summary>Label element names (road segment under the cursor).</summary>
+        public const string SegIdName = "debug-seg-id";
+        /// <summary>Label element names (road segment under the cursor).</summary>
+        public const string SegEndsName = "debug-seg-ends";
+        /// <summary>Label element names (road segment under the cursor).</summary>
+        public const string SegReachName = "debug-seg-reach";
         private const string RootName = "debug-overlay";
 
         [SerializeField] private GroundPicker _picker;
@@ -35,9 +47,11 @@ namespace LordsLegacy.Game
         [SerializeField] private VisualTreeAsset _visualTree;
         [SerializeField] private StyleSheet _styleSheet;
         [SerializeField] private float _treeRadiusM = 3f;
+        [SerializeField] private float _roadRadiusM = 4f;
 
         private VisualElement _root;
         private Label _fps, _count, _tickMs, _tps, _treeId, _trunk, _logs;
+        private Label _roadNodes, _roadSegments, _roadNetworks, _segId, _segEnds, _segReach;
         private float _fpsSmoothed;
 
         /// <summary>When true, Update toggles on F3, measures FPS and picks under the mouse. Tests set false.</summary>
@@ -51,6 +65,9 @@ namespace LordsLegacy.Game
 
         /// <summary>Max distance in metres from the cursor ground point to a tree that counts as hovered.</summary>
         public float TreeRadiusM { get => _treeRadiusM; set => _treeRadiusM = value; }
+
+        /// <summary>Max distance in metres from the cursor ground point to a road feature that counts as the segment under the cursor.</summary>
+        public float RoadRadiusM { get => _roadRadiusM; set => _roadRadiusM = value; }
 
         /// <summary>True when the overlay is shown.</summary>
         public bool Visible { get; private set; }
@@ -79,6 +96,10 @@ namespace LordsLegacy.Game
             _count.text = "Trees " + host.World.Trees.Count.ToString(c);
             _tickMs.text = "Tick " + host.Stats.LastStepMs.ToString("F3", c) + " ms";
             _tps.text = "Ticks/s " + host.Stats.TicksPerSecond.ToString("F1", c);
+            var roads = host.World.Roads;
+            _roadNodes.text = "Road nodes " + roads.NodeCount.ToString(c);
+            _roadSegments.text = "Road segments " + roads.SegmentCount.ToString(c);
+            _roadNetworks.text = "Road networks " + roads.ComponentCount.ToString(c);
         }
 
         /// <summary>Finds the tree nearest the ground under a screen position and shows it. Clears the tree labels if none.</summary>
@@ -87,7 +108,8 @@ namespace LordsLegacy.Game
             var picker = _picker != null ? _picker : (_picker = FindFirstObjectByType<GroundPicker>());
             var host = ResolveHost();
             if (picker == null || host == null || !host.IsInitialized
-                || !picker.TryPickScreen(screenPos, out var g)) { ShowTree(null); return; }
+                || !picker.TryPickScreen(screenPos, out var g)) { ShowTree(null); ShowSegment(null, null); return; }
+            InspectRoad(host, g);
             TreeRecord best = null;
             double bestD = double.MaxValue;
             foreach (var t in host.World.Trees.QueryRadius(g.X, g.Z, _treeRadiusM))
@@ -96,6 +118,28 @@ namespace LordsLegacy.Game
                 if (d < bestD) { bestD = d; best = t; }
             }
             ShowTree(best);
+        }
+
+        private void InspectRoad(SimHost host, GroundSample g)
+        {
+            var roads = host.World.Roads;
+            var hit = roads.FindNearest(LordsLegacy.Sim.Geometry.PointMm.FromMetres(g.X, g.Z), _roadRadiusM * 1000.0);
+            var seg = hit.Kind == LordsLegacy.Sim.Roads.RoadHitKind.None ? null : roads.GetSegment(hit.SegmentId);
+            ShowSegment(seg, roads);
+        }
+
+        private void ShowSegment(LordsLegacy.Sim.Roads.RoadSegment seg, LordsLegacy.Sim.Roads.RoadNetwork roads)
+        {
+            if (_segId == null) return;
+            var c = CultureInfo.InvariantCulture;
+            if (seg == null)
+            {
+                _segId.text = "Segment id --"; _segEnds.text = "Ends -- --"; _segReach.text = "Reachable segments --";
+                return;
+            }
+            _segId.text = "Segment id " + seg.Id.ToString(c);
+            _segEnds.text = "Ends " + seg.NodeA.ToString(c) + " " + seg.NodeB.ToString(c);
+            _segReach.text = "Reachable segments " + roads.ReachableSegmentCount(seg.Id).ToString(c);
         }
 
         private void ShowTree(TreeRecord t)
@@ -131,6 +175,12 @@ namespace LordsLegacy.Game
             _treeId = root.Q<Label>(TreeIdName);
             _trunk = root.Q<Label>(TreeTrunkName);
             _logs = root.Q<Label>(TreeLogsName);
+            _roadNodes = root.Q<Label>(RoadNodesName);
+            _roadSegments = root.Q<Label>(RoadSegmentsName);
+            _roadNetworks = root.Q<Label>(RoadNetworksName);
+            _segId = root.Q<Label>(SegIdName);
+            _segEnds = root.Q<Label>(SegEndsName);
+            _segReach = root.Q<Label>(SegReachName);
             SetVisible(Visible);
         }
 
@@ -140,7 +190,8 @@ namespace LordsLegacy.Game
             box.style.position = Position.Absolute;
             box.style.top = 48;
             box.style.right = 12;
-            foreach (var n in new[] { FpsName, TreeCountName, TickMsName, TpsName, TreeIdName, TreeTrunkName, TreeLogsName })
+            foreach (var n in new[] { FpsName, TreeCountName, TickMsName, TpsName, TreeIdName, TreeTrunkName, TreeLogsName,
+                RoadNodesName, RoadSegmentsName, RoadNetworksName, SegIdName, SegEndsName, SegReachName })
                 box.Add(new Label(n) { name = n });
             root.Add(box);
         }

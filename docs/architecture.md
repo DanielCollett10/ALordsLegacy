@@ -184,6 +184,9 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 - Debug overlay (`Assets/Game/UI/DebugOverlay/`): `DebugOverlayView` (UI Toolkit, F3 toggles) shows FPS, tree count,
   `SimStats` tick ms and ticks/s, and the tree nearest the cursor ground point (id, trunk, log yield) via
   `TreeRegistry.QueryRadius`. Read-only; one named label per value (`debug-*`).
+  T-103: also shows road node count, segment count and network count (`RoadNetwork.NodeCount`, `SegmentCount`,
+  `ComponentCount`), and for the segment under the cursor (`RoadNetwork.FindNearest` within `RoadRadiusM`, 4 m): its id,
+  its two end node ids (`NodeA`, `NodeB`) and `ReachableSegmentCount`. Labels `debug-road-*` and `debug-seg-*`.
 - Visuals (`LordsLegacy.Game.Visuals`, `Assets/Game/Visuals/`): every drawn thing gets its mesh and materials from a
   `VisualDefinition` asset referenced by string id (e.g. `visual.tree.generic`). Sim data holds only the id (decision 0009).
   `VisualRegistry.asset` maps ids to definitions: `TryGet(id, out def)` for lookup, `Get(id)` logs an error and
@@ -213,10 +216,14 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   and `SceneYamlNormalizer` gives its objects stable fileIDs, so two runs give the same file. Serialized references are wired in code.
 - Contents: `Terrain`; `SimHost`; `Main Camera` (Camera + `CameraRig`); `Directional Light` (Light + `SunLightController`
   -> SimHost, light, TopBar); `TreeRenderer` (-> SimHost, `VisualRegistry.asset`, main camera); `GroundPicker`
-  (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `GroundReadout` (`GroundReadoutView` -> picker) and
-  `DebugOverlay` (`DebugOverlayView` -> SimHost, picker; F3 toggles). All UIDocuments use
-  `Assets/Game/UI/PanelSettings.asset`.
+  (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `BuildBar` (`BuildBarView`, plus `ToolController`
+  -> build bar, camera rig), `ToolPanel` (`ToolPanelView`), `GroundReadout` (`GroundReadoutView` -> picker) and
+  `DebugOverlay` (`DebugOverlayView` -> SimHost, picker; F3 toggles); `RoadRenderer` (-> SimHost, `VisualRegistry.asset`);
+  `RoadTool` (-> SimHost, picker, RoadRenderer, ToolPanel, ToolController, TopBar). All UIDocuments use
+  `Assets/Game/UI/PanelSettings.asset`. `GameSceneGenerator.CreateBuildBar` and `CreateRoadTool` wire these in code.
 - Other editor tools (`Assets/Editor/`): `AgentFriendlyProjectSettings` forces text serialization and visible
   .meta files when the Editor loads; `CreatePanelSettings` (menu `Lords Legacy/Create Shared PanelSettings`) makes the
   shared PanelSettings asset. Scenes and placeholder assets are generated, not hand-edited (decision 0010).
 - `GameSceneTests.GameSceneHasEveryM1PieceWired` (PlayMode) loads the scene and checks each piece and its references.
+  `GameSceneTests.GameSceneHasM3RoadToolWired` (T-103, PlayMode) does the same for BuildBarView, ToolPanelView,
+  ToolController, RoadRenderer and RoadTool; the UIDocument list must match the generator.

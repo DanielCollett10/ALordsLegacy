@@ -7,5 +7,11 @@
         <ui:Label name="debug-tree-id" text="Tree id --" />
         <ui:Label name="debug-tree-trunk" text="Trunk -- m" />
         <ui:Label name="debug-tree-logs" text="Logs --" />
+        <ui:Label name="debug-road-nodes" text="Road nodes --" />
+        <ui:Label name="debug-road-segments" text="Road segments --" />
+        <ui:Label name="debug-road-networks" text="Road networks --" />
+        <ui:Label name="debug-seg-id" text="Segment id --" />
+        <ui:Label name="debug-seg-ends" text="Ends -- --" />
+        <ui:Label name="debug-seg-reach" text="Reachable segments --" />
     </ui:VisualElement>
 </ui:UXML>

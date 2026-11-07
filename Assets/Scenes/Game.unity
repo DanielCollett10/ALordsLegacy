@@ -279,6 +279,7 @@ MonoBehaviour:
   _visualTree: {fileID: 9197481963319205126, guid: 9654eedae9ee2d5469c7c5d86c859db5, type: 3}
   _styleSheet: {fileID: 7433441132597879392, guid: 048ede03f71b69b4185a9707a9aa5b45, type: 3}
   _treeRadiusM: 3
+  _roadRadiusM: 4
 --- !u!1 &100008
 GameObject:
   m_ObjectHideFlags: 0

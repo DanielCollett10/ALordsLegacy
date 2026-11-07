@@ -75,7 +75,36 @@ namespace LordsLegacy.Tests.PlayMode
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "DebugOverlay", "GroundReadout", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "DebugOverlay", "GroundReadout", "ToolPanel", "TopBar" }, names);
+        }
+
+        [UnityTest]
+        public IEnumerator GameSceneHasM3RoadToolWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var bar = Object.FindFirstObjectByType<BuildBarView>();
+            Assert.IsNotNull(bar, "BuildBarView missing.");
+            AssertNoNullRefs(bar);
+
+            var panel = Object.FindFirstObjectByType<ToolPanelView>();
+            Assert.IsNotNull(panel, "ToolPanelView missing.");
+            AssertNoNullRefs(panel);
+
+            var controller = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>();
+            Assert.IsNotNull(controller, "ToolController missing.");
+            AssertNoNullRefs(controller);
+
+            var roads = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.RoadRenderer>();
+            Assert.IsNotNull(roads, "RoadRenderer missing.");
+            AssertNoNullRefs(roads);
+
+            var tool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.RoadTool>();
+            Assert.IsNotNull(tool, "RoadTool missing.");
+            AssertNoNullRefs(tool);
         }
 
         [UnityTest]
