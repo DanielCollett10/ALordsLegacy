@@ -42,6 +42,7 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Escape | cancel the draft, or leave the tool | same |
 | Alt (press) | toggle snapping on/off | same |
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
+| Right-drag | camera orbit (from M5) | camera orbit (from M5) |
 
 Game pause and speed are unchanged by tools. Drawing works while paused.
 
@@ -53,3 +54,21 @@ segment or area: used for right-click delete and road branching), then **ground*
 **Camera vs tools.** The camera keeps middle mouse (rotate), scroll (zoom), keys and screen-edge pan. While a tool
 is active, left and right mouse buttons belong to the tool; the camera never pans or rotates from them. Edge
 pan keeps working while a point is being dragged.
+
+**Right mouse is click-only for tools.** Tools act on a right **click** (release without moving more than 4 px),
+never on a right press or drag. This keeps right-drag free for camera orbit (below).
+
+## Keyboard and UI focus
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| UIK-01 | Game UI buttons (top bar, build bar, tool panel) never take keyboard focus. Clicking them must not leave a focused element | DECIDED |
+| UIK-02 | Keyboard UI navigation (WASD, arrows, Tab) is off in game. Camera and tool keys must never change UI selection (bug: A/D cycled the speed buttons) | DECIDED |
+
+## Camera controls (planned, milestone M5)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| CAM-A1 | **Right-drag orbits** the camera around the ground point under the screen centre (yaw, and pitch within the existing limits). Replaces Q/E rotation, which is removed | DECIDED |
+| CAM-A2 | **Right-click** (no drag) cancels: a tool draft first; later, it closes the topmost unpinned popup (UI-03/04). In road or area mode with no draft, it deletes the object under the cursor (roads.md, areas.md) | DECIDED |
+| CAM-A3 | Middle-drag rotation: keep as an alternative or remove? | OPEN |
