@@ -21,6 +21,9 @@ try Bézier curves later. Roads must join, split at junctions and be deletable p
 - The Unity road view builds a mesh per segment from the samples and terrain heights, and rebuilds when the
   network's `Version` changes.
 
+> Implementation note (corridor): `RoadSegment` does not store a corridor. It is worked out from the centre line and
+> the road type width when needed. The list above says "corridor" as if it were stored.
+
 **Consequences.** Reshaping a confirmed road (owner: "design around it being reshaped") will be a
 `ReshapeRoadSegment(segmentId, controlPoints)` command: re-sample with the segment's curve kind, re-validate, keep the
 end nodes (moving an end node moves every attached segment's end control point). Not built yet, but nothing in the
