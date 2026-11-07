@@ -44,3 +44,12 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
 
 Game pause and speed are unchanged by tools. Drawing works while paused.
+
+**What a click hits** (all drawing tools, in this order, within 12 screen pixels): a draft **vertex**, then an
+edge's **bend handle** (area tools), then a draft **edge**, then a confirmed object of the tool's kind (road
+segment or area: used for right-click delete and road branching), then **ground**. A press that moves more than
+4 pixels before release is a drag; otherwise it is a click.
+
+**Camera vs tools.** The camera keeps middle mouse (rotate), scroll (zoom), keys and screen-edge pan. While a tool
+is active, left and right mouse buttons belong to the tool; the camera never pans or rotates from them. Edge
+pan keeps working while a point is being dragged.

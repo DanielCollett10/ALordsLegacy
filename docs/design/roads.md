@@ -12,7 +12,8 @@ Technical shape: decisions 0011 (commands), 0012 (geometry) and 0013 (road model
    smooth curve that **passes through every clicked point** and lies on the terrain.
 3. While drawing, the player can **drag** any placed point to move it, and **Backspace** removes the
    last point.
-4. **Double-click** (on the last point) or **Enter** or the panel's **Confirm** finishes the road.
+4. **Double-click** places a final point at the cursor and finishes the road (the double-click adds one point,
+   not two). **Enter** or the panel's **Confirm** finishes without adding a point.
    **Right-click** or **Escape** cancels the road in progress.
 5. With no road in progress, **right-click on a road deletes the road segment** under the cursor.
    No popup and no confirmation.
@@ -27,7 +28,7 @@ future `ReshapeRoadSegment` command only re-samples and re-validates one segment
 | ID | Rule | Tag |
 | --- | --- | --- |
 | RD-01 | The curve is a **centripetal Catmull-Rom** spline through the clicked points (control points). The curve type is a field on the road, so a Bézier variant can be tried later without changing stored roads or the network | DECIDED |
-| RD-02 | A road needs at least 2 control points. Control points closer than **1 m** to the previous point are ignored | DECIDED (distance PLACEHOLDER) |
+| RD-02 | A road needs at least 2 control points. A control point closer than **1 m** to the previous one is ignored, except the **last** point: if it is within 1 m of the previous one, it replaces that point, so the road always ends where the player clicked | DECIDED (distance PLACEHOLDER) |
 | RD-03 | The Sim samples the curve into a centre line every **1 m** of arc length. Heights come from the terrain, never stored (ROAD-02, NAV-02) | DECIDED (spacing PLACEHOLDER) |
 | RD-04 | Every road has a **road type**. MVP has one: `road.dirt_path`, width **2.5 m** (2–3 people abreast), free (ROAD-12). Wider and better surfaces (gravel, cobble) come later as new types | DECIDED (width PLACEHOLDER) |
 | RD-05 | **Grade check:** each 1 m sample step whose rise ÷ run is over the type's max grade (**15%**) is invalid. Invalid stretches show red in the preview, and the road cannot be confirmed (ROAD-09, NAV-03) | DECIDED (value PLACEHOLDER) |
