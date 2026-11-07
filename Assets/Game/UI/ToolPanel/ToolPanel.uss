@@ -1,0 +1,21 @@
+.tool-panel-root {
+    position: absolute;
+    left: 0; right: 0; bottom: 80px;
+    align-items: center;
+}
+.tool-panel {
+    flex-direction: row;
+    align-items: center;
+    min-width: 560px;
+    padding: 10px 14px;
+    background-color: rgba(30, 24, 18, 0.92);
+    border-width: 1px;
+    border-color: rgb(110, 100, 85);
+    border-radius: 4px;
+}
+.tool-panel__text { flex-grow: 1; flex-shrink: 1; }
+.tool-panel__status { color: rgb(240, 230, 210); font-size: 15px; -unity-font-style: bold; }
+.tool-panel__hint { color: rgb(190, 178, 158); font-size: 12px; margin-top: 2px; }
+.tool-panel__button { min-width: 90px; margin-left: 8px; color: rgb(240, 230, 210); background-color: rgb(70, 58, 44); }
+.tool-panel__button--confirm { background-color: rgb(190, 140, 50); color: rgb(20, 14, 8); }
+.tool-panel__button:disabled { opacity: 0.4; }

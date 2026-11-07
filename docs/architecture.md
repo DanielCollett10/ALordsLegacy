@@ -158,6 +158,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   Cancel+Deactivate on the old tool), `HandleEscape()` (tool first, deactivate only if it returns false), `IsPointerOverUi`
   (bar hover). It sets `CameraRig.ToolActive`; the rig then refuses left/right mouse (`AcceptsMouseButton`), middle/scroll/keys/edge pan unchanged.
   Tools register with `ToolController.Register`; no concrete tool exists yet.
+- Tool panel (T-097, `ToolPanelView`, `Assets/Game/UI/ToolPanel/`, UXML/USS, ui.md "Tool panel"): a reusable panel above the
+  build bar with a status line, a hint line and Cancel/Confirm. `Show(status, hint, isValid)` (Confirm disabled while invalid),
+  `Hide()` (hidden by default), events `Cancelled` and `Confirmed`. Buttons are non-focusable (UiFocusRules). Holds no tool
+  rules; a tool calls it while it has a draft. Not yet placed in the Game scene (no tool uses it yet).
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
 - Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
   terrain, not from the collider.
