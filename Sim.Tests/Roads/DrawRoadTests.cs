@@ -183,26 +183,30 @@ namespace LordsLegacy.Sim.Tests.Roads
         public void ResampledSplitHalf_MatchesOriginalWithinToleranceAwayFromTheCut()
         {
             SimWorld w = Flat();
-            var cps = new[] { M(0, 0), M(30, 5), M(60, 0), M(90, 5), M(120, 0) };
+            var cps = new[] { M(0, 0), M(30, 0.1), M(60, 0), M(90, 0.1), M(120, 0), M(150, 0.1), M(180, 0) };
             CommandResult a = Draw(w, cps);
             RoadSegment original = w.Roads.GetSegment((int)a.Created[0]);
             IReadOnlyList<PointMm> originalSamples = original.Samples;
 
-            // Cross between the 3rd and 4th control points.
-            CommandResult r = Draw(w, M(75, -30), M(75, 30));
+            // Cut between the 6th and 7th control points.
+            CommandResult r = Draw(w, M(165, -30), M(165, 30));
             Assert.That(r.IsAccepted, Is.True, r.Text);
             RoadSegment half = r.Created.Select(id => w.Roads.GetSegment((int)id))
                 .Single(s => s.Samples[0] == originalSamples[0]);
+            Assert.That(half.ControlPoints.Count, Is.EqualTo(7)); // 6 original points + the cut point
 
             IReadOnlyList<PointMm> again = new CatmullRomSampler(w.Tuning).Sample(half.ControlPoints);
-            int firstSpanEnd = half.Samples.ToList().IndexOf(M(30, 5));
-            Assert.That(firstSpanEnd, Is.GreaterThan(0));
-            for (int i = 0; i <= firstSpanEnd; i++)
-                Assert.That(again[i].DistanceTo(half.Samples[i]), Is.LessThan(10), "sample " + i);
-
-            // Every re-sampled point stays within 0.5 m of the original centre line.
-            foreach (PointMm p in again)
-                Assert.That(Polylines.Nearest(half.Samples, p).DistanceMm, Is.LessThan(500));
+            int span = 0;
+            int lastSpan = half.ControlPoints.Count - 2; // the span that contains the cut
+            for (int i = 0; i < again.Count; i++)
+            {
+                // Advance to the span this sample belongs to (samples at a control point count for the earlier span).
+                while (span < lastSpan && again[i] == half.ControlPoints[span + 1] && i > 0 && again[i - 1] != half.ControlPoints[span + 1]) span++;
+                double err = Polylines.Nearest(originalSamples, again[i]).DistanceMm;
+                double limit = span == lastSpan ? 500 : 10;
+                Assert.That(err, Is.LessThanOrEqualTo(limit), "sample " + i + " in span " + span);
+            }
+            Assert.That(span, Is.EqualTo(lastSpan));
         }
     }
 }
