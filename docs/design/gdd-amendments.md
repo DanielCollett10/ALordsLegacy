@@ -100,6 +100,19 @@ same assigned family** leads an ox to drag them to the operation's log storage.
 | CON-A1 | Build work is in worker-minutes of game time and only counts while materials are on site. Delivery time is separate and depends on distance and oxen. Starting values: hut 960, oxen stand 60, house 720, granary 600 worker-minutes | PLACEHOLDER |
 | BLD-10-A | **MVP:** trees under a confirmed building area, plot or module are removed instantly and yield nothing. **WIP:** later they must be felled by workers | DECIDED |
 
+## Roads and areas (MVP-0.5)
+
+Full rules: **`roads.md`**, **`areas.md`** and **`ui.md`** (they win over GDD sections 3, 4 and tech spec 17).
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| BLD-10-B | BLD-10-A also applies to **roads**: trees in a road's corridor vanish on confirmation and yield nothing. **Work areas never clear trees or land** | DECIDED |
+| BLD-10-C | **Future:** clearing becomes a job. Placing a road or building area asks a woodcutting family to fell the trees; the logs go to a stockpile, or straight to a construction site that needs them when there is no buffer to fill | DECIDED (future) |
+| WORLD-08-A | The trunk road is **not baked** into the map. Starting roads are ordinary roads created at game start, and the player can delete or reroute them | DECIDED |
+| ROAD-11-A | Right-click on a road in road mode deletes that segment, with no popup. Editing a confirmed road's curve is still later | DECIDED |
+| ROAD-13-A | Road curves pass through the clicked points (Catmull-Rom). A Bézier option may be tried later (decision 0013) | DECIDED |
+| AREA-01-A | Areas are drawn point by point (3 to 16 points, any angles), not dragged as a square. Edges can be bent into curves by dragging their middle. Fixed-footprint buildings (e.g. a stable) are placed as one piece and need no area | DECIDED |
+
 ## Population (POP)
 
 | ID | Rule | Tag |

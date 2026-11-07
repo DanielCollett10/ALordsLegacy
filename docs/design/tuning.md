@@ -47,6 +47,26 @@ Derived (walking, off-road): 52 m per game hour; quarter day ≈ 310 m; half day
 full day ≈ 1.25 km. Crossing a 25 km world ≈ 20 game days. If walk speed or day length
 changes, recompute these and the market table below.
 
+## Roads and areas
+
+| Value | Default | Unit | Rule |
+| --- | --- | --- | --- |
+| Dirt path width | 2.5 | m | RD-04 |
+| Max road grade | 15 | % (rise ÷ run per 1 m step) | RD-05 |
+| Road sample spacing | 1 | m | RD-03 |
+| Min distance between road points | 1 | m | RD-02 |
+| Tree clearance beyond road half width | 0.5 | m | RD-11 |
+| Snap distance | 12 | screen pixels (Unity side) | roads.md |
+| Area points | 3–16 | vertices | AR-02 |
+| Curve flattening spacing | 1 | m | AR-05 |
+| Test area size / max slope | 100–5,000 / 10 | m² / degrees | AR-13, AR-14 |
+| Test work area size | 100–40,000 | m² | AR-13 |
+| Slope sample grid | 2 | m | AR-14 |
+| Overlap tolerance | 0.1 | m² | AR-15 |
+| Spatial index cell | 32 | m | decision 0012 |
+
+Road and area values live on their type definitions (`RoadTypeDef`, `AreaTypeDef`), not in `SimTuning`.
+
 ## Population and oxen
 
 | Value | Default | Unit | Rule |

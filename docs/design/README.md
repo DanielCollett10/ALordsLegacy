@@ -21,5 +21,8 @@ The GDD stays the design source until systems are playable. Owner decisions made
 v0.4 are in **`gdd-amendments.md`**, which wins where it disagrees with the GDD.
 Read both. Tasks cite rule IDs from either.
 
+System files (`roads.md`, `areas.md`, `ui.md`, …) hold the current rules for one system each and win over
+the GDD for that system.
+
 **`tuning.md`** lists every placeholder number (time, movement, food, markets, construction),
 its unit and where it lives, plus the derived timing tables. Update it whenever a default changes.
