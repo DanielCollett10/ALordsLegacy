@@ -1,0 +1,269 @@
+using System;
+using System.Collections.Generic;
+using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Geometry;
+
+namespace LordsLegacy.Sim.Roads
+{
+    /// <summary>
+    /// Decides whether a drawn road is allowed and where its junctions are (RD-05..RD-10). Used by the tool
+    /// preview and by the Sim command. Pure: it never changes the world.
+    /// </summary>
+    public static class RoadValidator
+    {
+        private const double ExemptRiseMm = 5;   // a sample counts as "moving away" from a junction if D rises by more than this
+        private const double DedupeMm = 10;
+
+        /// <summary>
+        /// Validates a road. Reasons are checked in order: outside the map, too steep, crosses itself, overlaps road.
+        /// Junctions are planned whatever the result.
+        /// </summary>
+        /// <param name="world">The world (terrain, tuning, road network). Not changed.</param>
+        /// <param name="controlPoints">The clicked points; cleaned and sampled as in RD-02/RD-03.</param>
+        /// <param name="typeId">Road type id.</param>
+        /// <param name="ignoreSegmentId">A segment to treat as absent (for reshaping); -1 for none.</param>
+        public static RoadPreview Validate(SimWorld world, IReadOnlyList<PointMm> controlPoints, string typeId,
+            int ignoreSegmentId = -1)
+        {
+            if (world == null) throw new ArgumentNullException(nameof(world));
+            var noRanges = new List<InvalidRange>();
+            var noJunctions = new List<PlannedJunction>();
+            var none = new List<PointMm>();
+
+            RoadTypeDef type = typeId == null ? null : RoadTypes.Find(typeId);
+            if (type == null) return new RoadPreview(none, noRanges, noJunctions, 0, 0, RoadRefusal.UnknownType);
+            if (controlPoints == null) return new RoadPreview(none, noRanges, noJunctions, 0, 0, RoadRefusal.NotEnoughPoints);
+
+            IReadOnlyList<PointMm> samples = new CatmullRomSampler(world.Tuning).Sample(controlPoints);
+            int n = samples.Count;
+            if (n < 2) return new RoadPreview(samples, noRanges, noJunctions, 0, 0, RoadRefusal.NotEnoughPoints);
+
+            var others = new List<RoadSegment>();
+            foreach (RoadSegment s in world.Roads.Segments) if (s.Id != ignoreSegmentId) others.Add(s);
+
+            double widthMm = type.WidthM * PointMm.MmPerMetre;
+            double lengthM = Polylines.LengthMetres(samples);
+
+            bool outside = false;
+            for (int i = 0; i < n && !outside; i++)
+                if (!world.Terrain.Contains((float)samples[i].XMetres, (float)samples[i].ZMetres)) outside = true;
+
+            List<InvalidRange> ranges = CheckGrade(world, samples, type.MaxGrade, out double maxGrade);
+            bool selfCross = CrossesItself(samples);
+
+            var cuts = new List<(int Lo, int Hi)>();
+            List<PlannedJunction> junctions = PlanJunctions(samples, others, widthMm, lengthM, cuts);
+
+            RoadRefusal reason = RoadRefusal.Valid;
+            if (outside) reason = RoadRefusal.OutsideMap;
+            else if (ranges.Count > 0) reason = RoadRefusal.TooSteep;
+            else if (selfCross) reason = RoadRefusal.CrossesItself;
+            else if (Overlaps(samples, others, junctions, cuts, widthMm)) reason = RoadRefusal.OverlapsRoad;
+
+            return new RoadPreview(samples, ranges, junctions, lengthM, maxGrade, reason);
+        }
+
+        private static List<InvalidRange> CheckGrade(SimWorld world, IReadOnlyList<PointMm> samples, double maxGrade, out double worst)
+        {
+            var ranges = new List<InvalidRange>();
+            worst = 0;
+            int start = -1, end = -1;
+            float prevH = world.Terrain.HeightAt((float)samples[0].XMetres, (float)samples[0].ZMetres);
+            for (int i = 1; i < samples.Count; i++)
+            {
+                float h = world.Terrain.HeightAt((float)samples[i].XMetres, (float)samples[i].ZMetres);
+                double run = samples[i - 1].DistanceTo(samples[i]) / PointMm.MmPerMetre;
+                bool bad = false;
+                if (run > 0)
+                {
+                    double grade = Math.Abs(h - prevH) / run;
+                    if (grade > worst) worst = grade;
+                    bad = grade > maxGrade;
+                }
+                if (bad)
+                {
+                    if (start < 0) start = i - 1;
+                    end = i;
+                }
+                else if (start >= 0)
+                {
+                    ranges.Add(new InvalidRange(start, end));
+                    start = -1;
+                }
+                prevH = h;
+            }
+            if (start >= 0) ranges.Add(new InvalidRange(start, end));
+            return ranges;
+        }
+
+        private static bool CrossesItself(IReadOnlyList<PointMm> s)
+        {
+            int n = s.Count;
+            for (int i = 0; i + 1 < n; i++)
+            {
+                PointMm a1 = s[i], a2 = s[i + 1];
+                long minX = Math.Min(a1.X, a2.X), maxX = Math.Max(a1.X, a2.X);
+                long minZ = Math.Min(a1.Z, a2.Z), maxZ = Math.Max(a1.Z, a2.Z);
+                for (int j = i + 2; j + 1 < n; j++)
+                {
+                    PointMm b1 = s[j], b2 = s[j + 1];
+                    if (Math.Max(b1.X, b2.X) < minX || Math.Min(b1.X, b2.X) > maxX
+                        || Math.Max(b1.Z, b2.Z) < minZ || Math.Min(b1.Z, b2.Z) > maxZ) continue;
+                    if (Segments.Intersects(a1, a2, b1, b2)) return true;
+                }
+            }
+            return false;
+        }
+
+        private static List<PlannedJunction> PlanJunctions(IReadOnlyList<PointMm> samples, List<RoadSegment> others,
+            double widthMm, double lengthM, List<(int Lo, int Hi)> cuts)
+        {
+            int n = samples.Count;
+            var list = new List<PlannedJunction>();
+            var ends = new List<PlannedJunction>();
+
+            for (int e = 0; e < 2; e++)
+            {
+                bool atStart = e == 0;
+                PointMm end = atStart ? samples[0] : samples[n - 1];
+                RoadSegment best = null;
+                PolylineHit bestHit = default(PolylineHit);
+                foreach (RoadSegment seg in others)
+                {
+                    PolylineHit h = Polylines.Nearest(seg.Samples, end);
+                    if (h.DistanceMm <= widthMm / 2 && (best == null || h.DistanceMm < bestHit.DistanceMm)) { best = seg; bestHit = h; }
+                }
+                if (best == null) continue;
+
+                PointMm p = Round(bestHit.X, bestHit.Z);
+                PlannedJunction j;
+                double newArc = atStart ? 0 : lengthM;
+                if (p == best.Samples[0])
+                    j = new PlannedJunction(JunctionKind.JoinNode, best.Id, best.NodeA, p, 0, newArc);
+                else if (p == best.Samples[best.Samples.Count - 1])
+                    j = new PlannedJunction(JunctionKind.JoinNode, best.Id, best.NodeB, p, best.LengthM, newArc);
+                else
+                    j = new PlannedJunction(JunctionKind.T, best.Id, -1, p, bestHit.ArcLengthMm / PointMm.MmPerMetre, newArc);
+                list.Add(j);
+                ends.Add(j);
+                cuts.Add(atStart ? (-1, 0) : (n - 1, n));
+            }
+
+            foreach (RoadSegment seg in others)
+            {
+                IReadOnlyList<PointMm> b = seg.Samples;
+                for (int i = 0; i + 1 < n; i++)
+                {
+                    PointMm a1 = samples[i], a2 = samples[i + 1];
+                    for (int k = 0; k + 1 < b.Count; k++)
+                    {
+                        SegmentRelation rel = Segments.Classify(a1, a2, b[k], b[k + 1]);
+                        if (rel != SegmentRelation.Crossing && rel != SegmentRelation.Touching) continue;
+                        // Parallel pieces only touch where they run along each other: that is overlap, not a junction.
+                        if ((a2.X - a1.X) * (b[k + 1].Z - b[k].Z) - (a2.Z - a1.Z) * (b[k + 1].X - b[k].X) == 0) continue;
+                        PointMm p = rel == SegmentRelation.Crossing ? CrossingPoint(a1, a2, b[k], b[k + 1]) : TouchPoint(a1, a2, b[k], b[k + 1]);
+                        if (Near(list, p)) continue;
+
+                        double newArc = Polylines.Nearest(samples, p).ArcLengthMm / PointMm.MmPerMetre;
+                        if (NearEndJunction(ends, seg.Id, newArc, widthMm / 2 / PointMm.MmPerMetre)) continue;
+                        double oldArc = Polylines.Nearest(b, p).ArcLengthMm / PointMm.MmPerMetre;
+                        int node = p == b[0] ? seg.NodeA : p == b[b.Count - 1] ? seg.NodeB : -1;
+                        list.Add(new PlannedJunction(JunctionKind.X, seg.Id, node, p, oldArc, newArc));
+                        cuts.Add((i, i + 1));
+                    }
+                }
+            }
+
+            // Sort by position along the new road, keeping cuts in step.
+            var order = new List<int>();
+            for (int i = 0; i < list.Count; i++) order.Add(i);
+            order.Sort((x, y) =>
+            {
+                int c = list[x].NewArcM.CompareTo(list[y].NewArcM);
+                if (c != 0) return c;
+                c = list[x].SegmentId.CompareTo(list[y].SegmentId);
+                return c != 0 ? c : x.CompareTo(y);
+            });
+            var sorted = new List<PlannedJunction>();
+            var sortedCuts = new List<(int Lo, int Hi)>();
+            foreach (int i in order) { sorted.Add(list[i]); sortedCuts.Add(cuts[i]); }
+            cuts.Clear();
+            cuts.AddRange(sortedCuts);
+            return sorted;
+        }
+
+        private static bool Near(List<PlannedJunction> list, PointMm p)
+        {
+            foreach (PlannedJunction j in list) if (j.Point.DistanceTo(p) <= DedupeMm) return true;
+            return false;
+        }
+
+        private static bool NearEndJunction(List<PlannedJunction> ends, int segId, double newArcM, double withinM)
+        {
+            foreach (PlannedJunction j in ends)
+                if (j.SegmentId == segId && Math.Abs(j.NewArcM - newArcM) < withinM) return true;
+            return false;
+        }
+
+        private static PointMm Round(double x, double z) =>
+            new PointMm((long)Math.Round(x, MidpointRounding.AwayFromZero), (long)Math.Round(z, MidpointRounding.AwayFromZero));
+
+        private static PointMm CrossingPoint(PointMm a1, PointMm a2, PointMm b1, PointMm b2)
+        {
+            double rx = a2.X - a1.X, rz = a2.Z - a1.Z, sx = b2.X - b1.X, sz = b2.Z - b1.Z;
+            double denom = rx * sz - rz * sx;
+            double t = ((b1.X - a1.X) * sz - (b1.Z - a1.Z) * sx) / denom;
+            return Round(a1.X + t * rx, a1.Z + t * rz);
+        }
+
+        private static PointMm TouchPoint(PointMm a1, PointMm a2, PointMm b1, PointMm b2)
+        {
+            if (Segments.ContainsPoint(b1, b2, a1)) return a1;
+            if (Segments.ContainsPoint(b1, b2, a2)) return a2;
+            if (Segments.ContainsPoint(a1, a2, b1)) return b1;
+            return b2;
+        }
+
+        private static bool Overlaps(IReadOnlyList<PointMm> samples, List<RoadSegment> others, List<PlannedJunction> junctions,
+            List<(int Lo, int Hi)> cuts, double widthMm)
+        {
+            if (others.Count == 0) return false;
+            int n = samples.Count;
+            var d = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                double best = double.MaxValue;
+                foreach (RoadSegment seg in others)
+                    best = Math.Min(best, Polylines.Nearest(seg.Samples, samples[i]).DistanceMm);
+                d[i] = best;
+            }
+
+            var exempt = new bool[n];
+            for (int q = 0; q < junctions.Count; q++)
+            {
+                for (int i = 0; i < n; i++)
+                    if (samples[i].DistanceTo(junctions[q].Point) <= widthMm) exempt[i] = true;
+                int lo = cuts[q].Lo, hi = cuts[q].Hi;
+                if (lo >= 0) { exempt[lo] = true; Walk(exempt, d, lo, -1, widthMm); }
+                if (hi < n) { exempt[hi] = true; Walk(exempt, d, hi, 1, widthMm); }
+            }
+
+            for (int i = 0; i < n; i++)
+                if (!exempt[i] && d[i] < widthMm) return true;
+            return false;
+        }
+
+        // Exempts samples moving away from a junction while they get steadily further from the road, until a full width away.
+        private static void Walk(bool[] exempt, double[] d, int from, int dir, double widthMm)
+        {
+            int cur = from;
+            while (d[cur] < widthMm)
+            {
+                int next = cur + dir;
+                if (next < 0 || next >= d.Length || !(d[next] > d[cur] + ExemptRiseMm)) break;
+                exempt[next] = true;
+                cur = next;
+            }
+        }
+    }
+}

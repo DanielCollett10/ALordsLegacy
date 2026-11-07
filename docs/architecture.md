@@ -57,7 +57,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   end position. `SplitSegmentAt` cuts the samples and control points as decision 0013 says, removes the original id and
   issues two new ones (no-op at an end). `RemoveSegment` drops emptied nodes. `Version` rises on every change;
   `AreConnected`, `ComponentCount`, `ReachableSegmentCount`; `FindNearest` returns a `RoadHit` (None/End/Line), preferring
-  a node in range over a line point. Commands and checks are not built yet.
+  a node in range over a line point.
+  `RoadValidator.Validate(world, controlPoints, typeId, ignoreSegmentId = -1)` is the one check used by the tool preview
+  and the future command. It samples the curve, then returns a `RoadPreview` (samples, `InvalidRanges` of too-steep
+  sample indices, `PlannedJunction`s ordered along the new road, length, max grade, `RoadRefusal` reason). Reasons in
+  order: outside map, too steep, crosses itself, overlaps road. Junctions: `T` (a new end within half a width of a
+  centre line, snapped to the nearest point), `JoinNode` (that point is an existing segment end, no split) and `X`
+  (centre lines cross). Overlap ignores samples within one width of a junction and the stretch next to it that is still
+  moving away from the road. A flat (no-map) world counts every point as inside. It never changes the world.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
   `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created/removed ids,
   or Rejected with `CommandRejectCode` and text), `CommandLog` (append-only `(tick, command)` entries).
