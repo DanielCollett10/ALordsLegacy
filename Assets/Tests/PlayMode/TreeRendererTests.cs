@@ -121,10 +121,19 @@ namespace LordsLegacy.Tests.PlayMode
             {
                 renderer.Draw();
                 Assert.AreEqual(5, renderer.DrawnInstanceCount, "All five synthetic trees should be drawn.");
+                var before = new Matrix4x4[renderer.CellCount][];
+                for (int i = 0; i < before.Length; i++) before[i] = renderer.GetCellMatrices(i);
 
                 Assert.IsTrue(host.World.Trees.Remove(new TreeId(3)), "Tree 3 should be removed through the Sim.");
                 renderer.Draw();
                 Assert.AreEqual(4, renderer.DrawnInstanceCount, "Drawn count should drop by one after removal.");
+
+                // Each synthetic tree is in its own 64 m cell: the emptied cell goes, the rest keep their arrays.
+                Assert.AreEqual(5, before.Length);
+                Assert.AreEqual(4, renderer.CellCount);
+                var kept = new[] { before[0], before[1], before[3], before[4] };
+                for (int i = 0; i < 4; i++)
+                    Assert.AreSame(kept[i], renderer.GetCellMatrices(i), "Untouched cell " + i + " was rebuilt.");
             }
             finally
             {
