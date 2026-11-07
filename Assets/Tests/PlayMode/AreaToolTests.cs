@@ -1,0 +1,367 @@
+using System.Collections;
+using LordsLegacy.Game;
+using LordsLegacy.Game.Tools;
+using LordsLegacy.Game.Tools.Shared;
+using LordsLegacy.Game.Visuals;
+using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Tuning;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.TestTools;
+using UnityEngine.UIElements;
+
+namespace LordsLegacy.Tests.PlayMode
+{
+    /// <summary>PlayMode tests for <see cref="AreaTool"/> on a synthetic SimHost (T-114).</summary>
+    public class AreaToolTests
+    {
+        private GameObject _hostGo, _rendererGo, _panelGo, _toolGo, _camGo, _groundGo;
+        private PanelSettings _panelSettings;
+        private SimHost _host;
+        private AreaRenderer _renderer;
+        private ToolPanelView _panel;
+        private AreaTool _tool;
+        private ToolController _controller;
+        private Camera _cam;
+        private float _time;
+
+        [TearDown]
+        public void TearDown()
+        {
+            foreach (var go in new[] { _hostGo, _rendererGo, _panelGo, _toolGo, _camGo, _groundGo })
+                if (go != null) Object.Destroy(go);
+            if (_panelSettings != null) Object.Destroy(_panelSettings);
+        }
+
+        private IEnumerator Setup(string toolId = AreaTool.TestToolId, string typeId = AreaTypes.TestId)
+        {
+            _hostGo = new GameObject("SyntheticSimHost");
+            _host = _hostGo.AddComponent<SimHost>();
+            _host.Initialize(new SimTuning(), SyntheticMap.CreateRamp());
+            _host.AutoUpdate = false;
+
+            _camGo = new GameObject("TestCam");
+            _cam = _camGo.AddComponent<Camera>();
+            _cam.orthographic = true;
+            _cam.orthographicSize = 60f;
+            _camGo.transform.position = new Vector3(100f, 50f, 100f);
+            _camGo.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+
+            _groundGo = new GameObject("TestGround");
+            _groundGo.transform.position = new Vector3(100f, -0.5f, 100f);
+            _groundGo.AddComponent<BoxCollider>().size = new Vector3(1000f, 1f, 1000f);
+
+            var pickerGo = new GameObject("Picker");
+            pickerGo.transform.SetParent(_groundGo.transform, false);
+            var picker = pickerGo.AddComponent<GroundPicker>();
+            picker.PickCamera = _cam;
+            picker.Host = _host;
+
+            _rendererGo = new GameObject("TestAreaRenderer");
+            _renderer = _rendererGo.AddComponent<AreaRenderer>();
+            _renderer.Configure(_host);
+
+            _panelGo = new GameObject("ToolPanel");
+            _panelGo.SetActive(false);
+            _panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+            _panelGo.AddComponent<UIDocument>().panelSettings = _panelSettings;
+            _panel = _panelGo.AddComponent<ToolPanelView>();
+            _panelGo.SetActive(true);
+
+            _toolGo = new GameObject("AreaTool");
+            _controller = _toolGo.AddComponent<ToolController>();
+            _tool = _toolGo.AddComponent<AreaTool>();
+            _tool.Configure(toolId, typeId, _host, picker, _renderer, _panel, _controller);
+            _controller.Register(_tool);
+            yield return null; // let physics see the ground collider
+            _controller.Toggle(toolId);
+        }
+
+        private Vector2 Screen(float x, float z) => _cam.WorldToScreenPoint(new Vector3(x, 0f, z));
+
+        private void Click(float x, float z, PressButton b = PressButton.Left)
+        {
+            var p = Screen(x, z);
+            _tool.PointerDown(b, p);
+            _time += 2f; // never a double click
+            _tool.PointerUp(b, p, _time);
+        }
+
+        /// <summary>Four corners of a 40 m square starting at (40, 40): enough for a valid test area.</summary>
+        private void ClickSquareMinusLast()
+        {
+            Click(40, 40); Click(80, 40); Click(80, 80);
+        }
+
+        [UnityTest]
+        public IEnumerator FourPointsConfirmCreatesAreaAndClearsDraft()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            Assert.AreEqual(3, _tool.PointCount);
+            Click(40, 80);
+            Assert.AreEqual(4, _tool.PointCount);
+            StringAssert.Contains("Test area", _panel.Status);
+            StringAssert.Contains("4 points", _panel.Status);
+            StringAssert.Contains("1,600 m²", _panel.Status);
+            StringAssert.Contains("Valid", _panel.Status);
+            Assert.IsTrue(_panel.IsConfirmEnabled);
+            Assert.IsNotNull(_renderer.PreviewMesh);
+
+            _host.World.Pause(); // works while paused
+            _panel.ClickConfirm();
+            Assert.AreEqual(1, _host.World.Areas.Count);
+            Assert.IsFalse(_tool.HasDraft);
+            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsNull(_renderer.PreviewMesh);
+        }
+
+        [UnityTest]
+        public IEnumerator ThreePointsCannotBeConfirmedOrClosed()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            Assert.IsFalse(_tool.CurrentPreview.IsValid);
+            StringAssert.Contains("too few points", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+            _tool.Confirm();
+            _panel.ClickConfirm();
+            Assert.AreEqual(0, _host.World.Areas.Count, "Confirm does nothing with 3 points.");
+
+            Click(40, 40); // click on point 1: must not close
+            Assert.AreEqual(0, _host.World.Areas.Count, "Click on point 1 cannot close from 3 points.");
+            Assert.AreEqual(3, _tool.PointCount, "A click on a placed point adds nothing.");
+
+            // Enter key path.
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Enter));
+            yield return null;
+            Assert.AreEqual(0, _host.World.Areas.Count, "Enter cannot close from 3 points.");
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
+            yield return null;
+
+            // Double-click on new ground: one point is added, no close.
+            var p = Screen(40, 80);
+            _tool.PointerDown(PressButton.Left, p); _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(0, _host.World.Areas.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator DoubleClickClosesFromFourPointsAddingOnePoint()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            var p = Screen(40, 80);
+            _tool.PointerDown(PressButton.Left, p); _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            Assert.AreEqual(4, _tool.PointCount);
+            _tool.PointerDown(PressButton.Left, p); _tool.PointerUp(PressButton.Left, p, _time += 0.1f);
+            Assert.AreEqual(1, _host.World.Areas.Count);
+            Assert.AreEqual(4, new System.Collections.Generic.List<AreaRecord>(_host.World.Areas.All)[0].Shape.Vertices.Count);
+            Assert.IsFalse(_tool.HasDraft);
+        }
+
+        [UnityTest]
+        public IEnumerator DoubleClickWithThreePointsDoesNotClose()
+        {
+            yield return Setup();
+            Click(40, 40); Click(80, 40);
+            var p = Screen(80, 80);
+            _tool.PointerDown(PressButton.Left, p); _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            _tool.PointerDown(PressButton.Left, p); _tool.PointerUp(PressButton.Left, p, _time += 0.1f);
+            Assert.AreEqual(3, _tool.PointCount, "The pair adds exactly one point.");
+            Assert.AreEqual(0, _host.World.Areas.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator ClickOnPointOneClosesRatherThanDrags()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            Click(40, 80);
+            Assert.AreEqual(4, _tool.PointCount);
+            var before = _tool.Points[0];
+            Click(40, 40); // press and release on point 1, no movement
+            Assert.AreEqual(1, _host.World.Areas.Count, "A click on point 1 closes the shape.");
+            Assert.IsFalse(_tool.HasDraft);
+            foreach (var a in _host.World.Areas.All) Assert.AreEqual(before, a.Shape.Vertices[0], "Point 1 did not move.");
+        }
+
+        [UnityTest]
+        public IEnumerator DragMovesVertexWithoutClosingOrAdding()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            Click(40, 80);
+            Vector3 camPos = _camGo.transform.position;
+
+            _tool.PointerDown(PressButton.Left, Screen(40, 40)); // on point 1
+            _tool.PointerMove(Screen(35, 35));
+            _tool.PointerMove(Screen(30, 30));
+            Assert.AreEqual(30.0, _tool.Points[0].XMetres, 0.5);
+            Assert.AreEqual(30.0, _tool.Points[0].ZMetres, 0.5);
+            _tool.PointerUp(PressButton.Left, Screen(30, 30), _time += 2f);
+            Assert.AreEqual(4, _tool.PointCount, "A drag moves a point, it does not add one.");
+            Assert.AreEqual(0, _host.World.Areas.Count, "Dragging point 1 must not close the shape.");
+            Assert.AreEqual(30.0, _tool.Points[0].XMetres, 0.5);
+            Assert.AreEqual(camPos, _camGo.transform.position);
+        }
+
+        [UnityTest]
+        public IEnumerator MaxPointsStopsAtEight()
+        {
+            yield return Setup();
+            float[,] pts = { { 40, 20 }, { 60, 20 }, { 80, 40 }, { 80, 60 }, { 60, 80 }, { 40, 80 }, { 20, 60 }, { 20, 40 } };
+            for (int i = 0; i < 8; i++) Click(pts[i, 0], pts[i, 1]);
+            Assert.AreEqual(8, _tool.PointCount);
+            Click(100, 100);
+            Assert.AreEqual(8, _tool.PointCount, "A ninth point is not added.");
+        }
+
+        [UnityTest]
+        public IEnumerator BackspaceRemovesLastPoint()
+        {
+            yield return Setup();
+            Click(40, 40); Click(80, 40); Click(80, 80);
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
+            yield return null;
+            Assert.AreEqual(2, _tool.PointCount);
+            Assert.AreEqual(80.0, _tool.Points[1].XMetres, 0.5);
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator RightClickOnVertexRemovesItButEmptyGroundCancels()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            Click(80, 40, PressButton.Right);
+            Assert.AreEqual(2, _tool.PointCount);
+            Assert.AreEqual(80.0, _tool.Points[1].XMetres, 0.5, "Point (80,40) removed, (80,80) remains.");
+            Assert.AreEqual(80.0, _tool.Points[1].ZMetres, 0.5);
+
+            Click(150, 150, PressButton.Right);
+            Assert.IsFalse(_tool.HasDraft, "Right click on empty ground cancels the draft.");
+            StringAssert.Contains("no points", _panel.Status);
+        }
+
+        [UnityTest]
+        public IEnumerator RightDragDoesNothing()
+        {
+            yield return Setup();
+            ClickSquareMinusLast();
+            foreach (var start in new[] { Screen(80, 40), Screen(150, 150) }) // on a vertex, and on empty ground
+            {
+                _tool.PointerDown(PressButton.Right, start);
+                _tool.PointerMove(start + new Vector2(30f, 0f));
+                _tool.PointerUp(PressButton.Right, start + new Vector2(30f, 0f), _time += 2f);
+                Assert.AreEqual(3, _tool.PointCount, "Right drag must neither remove a point nor cancel.");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator RightDragDoesNotDeleteAnArea()
+        {
+            yield return Setup();
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(), AreaTypes.TestId)).IsAccepted);
+            var a = Screen(60, 60);
+            _tool.PointerDown(PressButton.Right, a);
+            _tool.PointerMove(a + new Vector2(30f, 0f));
+            _tool.PointerUp(PressButton.Right, a + new Vector2(30f, 0f), _time += 2f);
+            Assert.AreEqual(1, _host.World.Areas.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator EscapeCancelsThenSecondEscapeLeavesTool()
+        {
+            yield return Setup();
+            Click(40, 40);
+            Assert.IsTrue(_controller.HandleEscape(), "First Escape cancels the draft.");
+            Assert.IsFalse(_tool.HasDraft);
+            Assert.AreSame(_tool, _controller.ActiveTool);
+            Assert.IsTrue(_controller.HandleEscape(), "Second Escape leaves the tool.");
+            Assert.IsNull(_controller.ActiveTool);
+        }
+
+        [UnityTest]
+        public IEnumerator CancelButtonCancelsDraft()
+        {
+            yield return Setup();
+            Click(40, 40);
+            _panel.ClickCancel();
+            Assert.IsFalse(_tool.HasDraft);
+        }
+
+        [UnityTest]
+        public IEnumerator InvalidReasonShownAndConfirmBlocked()
+        {
+            yield return Setup();
+            Click(40, 40); Click(42, 40); Click(42, 42); Click(40, 42); // 4 m², too small
+            Assert.IsFalse(_tool.CurrentPreview.IsValid);
+            StringAssert.Contains("too small", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+            _tool.Confirm();
+            Assert.AreEqual(0, _host.World.Areas.Count);
+            Assert.AreEqual(4, _tool.PointCount);
+        }
+
+        private static AreaShape Square()
+        {
+            return AreaShape.Straight(new[]
+            {
+                PointMm.FromMetres(40, 40), PointMm.FromMetres(80, 40), PointMm.FromMetres(80, 80), PointMm.FromMetres(40, 80),
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator RightClickDeletesAreaOfThisKindOnlyWhenNoDraft()
+        {
+            yield return Setup();
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(), AreaTypes.TestId)).IsAccepted);
+            // A work area elsewhere is not of this tool's kind.
+            var work = AreaShape.Straight(new[]
+            {
+                PointMm.FromMetres(120, 40), PointMm.FromMetres(160, 40), PointMm.FromMetres(160, 80), PointMm.FromMetres(120, 80),
+            });
+            Assert.IsTrue(_host.Execute(new DesignateArea(work, AreaTypes.TestWorkId)).IsAccepted);
+
+            Click(140, 60, PressButton.Right);
+            Assert.AreEqual(2, _host.World.Areas.Count, "Test area tool does not delete a work area.");
+            Click(150, 150, PressButton.Right);
+            Assert.AreEqual(2, _host.World.Areas.Count, "Empty ground deletes nothing.");
+
+            Click(150, 150); // a draft exists: right click on the area cancels, deletes nothing
+            Click(60, 60, PressButton.Right);
+            Assert.AreEqual(2, _host.World.Areas.Count);
+            Assert.IsFalse(_tool.HasDraft);
+
+            Click(60, 60, PressButton.Right);
+            Assert.AreEqual(1, _host.World.Areas.Count, "With no draft a right click deletes the area.");
+        }
+
+        [UnityTest]
+        public IEnumerator WorkAreaToolDrawsAndDeletesWorkAreas()
+        {
+            yield return Setup(AreaTool.TestWorkToolId, AreaTypes.TestWorkId);
+            Click(40, 40); Click(80, 40); Click(80, 80); Click(40, 80);
+            StringAssert.Contains("Test work area", _panel.Status);
+            _tool.Confirm();
+            Assert.AreEqual(1, _host.World.Areas.Count);
+            foreach (var a in _host.World.Areas.All) Assert.AreEqual(AreaTypes.TestWorkId, a.TypeId);
+            Click(60, 60, PressButton.Right);
+            Assert.AreEqual(0, _host.World.Areas.Count);
+        }
+
+        [Test]
+        public void BuildBarEnablesBothAreaEntries()
+        {
+            foreach (var e in ToolEntry.Defaults())
+                if (e.Id == AreaTool.TestToolId || e.Id == AreaTool.TestWorkToolId) Assert.IsTrue(e.Enabled, e.Id);
+        }
+    }
+}

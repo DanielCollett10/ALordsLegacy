@@ -40,6 +40,7 @@ namespace LordsLegacy.EditorTools.Scenes
             var topBar = CreateTopBar(host);
             CreateBuildBar();
             CreateRoadTool(host);
+            CreateAreaTools(host);
             CreateGroundReadout();
             CreateDebugOverlay(host);
             CreateSunController(host, light, topBar);
@@ -187,6 +188,40 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             SetRef(tool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             return go;
+        }
+
+        /// <summary>Adds the AreaRenderer and the Test area and Test work area tools, sharing the tool panel (T-114).</summary>
+        public static GameObject CreateAreaTools(SimHost host)
+        {
+            var ar = new GameObject("AreaRenderer").AddComponent<LordsLegacy.Game.Visuals.AreaRenderer>();
+            SetRef(ar, "host", host);
+            var panel = Object.FindFirstObjectByType<ToolPanelView>();
+            var defs = new[]
+            {
+                new[] { "TestAreaTool", LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Sim.Areas.AreaTypes.TestId },
+                new[] { "TestWorkAreaTool", LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, LordsLegacy.Sim.Areas.AreaTypes.TestWorkId },
+            };
+            GameObject last = null;
+            foreach (var d in defs)
+            {
+                last = new GameObject(d[0]);
+                var tool = last.AddComponent<LordsLegacy.Game.Tools.AreaTool>();
+                SetString(tool, "_toolId", d[1]);
+                SetString(tool, "_typeId", d[2]);
+                SetRef(tool, "_host", host);
+                SetRef(tool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+                SetRef(tool, "_areas", ar);
+                SetRef(tool, "_panel", panel);
+                SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            }
+            return last;
+        }
+
+        private static void SetString(Component target, string field, string value)
+        {
+            var so = new SerializedObject(target);
+            so.FindProperty(field).stringValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>Adds the cursor ground readout UIDocument and view.</summary>
