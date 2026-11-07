@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Roads;
 
@@ -9,7 +10,9 @@ namespace LordsLegacy.Sim.Commands
     /// <summary>
     /// Draws a road (RD-07, decision 0013). Re-runs <see cref="RoadValidator"/>; if valid, splits the existing
     /// segments at the planned junctions and adds the new road cut at every junction. Created ids are segment
-    /// ids (new segments and split halves); removed ids are the segments that were split.
+    /// ids (new segments and split halves); removed ids are the segments that were split. Trees within half the
+    /// road width + <see cref="Tuning.SimTuning.RoadTreeClearanceM"/> of a new segment are removed; their ids are
+    /// in <see cref="CommandResult.RemovedTreeIds"/>.
     /// </summary>
     public sealed class DrawRoad : ISimCommand
     {
@@ -84,10 +87,20 @@ namespace LordsLegacy.Sim.Commands
             }
 
             List<PointMm> cps = ControlPointFilter.Clean(_controlPoints, world.Tuning.RoadMinPointSpacingM);
+            // Trees within half a width + clearance of each new centre line go (RD-11, BLD-10-B). Each query
+            // only sees trees still standing, so no tree id is reported twice.
+            double clearM = RoadTypes.Find(TypeId).WidthM / 2 + world.Tuning.RoadTreeClearanceM;
+            var treesRemoved = new List<long>();
             foreach (RoadPiece piece in RoadCutter.Cut(preview.Samples, cps, startNode, endNode, interior))
-                created.Add(net.AddSegment(TypeId, Curve, piece.ControlPoints, piece.Samples).Id);
+            {
+                RoadSegment seg = net.AddSegment(TypeId, Curve, piece.ControlPoints, piece.Samples);
+                created.Add(seg.Id);
+                foreach (TreeId t in TreeClearing.RemoveNearPolyline(world.Trees, seg.Samples, clearM))
+                    treesRemoved.Add(t.Value);
+            }
+            treesRemoved.Sort();
 
-            return CommandResult.Accepted(Sorted(created), Sorted(removed));
+            return CommandResult.Accepted(Sorted(created), Sorted(removed), treesRemoved.ToArray());
         }
 
         // The current piece of an original segment that the point lies on (the original itself if never split).
