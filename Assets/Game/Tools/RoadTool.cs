@@ -94,7 +94,7 @@ namespace LordsLegacy.Game.Tools
         public void PointerDown(PressButton button, Vector2 screenPos)
         {
             if (!_active) return;
-            if (_controller != null && _controller.IsPointerOverUi) return;
+            if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) return;
             _press.Press(button, screenPos);
         }
 

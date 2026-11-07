@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace LordsLegacy.Game.Tools
 {
@@ -20,7 +21,35 @@ namespace LordsLegacy.Game.Tools
         public ITool ActiveTool { get; private set; }
 
         /// <summary>True while the pointer is over game UI; tools must ignore clicks then (UIB-05).</summary>
-        public bool IsPointerOverUi => _bar != null && _bar.IsPointerOver;
+        public bool IsPointerOverUi
+        {
+            get
+            {
+                if (_bar != null && _bar.IsPointerOver) return true;
+                var mouse = Mouse.current;
+                return mouse != null && IsOverAnyPanel(mouse.position.ReadValue());
+            }
+        }
+
+        /// <summary>True if any visible, pickable UI Toolkit element (bar, tool panel, top bar...) is under the screen position (pixels).</summary>
+        public bool IsPointerOverUiAt(Vector2 screenPos)
+        {
+            return (_bar != null && _bar.IsPointerOver) || IsOverAnyPanel(screenPos);
+        }
+
+        private static bool IsOverAnyPanel(Vector2 screenPos)
+        {
+            var docs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            for (int i = 0; i < docs.Length; i++)
+            {
+                var root = docs[i].rootVisualElement;
+                var panel = root?.panel;
+                if (panel == null) continue;
+                var p = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screenPos.x, Screen.height - screenPos.y));
+                if (panel.Pick(p) != null) return true;
+            }
+            return false;
+        }
 
         /// <summary>Sets the build bar (for code that creates the component). Call before enabling.</summary>
         public void SetBar(BuildBarView bar) { _bar = bar; }
