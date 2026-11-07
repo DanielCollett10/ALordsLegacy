@@ -39,6 +39,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateGroundPicker(host, cam);
             var topBar = CreateTopBar(host);
             CreateBuildBar();
+            CreateRoadTool(host);
             CreateGroundReadout();
             CreateDebugOverlay(host);
             CreateSunController(host, light, topBar);
@@ -163,6 +164,27 @@ namespace LordsLegacy.EditorTools.Scenes
             var tools = new GameObject("ToolController").AddComponent<LordsLegacy.Game.Tools.ToolController>();
             SetRef(tools, "_bar", view);
             SetRef(tools, "_camera", Object.FindFirstObjectByType<CameraRig>());
+            return go;
+        }
+
+        /// <summary>Adds the RoadRenderer, the tool panel UIDocument and the RoadTool, all wired together (T-100).</summary>
+        public static GameObject CreateRoadTool(SimHost host)
+        {
+            var rr = new GameObject("RoadRenderer").AddComponent<RoadRenderer>();
+            SetRef(rr, "host", host);
+            SetRef(rr, "registry", Load<VisualRegistry>(RegistryPath));
+
+            var panelGo = CreateUiDocument("ToolPanel", "Assets/Game/UI/ToolPanel/ToolPanel.uxml");
+            var panel = panelGo.AddComponent<ToolPanelView>();
+            SetRef(panel, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/ToolPanel/ToolPanel.uss"));
+
+            var go = new GameObject("RoadTool");
+            var tool = go.AddComponent<LordsLegacy.Game.Tools.RoadTool>();
+            SetRef(tool, "_host", host);
+            SetRef(tool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(tool, "_roads", rr);
+            SetRef(tool, "_panel", panel);
+            SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             return go;
         }
 
