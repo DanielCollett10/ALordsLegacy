@@ -143,6 +143,32 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(50f, _rig.PitchDeg, 0.001f);
         }
 
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator MiddleDragThroughInputChangesYawAndPitchNotDistance()
+        {
+            var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+            _rig.EdgePanEnabled = false;
+            _rig.SetPose(100, 100, 30, 50, 0);
+            yield return null;
+            float d0 = _rig.FocusDistance();
+            var centre = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            for (int i = 0; i < 4; i++)
+            {
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse, new UnityEngine.InputSystem.LowLevel.MouseState
+                {
+                    position = centre,
+                    delta = new Vector2(20f, 10f),
+                }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Middle));
+                yield return null;
+            }
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse, new UnityEngine.InputSystem.LowLevel.MouseState { position = centre });
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+            Assert.Greater(Mathf.Abs(Mathf.DeltaAngle(0f, _rig.YawDeg)), 0.5f);
+            Assert.Greater(Mathf.Abs(_rig.PitchDeg - 50f), 0.5f);
+            Assert.AreEqual(d0, _rig.FocusDistance(), d0 * 0.02f);
+        }
+
         [Test]
         public void RotateWrapsYaw()
         {
