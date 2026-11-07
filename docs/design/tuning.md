@@ -41,7 +41,7 @@ Derived: clock runs 96× real time at 1×. A year is 91 h at 1×, 11.4 h at 8×,
 | Road speed multiplier | 1.5 | × | ROAD-10 |
 
 > Implementation note (Walk and ox speed, TIME-04): `SimTuning` holds both values, but no Sim system moves anyone yet.
-> The road multiplier is not in code.
+> The road multiplier is stored on the dirt path type (`RoadTypeDef.SpeedMultiplier` = 1.5), but no movement reads it.
 
 Derived (walking, off-road): 52 m per game hour; quarter day ≈ 310 m; half day ≈ 630 m;
 full day ≈ 1.25 km. Crossing a 25 km world ≈ 20 game days. If walk speed or day length
@@ -69,6 +69,10 @@ Where they live: per-type values (road width, max grade, area points, m², max s
 (`RoadTypeDef`, `AreaTypeDef`). Shared values (sample spacing, min point distance, tree clearance, curve flattening
 spacing, slope sample grid, overlap tolerance, spatial index cell) are in `SimTuning`. Snap distance is a
 presentation value in `ViewSettings`.
+
+> Implementation note (spatial index cell and area values, decision 0012): `SimTuning.SpatialIndexCellM` (32) is not
+> read. `TreeRegistry` uses its own grid (16 m, constructor default). Curve flattening, slope grid and overlap
+> tolerance are also unread: they belong to the area tasks (M4), and `AreaTypeDef` does not exist yet.
 
 ## Population and oxen
 

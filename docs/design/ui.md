@@ -26,6 +26,13 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 - Invalid reasons are also labelled in the world near the problem when the tool can tell where it is
   (e.g. the red stretch of a too-steep road, or the overlapped area).
 
+> Implementation note (panel visibility): the road tool shows the panel whenever it is active, with an idle hint
+> ("Road · no points yet"). That matches `roads.md` ("the tool panel shows while the tool is active") but not the
+> sentence above ("shown only while a tool has a draft"). Owner to pick one.
+>
+> Implementation note (invalid label): when invalid, line 1 shows the bare reason (e.g. `too steep`), without the
+> `Invalid:` prefix shown above.
+
 ## Top bar addition
 
 - **Snapping: On/Off** toggle on the right (UI-02). It is a presentation setting (`ViewSettings`), not Sim state.
