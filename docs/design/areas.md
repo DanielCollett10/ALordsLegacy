@@ -3,6 +3,9 @@
 Implements GDD section 3 (AREA, WORK) and tech spec section 9 (GEO), with the owner decisions
 below. **Where this file and the GDD disagree, this file wins.** Geometry: decision 0012.
 
+> Implementation note (status): nothing in this file is in code yet (M4). There are no area types, area commands or
+> area tool. Decision 0011 names `DesignateArea` and `DeleteArea` as the planned commands.
+
 ## What the player does
 
 1. Click **Test area** (or **Test work area**) on the build bar.
