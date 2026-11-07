@@ -29,7 +29,7 @@ namespace LordsLegacy.Game.Tools
 
         private readonly List<PointMm> _points = new List<PointMm>();
         private readonly PressTracker _press = new PressTracker();
-        private ToolController _controller;
+        [SerializeField] private ToolController _controller;
         private bool _active;
         private RoadPreview _preview;
         private string _rejection;
@@ -190,6 +190,11 @@ namespace LordsLegacy.Game.Tools
         }
 
         private void OnPanelCancelled() { ClearDraft(); }
+
+        private void OnEnable()
+        {
+            if (_controller != null) _controller.Register(this);
+        }
 
         private void OnDestroy() { Unsubscribe(); }
 
