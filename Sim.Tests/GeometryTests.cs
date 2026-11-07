@@ -48,6 +48,27 @@ namespace LordsLegacy.Sim.Tests
         }
 
         [Test]
+        public void Segments_ZeroLengthSegments()
+        {
+            Assert.AreEqual(SegmentRelation.None, Segments.Classify(P(5, 5), P(5, 5), P(0, 0), P(10, 0)));
+            Assert.AreEqual(SegmentRelation.None, Segments.Classify(P(0, 0), P(10, 0), P(5, 5), P(5, 5)));
+            Assert.AreEqual(SegmentRelation.Touching, Segments.Classify(P(5, 0), P(5, 0), P(0, 0), P(10, 0)));
+            Assert.AreEqual(SegmentRelation.Touching, Segments.Classify(P(0, 0), P(10, 0), P(5, 0), P(5, 0)));
+            Assert.AreEqual(SegmentRelation.Touching, Segments.Classify(P(1, 1), P(1, 1), P(1, 1), P(1, 1)));
+            Assert.AreEqual(SegmentRelation.None, Segments.Classify(P(1, 1), P(1, 1), P(2, 2), P(2, 2)));
+            Assert.AreEqual(SegmentRelation.None, Segments.Classify(P(11, 0), P(11, 0), P(0, 0), P(10, 0)));
+        }
+
+        [Test]
+        public void Polyline_MinDistance_RepeatedPoint()
+        {
+            var a = new[] { P(0, 0), P(10, 0) };
+            var b = new[] { P(5, 5), P(5, 5), P(8, 5) };
+            Assert.AreEqual(5, Polylines.MinDistanceMm(a, b), 1e-9);
+            Assert.AreEqual(5, Polylines.MinDistanceMm(b, a), 1e-9);
+        }
+
+        [Test]
         public void Segments_Distance()
         {
             Assert.AreEqual(5, Segments.Distance(P(0, 0), P(10, 0), P(3, 5), P(8, 5)), 1e-9);

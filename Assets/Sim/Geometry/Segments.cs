@@ -21,6 +21,11 @@ namespace LordsLegacy.Sim.Geometry
         /// <summary>Classifies how segment a1-a2 meets b1-b2. Exact.</summary>
         public static SegmentRelation Classify(PointMm a1, PointMm a2, PointMm b1, PointMm b2)
         {
+            // Zero-length segments are points: handle before the orientation tests.
+            if (a1 == a2 && b1 == b2) return a1 == b1 ? SegmentRelation.Touching : SegmentRelation.None;
+            if (a1 == a2) return ContainsPoint(b1, b2, a1) ? SegmentRelation.Touching : SegmentRelation.None;
+            if (b1 == b2) return ContainsPoint(a1, a2, b1) ? SegmentRelation.Touching : SegmentRelation.None;
+
             int d1 = Math.Sign(PointMm.Cross(a1, a2, b1));
             int d2 = Math.Sign(PointMm.Cross(a1, a2, b2));
             int d3 = Math.Sign(PointMm.Cross(b1, b2, a1));
