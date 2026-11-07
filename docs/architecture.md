@@ -47,7 +47,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   distance of a polyline (`RemoveNearPolyline`, inclusive), using geo-1 on trunk positions rounded to mm; both return the removed ids sorted.
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
-  min distance). Predicates are exact; distances are double mm.
+  min distance), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
+  Predicates are exact; distances are double mm.
 - `Assets/Sim/Roads/` (`LordsLegacy.Sim.Roads`, decision 0013): `RoadTypeDef` / `RoadTypes` (`road.dirt_path`),
   `CurveKind`, `ICurveSampler` and `CatmullRomSampler` (centripetal; per span it samples evenly by arc length so
   samples are ~`RoadSampleSpacingM` apart and hit every control point). `ControlPointFilter.Clean` applies RD-02
