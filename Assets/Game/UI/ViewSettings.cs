@@ -5,5 +5,14 @@ namespace LordsLegacy.Game
     {
         /// <summary>When true the view uses fixed, steady lighting instead of the seasonal daylight cycle.</summary>
         public bool SteadyLight { get; set; }
+
+        /// <summary>
+        /// One snapping setting shared by road and area tools (roads.md Snapping). Default On. Set by the top bar
+        /// button and by the Alt key (ToggleSnapping action). Tools read it; the Sim never does.
+        /// </summary>
+        public bool Snapping { get; set; } = true;
+
+        /// <summary>Snap distance in screen pixels, used by the drawing tools (ui.md, roads.md). Presentation-only.</summary>
+        public float SnapDistancePx { get; set; } = 12f;
     }
 }
