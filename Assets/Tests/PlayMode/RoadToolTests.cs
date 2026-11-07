@@ -67,7 +67,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             _panelGo = new GameObject("ToolPanel");
             _panelGo.SetActive(false);
-            _panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+            _panelSettings = TestPanelSettings.Create();
             _panelGo.AddComponent<UIDocument>().panelSettings = _panelSettings;
             _panel = _panelGo.AddComponent<ToolPanelView>();
             _panelGo.SetActive(true);

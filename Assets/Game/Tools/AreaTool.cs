@@ -4,6 +4,7 @@ using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Roads;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,7 +17,9 @@ namespace LordsLegacy.Game.Tools
     /// moves it, Backspace removes the last point and a right <i>click</i> on a point removes it. A right click
     /// elsewhere or Escape or Cancel drops the draft; with no draft a right click on an area of this tool's kind sends
     /// <see cref="DeleteArea"/>. Right drags do nothing. Holds no area rules: <see cref="AreaValidator"/> and the Sim
-    /// commands decide everything. Bending, edge insertion and snapping are later work.
+    /// commands decide everything. Part 2: a click on an edge inserts a point, dragging an edge's middle handle bends it, a double click on the
+    /// handle straightens it, and with snapping on points snap to area vertices, road side lines and area edges (two
+    /// consecutive points on the same road side make that edge FollowsRoad).
     /// </summary>
     public sealed class AreaTool : MonoBehaviour, ITool
     {
@@ -37,6 +40,13 @@ namespace LordsLegacy.Game.Tools
         [SerializeField] private ToolController _controller;
 
         private readonly List<PointMm> _points = new List<PointMm>();
+        private readonly List<AreaEdge> _edges = new List<AreaEdge>();
+        private readonly List<int> _roadSeg = new List<int>();
+        private readonly List<RoadSide> _roadSide = new List<RoadSide>();
+        private ViewSettings _settings;
+        [SerializeField] private TopBarController _topBar;
+        private int _pressHandle = -1;
+        private int _pressEdge = -1;
         private readonly PressTracker _press = new PressTracker();
         private bool _active;
         private bool _subscribed;
@@ -68,6 +78,22 @@ namespace LordsLegacy.Game.Tools
         public bool IsActive => _active;
 
         private AreaTypeDef Type => AreaTypes.Find(_typeId);
+
+        /// <summary>Sets the view settings (snapping on/off and distance). Without them the top bar's, or defaults (snapping on, 12 px).</summary>
+        public void SetViewSettings(ViewSettings settings) { _settings = settings; }
+
+        /// <summary>The draft's edges (one per point; edge i joins point i to point i+1), with road-following edges resolved.</summary>
+        public IReadOnlyList<AreaEdge> Edges => CurrentShape().Edges;
+
+        private ViewSettings Settings
+        {
+            get
+            {
+                if (_settings != null) return _settings;
+                if (_topBar == null) _topBar = FindFirstObjectByType<TopBarController>();
+                return _topBar != null ? _topBar.ViewSettings : (_settings = new ViewSettings());
+            }
+        }
 
         /// <summary>Sets the references and which area type this tool draws (for code that adds the component at run time).</summary>
         public void Configure(string toolId, string typeId, SimHost host, GroundPicker picker, AreaRenderer areas,
@@ -113,7 +139,12 @@ namespace LordsLegacy.Game.Tools
             if (!_active) return;
             if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) return;
             _press.Press(button, screenPos);
-            _pressVertex = button == PressButton.Left ? VertexUnder(screenPos) : -1;
+            _pressVertex = -1; _pressHandle = -1; _pressEdge = -1;
+            if (button != PressButton.Left) return;
+            var hit = HitTest(screenPos);
+            if (hit.Kind == ToolHitKind.Vertex) _pressVertex = hit.Id;
+            else if (hit.Kind == ToolHitKind.Handle) _pressHandle = hit.Id;
+            else if (hit.Kind == ToolHitKind.Edge) _pressEdge = hit.Id;
         }
 
         /// <summary>The cursor moved. While a press that started on a placed point is dragged, that point follows the cursor.</summary>
@@ -121,7 +152,9 @@ namespace LordsLegacy.Game.Tools
         {
             if (!_active) return;
             _press.Move(screenPos);
-            if (_pressVertex < 0 || !_press.IsDragging(PressButton.Left)) return;
+            if (!_press.IsDragging(PressButton.Left)) return;
+            if (_pressHandle >= 0) { BendEdge(_pressHandle, screenPos); return; }
+            if (_pressVertex < 0) return;
             _dragIndex = _pressVertex;
             MoveDraggedPoint(screenPos);
         }
@@ -131,8 +164,8 @@ namespace LordsLegacy.Game.Tools
         {
             if (!_active) return;
             var r = _press.Release(button, screenPos, time);
-            int pressedVertex = _pressVertex;
-            _pressVertex = -1;
+            int pressedVertex = _pressVertex, pressedHandle = _pressHandle, pressedEdge = _pressEdge;
+            _pressVertex = -1; _pressHandle = -1; _pressEdge = -1;
             _dragIndex = -1;
             _lastReleaseAddedPoint = false;
             // A drag (of either button) never acts on release; right mouse is click-only.
@@ -141,6 +174,11 @@ namespace LordsLegacy.Game.Tools
             if (button == PressButton.Right)
             {
                 RightClick(r.EndPosition);
+                return;
+            }
+            if (r.Kind == PressKind.DoubleClick && pressedHandle >= 0)
+            {
+                Straighten(pressedHandle);
                 return;
             }
             if (r.Kind == PressKind.DoubleClick)
@@ -155,6 +193,8 @@ namespace LordsLegacy.Game.Tools
                 if (pressedVertex == 0 && CanClose) Confirm();
                 return;
             }
+            if (pressedHandle >= 0) return; // a click on a handle does nothing
+            if (pressedEdge >= 0) { _lastReleaseAddedPoint = InsertPointOnEdge(pressedEdge, r.EndPosition); return; }
             _lastReleaseAddedPoint = AddPointAt(r.EndPosition);
         }
 
@@ -198,7 +238,9 @@ namespace LordsLegacy.Game.Tools
 
         private void RemovePoint(int index)
         {
-            _points.RemoveAt(index);
+            int n = _points.Count;
+            if (n > 1) _edges[(index - 1 + n) % n] = AreaEdge.Straight();
+            _points.RemoveAt(index); _edges.RemoveAt(index); _roadSeg.RemoveAt(index); _roadSide.RemoveAt(index);
             _rejection = null;
             _pressVertex = -1;
             _dragIndex = -1;
@@ -220,6 +262,126 @@ namespace LordsLegacy.Game.Tools
             return hit.Kind == ToolHitKind.Vertex ? hit.Id : -1;
         }
 
+        private int EdgeCount => _points.Count >= 3 ? _points.Count : _points.Count - 1;
+
+        private PointMm EdgeMiddlePoint(int i)
+        {
+            if (_edges[i].Kind == AreaEdgeKind.Bent) return _edges[i].Handle;
+            var a = _points[i]; var b = _points[(i + 1) % _points.Count];
+            return new PointMm((a.X + b.X) / 2, (a.Z + b.Z) / 2);
+        }
+
+        private bool ToScreen(PointMm p, out Vector2 s)
+        {
+            s = default;
+            return _picker != null && _picker.TryWorldToScreen((float)p.XMetres, (float)p.ZMetres, out s);
+        }
+
+        /// <summary>What a press hits: a point, an edge's middle handle (id = edge), an edge (id = edge) or the ground.</summary>
+        private ToolHit HitTest(Vector2 screenPos)
+        {
+            var cands = new List<HitCandidate>();
+            for (int i = 0; i < _points.Count; i++)
+                if (ToScreen(_points[i], out var s)) cands.Add(HitCandidate.Point(ToolHitKind.Vertex, i, s));
+            for (int i = 0; i < EdgeCount; i++)
+            {
+                if (ToScreen(EdgeMiddlePoint(i), out var m)) cands.Add(HitCandidate.Point(ToolHitKind.Handle, i, m));
+                PointMm a = _points[i], b = _points[(i + 1) % _points.Count];
+                if (_edges[i].Kind == AreaEdgeKind.Bent)
+                {
+                    PointMm prev = a; const int steps = 12;
+                    double cx = 2.0 * _edges[i].Handle.X - (a.X + b.X) / 2.0, cz = 2.0 * _edges[i].Handle.Z - (a.Z + b.Z) / 2.0;
+                    for (int k = 1; k <= steps; k++)
+                    {
+                        double t = k / (double)steps, u = 1 - t;
+                        var q = k == steps ? b : new PointMm((long)(u * u * a.X + 2 * u * t * cx + t * t * b.X),
+                                                              (long)(u * u * a.Z + 2 * u * t * cz + t * t * b.Z));
+                        if (ToScreen(prev, out var sa) && ToScreen(q, out var sb))
+                            cands.Add(new HitCandidate(ToolHitKind.Edge, i, sa, sb));
+                        prev = q;
+                    }
+                }
+                else if (ToScreen(a, out var ea) && ToScreen(b, out var eb))
+                    cands.Add(new HitCandidate(ToolHitKind.Edge, i, ea, eb));
+            }
+            return ToolHitTester.Test(cands, screenPos);
+        }
+
+        private void BendEdge(int edge, Vector2 screenPos)
+        {
+            if (edge >= EdgeCount || !TryGround(screenPos, out var p)) return;
+            _edges[edge] = AreaEdge.Bent(p);
+            _rejection = null;
+            Refresh();
+        }
+
+        private void Straighten(int edge)
+        {
+            if (edge >= EdgeCount) return;
+            _edges[edge] = AreaEdge.Straight();
+            _rejection = null;
+            Refresh();
+        }
+
+        private bool InsertPointOnEdge(int edge, Vector2 screenPos)
+        {
+            var t = Type;
+            if (t == null || _points.Count >= t.MaxPoints || edge >= EdgeCount) return false;
+            if (!TryGround(screenPos, out var p)) return false;
+            SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
+            _points.Insert(edge + 1, p);
+            _roadSeg.Insert(edge + 1, seg); _roadSide.Insert(edge + 1, side);
+            _edges[edge] = AreaEdge.Straight();
+            _edges.Insert(edge + 1, AreaEdge.Straight());
+            _rejection = null;
+            Refresh();
+            return true;
+        }
+
+        private const int KindAreaVertex = 0, KindRoad = 1, KindAreaEdge = 2;
+
+        /// <summary>
+        /// Snaps a ground point when snapping is on (areas.md Snapping): area vertices, then road side lines, then area
+        /// edges, within SnapDistancePx. <paramref name="seg"/> is the road segment id when it landed on a road side, else -1.
+        /// </summary>
+        private void SnapPoint(Vector2 screenPos, ref PointMm p, out int seg, out RoadSide side)
+        {
+            seg = -1; side = RoadSide.Left;
+            var settings = Settings;
+            if (!settings.Snapping || _host == null || !_host.IsInitialized || _picker == null) return;
+            float px = settings.SnapDistancePx;
+            if (!TryGround(screenPos + new Vector2(px, 0f), out var q)) return;
+            double radiusMm = p.DistanceTo(q) * 1.5 + 1;
+            var cands = new List<SnapCandidate>();
+            var points = new List<PointMm>();
+            var segs = new List<int>();
+            var sides = new List<RoadSide>();
+            void Add(int kind, PointMm at, int sg, RoadSide sd)
+            {
+                if (!ToScreen(at, out var s)) return;
+                cands.Add(new SnapCandidate(kind, points.Count, (s - screenPos).magnitude));
+                points.Add(at); segs.Add(sg); sides.Add(sd);
+            }
+            var world = _host.World;
+            var hit = world.Areas.FindNearestSnap(p, radiusMm);
+            if (hit.HasValue)
+                Add(hit.Value.Kind == AreaSnapKind.Vertex ? KindAreaVertex : KindAreaEdge, hit.Value.Point, -1, RoadSide.Left);
+            foreach (var segment in world.Roads.Segments)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    RoadSide sd = k == 0 ? RoadSide.Left : RoadSide.Right;
+                    var line = segment.SideLine(sd);
+                    if (line.Length < 2) continue;
+                    var n = Polylines.Nearest(line, p);
+                    if (n.DistanceMm > radiusMm) continue;
+                    Add(KindRoad, new PointMm((long)System.Math.Round(n.X), (long)System.Math.Round(n.Z)), segment.Id, sd);
+                }
+            }
+            if (!SnapPicker.TryPick(cands, new[] { KindAreaVertex, KindRoad, KindAreaEdge }, px, true, out var best)) return;
+            p = points[best.Id]; seg = segs[best.Id]; side = sides[best.Id];
+        }
+
         private bool TryGround(Vector2 screenPos, out PointMm point)
         {
             point = default;
@@ -239,7 +401,10 @@ namespace LordsLegacy.Game.Tools
         private void MoveDraggedPoint(Vector2 screenPos)
         {
             if (_dragIndex < 0 || _dragIndex >= _points.Count) return;
-            if (!TryGround(screenPos, out var p) || p == _points[_dragIndex]) return;
+            if (!TryGround(screenPos, out var p)) return;
+            SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
+            _roadSeg[_dragIndex] = seg; _roadSide[_dragIndex] = side;
+            if (p == _points[_dragIndex]) { Refresh(); return; }
             _points[_dragIndex] = p;
             _rejection = null;
             Refresh();
@@ -250,13 +415,29 @@ namespace LordsLegacy.Game.Tools
             var t = Type;
             if (t == null || _points.Count >= t.MaxPoints) return false;
             if (!TryGround(screenPos, out var p)) return false;
-            _points.Add(p);
+            SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
+            _points.Add(p); _edges.Add(AreaEdge.Straight()); _roadSeg.Add(seg); _roadSide.Add(side);
             _rejection = null;
             Refresh();
             return true;
         }
 
-        private AreaShape CurrentShape() { return AreaShape.Straight(_points); }
+        private AreaShape CurrentShape()
+        {
+            int n = _points.Count;
+            var edges = new AreaEdge[n];
+            bool snapping = Settings.Snapping;
+            for (int i = 0; i < n; i++)
+            {
+                edges[i] = _edges[i];
+                int j = (i + 1) % n;
+                // A straight edge between two points snapped to the same side of the same road follows it (AR-04).
+                if (snapping && edges[i].Kind == AreaEdgeKind.Straight && j != i && _roadSeg[i] >= 0
+                    && _roadSeg[i] == _roadSeg[j] && _roadSide[i] == _roadSide[j])
+                    edges[i] = AreaEdge.FollowsRoad(_roadSeg[i], _roadSide[i]);
+            }
+            return new AreaShape(_points, edges);
+        }
 
         private void Refresh()
         {
@@ -299,7 +480,8 @@ namespace LordsLegacy.Game.Tools
 
         private void ClearDraft()
         {
-            _points.Clear();
+            _points.Clear(); _edges.Clear(); _roadSeg.Clear(); _roadSide.Clear();
+            _pressHandle = -1; _pressEdge = -1;
             _preview = null;
             _rejection = null;
             _pressVertex = -1;

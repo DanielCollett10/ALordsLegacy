@@ -35,7 +35,7 @@ namespace LordsLegacy.Tests.PlayMode
         {
             _uiGo = new GameObject("BuildBar");
             _uiGo.SetActive(false);
-            _panel = ScriptableObject.CreateInstance<PanelSettings>();
+            _panel = TestPanelSettings.Create();
             _uiGo.AddComponent<UIDocument>().panelSettings = _panel;
             _view = _uiGo.AddComponent<BuildBarView>();
             _uiGo.SetActive(true);

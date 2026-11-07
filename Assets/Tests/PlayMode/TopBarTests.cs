@@ -24,7 +24,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             _uiGo = new GameObject("TopBar");
             _uiGo.SetActive(false);
-            _panel = ScriptableObject.CreateInstance<PanelSettings>();
+            _panel = TestPanelSettings.Create();
             _uiGo.AddComponent<UIDocument>().panelSettings = _panel;
             _bar = _uiGo.AddComponent<TopBarController>();
             _bar.SetHost(_host);

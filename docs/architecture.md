@@ -182,6 +182,11 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     and `SimHost.Execute` for `DrawRoad` and `DeleteRoadSegment`. Holds no road rules. Rules: roads.md; input: ui.md.
   - `Tools/Shared/`: `PressTracker` (click, drag, double-click; 4 px drag threshold, 6 px double-click radius; time passed
     in), `SnapPicker` (best candidate by kind order within a pixel limit), `ToolHitTester` (draft point hits).
+  - `AreaTool` (ids `test-area`, `test-work-area`): draft points with a parallel edge list. A click on an edge inserts a point
+    (max 8), dragging an edge's middle handle makes it Bent through the cursor, double-clicking the handle straightens it.
+    With `ViewSettings.Snapping` on, points snap (SnapPicker order: area vertex, road side line via `RoadSegment.SideLine`, area
+    edge via `AreaRegistry.FindNearestSnap`) within `SnapDistancePx`; two consecutive points snapped to the same road side
+    make that edge FollowsRoad. Snapping off: no snap, no FollowsRoad.
 - Build bar (`BuildBarView`, `Assets/Game/UI/BuildBar/`, UXML/USS): non-focusable buttons built from `ToolEntry.Defaults()`
   (Road enabled; the rest greyed, future ones tooltip "Coming later"). Raises `ToolClicked`.
 - Tool panel (`ToolPanelView`, `Assets/Game/UI/ToolPanel/`, UXML/USS): status line, hint line, Cancel/Confirm.
