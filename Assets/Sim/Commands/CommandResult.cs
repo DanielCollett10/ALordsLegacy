@@ -26,27 +26,35 @@ namespace LordsLegacy.Sim.Commands
         /// <summary>Ids created by the command. Empty when rejected.</summary>
         public long[] Created { get; }
 
-        /// <summary>Ids removed by the command. Empty when rejected.</summary>
+        /// <summary>Road segment ids removed by the command (e.g. split originals). Empty when rejected.</summary>
         public long[] Removed { get; }
 
-        private CommandResult(bool accepted, CommandRejectCode reason, string text, long[] created, long[] removed)
+        /// <summary>
+        /// Tree ids the command removed (e.g. trees cleared for a road, BLD-10-B). Kept apart from
+        /// <see cref="Removed"/> because they are a different kind of id. Empty when rejected.
+        /// </summary>
+        public long[] RemovedTreeIds { get; }
+
+        private CommandResult(bool accepted, CommandRejectCode reason, string text, long[] created, long[] removed, long[] removedTrees)
         {
             IsAccepted = accepted;
             Reason = reason;
             Text = text ?? string.Empty;
             Created = created;
             Removed = removed;
+            RemovedTreeIds = removedTrees;
         }
 
-        /// <summary>An accepted result, with optional created and removed ids (copied).</summary>
-        public static CommandResult Accepted(long[] created = null, long[] removed = null) =>
-            new CommandResult(true, default, string.Empty,
-                created == null || created.Length == 0 ? NoIds : (long[])created.Clone(),
-                removed == null || removed.Length == 0 ? NoIds : (long[])removed.Clone());
+        /// <summary>An accepted result, with optional created, removed and removed-tree ids (copied).</summary>
+        public static CommandResult Accepted(long[] created = null, long[] removed = null, long[] removedTreeIds = null) =>
+            new CommandResult(true, default, string.Empty, Copy(created), Copy(removed), Copy(removedTreeIds));
 
         /// <summary>A rejected result with a reason code and text. Ids are always empty.</summary>
         public static CommandResult Rejected(CommandRejectCode reason, string text) =>
-            new CommandResult(false, reason, text, NoIds, NoIds);
+            new CommandResult(false, reason, text, NoIds, NoIds, NoIds);
+
+        private static long[] Copy(long[] ids) =>
+            ids == null || ids.Length == 0 ? NoIds : (long[])ids.Clone();
 
         /// <summary>Short form for logs and debug views.</summary>
         public override string ToString() =>

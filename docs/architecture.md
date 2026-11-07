@@ -70,9 +70,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   junction (`SplitSegmentAt`), then cuts the new road's samples at every junction (cut point added as a sample and as a
   control point on both sides; all original samples kept; a T/JoinNode end is snapped by adding the node position as a new
   first/last sample and control point) and adds one segment per piece. `Created` = new segments plus split halves,
-  `Removed` = the split originals (both segment ids).
+  `Removed` = the split originals (both segment ids). After the pieces are added, every standing tree within half the
+  road width + `RoadTreeClearanceM` of each new segment's centre line is removed (RD-11, BLD-10-B, via
+  `TreeClearing.RemoveNearPolyline`); those ids are `RemovedTreeIds` on the result (decision 0015).
+- `DeleteRoadSegment(segmentId)` (Commands) removes one segment with `RoadNetwork.RemoveSegment`; nodes left with no
+  segments go with it. Unknown id → `NotFound`. Trees are not touched and never come back (RD-12, BLD-10-D).
+  Works while paused, like every command.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
-  `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created/removed ids,
+  `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created/removed segment ids and removed tree ids (`RemovedTreeIds`, decision 0015),
   or Rejected with `CommandRejectCode` and text), `CommandLog` (append-only `(tick, command)` entries).
   `SimWorld.Execute(cmd)` runs validate-then-apply immediately, works while paused, never changes `Tick`, and appends
   every call (accepted or rejected) to `SimWorld.CommandLog` with the current tick. A rejected command changes nothing.
