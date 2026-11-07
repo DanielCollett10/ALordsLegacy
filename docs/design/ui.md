@@ -28,7 +28,7 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 ## Top bar addition
 
 - **Snapping: On/Off** toggle on the right (UI-02). It is a presentation setting (`ViewSettings`), not Sim state.
-  Holding Alt inverts it while held.
+  Default On. Pressing **Alt** toggles it, exactly like clicking the button (not a hold).
 
 ## Input summary
 
@@ -40,6 +40,7 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Right-click | cancel the draft; with no draft: delete the segment under the cursor | on a point: remove it; elsewhere: cancel the draft; with no draft: delete the area under the cursor |
 | Backspace | remove the last point | remove the last point |
 | Escape | cancel the draft, or leave the tool | same |
+| Alt (press) | toggle snapping on/off | same |
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
 
 Game pause and speed are unchanged by tools. Drawing works while paused.

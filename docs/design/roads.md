@@ -18,7 +18,9 @@ Technical shape: decisions 0011 (commands), 0012 (geometry) and 0013 (road model
    No popup and no confirmation.
 6. Left-clicking on an existing road starts a new road from that point (a branch, which makes a junction).
 
-Editing the shape of a confirmed road (dragging its points) is later work. For now the player deletes and redraws.
+Editing the shape of a confirmed road (dragging its points) is later work. For now the player deletes and redraws,
+but **the data must allow reshaping later**: every segment keeps its own control points (decision 0013), so a
+future `ReshapeRoadSegment` command only re-samples and re-validates one segment.
 
 ## Rules
 
@@ -35,7 +37,7 @@ Editing the shape of a confirmed road (dragging its points) is later work. For n
 | RD-09 | A new road's corridor may not overlap another road's corridor except within **one road width** of a junction it makes (stops roads running on top of each other). Refused: "overlaps road" | PROPOSED |
 | RD-10 | The whole centre line must be inside the map (refused: "outside the map") | DECIDED |
 | RD-11 | **Trees in the corridor are removed** on confirmation: any tree whose trunk is within half width + **0.5 m** of the centre line. They yield nothing and simply disappear (same rule as BLD-10-A) | DECIDED (MVP; clearance PLACEHOLDER) |
-| RD-12 | **Delete:** right-click removes one **segment** (the stretch between two nodes: road ends or junctions). A node left with no segments is removed. Trees do not come back | DECIDED |
+| RD-12 | **Delete:** right-click removes one **segment** (the stretch between two nodes: road ends or junctions). A node left with no segments is removed. Trees do not come back (no regrowth exists; see `gdd-amendments.md` BLD-10-D) | DECIDED |
 | RD-13 | Roads may not cross building areas or plots (ROAD-08). Checked once areas exist (M4): refused with "crosses <area name>". Work areas don't block roads | DECIDED |
 | RD-14 | No pre-placed (baked) trunk road. Any starting road (WORLD-08) is an ordinary road created when the game starts, and the player can delete or reroute it. Not needed in M3 | DECIDED |
 | RD-15 | Commands work while the game is paused | DECIDED |
@@ -55,7 +57,8 @@ the map, too steep, crosses itself, overlaps road, crosses area.
 
 ## Snapping (shared with areas, GEO-13..15)
 
-- One toggle in the top bar, **Snapping: On/Off**, default On. Holding **Alt** inverts it while held.
+- One toggle in the top bar, **Snapping: On/Off**, default On. Pressing **Alt** toggles it too (same as
+  clicking the button; it stays changed until toggled again). Not a hold.
 - Road snap targets (in this order): road ends, points on a road's centre line, and later area vertices
   and area edges (M4). Snap distance: **12 screen pixels** (tool-side only, PLACEHOLDER).
 
