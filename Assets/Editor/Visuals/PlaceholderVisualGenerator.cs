@@ -20,6 +20,12 @@ namespace LordsLegacy.EditorTools.Visuals
         public const string TreeDefinitionPath = Folder + "/Definitions/visual.tree.generic.asset";
         /// <summary>Path of the placeholder tree material.</summary>
         public const string TreeMaterialPath = Folder + "/Materials/PlaceholderTree.mat";
+        /// <summary>Path of the placeholder dirt path definition.</summary>
+        public const string RoadDefinitionPath = Folder + "/Definitions/visual.road.dirt_path.asset";
+        /// <summary>Path of the placeholder dirt path material.</summary>
+        public const string RoadMaterialPath = Folder + "/Materials/PlaceholderRoadDirtPath.mat";
+        /// <summary>Id of the placeholder dirt path definition.</summary>
+        public const string RoadId = "visual.road.dirt_path";
         /// <summary>Id of the placeholder tree definition.</summary>
         public const string TreeId = "visual.tree.generic";
 
@@ -41,6 +47,14 @@ namespace LordsLegacy.EditorTools.Visuals
             EditorUtility.SetDirty(definition);
 
             registry.Register(definition);
+
+            // Road: the renderer builds its own strip meshes; the definition carries the material (and a quad
+            // stand-in mesh so the definition is never mesh-less).
+            var roadMaterial = LoadOrCreateRoadMaterial();
+            var roadDefinition = LoadOrCreateRoadDefinition();
+            roadDefinition.Configure(RoadId, Resources.GetBuiltinResource<Mesh>("Quad.fbx"), new[] { roadMaterial }, 1f, true);
+            EditorUtility.SetDirty(roadDefinition);
+            registry.Register(roadDefinition);
             EditorUtility.SetDirty(registry);
 
             AssetDatabase.SaveAssets();
@@ -59,6 +73,31 @@ namespace LordsLegacy.EditorTools.Visuals
             mat.color = new Color(0.25f, 0.5f, 0.2f);
             EditorUtility.SetDirty(mat);
             return mat;
+        }
+
+        private static Material LoadOrCreateRoadMaterial()
+        {
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(RoadMaterialPath);
+            if (mat == null)
+            {
+                mat = new Material(Shader.Find("Standard")) { name = "PlaceholderRoadDirtPath" };
+                AssetDatabase.CreateAsset(mat, RoadMaterialPath);
+            }
+            mat.color = new Color(0.55f, 0.42f, 0.28f);
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        private static VisualDefinition LoadOrCreateRoadDefinition()
+        {
+            var def = AssetDatabase.LoadAssetAtPath<VisualDefinition>(RoadDefinitionPath);
+            if (def == null)
+            {
+                def = ScriptableObject.CreateInstance<VisualDefinition>();
+                def.name = RoadId;
+                AssetDatabase.CreateAsset(def, RoadDefinitionPath);
+            }
+            return def;
         }
 
         private static VisualDefinition LoadOrCreateDefinition()
