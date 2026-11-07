@@ -24,3 +24,9 @@ Boundaries:
 
 Your final answer is the structured report. Be honest in not_done: a partial
 result reported clearly is better than a hidden gap.
+
+## Lessons learned
+
+Rules added after reviews kept catching the same mistakes. Follow them like any other rule.
+
+- For Sim geometry or math functions, handle degenerate inputs explicitly before the general branches: zero-length segments, repeated points, empty or single-point polylines, and collinear or overlapping cases. Add an NUnit test for each one, with the expected result stated in the test name. _(learned from T-084)_
