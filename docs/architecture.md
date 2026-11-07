@@ -48,6 +48,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
   min distance). Predicates are exact; distances are double mm.
+- `Assets/Sim/Roads/` (`LordsLegacy.Sim.Roads`, decision 0013): `RoadTypeDef` / `RoadTypes` (`road.dirt_path`),
+  `CurveKind`, `ICurveSampler` and `CatmullRomSampler` (centripetal; per span it samples evenly by arc length so
+  samples are ~`RoadSampleSpacingM` apart and hit every control point). `ControlPointFilter.Clean` applies RD-02
+  (`RoadMinPointSpacingM`). Network, commands and checks are not built yet.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
   `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created/removed ids,
   or Rejected with `CommandRejectCode` and text), `CommandLog` (append-only `(tick, command)` entries).
