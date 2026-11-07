@@ -122,6 +122,7 @@ namespace LordsLegacy.Game
             if (_visualTree != null) _visualTree.CloneTree(root);
             else BuildFallback(root);
             if (_styleSheet != null) root.styleSheets.Add(_styleSheet);
+            UiFocusRules.Apply(root);
             _root = root.Q<VisualElement>(RootName);
             _fps = root.Q<Label>(FpsName);
             _count = root.Q<Label>(TreeCountName);

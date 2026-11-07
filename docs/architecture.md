@@ -144,6 +144,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `LateUpdate`. Steady light is `ViewSettings.SteadyLight` (set by the top bar): fixed sun, visual only.
 - Top bar (`TopBarController`, UI Toolkit, `Assets/Game/UI/TopBar/`): date and time, pause, speed buttons from
   `Pacer.Speeds`, steady-light toggle, "running slower" notice (`SlowedDown`). Sends commands through `SimHost`.
+- No-focus rule (ui.md UIK-01, UIK-02, `UiFocusRules` in `Assets/Game/UI/`): game UI never takes keyboard focus. Top bar
+  and debug overlay call `UiFocusRules.Apply(root)`, which sets `focusable = false` on every element and stops
+  NavigationMove/Submit/Cancel events at the panel root (trickle-down), so WASD/arrows never move a UI selection.
+  Camera and tool keys read `Keyboard.current` directly and are unaffected. New game UI must call it too.
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
 - Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
   terrain, not from the collider.

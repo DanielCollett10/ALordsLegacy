@@ -67,5 +67,31 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, Run100());
             Assert.AreEqual("Paused", _bar.DateText);
         }
+
+        [Test]
+        public void SpeedButtonsNeverTakeFocusAndNavigationKeysKeepSpeed()
+        {
+            var root = _uiGo.GetComponent<UIDocument>().rootVisualElement;
+            var speed = root.Q<Button>("speed-2");
+            Assert.IsNotNull(speed);
+            Assert.IsFalse(speed.focusable);
+            Assert.IsFalse(root.Q<Button>("pause-button").focusable);
+
+            _bar.SetSpeed(2); // 4x, as if clicked
+            Assert.IsNull(root.panel.focusController.focusedElement);
+
+            // Stand-ins for the Input System Navigate action from A, D, W, S and the arrow keys.
+            Vector2[] dirs = { Vector2.left, Vector2.right, Vector2.up, Vector2.down };
+            foreach (var dir in dirs)
+            {
+                var e = NavigationMoveEvent.GetPooled(dir);
+                e.target = root;
+                root.SendEvent(e);
+                e.Dispose();
+            }
+            Assert.AreEqual(2, _host.Pacer.CurrentSpeedIndex);
+            Assert.AreEqual(4, _host.Pacer.CurrentSpeed);
+            Assert.IsNull(root.panel.focusController.focusedElement);
+        }
     }
 }

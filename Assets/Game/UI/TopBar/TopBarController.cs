@@ -41,6 +41,7 @@ namespace LordsLegacy.Game
             if (doc.visualTreeAsset != null) doc.visualTreeAsset.CloneTree(root);
             else BuildFallback(root);
             if (_styleSheet != null) root.styleSheets.Add(_styleSheet);
+            UiFocusRules.Apply(root);
 
             _dateLabel = root.Q<Label>("date-label");
             _notice = root.Q<Label>("slowed-notice");
@@ -68,6 +69,7 @@ namespace LordsLegacy.Game
                 int index = i;
                 var b = new Button(() => SetSpeed(index)) { name = "speed-" + i, text = _host.Pacer.Speeds[i] + "x" };
                 b.AddToClassList("top-bar__button");
+                b.focusable = false;
                 _speedsRoot.Add(b);
                 _speedButtons[i] = b;
             }
