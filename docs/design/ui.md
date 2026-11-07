@@ -11,6 +11,7 @@ wireframes come later. UI Toolkit only. The UI reads Sim state and sends command
 | UIB-02 | M3 entries: **Road** (enabled), **Test area** (enabled from M4), **Test work area** (enabled from M4). Future entries (Woodcutting, Storage yard, House, Granary) show greyed with a dashed border and the tooltip "Coming later" | DECIDED |
 | UIB-03 | Clicking a button activates its tool and highlights the button. Clicking the active button again, or Escape with nothing in progress, deactivates it. Only one tool is active at a time | DECIDED |
 | UIB-04 | Switching tools discards any unconfirmed draft | DECIDED |
+| UIB-06 | **Escape** goes to the active tool first. If the tool has a draft, it cancels the draft and Escape stops there. Only when the tool reports it is idle does the ToolController deactivate the tool | DECIDED |
 | UIB-05 | Clicks on UI never pass through to the ground (no point placed under a button) | DECIDED |
 
 ## Tool panel (just above the build bar, while drawing)

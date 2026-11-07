@@ -65,7 +65,10 @@ changes, recompute these and the market table below.
 | Overlap tolerance | 0.1 | m² | AR-15 |
 | Spatial index cell | 32 | m | decision 0012 |
 
-Road and area values live on their type definitions (`RoadTypeDef`, `AreaTypeDef`), not in `SimTuning`.
+Where they live: per-type values (road width, max grade, area points, m², max slope) are on the type definitions
+(`RoadTypeDef`, `AreaTypeDef`). Shared values (sample spacing, min point distance, tree clearance, curve flattening
+spacing, slope sample grid, overlap tolerance, spatial index cell) are in `SimTuning`. Snap distance is a
+presentation value in `ViewSettings`.
 
 ## Population and oxen
 
