@@ -42,7 +42,7 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Escape | cancel the draft, or leave the tool | same |
 | Alt (press) | toggle snapping on/off | same |
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
-| Right-drag | camera orbit (from M5) | camera orbit (from M5) |
+| Middle-drag | camera orbit: turn and tilt (tilt from M5) | same |
 
 Game pause and speed are unchanged by tools. Drawing works while paused.
 
@@ -56,7 +56,7 @@ is active, left and right mouse buttons belong to the tool; the camera never pan
 pan keeps working while a point is being dragged.
 
 **Right mouse is click-only for tools.** Tools act on a right **click** (release without moving more than 4 px),
-never on a right press or drag. This keeps right-drag free for camera orbit (below).
+never on a right press or drag. Right-drag is kept free for a possible later use.
 
 ## Keyboard and UI focus
 
@@ -69,6 +69,8 @@ never on a right press or drag. This keeps right-drag free for camera orbit (bel
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| CAM-A1 | **Right-drag orbits** the camera around the ground point under the screen centre (yaw, and pitch within the existing limits). Replaces Q/E rotation, which is removed | DECIDED |
-| CAM-A2 | **Right-click** (no drag) cancels: a tool draft first; later, it closes the topmost unpinned popup (UI-03/04). In road or area mode with no draft, it deletes the object under the cursor (roads.md, areas.md) | DECIDED |
-| CAM-A3 | Middle-drag rotation: keep as an alternative or remove? | OPEN |
+| CAM-A1 | **Middle-drag orbits** the camera around the ground point under the screen centre, at the current zoom distance: horizontal drag turns (yaw), vertical drag tilts (pitch) down towards the ground or up towards the horizon, within pitch limits. Today middle-drag only turns; this adds tilt | DECIDED |
+| CAM-A2 | **Scroll** zooms as now: in = down towards the ground, out = up | DECIDED |
+| CAM-A3 | The camera never goes below the ground (Sim terrain height + clearance) or outside the map, while orbiting, tilting, zooming or panning. If a tilt would push it into a hill, it is held above the ground | DECIDED |
+| CAM-A4 | **Q/E rotation is removed.** Q and E are left free (no binding) for now | DECIDED |
+| CAM-A5 | **Right-click** (no drag) cancels: a tool draft first; later, it closes the topmost unpinned popup (UI-03/04). In road or area mode with no draft, it deletes the object under the cursor (roads.md, areas.md). Right-drag does nothing for now (kept free) | DECIDED |
