@@ -584,7 +584,10 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Server: ENABLE_RUNTIME_PIPELINE_DEV
+    Standalone: ENABLE_RUNTIME_PIPELINE_DEV
+    WebGL: ENABLE_RUNTIME_PIPELINE_DEV
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
