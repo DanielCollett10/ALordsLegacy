@@ -76,6 +76,8 @@ namespace LordsLegacy.Tests.PlayMode
             _controller = _toolGo.AddComponent<ToolController>();
             _tool = _toolGo.AddComponent<RoadTool>();
             _tool.Configure(_host, picker, _renderer, _panel, _controller);
+            // Pin the view settings so no test depends on a TopBarController left alive in the scene (snapping on, 12 px).
+            _tool.SetViewSettings(new ViewSettings());
             _controller.Register(_tool);
             yield return null; // let physics see the ground collider
             _controller.Toggle(RoadTool.ToolId);
