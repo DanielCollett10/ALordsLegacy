@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using LordsLegacy.Game;
 using LordsLegacy.Game.Visuals;
+using LordsLegacy.Sim.Forestry;
+using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -83,6 +86,55 @@ namespace LordsLegacy.Tests.PlayMode
 
             var after = Snapshot();
             CollectionAssert.AreEqual(before, after);
+        }
+
+        /// <summary>
+        /// Builds its own SimHost from SyntheticMap (not the Game scene), removes a tree through the Sim
+        /// and checks the drawn instance count drops by one.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator RemovingTreeInSimDropsDrawnInstanceCount()
+        {
+            var hostGo = new GameObject("SyntheticSimHost");
+            var host = hostGo.AddComponent<SimHost>();
+            host.Initialize(new SimTuning(), SyntheticMap.CreateRamp());
+            host.AutoUpdate = false;
+
+            var registry = ScriptableObject.CreateInstance<VisualRegistry>();
+            var def = ScriptableObject.CreateInstance<VisualDefinition>();
+            def.Configure(TreeRenderer.TreeVisualId, Resources.GetBuiltinResource<Mesh>("Cube.fbx"), new Material[0], 1f, false);
+            registry.Register(def);
+
+            var camGo = new GameObject("SyntheticCamera");
+            var cam = camGo.AddComponent<Camera>();
+            cam.fieldOfView = 60f;
+            cam.farClipPlane = 2000f;
+            cam.transform.position = new Vector3(100f, 300f, 100f);
+            cam.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+
+            var go = new GameObject("SyntheticTreeRenderer");
+            var renderer = go.AddComponent<TreeRenderer>();
+            renderer.Configure(host, registry, cam);
+            yield return null;
+
+            try
+            {
+                renderer.Draw();
+                Assert.AreEqual(5, renderer.DrawnInstanceCount, "All five synthetic trees should be drawn.");
+
+                Assert.IsTrue(host.World.Trees.Remove(new TreeId(3)), "Tree 3 should be removed through the Sim.");
+                renderer.Draw();
+                Assert.AreEqual(4, renderer.DrawnInstanceCount, "Drawn count should drop by one after removal.");
+            }
+            finally
+            {
+                Object.Destroy(go);
+                Object.Destroy(camGo);
+                Object.Destroy(hostGo);
+                Object.Destroy(def);
+                Object.Destroy(registry);
+            }
+            yield return null;
         }
 
         private List<string> Snapshot()

@@ -107,7 +107,8 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   It is not built from Sim data.
 - Trees (`Assets/Game/Visuals/TreeRenderer`): draws every standing tree in `World.Trees` with the
   `visual.tree.generic` definition. Trees are grouped in 64 m cells, frustum-culled, and drawn with
-  `Graphics.RenderMeshInstanced` in batches of 1023. Each tree is scaled to its trunk length and yawed from its id.
+  `Graphics.RenderMeshInstanced` in batches of 1023. All batches are rebuilt when `TreeRegistry.Version` changes
+  (every cell, not only the changed ones; per-cell rebuild is not done yet). Each tree is scaled to its trunk length and yawed from its id.
   There are no per-tree GameObjects and no colliders (decision 0008).
 - No DOTS/ECS code yet. Rendering is `Graphics.RenderMeshInstanced` and MonoBehaviours (decision 0002 is still provisional).
 - Sun and sky (`Assets/Game/Lighting/`): `SunLightModel` is pure maths (Sim `GameTime` + `Daylight` → elevation,

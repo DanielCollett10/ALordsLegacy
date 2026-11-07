@@ -37,6 +37,7 @@ namespace LordsLegacy.Game.Visuals
         private readonly List<Cell> _cells = new List<Cell>();
         private readonly Plane[] _planes = new Plane[6];
         private bool _built;
+        private int _builtVersion;
 
         /// <summary>Cells that passed the frustum test in the last drawn frame.</summary>
         public int VisibleCellCount { get; private set; }
@@ -70,7 +71,9 @@ namespace LordsLegacy.Game.Visuals
             VisibleCellCount = 0;
             DrawnInstanceCount = 0;
             if (host == null || !host.IsInitialized || registry == null || cullCamera == null) return;
-            if (!_built) Build();
+            // Rebuild when the Sim's tree set changed (TreeRegistry.Version) or the view was invalidated.
+            // Rebuilds all cells: the Version alone does not say which cell changed.
+            if (!_built || host.World.Trees.Version != _builtVersion) Build();
 
             var def = registry.Get(TreeVisualId);
             var mesh = def.Mesh;
@@ -120,6 +123,7 @@ namespace LordsLegacy.Game.Visuals
             _built = true;
             _cells.Clear();
             var world = host.World;
+            _builtVersion = world.Trees.Version;
             var def = registry.Get(TreeVisualId);
             // Each tree is scaled so its mesh is (trunk length x definition scale) metres tall, and its base
             // sits on the terrain. Without this a 1 m placeholder mesh is invisible at forest distances.
