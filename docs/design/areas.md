@@ -53,6 +53,20 @@ Checks run on the flattened polygon. The first failing check (in this order) is 
 
 Minimum width (GEO-07, "no thin slivers") is deferred.
 
+**AR-11 bug (M5):** in play, the owner drew an hourglass (a figure-8 with crossing edges) and it wasn't refused.
+"Edges cross" must catch **every** self-crossing: crossings between straight edges, between bent edges, and between
+road-following edges, however the draft got there (clicking, dragging a point, inserting a point, bending an edge or
+removing a point). The preview turns red, the panel shows "edges cross", Confirm is disabled, and `DesignateArea` rejects it.
+
+## Drawing aids (M5, presentation only, decision 0017)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| AR-20 | **Cursor sphere:** while an area tool is active, a small sphere (**0.6 m**) sits on the ground at the point the next click would place: the snapped point if snapping applies, otherwise the cursor. It changes colour when snapped and is hidden over UI | DECIDED |
+| AR-21 | **Ghost polygon:** once the draft has 1+ points and the player isn't dragging, the preview also draws faint ghost edges from the last point to the cursor sphere and from the sphere back to point 1. That's the shape you'd get by clicking there. The ghost isn't validated; the panel status describes the placed points only | DECIDED |
+| AR-22 | **Road snap dots:** with snapping on, every road side line within **25 m** of the cursor shows small dots every **2.5 m** of length, measured from the segment's node A end so they don't slide. Near a road side, an area vertex snaps to the nearest dot within the snap distance (12 px) instead of any point on the line. Area vertices still beat dots (snap order unchanged) | DECIDED |
+| AR-23 | **Edge follows a nearby road:** when a vertex is placed snapped to a road side and the **previous** vertex is within **10 m** of the same side but not on it, the previous vertex moves onto its nearest dot on that side and the edge between them becomes FollowsRoad (AR-04). The same applies to the closing edge (last point → point 1) when the shape is closed. Snapping off: never | PROPOSED (owner to confirm) |
+
 ## Area kinds and effects
 
 | Kind | Example now | Blocks other building areas | Blocks roads | Clears trees |

@@ -43,11 +43,12 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Input | Road tool | Area tools |
 | --- | --- | --- |
 | Left-click | add point (on a road: start a branch) | add point; on an edge: insert point; on point 1: close |
-| Left-drag | move a placed point | move a point; drag the edge handle to bend |
+| Left-drag | move a placed point; with no draft, on a confirmed road node: move the node (RD-17) | move a point; drag the edge handle to bend |
+| Hover | cursor ring (RD-18); with no draft, node handles show on the road under the cursor | cursor sphere, ghost edges, road snap dots (AR-20..22) |
 | Double-click / Enter | finish and confirm | close / confirm |
 | Right-click | cancel the draft; with no draft: delete the segment under the cursor | on a point: remove it; elsewhere: cancel the draft; with no draft: delete the area under the cursor |
 | Backspace | remove the last point | remove the last point |
-| Escape | cancel the draft, or leave the tool | same |
+| Escape | cancel the draft or a node drag (node goes back), or leave the tool | same |
 | Alt (press) | toggle snapping on/off | same |
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
 | Middle-drag | camera orbit: turn and tilt | same |

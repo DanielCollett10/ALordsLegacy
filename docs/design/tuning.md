@@ -56,7 +56,12 @@ changes, recompute these and the market table below.
 | Road sample spacing | 1 | m | RD-03 |
 | Min distance between road points | 1 | m | RD-02 |
 | Tree clearance beyond road half width | 0.5 | m | RD-11 |
-| Snap distance | 12 | screen pixels (Unity side) | roads.md |
+| Snap distance (area tools) | 12 | screen pixels (Unity side) | roads.md, areas.md |
+| Snap distance (road tool, M5) | 16 | screen pixels (Unity side) | roads.md |
+| Dead-end extension tangent tolerance | 1 | degrees | RD-16 |
+| Area cursor sphere | 0.6 | m diameter (Unity side) | AR-20 |
+| Road snap dot spacing / shown within | 2.5 / 25 | m / m from cursor (Unity side) | AR-22 |
+| Edge-follow pull distance | 10 | m (Unity side) | AR-23 |
 | Area points | 4–8 | vertices | AR-02 |
 | Curve flattening spacing | 1 | m | AR-05 |
 | Test area size / max slope | 100–5,000 / 10 | m² / degrees | AR-13, AR-14 |
@@ -69,6 +74,11 @@ Where they live: per-type values (road width, max grade, area points, m², max s
 (`RoadTypeDef`, `AreaTypeDef`). Shared values (sample spacing, min point distance, tree clearance, curve flattening
 spacing, slope sample grid, overlap tolerance, spatial index cell) are in `SimTuning`. Snap distance is a
 presentation value in `ViewSettings`.
+
+**Inspector config (M5, decision 0019):** every Sim value in this file (`SimTuning`, road types and area types) is
+editable in the Unity Inspector on one `SimConfig` asset that `SimHost` reads. Tooltips name the rule ID. The
+asset's defaults equal the code defaults. Edits made during Play take effect the next time Play starts (the world is
+built once, at start). Presentation values (snap distances, sphere, dots) stay on `ViewSettings`.
 
 ## Population and oxen
 
