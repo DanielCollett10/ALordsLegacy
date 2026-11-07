@@ -146,7 +146,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(p, "Shared PanelSettings missing.");
             return p;
 #else
-            return ScriptableObject.CreateInstance<PanelSettings>();
+            return TestPanelSettings.Create();
 #endif
         }
     }
