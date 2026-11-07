@@ -40,7 +40,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   future work with no code.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
-  length and `State` (only `Standing` exists yet). Trees come from the baked map; nothing adds or removes them at runtime.
+  length and `State` (only `Standing` exists yet). Trees come from the baked map. `Remove(TreeId)` takes a tree out of
+  the records and grid (false if unknown); a removed id can never be added again (BLD-10-D). `Version` increases on
+  every Add or Remove, so views can rebuild only when it changes. `Count`, `All` and the queries show standing trees only.
+  `TreeClearing` (static) removes the trees under a polygon (`RemoveInPolygon`, trunk inside or on the edge) or within a
+  distance of a polyline (`RemoveNearPolyline`, inclusive), using geo-1 on trunk positions rounded to mm; both return the removed ids sorted.
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
   min distance). Predicates are exact; distances are double mm.
