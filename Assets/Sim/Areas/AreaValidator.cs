@@ -7,7 +7,7 @@ namespace LordsLegacy.Sim.Areas
 {
     /// <summary>
     /// Shape checks for a drawn area (AR-10..13, decision 0014). Pure: never changes the world.
-    /// Placement checks (slope, overlap, roads) are added separately.
+    /// Building types then get placement checks 6-8 (slope, overlap, roads): <see cref="AreaPlacementChecks"/>.
     /// </summary>
     public static class AreaValidator
     {
@@ -31,12 +31,14 @@ namespace LordsLegacy.Sim.Areas
             AreaTypeDef type = AreaTypes.Find(typeId);
             if (type == null) return new AreaPreview(poly, area, count, AreaRefusal.UnknownType);
 
-            AreaRefusal reason = FirstReason(world, shape, type, poly, area);
-            return new AreaPreview(poly, area, count, reason);
+            AreaRefusal reason = FirstReason(world, shape, type, poly, area, out string overlapName);
+            return new AreaPreview(poly, area, count, reason, overlapName);
         }
 
-        private static AreaRefusal FirstReason(SimWorld world, AreaShape shape, AreaTypeDef type, PointMm[] poly, double area)
+        private static AreaRefusal FirstReason(SimWorld world, AreaShape shape, AreaTypeDef type, PointMm[] poly,
+            double area, out string overlapName)
         {
+            overlapName = string.Empty;
             int n = shape.Vertices.Count;
             if (n < type.MinPoints) return AreaRefusal.TooFewPoints;
             if (n > type.MaxPoints) return AreaRefusal.TooManyPoints;
@@ -46,6 +48,12 @@ namespace LordsLegacy.Sim.Areas
                 if (!world.Terrain.Contains((float)poly[i].XMetres, (float)poly[i].ZMetres)) return AreaRefusal.OutsideMap;
             if (area < type.MinAreaM2) return AreaRefusal.TooSmall;
             if (area > type.MaxAreaM2) return AreaRefusal.TooLarge;
+            if (type.Kind != AreaKind.Building) return AreaRefusal.Valid; // work areas skip checks 6-8
+            if (type.MaxSlopeDegrees.HasValue && AreaPlacementChecks.TooSteep(world, poly, type.MaxSlopeDegrees.Value))
+                return AreaRefusal.TooSteep;
+            AreaRecord other = AreaPlacementChecks.FindOverlappingArea(world, poly);
+            if (other != null) { overlapName = other.Name; return AreaRefusal.OverlapsArea; }
+            if (AreaPlacementChecks.CrossesRoad(world, poly)) return AreaRefusal.CrossesRoad;
             return AreaRefusal.Valid;
         }
 

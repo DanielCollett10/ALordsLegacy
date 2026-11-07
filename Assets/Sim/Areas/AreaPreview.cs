@@ -24,6 +24,12 @@ namespace LordsLegacy.Sim.Areas
         TooSmall = 7,
         /// <summary>Larger than the type's maximum m² (AR-13).</summary>
         TooLarge = 8,
+        /// <summary>A slope sample inside the area is steeper than the type's limit (AR-14).</summary>
+        TooSteep = 9,
+        /// <summary>Overlaps another building area (AR-15); see <see cref="AreaPreview.OverlapName"/>.</summary>
+        OverlapsArea = 10,
+        /// <summary>Overlaps a road corridor (AR-16).</summary>
+        CrossesRoad = 11,
     }
 
     /// <summary>Result of <see cref="AreaValidator.Validate"/>. Immutable.</summary>
@@ -56,14 +62,22 @@ namespace LordsLegacy.Sim.Areas
                     case AreaRefusal.OutsideMap: return "outside the map";
                     case AreaRefusal.TooSmall: return "too small";
                     case AreaRefusal.TooLarge: return "too large";
+                    case AreaRefusal.TooSteep: return "too steep";
+                    case AreaRefusal.OverlapsArea: return "overlaps " + OverlapName;
+                    case AreaRefusal.CrossesRoad: return "crosses road";
                     default: return string.Empty;
                 }
             }
         }
 
-        internal AreaPreview(IReadOnlyList<PointMm> polygon, double areaM2, int pointCount, AreaRefusal reason)
+        /// <summary>Name of the area overlapped when <see cref="Reason"/> is OverlapsArea; otherwise empty.</summary>
+        public string OverlapName { get; }
+
+        internal AreaPreview(IReadOnlyList<PointMm> polygon, double areaM2, int pointCount, AreaRefusal reason,
+            string overlapName = "")
         {
             Polygon = polygon; AreaM2 = areaM2; PointCount = pointCount; Reason = reason;
+            OverlapName = overlapName ?? string.Empty;
         }
     }
 }
