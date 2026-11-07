@@ -148,6 +148,12 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   and debug overlay call `UiFocusRules.Apply(root)`, which sets `focusable = false` on every element and stops
   NavigationMove/Submit/Cancel events at the panel root (trickle-down), so WASD/arrows never move a UI selection.
   Camera and tool keys read `Keyboard.current` directly and are unaffected. New game UI must call it too.
+- Build bar and tools: `BuildBarView` (`Assets/Game/UI/BuildBar/`, UXML/USS) builds non-focusable buttons from `ToolEntry` list
+  (`ToolEntry.Defaults()`; disabled ones greyed, future ones tooltip "Coming later") and raises `ToolClicked`.
+  `ToolController` (`Assets/Game/Tools/`) keeps one `ITool` active: `Toggle(id)` (second click deactivates; switching calls
+  Cancel+Deactivate on the old tool), `HandleEscape()` (tool first, deactivate only if it returns false), `IsPointerOverUi`
+  (bar hover). It sets `CameraRig.ToolActive`; the rig then refuses left/right mouse (`AcceptsMouseButton`), middle/scroll/keys/edge pan unchanged.
+  Tools register with `ToolController.Register`; no concrete tool exists yet.
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
 - Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
   terrain, not from the collider.

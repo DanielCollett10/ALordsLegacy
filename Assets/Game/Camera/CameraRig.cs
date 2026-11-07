@@ -56,6 +56,15 @@ namespace LordsLegacy.Game
         /// <summary>Yaw in degrees (0 looks along +z).</summary>
         public float YawDeg => _yaw;
 
+        /// <summary>True while a build tool is active; it then owns the left and right mouse buttons (ui.md "Camera vs tools").</summary>
+        public bool ToolActive { get; set; }
+
+        /// <summary>
+        /// Whether the camera reacts to a mouse button (0 left, 1 right, 2 middle). Left and right are refused while
+        /// <see cref="ToolActive"/>; middle always works.
+        /// </summary>
+        public bool AcceptsMouseButton(int button) => button == 2 || (button != 0 && button != 1) || !ToolActive;
+
         /// <summary>Sets the terrain to stay above and inside. Null means flat ground, unbounded.</summary>
         public void SetTerrain(IHeightField terrain)
         {
@@ -141,7 +150,7 @@ namespace LordsLegacy.Game
             }
             if (mouse != null)
             {
-                if (mouse.middleButton.isPressed) Rotate(mouse.delta.ReadValue().x * MouseRotateDegPerPixel);
+                if (AcceptsMouseButton(2) && mouse.middleButton.isPressed) Rotate(mouse.delta.ReadValue().x * MouseRotateDegPerPixel);
                 float scroll = mouse.scroll.ReadValue().y;
                 if (scroll != 0) Zoom(scroll / ScrollUnitsPerStep);
             }
