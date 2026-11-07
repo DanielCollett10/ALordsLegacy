@@ -162,6 +162,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   build bar with a status line, a hint line and Cancel/Confirm. `Show(status, hint, isValid)` (Confirm disabled while invalid),
   `Hide()` (hidden by default), events `Cancelled` and `Confirmed`. Buttons are non-focusable (UiFocusRules). Holds no tool
   rules; a tool calls it while it has a draft. Not yet placed in the Game scene (no tool uses it yet).
+- Road tool (T-100, `RoadTool` in `Assets/Game/Tools/`, id `road`): left click adds a point via `GroundPicker` + `PressTracker`; with 2+ points it
+  runs `RoadValidator` and `RoadRenderer.ShowPreview`; Enter or panel Confirm sends `DrawRoad` through `SimHost.Execute`. Accepted clears the
+  draft; rejected shows the reason and keeps it. A right click (not drag) or Escape cancels. The tool panel shows while the tool is active.
+  `GameSceneGenerator.CreateRoadTool` adds `RoadRenderer`, `ToolPanel` and `RoadTool` to the scene; the tool registers itself with `ToolController`.
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
 - Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim
   terrain, not from the collider.
