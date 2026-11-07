@@ -31,6 +31,20 @@ namespace LordsLegacy.Sim.Tests
         }
 
         [Test]
+        public void RoadAndAreaDefaults_MatchTuningDoc()
+        {
+            // tuning.md "Roads and areas".
+            var t = new SimTuning();
+            Assert.AreEqual(1, t.RoadSampleSpacingM, 1e-9);
+            Assert.AreEqual(1, t.RoadMinPointSpacingM, 1e-9);
+            Assert.AreEqual(0.5, t.RoadTreeClearanceM, 1e-9);
+            Assert.AreEqual(1, t.CurveFlattenSpacingM, 1e-9);
+            Assert.AreEqual(2, t.SlopeSampleGridM, 1e-9);
+            Assert.AreEqual(0.1, t.OverlapToleranceM2, 1e-9);
+            Assert.AreEqual(32, t.SpatialIndexCellM, 1e-9);
+        }
+
+        [Test]
         public void GameMinutesPerRealSecondAt1x_IsDerivedFromDayLength()
         {
             var t = new SimTuning();

@@ -107,6 +107,48 @@ namespace LordsLegacy.Sim.Tuning
         public int StartingOxen { get; set; } = 2;
 
         /// <summary>
+        /// Distance between sampled points along a road centre line. Unit: metres. Rule: RD-03
+        /// (tuning.md "Roads and areas"). Read by roads.
+        /// </summary>
+        public double RoadSampleSpacingM { get; set; } = 1;
+
+        /// <summary>
+        /// Shortest allowed distance between two consecutive road points. Unit: metres. Rule: RD-02
+        /// (tuning.md "Roads and areas"). Read by roads.
+        /// </summary>
+        public double RoadMinPointSpacingM { get; set; } = 1;
+
+        /// <summary>
+        /// Clear ground kept beyond each road edge (half width plus this) free of trees. Unit: metres.
+        /// Rule: RD-11 (tuning.md "Roads and areas"). Read by roads.
+        /// </summary>
+        public double RoadTreeClearanceM { get; set; } = 0.5;
+
+        /// <summary>
+        /// Spacing used to flatten curved area edges into straight segments. Unit: metres. Rule: AR-05
+        /// (tuning.md "Roads and areas"). Read by areas.
+        /// </summary>
+        public double CurveFlattenSpacingM { get; set; } = 1;
+
+        /// <summary>
+        /// Grid spacing at which an area's footprint is sampled for slope checks. Unit: metres. Rule: AR-14
+        /// (tuning.md "Roads and areas"). Read by areas.
+        /// </summary>
+        public double SlopeSampleGridM { get; set; } = 2;
+
+        /// <summary>
+        /// Overlap area allowed between two areas before they count as overlapping. Unit: square metres.
+        /// Rule: AR-15 (tuning.md "Roads and areas"). Read by areas.
+        /// </summary>
+        public double OverlapToleranceM2 { get; set; } = 0.1;
+
+        /// <summary>
+        /// Cell size of the spatial index used for roads and areas. Unit: metres. Rule: decision 0012
+        /// (tuning.md "Roads and areas"). Read by roads/areas.
+        /// </summary>
+        public double SpatialIndexCellM { get; set; } = 32;
+
+        /// <summary>
         /// Game minutes that pass per real second at 1× speed. Unit: game minutes per real second.
         /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 1.6 at the default of 15.
         /// Rule: decision 0004.
