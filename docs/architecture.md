@@ -45,6 +45,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   Bent with an on-curve handle, FollowsRoad with segment id and `RoadSide`) and `AreaFlattener.Flatten(shape, roads)`,
   which gives a CCW `PointMm` polygon: bent edges are quadratics sampled every `CurveFlattenSpacingM`, road edges copy
   the road side line between the vertices' nearest positions, a missing segment falls back to Straight.
+  `AreaRegistry` (`SimWorld.Areas`, never null) stores `AreaRecord`s (id, type id, name, shape, flattened polygon,
+  bounds); internal `Add`/`Remove` bump `Version`; names are "<prefix> N" with per-type counters that never reuse.
+  Building-kind areas sit in a `SpatialGrid` (`SpatialIndexCellM`): `QueryOverlapCandidates(bounds)`. `FindAt(point,
+  kind)` is point-in-polygon on the flattened outline; `FindNearestSnap(point, maxMm)` gives an `AreaSnapHit`
+  (Vertex/Edge, vertices preferred; edge index is the shape edge, measured on the flattened outline).
   `RoadSegment.SideLine(side)` (half-width offset of the samples; Left is left of NodeA→NodeB) and `CorridorPolygon()`
   (CCW) support this. Not built yet: validation, the area registry, commands, tree clearing on confirm.
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
