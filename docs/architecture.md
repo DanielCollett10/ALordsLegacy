@@ -51,7 +51,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   kind)` is point-in-polygon on the flattened outline; `FindNearestSnap(point, maxMm)` gives an `AreaSnapHit`
   (Vertex/Edge, vertices preferred; edge index is the shape edge, measured on the flattened outline).
   `RoadSegment.SideLine(side)` (half-width offset of the samples; Left is left of NodeA→NodeB) and `CorridorPolygon()`
-  (CCW) support this. Not built yet: validation, the area registry, commands, tree clearing on confirm.
+  (CCW) support this. `AreaValidator.Validate(world, shape, typeId)` is pure and returns an `AreaPreview` (flattened polygon, m²,
+  point count, `AreaRefusal`). Shape checks only, in order: point count, FollowsRoad vertices within 5 cm of the road
+  side ("not on road"; a missing segment also fails), edges cross (repeated shape points or non-simple outline), outside
+  the map (any flattened point), size. Placement checks (slope, overlap, road crossing) are not built yet, nor are
+  commands or tree clearing on confirm.
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
   min distance), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
