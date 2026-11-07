@@ -5,7 +5,7 @@
     Assets/Prototypes/PerfSpike like Sim.Tests compiles Assets/Sim. Nothing in LordsLegacy.Game or
     LordsLegacy.Editor references it, so perf-3b can delete Assets/Prototypes and Perf.Tests together.
     Perf runs are [Explicit] and [Category("Perf")]; run them with:
-      dotnet test Perf.Tests/Perf.Tests.csproj --filter "TestCategory=Perf"
+      dotnet test Perf.Tests/Perf.Tests.csproj with a filter on TestCategory=Perf
   -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
