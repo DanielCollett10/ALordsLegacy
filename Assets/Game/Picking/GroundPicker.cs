@@ -40,6 +40,22 @@ namespace LordsLegacy.Game
             return TryPickRay(cam.ScreenPointToRay(screenPos), out sample);
         }
 
+        /// <summary>
+        /// Projects the Sim ground point (x,z) to a screen position (pixels, origin bottom-left), using the Sim height.
+        /// False if there is no camera, the Sim is not ready, or the point is behind the camera.
+        /// </summary>
+        public bool TryWorldToScreen(float x, float z, out Vector2 screen)
+        {
+            screen = Vector2.zero;
+            var cam = ResolveCamera();
+            var terrain = SimTerrain();
+            if (cam == null || terrain == null) return false;
+            Vector3 p = cam.WorldToScreenPoint(new Vector3(x, terrain.HeightAt(x, z), z));
+            if (p.z < 0f) return false;
+            screen = new Vector2(p.x, p.y);
+            return true;
+        }
+
         /// <summary>Casts the ray and reads the Sim at the hit point's x/z. False if nothing was hit or the Sim is not ready.</summary>
         public bool TryPickRay(Ray ray, out GroundSample sample)
         {

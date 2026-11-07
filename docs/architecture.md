@@ -165,6 +165,9 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 - Road tool (T-100, `RoadTool` in `Assets/Game/Tools/`, id `road`): left click adds a point via `GroundPicker` + `PressTracker`; with 2+ points it
   runs `RoadValidator` and `RoadRenderer.ShowPreview`; Enter or panel Confirm sends `DrawRoad` through `SimHost.Execute`. Accepted clears the
   draft; rejected shows the reason and keeps it. A right click (not drag) or Escape cancels. The tool panel shows while the tool is active.
+  T-101: a left press within the hit radius of a placed point (`ToolHitTester` vertex hits, screen positions from
+  `GroundPicker.TryWorldToScreen`) and a drag (`PressTracker`) moves that point live; the preview follows. Backspace
+  removes the last point. A double click replaces the point its first click added with one final point at the cursor, then confirms.
   `GameSceneGenerator.CreateRoadTool` adds `RoadRenderer`, `ToolPanel` and `RoadTool` to the scene; the tool registers itself with `ToolController`.
 - `ViewSettings` (`Assets/Game/UI/`) holds presentation-only settings. The Sim never reads them.
 - Camera (`CameraRig` on Main Camera): pan, zoom and rotate over the terrain. Reads ground height from the Sim

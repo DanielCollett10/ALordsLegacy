@@ -10,10 +10,11 @@ using UnityEngine.InputSystem;
 namespace LordsLegacy.Game.Tools
 {
     /// <summary>
-    /// Road tool, part 1 (roads.md steps 1-4): left click on the ground adds a point, the preview and tool panel follow
-    /// the points, Enter or Confirm sends <see cref="DrawRoad"/>, a right click (not a right drag) or Escape cancels.
-    /// Holds no road rules: <see cref="RoadValidator"/> and the Sim command decide everything. Dragging points,
-    /// Backspace, double-click finish, branching and deleting come later.
+    /// Road tool (roads.md steps 1-4): left click on the ground adds a point, a press on a placed point and a drag moves
+    /// it (the preview follows), Backspace removes the last point, a double click adds one final point at the cursor and
+    /// confirms, Enter or Confirm sends <see cref="DrawRoad"/>, a right click (not a right drag) or Escape cancels.
+    /// Holds no road rules: <see cref="RoadValidator"/> and the Sim command decide everything. Branching and deleting
+    /// are in the world-click tools (roads.md steps 5-6).
     /// </summary>
     public sealed class RoadTool : MonoBehaviour, ITool
     {
@@ -21,7 +22,7 @@ namespace LordsLegacy.Game.Tools
         public const string ToolId = "road";
 
         private const string IdleHint = "Left-click the ground to place the first point · Esc leaves the tool";
-        private const string DraftHint = "Left-click adds a point · Enter confirms · Right-click or Esc cancels";
+        private const string DraftHint = "Drag a point to move it · Backspace removes the last point · Double-click or Enter confirms · Right-click or Esc cancels";
 
         [SerializeField] private SimHost _host;
         [SerializeField] private GroundPicker _picker;
@@ -35,6 +36,12 @@ namespace LordsLegacy.Game.Tools
         private RoadPreview _preview;
         private string _rejection;
         private bool _subscribed;
+
+        // Left-press state: the placed point under the press (-1 if none), the point being dragged (-1 if none),
+        // and whether the last left release added a point (a double click then replaces that point with its own).
+        private int _pressVertex = -1;
+        private int _dragIndex = -1;
+        private bool _lastReleaseAddedPoint;
 
         /// <inheritdoc />
         public string Id => ToolId;
@@ -96,20 +103,39 @@ namespace LordsLegacy.Game.Tools
             if (!_active) return;
             if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) return;
             _press.Press(button, screenPos);
+            _pressVertex = button == PressButton.Left ? VertexUnder(screenPos) : -1;
         }
 
-        /// <summary>The cursor moved.</summary>
-        public void PointerMove(Vector2 screenPos) { if (_active) _press.Move(screenPos); }
+        /// <summary>The cursor moved. While a press that started on a placed point is dragged, that point follows the cursor.</summary>
+        public void PointerMove(Vector2 screenPos)
+        {
+            if (!_active) return;
+            _press.Move(screenPos);
+            if (_pressVertex < 0 || !_press.IsDragging(PressButton.Left)) return;
+            _dragIndex = _pressVertex;
+            MoveDraggedPoint(screenPos);
+        }
 
         /// <summary>A mouse button was released. <paramref name="time"/> is real seconds (for double-click detection).</summary>
         public void PointerUp(PressButton button, Vector2 screenPos, float time)
         {
             if (!_active) return;
             var r = _press.Release(button, screenPos, time);
+            bool pressedVertex = _pressVertex >= 0;
+            bool previousClickAddedPoint = _lastReleaseAddedPoint;
+            _pressVertex = -1;
+            _dragIndex = -1;
+            _lastReleaseAddedPoint = false;
             if (r.Kind == PressKind.None || r.Kind == PressKind.Drag) return;
             if (button == PressButton.Right) { if (HasDraft) ClearDraft(); return; }
-            // Double-click finishing is later work; for now it is just another click.
-            AddPointAt(r.EndPosition);
+            if (r.Kind == PressKind.DoubleClick)
+            {
+                FinishWithDoubleClick(r.EndPosition, previousClickAddedPoint);
+                return;
+            }
+            // A click on a placed point does nothing: only a drag moves it.
+            if (pressedVertex) return;
+            _lastReleaseAddedPoint = AddPointAt(r.EndPosition);
         }
 
         /// <summary>Enter pressed or Confirm clicked: sends <see cref="DrawRoad"/> if the draft is valid.</summary>
@@ -126,12 +152,66 @@ namespace LordsLegacy.Game.Tools
             ShowPanel();
         }
 
-        private void AddPointAt(Vector2 screenPos)
+        /// <summary>
+        /// Backspace (roads.md step 3): removes the last placed point. The draft is cleared when no point is left.
+        /// </summary>
+        public void RemoveLastPoint()
         {
+            if (!_active || _points.Count == 0) return;
+            _points.RemoveAt(_points.Count - 1);
+            _rejection = null;
+            _pressVertex = -1;
+            _dragIndex = -1;
+            _lastReleaseAddedPoint = false;
+            Refresh();
+        }
+
+        /// <summary>
+        /// Double click (roads.md step 4): the first click of the pair has already added a point at (almost) the same
+        /// place, so that point is replaced by one final point at the cursor, and the road is confirmed. The pair adds
+        /// exactly one point.
+        /// </summary>
+        private void FinishWithDoubleClick(Vector2 screenPos, bool replacePreviousClickPoint)
+        {
+            if (replacePreviousClickPoint && _points.Count > 0) _points.RemoveAt(_points.Count - 1);
+            _rejection = null;
+            AddPointAt(screenPos);
+            Refresh();
+            Confirm();
+        }
+
+        /// <summary>Index of the placed point under the screen position (within the hit radius), or -1.</summary>
+        private int VertexUnder(Vector2 screenPos)
+        {
+            if (_picker == null || _points.Count == 0) return -1;
+            var candidates = new List<HitCandidate>(_points.Count);
+            for (int i = 0; i < _points.Count; i++)
+            {
+                if (!_picker.TryWorldToScreen((float)_points[i].XMetres, (float)_points[i].ZMetres, out var s)) continue;
+                candidates.Add(HitCandidate.Point(ToolHitKind.Vertex, i, s));
+            }
+            var hit = ToolHitTester.Test(candidates, screenPos);
+            return hit.Kind == ToolHitKind.Vertex ? hit.Id : -1;
+        }
+
+        private void MoveDraggedPoint(Vector2 screenPos)
+        {
+            if (_dragIndex < 0 || _dragIndex >= _points.Count) return;
             if (_picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
+            var p = PointMm.FromMetres(s.X, s.Z);
+            if (p == _points[_dragIndex]) return;
+            _points[_dragIndex] = p;
+            _rejection = null;
+            Refresh();
+        }
+
+        private bool AddPointAt(Vector2 screenPos)
+        {
+            if (_picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return false;
             _points.Add(PointMm.FromMetres(s.X, s.Z));
             _rejection = null;
             Refresh();
+            return true;
         }
 
         private void Refresh()
@@ -171,6 +251,9 @@ namespace LordsLegacy.Game.Tools
             _points.Clear();
             _preview = null;
             _rejection = null;
+            _pressVertex = -1;
+            _dragIndex = -1;
+            _lastReleaseAddedPoint = false;
             if (_roads != null) _roads.HidePreview();
             if (_panel == null) return;
             // While the tool is active the panel stays up so the player can see it is waiting for a first click.
@@ -217,7 +300,11 @@ namespace LordsLegacy.Game.Tools
                 if (mouse.rightButton.wasReleasedThisFrame) PointerUp(PressButton.Right, pos, t);
             }
             var kb = Keyboard.current;
-            if (kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)) Confirm();
+            if (kb != null)
+            {
+                if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) Confirm();
+                if (kb.backspaceKey.wasPressedThisFrame) RemoveLastPoint();
+            }
         }
     }
 }
