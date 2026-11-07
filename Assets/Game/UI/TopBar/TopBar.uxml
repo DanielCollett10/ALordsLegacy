@@ -6,5 +6,6 @@
         <ui:Button name="pause-button" class="top-bar__button" text="Pause" />
         <ui:VisualElement name="speed-buttons" class="top-bar__speeds" />
         <ui:Button name="steady-light-toggle" class="top-bar__button" text="Steady light" />
+        <ui:Button name="snapping-toggle" class="top-bar__button" text="Snapping: On" />
     </ui:VisualElement>
 </ui:UXML>

@@ -20,8 +20,10 @@ namespace LordsLegacy.Game
         private Label _notice;
         private Button _pauseButton;
         private Button _steadyButton;
+        private Button _snappingButton;
         private Button[] _speedButtons = new Button[0];
         private VisualElement _speedsRoot;
+        private SnappingHotkey _snappingHotkey;
 
         /// <summary>Presentation-only settings shared with the view.</summary>
         public ViewSettings ViewSettings { get; } = new ViewSettings();
@@ -47,15 +49,27 @@ namespace LordsLegacy.Game
             _notice = root.Q<Label>("slowed-notice");
             _pauseButton = root.Q<Button>("pause-button");
             _steadyButton = root.Q<Button>("steady-light-toggle");
+            _snappingButton = root.Q<Button>("snapping-toggle");
             var speeds = root.Q<VisualElement>("speed-buttons");
 
             _pauseButton.clicked += TogglePause;
             _steadyButton.clicked += ToggleSteadyLight;
+            _snappingButton.clicked += ToggleSnapping;
+
+            _snappingHotkey?.Dispose();
+            _snappingHotkey = new SnappingHotkey(ToggleSnapping);
 
             _speedsRoot = speeds;
             _speedButtons = new Button[0];
             BuildSpeedButtons();
+            UpdateSnappingLabel();
             Refresh();
+        }
+
+        private void OnDisable()
+        {
+            _snappingHotkey?.Dispose();
+            _snappingHotkey = null;
         }
 
         // The SimHost may initialise after OnEnable (it loads the map in Start), so this is retried from Refresh.
@@ -86,6 +100,7 @@ namespace LordsLegacy.Game
             speeds.style.flexDirection = FlexDirection.Row;
             bar.Add(speeds);
             bar.Add(new Button { name = "steady-light-toggle", text = "Steady light" });
+            bar.Add(new Button { name = "snapping-toggle", text = "Snapping: On" });
             root.Add(bar);
         }
 
@@ -110,6 +125,22 @@ namespace LordsLegacy.Game
         {
             ViewSettings.SteadyLight = !ViewSettings.SteadyLight;
             Refresh();
+        }
+
+        /// <summary>
+        /// Flips <see cref="ViewSettings.Snapping"/> and updates the button label. Called by the button and by the
+        /// Alt key (ToggleSnapping action, once per press). Does not touch the Sim.
+        /// </summary>
+        public void ToggleSnapping()
+        {
+            ViewSettings.Snapping = !ViewSettings.Snapping;
+            UpdateSnappingLabel();
+        }
+
+        private void UpdateSnappingLabel()
+        {
+            if (_snappingButton == null) return;
+            _snappingButton.text = ViewSettings.Snapping ? "Snapping: On" : "Snapping: Off";
         }
 
         /// <summary>Re-reads Sim state into the labels and button highlights.</summary>
