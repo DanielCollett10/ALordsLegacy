@@ -1,0 +1,19 @@
+{
+    "name": "LordsLegacy.Prototypes.PerfSpike.Unity.Editor",
+    "rootNamespace": "LordsLegacy.Prototypes.PerfSpike.UnityEditorMenu",
+    "references": [
+        "LordsLegacy.Prototypes.PerfSpike",
+        "LordsLegacy.Prototypes.PerfSpike.Unity"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

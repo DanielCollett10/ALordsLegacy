@@ -1,0 +1,16 @@
+{
+    "name": "LordsLegacy.Prototypes.PerfSpike.Unity",
+    "rootNamespace": "LordsLegacy.Prototypes.PerfSpike.Unity",
+    "references": [
+        "LordsLegacy.Prototypes.PerfSpike"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
