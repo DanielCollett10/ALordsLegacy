@@ -78,5 +78,66 @@ namespace LordsLegacy.Sim.Tests
             var ids = r.QueryRadius(0, 0, 5f).Select(t => t.Id.Value).ToArray();
             CollectionAssert.AreEqual(new[] { 1, 2 }, ids);
         }
+
+        [Test]
+        public void RemoveTakesTreeOutOfRecordsAndGrid()
+        {
+            var r = new TreeRegistry(10f);
+            r.Add(new TreeId(1), 5, 5, 4);
+            r.Add(new TreeId(2), 6, 6, 4);
+            Assert.IsTrue(r.Remove(new TreeId(1)));
+            Assert.AreEqual(1, r.Count);
+            Assert.IsFalse(r.TryGet(new TreeId(1), out _));
+            Assert.Throws<KeyNotFoundException>(() => r.Get(new TreeId(1)));
+            CollectionAssert.AreEqual(new[] { 2 }, r.All.Select(t => t.Id.Value).ToArray());
+            CollectionAssert.AreEqual(new[] { 2 }, r.QueryRect(new Bounds2(0, 0, 10, 10)).Select(t => t.Id.Value).ToArray());
+            CollectionAssert.AreEqual(new[] { 2 }, r.QueryRadius(5, 5, 3f).Select(t => t.Id.Value).ToArray());
+        }
+
+        [Test]
+        public void RemoveUnknownOrAlreadyRemovedIdReturnsFalse()
+        {
+            var r = new TreeRegistry();
+            r.Add(new TreeId(1), 0, 0, 4);
+            Assert.IsFalse(r.Remove(new TreeId(99)));
+            Assert.IsTrue(r.Remove(new TreeId(1)));
+            Assert.IsFalse(r.Remove(new TreeId(1)));
+            Assert.AreEqual(0, r.Count);
+        }
+
+        [Test]
+        public void RemovedIdCannotBeAddedAgain()
+        {
+            var r = new TreeRegistry();
+            r.Add(new TreeId(1), 0, 0, 4);
+            r.Remove(new TreeId(1));
+            Assert.Throws<ArgumentException>(() => r.Add(new TreeId(1), 0, 0, 4));
+            Assert.AreEqual(0, r.Count);
+        }
+
+        [Test]
+        public void VersionIncreasesOnEveryChangeOnly()
+        {
+            var r = new TreeRegistry();
+            int v0 = r.Version;
+            r.Add(new TreeId(1), 0, 0, 4);
+            int v1 = r.Version;
+            Assert.Greater(v1, v0);
+            Assert.IsFalse(r.Remove(new TreeId(99)));
+            Assert.AreEqual(v1, r.Version, "a failed remove must not change the version");
+            Assert.IsTrue(r.Remove(new TreeId(1)));
+            Assert.Greater(r.Version, v1);
+        }
+
+        [Test]
+        public void CountNeverIncludesRemovedTrees()
+        {
+            var r = new TreeRegistry();
+            for (int i = 0; i < 5; i++) r.Add(new TreeId(i), i, i, 4);
+            r.Remove(new TreeId(0));
+            r.Remove(new TreeId(4));
+            Assert.AreEqual(3, r.Count);
+            Assert.AreEqual(3, r.All.Count());
+        }
     }
 }

@@ -9,8 +9,10 @@ namespace LordsLegacy.Sim.Forestry
     public sealed class TreeRegistry
     {
         private readonly SortedDictionary<int, TreeRecord> _byId = new SortedDictionary<int, TreeRecord>();
+        private readonly HashSet<int> _removedIds = new HashSet<int>();
         private readonly Dictionary<long, List<TreeRecord>> _cells = new Dictionary<long, List<TreeRecord>>();
         private readonly float _cellSize;
+        private int _version;
 
         /// <summary>Creates an empty registry. <paramref name="cellSizeM"/> is the spatial grid cell size in metres.</summary>
         public TreeRegistry(float cellSizeM = 16f)
@@ -19,23 +21,51 @@ namespace LordsLegacy.Sim.Forestry
             _cellSize = cellSizeM;
         }
 
-        /// <summary>Number of trees.</summary>
+        /// <summary>Number of standing trees (removed trees are not counted).</summary>
         public int Count => _byId.Count;
 
-        /// <summary>All trees in ascending id order.</summary>
+        /// <summary>
+        /// Increases by one on every change (each <see cref="Add"/> and each successful <see cref="Remove"/>).
+        /// Views compare it with the last value they drew to know when to rebuild.
+        /// </summary>
+        public int Version => _version;
+
+        /// <summary>All standing trees in ascending id order. Do not remove trees while enumerating this.</summary>
         public IEnumerable<TreeRecord> All => _byId.Values;
 
-        /// <summary>Adds a standing tree. Throws <see cref="ArgumentException"/> if the id exists.</summary>
+        /// <summary>
+        /// Adds a standing tree. Throws <see cref="ArgumentException"/> if the id exists or was removed before
+        /// (removed trees never come back, BLD-10-D).
+        /// </summary>
         public TreeRecord Add(TreeId id, float x, float z, double trunkLengthM)
         {
             if (_byId.ContainsKey(id.Value)) throw new ArgumentException("Duplicate tree id " + id, nameof(id));
+            if (_removedIds.Contains(id.Value)) throw new ArgumentException("Tree " + id + " was removed and cannot come back", nameof(id));
             if (trunkLengthM < 0 || double.IsNaN(trunkLengthM)) throw new ArgumentOutOfRangeException(nameof(trunkLengthM));
             var t = new TreeRecord(id, x, z, trunkLengthM);
             _byId.Add(id.Value, t);
             long key = Key(Cell(x), Cell(z));
             if (!_cells.TryGetValue(key, out var list)) { list = new List<TreeRecord>(); _cells[key] = list; }
             list.Add(t);
+            _version++;
             return t;
+        }
+
+        /// <summary>
+        /// Removes a standing tree from the records and the spatial grid. Returns false (and changes nothing)
+        /// if the id is unknown or already removed. A removed id can never be added again.
+        /// </summary>
+        public bool Remove(TreeId id)
+        {
+            if (!_byId.TryGetValue(id.Value, out var t)) return false;
+            _byId.Remove(id.Value);
+            _removedIds.Add(id.Value);
+            long key = Key(Cell(t.X), Cell(t.Z));
+            var list = _cells[key];
+            list.Remove(t);
+            if (list.Count == 0) _cells.Remove(key);
+            _version++;
+            return true;
         }
 
         /// <summary>Returns the tree, or throws <see cref="KeyNotFoundException"/>.</summary>
