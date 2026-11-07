@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.Tuning;
@@ -88,6 +89,13 @@ namespace LordsLegacy.Game
             long start = Stopwatch.GetTimestamp();
             World.Step(n);
             Stats.Record(Stopwatch.GetTimestamp() - start, n, _clock.Elapsed.TotalSeconds);
+        }
+
+        /// <summary>Sends a command to the Sim (the only way views change it) and returns the result. Works while paused.</summary>
+        public CommandResult Execute(ISimCommand cmd)
+        {
+            if (World == null) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "The simulation is not running.");
+            return World.Execute(cmd);
         }
 
         /// <summary>Pauses or resumes the Sim.</summary>
