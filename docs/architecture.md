@@ -172,6 +172,11 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 
 - `Assets/Game/` reads Sim state and draws it; it turns player input into Sim commands and holds
   no game rules (see `CLAUDE.md`).
+- `GroundOverlay.Material(texture = null)` (`Assets/Game/Visuals/`, shader `LordsLegacy/GroundOverlay`, decision 0020):
+  use it for anything drawn on the terrain (roads, area outlines/fills, drafts, markers) instead of `Sprites/Default`.
+  Unlit, alpha blended, vertex colour x optional texture, pulls geometry towards the camera by a bias growing with
+  view distance so terrain LOD doesn't cover it. Materials are cached; don't destroy them. The shader ships through
+  the `Assets/Game/Resources/GroundOverlay.mat` material (loaded with `Resources.Load`).
 - `SimHost` (`Assets/Game/Bootstrap/`, MonoBehaviour in the Game scene) owns `SimWorld` and `TickPacer` (decision 0006).
   It has a serialized `SimConfig` (`Assets/Game/Config/SimConfig.cs`, asset `SimConfig.asset`, decision 0019): when set,
   `Start` builds `SimTuning` and the road/area catalogs from it once (edits apply on the next Play); when null it uses
