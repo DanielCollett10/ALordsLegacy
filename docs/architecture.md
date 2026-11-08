@@ -19,6 +19,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) is the root and owns all game state: the tick clock, pause,
   `Terrain` (`IHeightField`), `Trees` (`TreeRegistry`), `Roads` (`RoadNetwork`), `Areas` (`AreaRegistry`) and `CommandLog`. All are
   never null. Build it with `new SimWorld(tuning)` (flat ground, no trees) or `SimWorld.FromMapData(map, tuning)`.
+  Both take optional `RoadTypeCatalog` / `AreaTypeCatalog` arguments (decision 0019); the world exposes them as
+  `RoadTypes` and `AreaTypes` (never null; null arguments give the static default definitions in `RoadTypes.All` /
+  `AreaTypes.All`). All Sim code looks types up through the world (`world.RoadTypes.Find`, `RoadSegment.SideLine(side,
+  catalog)`, `CorridorPolygon(catalog)`, `AreaFlattener.Flatten(..., roadTypes)`); the static `Find` methods and the
+  catalog-less `SideLine`/`CorridorPolygon` overloads (`[Obsolete]`) remain only for the Unity layer until it migrates.
   **One tick = one game minute.** `Step(n)` advances `Tick` by n and does nothing while `Paused`; `Pause()` and
   `Resume()` set it. `Now` is the `GameTime` for the current tick. The Sim has no notion of real seconds.
 - `Assets/Sim/Time/` (namespace `LordsLegacy.Sim.Calendar`, to avoid clashing with `UnityEngine.Time`):

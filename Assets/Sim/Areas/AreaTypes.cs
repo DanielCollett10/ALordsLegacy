@@ -69,7 +69,10 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>All area types.</summary>
         public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork };
 
-        /// <summary>Finds a type by id, or null if unknown.</summary>
+        /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
+        public static readonly AreaTypeCatalog DefaultCatalog = new AreaTypeCatalog(All);
+
+        /// <summary>Finds a default type by id, or null if unknown. Sim code must use the world's catalog instead.</summary>
         public static AreaTypeDef Find(string id)
         {
             for (int i = 0; i < All.Count; i++) if (All[i].Id == id) return All[i];

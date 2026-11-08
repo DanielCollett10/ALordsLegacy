@@ -44,9 +44,14 @@ namespace LordsLegacy.Sim.Roads
         /// the averaged normal of its neighbouring pieces (mitred, clamped at 2x). An unknown road type gives width 0.
         /// Consecutive duplicate points are dropped.
         /// </summary>
-        public PointMm[] SideLine(RoadSide side)
+        [Obsolete("Pass the world's RoadTypes catalog: SideLine(side, world.RoadTypes). This overload uses the default definitions.")]
+        public PointMm[] SideLine(RoadSide side) => SideLine(side, RoadTypes.DefaultCatalog);
+
+        /// <summary>As <see cref="SideLine(RoadSide)"/>, taking the width from the given catalog (decision 0019).</summary>
+        public PointMm[] SideLine(RoadSide side, RoadTypeCatalog catalog)
         {
-            RoadTypeDef type = RoadTypes.Find(TypeId);
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+            RoadTypeDef type = catalog.Find(TypeId);
             double half = type == null ? 0 : type.WidthM * PointMm.MmPerMetre / 2.0;
             double sign = side == RoadSide.Left ? 1 : -1;
             var pts = Samples;
@@ -75,9 +80,13 @@ namespace LordsLegacy.Sim.Roads
         /// The road corridor as a counter-clockwise polygon: the right side line forward, then the left side line
         /// backward. Ends are cut square.
         /// </summary>
-        public PointMm[] CorridorPolygon()
+        [Obsolete("Pass the world's RoadTypes catalog: CorridorPolygon(world.RoadTypes). This overload uses the default definitions.")]
+        public PointMm[] CorridorPolygon() => CorridorPolygon(RoadTypes.DefaultCatalog);
+
+        /// <summary>As <see cref="CorridorPolygon()"/>, taking the width from the given catalog (decision 0019).</summary>
+        public PointMm[] CorridorPolygon(RoadTypeCatalog catalog)
         {
-            PointMm[] right = SideLine(RoadSide.Right), left = SideLine(RoadSide.Left);
+            PointMm[] right = SideLine(RoadSide.Right, catalog), left = SideLine(RoadSide.Left, catalog);
             var poly = new List<PointMm>(right.Length + left.Length);
             poly.AddRange(right);
             for (int i = left.Length - 1; i >= 0; i--) poly.Add(left[i]);
