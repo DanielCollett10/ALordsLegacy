@@ -22,6 +22,8 @@ namespace LordsLegacy.Sim.Roads
         OverlapsRoad = 6,
         /// <summary>The corridor overlaps a building area by more than the tolerance (RD-13); see <see cref="RoadPreview.CrossedAreaName"/>.</summary>
         CrossesArea = 7,
+        /// <summary>Moving a road node would make a new junction with another road (RD-17).</summary>
+        WouldJoinRoad = 8,
     }
 
     /// <summary>How a new road meets an existing one.</summary>
@@ -101,6 +103,7 @@ namespace LordsLegacy.Sim.Roads
                     case RoadRefusal.CrossesItself: return "crosses itself";
                     case RoadRefusal.OverlapsRoad: return "overlaps road";
                     case RoadRefusal.CrossesArea: return "crosses " + CrossedAreaName;
+                    case RoadRefusal.WouldJoinRoad: return "would join a road";
                     default: return string.Empty;
                 }
             }

@@ -127,6 +127,36 @@ namespace LordsLegacy.Sim.Roads
             return new SplitResult(true, cutNode, first.Id, second.Id);
         }
 
+        /// <summary>
+        /// Moves a node and replaces every segment attached to it (RD-17). Every node keeps its id; each old segment
+        /// is replaced by a new one with a new id between the same two nodes, in the same order as <paramref name="old"/>.
+        /// The caller has validated everything; this only applies it. Returns the new segments.
+        /// </summary>
+        internal List<RoadSegment> MoveNode(int nodeId, PointMm position, IReadOnlyList<RoadSegment> old,
+            IReadOnlyList<PointMm[]> controlPoints, IReadOnlyList<PointMm[]> samples,
+            IReadOnlyList<RoadTangent?> startTangents, IReadOnlyList<RoadTangent?> endTangents)
+        {
+            RoadNode node = _nodes[nodeId];
+            if (_nodeAt.TryGetValue(position, out int other) && other != nodeId)
+                throw new InvalidOperationException("Another node is already at " + position);
+            foreach (RoadSegment s in old)
+            {
+                _segments.Remove(s.Id);
+                _nodes[s.NodeA].SegmentIdList.Remove(s.Id);
+                if (s.NodeB != s.NodeA) _nodes[s.NodeB].SegmentIdList.Remove(s.Id);
+            }
+            _nodeAt.Remove(node.Position);
+            node.Position = position;
+            _nodeAt[position] = nodeId;
+
+            var created = new List<RoadSegment>();
+            for (int i = 0; i < old.Count; i++)
+                created.Add(Attach(old[i].NodeA, old[i].NodeB, old[i].TypeId, old[i].Curve,
+                    controlPoints[i], samples[i], startTangents[i], endTangents[i]));
+            Version++;
+            return created;
+        }
+
         /// <summary>Removes a segment, and any end node left with no segments. False if the id is unknown.</summary>
         public bool RemoveSegment(int segmentId)
         {

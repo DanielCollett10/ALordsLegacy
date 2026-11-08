@@ -138,12 +138,13 @@ namespace LordsLegacy.Sim.Commands
             return a;
         }
 
-        private static CommandRejectCode CodeFor(RoadRefusal reason)
+        internal static CommandRejectCode CodeFor(RoadRefusal reason)
         {
             switch (reason)
             {
                 case RoadRefusal.UnknownType:
                 case RoadRefusal.NotEnoughPoints: return CommandRejectCode.InvalidArgument;
+                case RoadRefusal.WouldJoinRoad:
                 case RoadRefusal.OverlapsRoad:
                 case RoadRefusal.CrossesArea: return CommandRejectCode.Conflict;
                 default: return CommandRejectCode.NotAllowed;

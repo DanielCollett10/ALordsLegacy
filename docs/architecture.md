@@ -97,6 +97,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     ids, `Removed` = split originals. Rejections: unknown type or too few points → InvalidArgument, overlap → Conflict,
     other → NotAllowed.
   - `DeleteRoadSegment(segmentId)`: removes one segment; unknown id → `NotFound`. Trees are not touched.
+  - `MoveRoadNode(nodeId, position)` (RD-17): Preview with `RoadValidator.PreviewMove(world, nodeId, position)` →
+    `NodeMovePreview` (one `SegmentMovePreview` per attached segment: new control points plus a `RoadPreview`; no mutation).
+    Each segment keeps its other control points (RD-02 cleans the neighbour); at a node with exactly 2 non-loop segments
+    both are pinned to one shared direction (`NodeMovePlanner`, tangents refined so the first sample steps agree within
+    1°). Each is checked by `RoadValidator.ValidateMove` (attached segments ignored; any junction except a join at the
+    segment's own end nodes → `RoadRefusal.WouldJoinRoad`, "would join a road", checked last). First failure rejects the
+    whole move. On success `RoadNetwork.MoveNode` replaces the attached segments with new ids (node ids kept),
+    `Removed` = old, `Created` = new, and trees near the new centre lines go (`RemovedTreeIds`). Unknown node → `NotFound`.
   - `SimWorld.Execute(cmd)` runs validate-then-apply immediately, works while paused, never changes `Tick`, and appends
     every call (accepted or rejected) to `CommandLog`. A rejected command changes nothing. Unity calls it only through `SimHost`.
 - Pure C#, no `UnityEngine`. Tests live in `Sim.Tests/`, which compiles the same `Assets/Sim/**/*.cs`.

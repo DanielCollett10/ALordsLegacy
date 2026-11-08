@@ -11,7 +11,7 @@ namespace LordsLegacy.Sim.Roads
         /// <summary>Node id, unique in its network and never reused.</summary>
         public int Id { get; }
         /// <summary>Position in mm.</summary>
-        public PointMm Position { get; }
+        public PointMm Position { get; internal set; }
         /// <summary>Ids of the segments that end at this node, in the order they were attached.</summary>
         public IReadOnlyList<int> SegmentIds => SegmentIdList;
 
