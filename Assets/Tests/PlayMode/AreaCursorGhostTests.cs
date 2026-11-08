@@ -66,6 +66,7 @@ namespace LordsLegacy.Tests.PlayMode
             _controller = _toolGo.AddComponent<ToolController>();
             _tool = _toolGo.AddComponent<AreaTool>();
             _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            _tool.GhostEnabled = true; // the ghost is off by default (T-164 playtest)
             _tool.Configure(AreaTool.TestToolId, AreaTypes.TestId, _host, picker, _renderer, panel, _controller);
             _controller.Register(_tool);
             yield return null;

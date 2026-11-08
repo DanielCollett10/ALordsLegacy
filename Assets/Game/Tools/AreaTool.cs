@@ -56,6 +56,13 @@ namespace LordsLegacy.Game.Tools
         private int _dragIndex = -1;
         private bool _lastReleaseAddedPoint;
         private const float CursorSphereM = 0.6f;
+
+        /// <summary>
+        /// AR-21 ghost polygon (the shape the next click would make). Off by default after the T-164 playtest: it
+        /// followed the mouse over the panel buttons and ignored bent and road-following edges, so it needs more polish.
+        /// The cursor sphere (AR-20) is unaffected.
+        /// </summary>
+        public bool GhostEnabled { get; set; }
         private CursorMarker _cursor;
         private PointMm _hover;
         private bool _hasHover, _hoverSnapped, _lastSnapped, _dragging;
@@ -199,7 +206,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (_areas == null) return;
             var t = Type;
-            bool show = _active && _hasHover && _points.Count >= 1 && !_dragging && t != null && _points.Count < t.MaxPoints;
+            bool show = GhostEnabled && _active && _hasHover && _points.Count >= 1 && !_dragging && t != null && _points.Count < t.MaxPoints;
             if (show) _areas.ShowGhost(_points, _hover);
             else _areas.HideGhost();
         }
