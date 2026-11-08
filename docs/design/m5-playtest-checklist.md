@@ -26,7 +26,10 @@ that says what "right" means.
 - [ ] A sphere sits under the cursor and changes colour when snapped (AR-20)
 - [ ] Ghost edges show the shape the next click would make (AR-21)
 - [ ] Near a road, dots every 2.5 m show along its sides within about 25 m, and points snap to them (AR-22)
-- [ ] Snap one point to a road side with the previous point near (≤ 10 m) the same side: that point is pulled onto the road and the edge follows the road (AR-23)
+- [ ] Snap one point to a road side with the previous point within 10 m of it, along a curved road: both points stay where you clicked, and the edge bends to follow the road's curve, drifting out to the other point (AR-23)
+- [ ] Same with the other point 15 m away: the edge stays straight (AR-23)
+- [ ] Double-click that edge's handle: it straightens (AR-23)
+- [ ] Confirm a near-road area, then delete the road: the area keeps its shape (AR-05)
 
 ## Tuning in the Inspector
 - [ ] Select the `SimConfig` asset: road max grade, road width, area limits and the `SimTuning` values are there, with rule IDs in the tooltips (decision 0019)

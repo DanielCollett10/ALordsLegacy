@@ -61,7 +61,7 @@ changes, recompute these and the market table below.
 | Dead-end extension tangent tolerance | 1 | degrees | RD-16 |
 | Area cursor sphere | 0.6 | m diameter (Unity side) | AR-20 |
 | Road snap dot spacing / shown within | 2.5 / 25 | m / m from cursor (Unity side) | AR-22 |
-| Edge-follow pull distance | 10 | m (Unity side) | AR-23 |
+| Near-road edge reach | 10 | m (area type value in the Sim, checked by the tool and the validator) | AR-23, AR-24 |
 | Area points | 4–8 | vertices | AR-02 |
 | Curve flattening spacing | 1 | m | AR-05 |
 | Test area size / max slope | 100–5,000 / 10 | m² / degrees | AR-13, AR-14 |

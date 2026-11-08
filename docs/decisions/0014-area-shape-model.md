@@ -18,5 +18,11 @@
 - `AreaTypeDef` holds the per-type limits (points, m², slope, kind, clears trees, blocks roads), built in code until
   the definition pipeline exists.
 
+**Amendment (M5, AR-23).** A fourth edge kind, `NearRoad` (segment id + side), follows the road side's curve at a
+distance that tapers linearly by arc length from vertex A's distance to vertex B's distance (both measured
+perpendicular to the side line). Both vertices stay where the player put them. `FollowsRoad` is the special case
+where both distances are 0. The Sim accepts `NearRoad` only if both vertices are within 10 m of that side and on
+the side away from the road.
+
 **Consequences.** Areas are reshape-ready and independent of later road edits. The flattened outline can hold
 hundreds of points, so overlap tests use the spatial index and bounding boxes first.
