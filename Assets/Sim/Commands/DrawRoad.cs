@@ -91,9 +91,17 @@ namespace LordsLegacy.Sim.Commands
             // only sees trees still standing, so no tree id is reported twice.
             double clearM = RoadTypes.Find(TypeId).WidthM / 2 + world.Tuning.RoadTreeClearanceM;
             var treesRemoved = new List<long>();
-            foreach (RoadPiece piece in RoadCutter.Cut(preview.Samples, cps, startNode, endNode, interior))
+            List<RoadPiece> cut = RoadCutter.Cut(preview.Samples, cps, startNode, endNode, interior);
+            for (int pi = 0; pi < cut.Count; pi++)
             {
-                RoadSegment seg = net.AddSegment(TypeId, Curve, piece.ControlPoints, piece.Samples);
+                RoadPiece piece = cut[pi];
+                // RD-16: keep the pinned end tangents so re-sampling the first/last piece gives the same samples.
+                // Only when the piece still starts/ends at the sampled end (no node link was added in front).
+                RoadTangent? st = pi == 0 && piece.ControlPoints[0] == preview.Samples[0] ? preview.StartTangent : null;
+                RoadTangent? et = pi == cut.Count - 1
+                    && piece.ControlPoints[piece.ControlPoints.Length - 1] == preview.Samples[preview.Samples.Count - 1]
+                    ? preview.EndTangent : null;
+                RoadSegment seg = net.AddSegment(TypeId, Curve, piece.ControlPoints, piece.Samples, st, et);
                 created.Add(seg.Id);
                 foreach (TreeId t in TreeClearing.RemoveNearPolyline(world.Trees, seg.Samples, clearM))
                     treesRemoved.Add(t.Value);

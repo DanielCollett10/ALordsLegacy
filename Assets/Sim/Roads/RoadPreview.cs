@@ -109,10 +109,16 @@ namespace LordsLegacy.Sim.Roads
         /// <summary>Name of the building area crossed when <see cref="Reason"/> is CrossesArea; otherwise empty.</summary>
         public string CrossedAreaName { get; }
 
+        /// <summary>Tangent used at the first sample when the road starts on a dead-end node (RD-16), else null.</summary>
+        public RoadTangent? StartTangent { get; }
+        /// <summary>Tangent used at the last sample when the road ends on a dead-end node (RD-16), else null.</summary>
+        public RoadTangent? EndTangent { get; }
+
         internal RoadPreview(IReadOnlyList<PointMm> samples, IReadOnlyList<InvalidRange> ranges,
             IReadOnlyList<PlannedJunction> junctions, double lengthM, double maxGrade, RoadRefusal reason,
-            string crossedAreaName = "")
+            string crossedAreaName = "", RoadTangent? startTangent = null, RoadTangent? endTangent = null)
         {
+            StartTangent = startTangent; EndTangent = endTangent;
             CrossedAreaName = crossedAreaName ?? string.Empty;
             Samples = samples; InvalidRanges = ranges; Junctions = junctions;
             LengthM = lengthM; MaxGrade = maxGrade; Reason = reason;

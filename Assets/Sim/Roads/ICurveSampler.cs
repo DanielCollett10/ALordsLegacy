@@ -14,6 +14,10 @@ namespace LordsLegacy.Sim.Roads
         /// The first and last samples are the first and last cleaned control points, and every cleaned control point is a sample.
         /// Fewer than two usable points give the cleaned points unchanged.
         /// </summary>
-        IReadOnlyList<PointMm> Sample(IReadOnlyList<PointMm> controlPoints);
+        /// <param name="controlPoints">The clicked points.</param>
+        /// <param name="startTangent">Optional direction of travel at the first point (RD-16); null leaves the free curve end.</param>
+        /// <param name="endTangent">Optional direction of travel at the last point (RD-16); null leaves the free curve end.</param>
+        IReadOnlyList<PointMm> Sample(IReadOnlyList<PointMm> controlPoints,
+            RoadTangent? startTangent = null, RoadTangent? endTangent = null);
     }
 }

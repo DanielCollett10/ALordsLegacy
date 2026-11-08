@@ -27,7 +27,8 @@ namespace LordsLegacy.Sim.Roads
         public CurveKind Kind => CurveKind.CatmullRomCentripetal;
 
         /// <inheritdoc />
-        public IReadOnlyList<PointMm> Sample(IReadOnlyList<PointMm> controlPoints)
+        public IReadOnlyList<PointMm> Sample(IReadOnlyList<PointMm> controlPoints,
+            RoadTangent? startTangent = null, RoadTangent? endTangent = null)
         {
             List<PointMm> pts = ControlPointFilter.Clean(controlPoints, _minPointSpacingM);
             int n = pts.Count;
@@ -47,9 +48,23 @@ namespace LordsLegacy.Sim.Roads
                 var fx = new double[fine + 1];
                 var fz = new double[fine + 1];
                 var cum = new double[fine + 1];
+                bool useStart = i == 0 && startTangent.HasValue;
+                bool useEnd = i == n - 2 && endTangent.HasValue;
+                bool hermite = useStart || useEnd;
+                double m1x = 0, m1z = 0, m2x = 0, m2z = 0;
+                if (hermite)
+                {
+                    // Hermite span: pinned tangent at the tangent end, the neighbouring Catmull-Rom direction at the other.
+                    if (useStart) { m1x = startTangent.Value.X; m1z = startTangent.Value.Z; }
+                    else InteriorDirection(i > 0 ? pts[i - 1] : p1, p1, p2, out m1x, out m1z);
+                    if (useEnd) { m2x = endTangent.Value.X; m2z = endTangent.Value.Z; }
+                    else InteriorDirection(p1, p2, i + 2 < n ? pts[i + 2] : p2, out m2x, out m2z);
+                    m1x *= chord; m1z *= chord; m2x *= chord; m2z *= chord;
+                }
                 for (int k = 0; k <= fine; k++)
                 {
-                    Evaluate(p0, p1, p2, p3, (double)k / fine, out fx[k], out fz[k]);
+                    if (hermite) EvaluateHermite(p1, p2, m1x, m1z, m2x, m2z, (double)k / fine, out fx[k], out fz[k]);
+                    else Evaluate(p0, p1, p2, p3, (double)k / fine, out fx[k], out fz[k]);
                     if (k > 0)
                     {
                         double dx = fx[k] - fx[k - 1], dz = fz[k] - fz[k - 1];
@@ -74,6 +89,38 @@ namespace LordsLegacy.Sim.Roads
                 result.Add(p2);
             }
             return result;
+        }
+
+        // Unit direction of the centripetal Catmull-Rom curve at b, given its neighbours a and c. Falls back to
+        // the chord when a or c is b itself (an end with no neighbour).
+        private static void InteriorDirection(PointMm a, PointMm b, PointMm c, out double x, out double z)
+        {
+            double cx = c.X - b.X, cz = c.Z - b.Z;
+            if (a == b || c == b)
+            {
+                double ex = a == b ? cx : b.X - a.X, ez = a == b ? cz : b.Z - a.Z;
+                Normalise(ex, ez, out x, out z);
+                return;
+            }
+            double tab = Knot(a, b), tbc = Knot(b, c), tac = tab + tbc;
+            double mx = (b.X - a.X) / tab - (c.X - a.X) / tac + cx / tbc;
+            double mz = (b.Z - a.Z) / tab - (c.Z - a.Z) / tac + cz / tbc;
+            Normalise(mx, mz, out x, out z);
+        }
+
+        private static void Normalise(double dx, double dz, out double x, out double z)
+        {
+            double len = Math.Sqrt(dx * dx + dz * dz);
+            if (len > 0) { x = dx / len; z = dz / len; } else { x = 0; z = 0; }
+        }
+
+        private static void EvaluateHermite(PointMm p1, PointMm p2, double m1x, double m1z, double m2x, double m2z,
+            double u, out double x, out double z)
+        {
+            double u2 = u * u, u3 = u2 * u;
+            double h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+            x = h00 * p1.X + h10 * m1x + h01 * p2.X + h11 * m2x;
+            z = h00 * p1.Z + h10 * m1z + h01 * p2.Z + h11 * m2z;
         }
 
         private static PointMm Reflect(PointMm through, PointMm origin) =>
