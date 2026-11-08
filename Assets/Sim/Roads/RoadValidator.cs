@@ -25,6 +25,34 @@ namespace LordsLegacy.Sim.Roads
         public static RoadPreview Validate(SimWorld world, IReadOnlyList<PointMm> controlPoints, string typeId,
             int ignoreSegmentId = -1)
         {
+            var ignored = new HashSet<int>();
+            if (ignoreSegmentId >= 0) ignored.Add(ignoreSegmentId);
+            return ValidateCore(world, controlPoints, typeId, ignored, false, null, null, null);
+        }
+
+        /// <summary>
+        /// Validates a re-shaped road (RD-17): the segments in <paramref name="ignoreSegmentIds"/> are treated as absent,
+        /// no tangent is worked out from neighbours (only the ones passed in are used), and any junction other than a
+        /// join at one of <paramref name="ownNodeIds"/> is refused as <see cref="RoadRefusal.WouldJoinRoad"/> (checked last).
+        /// </summary>
+        public static RoadPreview ValidateMove(SimWorld world, IReadOnlyList<PointMm> controlPoints, string typeId,
+            IReadOnlyCollection<int> ignoreSegmentIds, IReadOnlyCollection<int> ownNodeIds,
+            RoadTangent? startTangent, RoadTangent? endTangent)
+        {
+            return ValidateCore(world, controlPoints, typeId, new HashSet<int>(ignoreSegmentIds ?? new int[0]), true,
+                startTangent, endTangent, ownNodeIds);
+        }
+
+        /// <summary>
+        /// Previews moving a node (RD-17) without changing anything: one <see cref="RoadPreview"/> per attached segment.
+        /// </summary>
+        public static NodeMovePreview PreviewMove(SimWorld world, int nodeId, PointMm position) =>
+            NodeMovePlanner.Plan(world, nodeId, position);
+
+        private static RoadPreview ValidateCore(SimWorld world, IReadOnlyList<PointMm> controlPoints, string typeId,
+            HashSet<int> ignored, bool moveMode, RoadTangent? forcedStart, RoadTangent? forcedEnd,
+            IReadOnlyCollection<int> ownNodeIds)
+        {
             if (world == null) throw new ArgumentNullException(nameof(world));
             var noRanges = new List<InvalidRange>();
             var noJunctions = new List<PlannedJunction>();
@@ -40,7 +68,7 @@ namespace LordsLegacy.Sim.Roads
             if (n < 2) return new RoadPreview(samples, noRanges, noJunctions, 0, 0, RoadRefusal.NotEnoughPoints);
 
             var others = new List<RoadSegment>();
-            foreach (RoadSegment s in world.Roads.Segments) if (s.Id != ignoreSegmentId) others.Add(s);
+            foreach (RoadSegment s in world.Roads.Segments) if (!ignored.Contains(s.Id)) others.Add(s);
 
             double widthMm = type.WidthM * PointMm.MmPerMetre;
             double lengthM = Polylines.LengthMetres(samples);
@@ -48,14 +76,21 @@ namespace LordsLegacy.Sim.Roads
             // RD-16: an end joining a dead-end node leaves flush with the old road. The ends are the same with or
             // without tangents, so find the joins on the free curve, then sample again with the tangents.
             RoadTangent? startTan = null, endTan = null;
-            foreach (PlannedJunction j in PlanJunctions(samples, others, widthMm, lengthM, new List<(int Lo, int Hi)>()))
+            if (moveMode)
             {
-                if (j.Kind != JunctionKind.JoinNode) continue;
-                bool atStart = j.NewArcM <= 0, atEnd = j.NewArcM >= lengthM;
-                if (!atStart && !atEnd) continue;
-                RoadTangent? outward = DeadEndDirection(world.Roads, j.NodeId, ignoreSegmentId);
-                if (!outward.HasValue) continue;
-                if (atStart) startTan = outward; else endTan = outward.Value.Reversed();
+                startTan = forcedStart; endTan = forcedEnd;
+            }
+            else
+            {
+                foreach (PlannedJunction j in PlanJunctions(samples, others, widthMm, lengthM, new List<(int Lo, int Hi)>()))
+                {
+                    if (j.Kind != JunctionKind.JoinNode) continue;
+                    bool atStart = j.NewArcM <= 0, atEnd = j.NewArcM >= lengthM;
+                    if (!atStart && !atEnd) continue;
+                    RoadTangent? outward = DeadEndDirection(world.Roads, j.NodeId, ignored);
+                    if (!outward.HasValue) continue;
+                    if (atStart) startTan = outward; else endTan = outward.Value.Reversed();
+                }
             }
             if (startTan.HasValue || endTan.HasValue)
             {
@@ -85,19 +120,33 @@ namespace LordsLegacy.Sim.Roads
                 Areas.AreaRecord crossed = FindCrossedBuildingArea(world, samples, typeId);
                 if (crossed != null) { reason = RoadRefusal.CrossesArea; crossedName = crossed.Name; }
             }
+            if (moveMode && reason == RoadRefusal.Valid)
+            {
+                foreach (PlannedJunction j in junctions)
+                {
+                    bool own = j.Kind == JunctionKind.JoinNode && ownNodeIds != null && Contains(ownNodeIds, j.NodeId);
+                    if (!own) { reason = RoadRefusal.WouldJoinRoad; break; }
+                }
+            }
 
             return new RoadPreview(samples, ranges, junctions, lengthM, maxGrade, reason, crossedName, startTan, endTan);
         }
 
+        private static bool Contains(IReadOnlyCollection<int> ids, int id)
+        {
+            foreach (int x in ids) if (x == id) return true;
+            return false;
+        }
+
         // Direction pointing away from the old road at a node that has exactly one (non-looping) segment, else null.
-        private static RoadTangent? DeadEndDirection(RoadNetwork net, int nodeId, int ignoreSegmentId)
+        private static RoadTangent? DeadEndDirection(RoadNetwork net, int nodeId, HashSet<int> ignored)
         {
             RoadNode node = net.GetNode(nodeId);
             if (node == null) return null;
             RoadSegment only = null;
             foreach (int id in node.SegmentIdList)
             {
-                if (id == ignoreSegmentId) continue;
+                if (ignored.Contains(id)) continue;
                 if (only != null) return null;
                 only = net.GetSegment(id);
             }
