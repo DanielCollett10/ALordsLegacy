@@ -18,6 +18,8 @@ Each line matches one owner issue from M5 play (screenshots in `docs/design/sour
 - [ ] A valid 4-point area next to a road: the fill exactly matches the outline, including along the road
 - [ ] Screenshot 7: draw a plot whose edge cuts through the corner of a neighbouring test area (one that follows a road). The outline wraps around the neighbour's boundary, the panel says "fitted around …", and it confirms (AR-34)
 - [ ] Draw a plot that would be split in two by a neighbour: still refused, "overlaps …"
+- [ ] Draw a plot whose edge cuts across the corner of a road: trimmed back to the road edge, "fitted around road", and it confirms
+- [ ] Draw a plot with a road running right through it: refused, "crosses road" (no split plots)
 - [ ] A test work area over a test area is not trimmed
 
 ## 5. Can't place where it can't go (placement.md)

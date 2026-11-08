@@ -14,5 +14,8 @@ difference. Neighbours often share edges and corners exactly (snapped, terraced 
 - Pin the vendored version in `ThirdParty/Clipper2/VERSION.txt`. Don't modify the vendored files. If something has to
   change for C# 9 or Unity, record it in that file.
 
+Owner approved the dependency (M6 planning): it's free, including for commercial use. Any future outside library
+in the Sim must also be free, permissively licensed, pure C#, and recorded in a decision like this one.
+
 **Consequences.** Robust trimming with shared edges. Later uses (plot splitting, union of work areas, fences) go
 through the same wrapper. One external source drop to keep: an upgrade is a deliberate task, not a drive-by.
