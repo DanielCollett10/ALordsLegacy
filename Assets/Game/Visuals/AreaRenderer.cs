@@ -151,6 +151,9 @@ namespace LordsLegacy.Game.Visuals
         /// <summary>Colour of the faint ghost edges (AR-21).</summary>
         public static readonly Color GhostColor = new Color(1f, 1f, 1f, 0.35f);
 
+        /// <summary>Colour of the faint ghost fill (AR-21).</summary>
+        public static readonly Color GhostFill = new Color(1f, 1f, 1f, 0.12f);
+
         private GameObject _ghostObject;
         private Mesh _ghostMesh;
 
@@ -161,12 +164,26 @@ namespace LordsLegacy.Game.Visuals
         /// Draws the faint ghost edges last point -> cursor -> first point (AR-21). With a single placed point
         /// (<paramref name="last"/> equals <paramref name="first"/>) only one edge is drawn. Not validated.
         /// </summary>
-        public void ShowGhost(PointMm last, PointMm cursor, PointMm first)
+        public void ShowGhost(IReadOnlyList<PointMm> points, PointMm cursor)
         {
-            if (host == null || !host.IsInitialized) { HideGhost(); return; }
+            if (host == null || !host.IsInitialized || points == null || points.Count == 0) { HideGhost(); return; }
+            var last = points[points.Count - 1];
+            var first = points[0];
             var b = new MeshBuilder();
             float lift = HeightOffsetM + PreviewLiftM + 0.02f;
             int edges = 0;
+            if (points.Count >= 2)
+            {
+                // Fill the whole shape the click would make (as placed, after the hourglass auto-fix), not just the new edges.
+                var poly = new List<PointMm>(points) { cursor };
+                if (poly.Count >= 3 && AreaUntangler.TryUntangle(poly, out int[] order))
+                {
+                    var re = new List<PointMm>(poly.Count);
+                    foreach (int k in order) re.Add(poly[k]);
+                    poly = re;
+                }
+                if (poly.Count >= 3) AddFill(b, poly, GhostFill, lift - 0.01f);
+            }
             void Edge(PointMm a, PointMm c)
             {
                 var p0 = V(a); var p1 = V(c);

@@ -200,7 +200,7 @@ namespace LordsLegacy.Game.Tools
             if (_areas == null) return;
             var t = Type;
             bool show = _active && _hasHover && _points.Count >= 1 && !_dragging && t != null && _points.Count < t.MaxPoints;
-            if (show) _areas.ShowGhost(_points[_points.Count - 1], _hover, _points[0]);
+            if (show) _areas.ShowGhost(_points, _hover);
             else _areas.HideGhost();
         }
 
