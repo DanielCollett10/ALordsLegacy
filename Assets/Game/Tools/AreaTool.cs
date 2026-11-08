@@ -448,6 +448,7 @@ namespace LordsLegacy.Game.Tools
         private void Refresh()
         {
             if (_points.Count == 0) { ClearDraft(); return; }
+            if (TryUntangleDraft()) _rejection = null;
             var shape = CurrentShape();
             _preview = _host != null && _host.IsInitialized ? AreaValidator.Validate(_host.World, shape, _typeId) : null;
             if (_areas != null)
@@ -456,6 +457,34 @@ namespace LordsLegacy.Game.Tools
                 else _areas.HidePreview();
             }
             ShowPanel();
+        }
+
+        /// <summary>
+        /// AR-11 auto-fix: when the draft's straight edges cross (an hourglass), reorders the points so the polygon is
+        /// simple (<see cref="AreaUntangler"/>). Drafts with bent or road-following edges are left to be refused.
+        /// </summary>
+        private bool TryUntangleDraft()
+        {
+            int n = _points.Count;
+            if (n < 3) return false;
+            var shape = CurrentShape();
+            for (int i = 0; i < n; i++)
+                if (shape.Edges[i].Kind != AreaEdgeKind.Straight) return false;
+            if (!AreaUntangler.TryUntangle(_points, out int[] order)) return false;
+            var points = new List<PointMm>(n);
+            var roadSeg = new List<int>(n);
+            var roadSide = new List<RoadSide>(n);
+            for (int k = 0; k < n; k++)
+            {
+                points.Add(_points[order[k]]); roadSeg.Add(_roadSeg[order[k]]); roadSide.Add(_roadSide[order[k]]);
+            }
+            if (_dragIndex >= 0) _dragIndex = System.Array.IndexOf(order, _dragIndex);
+            if (_pressVertex >= 0) _pressVertex = System.Array.IndexOf(order, _pressVertex);
+            _points.Clear(); _points.AddRange(points);
+            _roadSeg.Clear(); _roadSeg.AddRange(roadSeg);
+            _roadSide.Clear(); _roadSide.AddRange(roadSide);
+            for (int i = 0; i < n; i++) _edges[i] = AreaEdge.Straight();
+            return true;
         }
 
         private string TypeName

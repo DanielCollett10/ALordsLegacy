@@ -469,24 +469,41 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_panel.IsConfirmEnabled);
         }
 
-        [UnityTest]
-        public IEnumerator ClickingFourPointsInCrossingOrderIsRefused()
+        /// <summary>Whatever the draft is, a refused shape can't be confirmed and a valid one can (AR-11).</summary>
+        private void AssertPanelMatchesValidity()
         {
-            yield return Setup();
-            Click(40, 40); Click(80, 80); Click(80, 40); Click(40, 80);
-            AssertHourglassRefused(4);
-            Click(40, 40); // a click on point 1 must not close it either
-            AssertHourglassRefused(4);
+            Assert.AreEqual(_tool.CurrentPreview.IsValid, _panel.IsConfirmEnabled);
+            if (_tool.CurrentPreview.IsValid) return;
+            StringAssert.Contains("edges cross", _panel.Status);
+            AssertHourglassRefused(_tool.PointCount);
         }
 
         [UnityTest]
-        public IEnumerator DraggingAPointIntoAnHourglassIsRefused()
+        public IEnumerator ClickingFourPointsInCrossingOrderIsReorderedIntoAValidShape()
+        {
+            yield return Setup();
+            Click(40, 40); Click(80, 80); Click(80, 40); Click(40, 80);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.IsTrue(LordsLegacy.Sim.Geometry.Polygons.IsSimple(_tool.Points), "Points were auto-reordered.");
+            Assert.AreEqual(PointMm.FromMetres(40, 40), _tool.Points[0], "Point 1 stays first.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid);
+            Assert.IsTrue(_panel.IsConfirmEnabled);
+            StringAssert.Contains("1,600 m²", _panel.Status);
+            Click(40, 40); // a click on point 1 closes the now valid shape
+            Assert.AreEqual(1, _host.World.Areas.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator DraggingAPointIntoAnHourglassIsReordered()
         {
             yield return Setup();
             FourSquare();
             Assert.IsTrue(_tool.CurrentPreview.IsValid);
             Drag(Screen(80, 40), Screen(80, 100));
-            AssertHourglassRefused(4);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.IsTrue(LordsLegacy.Sim.Geometry.Polygons.IsSimple(_tool.Points));
+            AssertPanelMatchesValidity();
+            Assert.IsTrue(_panel.IsConfirmEnabled);
         }
 
         [UnityTest]
@@ -500,7 +517,7 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator InsertingAPointIntoAnHourglassIsRefused()
+        public IEnumerator InsertingAPointThatWouldCrossIsFixedOrRefused()
         {
             yield return Setup();
             _camGo.transform.position = new Vector3(100f, 50f, 100f);
@@ -515,7 +532,8 @@ namespace LordsLegacy.Tests.PlayMode
             var p = Screen(106, 100) + new Vector2(0f, -7f);
             _tool.PointerDown(PressButton.Left, p);
             _tool.PointerUp(PressButton.Left, p, _time += 2f);
-            AssertHourglassRefused(8);
+            Assert.AreEqual(8, _tool.PointCount);
+            AssertPanelMatchesValidity(); // reordered into a valid shape, or refused: never confirmable while crossing
         }
 
         [Test]
