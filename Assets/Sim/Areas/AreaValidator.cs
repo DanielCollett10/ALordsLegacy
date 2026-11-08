@@ -42,7 +42,7 @@ namespace LordsLegacy.Sim.Areas
             int n = shape.Vertices.Count;
             if (n < type.MinPoints) return AreaRefusal.TooFewPoints;
             if (n > type.MaxPoints) return AreaRefusal.TooManyPoints;
-            if (!RoadEdgesOk(world, shape)) return AreaRefusal.NotOnRoad;
+            if (!RoadEdgesOk(world, shape, type)) return AreaRefusal.NotOnRoad;
             if (HasZeroLengthEdge(shape) || !Polygons.IsSimple(poly)) return AreaRefusal.EdgesCross;
             for (int i = 0; i < poly.Length; i++)
                 if (!world.Terrain.Contains((float)poly[i].XMetres, (float)poly[i].ZMetres)) return AreaRefusal.OutsideMap;
@@ -66,17 +66,23 @@ namespace LordsLegacy.Sim.Areas
             return false;
         }
 
-        private static bool RoadEdgesOk(SimWorld world, AreaShape shape)
+        private static bool RoadEdgesOk(SimWorld world, AreaShape shape, AreaTypeDef type)
         {
             int n = shape.Vertices.Count;
             for (int i = 0; i < n; i++)
             {
                 AreaEdge e = shape.Edges[i];
-                if (e.Kind != AreaEdgeKind.FollowsRoad) continue;
+                if (e.Kind != AreaEdgeKind.FollowsRoad && e.Kind != AreaEdgeKind.NearRoad) continue;
                 RoadSegment seg = world.Roads.GetSegment(e.SegmentId);
                 if (seg == null) return false;
                 PointMm[] side = seg.SideLine(e.Side);
                 if (side.Length == 0) return false;
+                if (e.Kind == AreaEdgeKind.NearRoad)
+                {
+                    if (!NearRoadGeometry.VertexOk(side, e.Side, shape.Vertices[i], type.NearRoadReachM)) return false;
+                    if (!NearRoadGeometry.VertexOk(side, e.Side, shape.Vertices[(i + 1) % n], type.NearRoadReachM)) return false;
+                    continue;
+                }
                 if (Polylines.Nearest(side, shape.Vertices[i]).DistanceMm > FollowsRoadToleranceMm) return false;
                 if (Polylines.Nearest(side, shape.Vertices[(i + 1) % n]).DistanceMm > FollowsRoadToleranceMm) return false;
             }

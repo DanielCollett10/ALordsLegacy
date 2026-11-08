@@ -13,7 +13,9 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>A quadratic curve passing through <see cref="AreaEdge.Handle"/>.</summary>
         Bent = 1,
         /// <summary>Copies one side line of a road segment.</summary>
-        FollowsRoad = 2
+        FollowsRoad = 2,
+        /// <summary>Follows a road side's curve at a distance that tapers from one vertex to the other (AR-24).</summary>
+        NearRoad = 3
     }
 
     /// <summary>One edge of an area shape. Edge i runs from vertex i to vertex i+1. Immutable.</summary>
@@ -40,6 +42,9 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>An edge that follows a road side line.</summary>
         public static AreaEdge FollowsRoad(int segmentId, RoadSide side) =>
             new AreaEdge(AreaEdgeKind.FollowsRoad, default, segmentId, side);
+        /// <summary>An edge that follows a road side's curve at a tapering distance away from the road (AR-24).</summary>
+        public static AreaEdge NearRoad(int segmentId, RoadSide side) =>
+            new AreaEdge(AreaEdgeKind.NearRoad, default, segmentId, side);
     }
 
     /// <summary>The player's area: ordered vertices plus one edge per vertex (decision 0014). Immutable.</summary>

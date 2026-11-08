@@ -35,10 +35,15 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>True if roads may not cross the area (AR-16).</summary>
         public bool BlocksRoads { get; }
 
+        /// <summary>How far (m) a NearRoad edge's vertices may be from the road side (AR-24).</summary>
+        public double NearRoadReachM { get; }
+
         /// <summary>Creates an area type definition.</summary>
         public AreaTypeDef(string id, string namePrefix, AreaKind kind, int minPoints, int maxPoints,
-            double minAreaM2, double maxAreaM2, double? maxSlopeDegrees, bool clearsTrees, bool blocksRoads)
+            double minAreaM2, double maxAreaM2, double? maxSlopeDegrees, bool clearsTrees, bool blocksRoads,
+            double nearRoadReachM = 10)
         {
+            NearRoadReachM = nearRoadReachM;
             Id = id; NamePrefix = namePrefix; Kind = kind; MinPoints = minPoints; MaxPoints = maxPoints;
             MinAreaM2 = minAreaM2; MaxAreaM2 = maxAreaM2; MaxSlopeDegrees = maxSlopeDegrees;
             ClearsTrees = clearsTrees; BlocksRoads = blocksRoads;
