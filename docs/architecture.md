@@ -59,7 +59,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `DesignateArea` and `DeleteArea` are in `Commands/` (see below).
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
   classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
-  min distance), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
+  min distance, `PointsEvery(line, spacingM)` points at arc length 0, s, 2s… rounded to mm, empty for zero-length
+  lines, throws for spacing ≤ 0; `PointsEveryWithin(line, spacingM, centre, radiusM)` the inclusive subset; snap dots, AR-22), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
   Predicates are exact; distances are double mm.
   `SpatialGrid<T>` (decision 0012, GEO-16) is a uniform-grid index over `BoundsMm` with a cell size in metres
   (rounded to mm, `SimTuning.SpatialIndexCellM` is the value to pass). `Insert(item, bounds)`, `Remove(item)`

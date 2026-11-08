@@ -59,6 +59,58 @@ namespace LordsLegacy.Sim.Geometry
             return new PolylineHit(bx, bz, best, bestArc, bestSeg);
         }
 
+        /// <summary>
+        /// Points every <paramref name="spacingM"/> metres of arc length from the first vertex: at 0, s, 2s, ...
+        /// Nothing is returned past the end. Positions are interpolated along the segments and rounded to whole mm.
+        /// Zero-length or single-point polylines (all vertices equal) give an empty list.
+        /// Repeated vertices are skipped. The same input always gives the same output.
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown when spacingM is not greater than 0 (or is NaN).</exception>
+        public static List<PointMm> PointsEvery(IReadOnlyList<PointMm> line, double spacingM)
+        {
+            if (!(spacingM > 0)) throw new ArgumentException("Spacing must be greater than 0.", nameof(spacingM));
+            var result = new List<PointMm>();
+            double total = LengthMm(line);
+            if (line.Count < 2 || total <= 0) return result;
+
+            const double eps = 1e-9; // mm; absorbs float error at the very end of the line
+            double spacingMm = spacingM * PointMm.MmPerMetre;
+            long k = 0;
+            double target = 0, walked = 0;
+            for (int i = 0; i + 1 < line.Count && target <= total + eps; i++)
+            {
+                PointMm a = line[i], b = line[i + 1];
+                double segLen = a.DistanceTo(b);
+                if (segLen <= 0) continue;
+                while (target <= walked + segLen + eps && target <= total + eps)
+                {
+                    double t = Math.Min(1.0, Math.Max(0.0, (target - walked) / segLen));
+                    result.Add(new PointMm(
+                        (long)Math.Round(a.X + t * (b.X - a.X), MidpointRounding.AwayFromZero),
+                        (long)Math.Round(a.Z + t * (b.Z - a.Z), MidpointRounding.AwayFromZero)));
+                    k++;
+                    target = k * spacingMm;
+                }
+                walked += segLen;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// The subset of <see cref="PointsEvery"/> whose points lie within <paramref name="radiusM"/> metres
+        /// of <paramref name="centre"/> (inclusive). Same positions and order as the full list.
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown when spacingM is not greater than 0, or radiusM is negative or NaN.</exception>
+        public static List<PointMm> PointsEveryWithin(IReadOnlyList<PointMm> line, double spacingM, PointMm centre, double radiusM)
+        {
+            if (!(radiusM >= 0)) throw new ArgumentException("Radius must be 0 or greater.", nameof(radiusM));
+            double radiusMm = radiusM * PointMm.MmPerMetre;
+            var result = new List<PointMm>();
+            foreach (PointMm p in PointsEvery(line, spacingM))
+                if (p.DistanceTo(centre) <= radiusMm) result.Add(p);
+            return result;
+        }
+
         /// <summary>Minimum distance in mm between two polylines (0 if they touch or cross).</summary>
         public static double MinDistanceMm(IReadOnlyList<PointMm> a, IReadOnlyList<PointMm> b)
         {
