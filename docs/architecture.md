@@ -81,6 +81,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     returns a `RoadPreview` (samples, `InvalidRanges`, `PlannedJunction`s in order along the road, length, max grade,
     `RoadRefusal`). Refusal order: outside map, too steep, crosses itself, overlaps road, crosses area (last; building areas only). Junction kinds: `T`, `X`,
     `JoinNode`. The tool preview and `DrawRoad` both call it.
+    RD-16 tangent continuity: `ICurveSampler.Sample(points, RoadTangent? start = null, RoadTangent? end = null)`; with
+    none the output is the plain Catmull-Rom. When the first/last point is a `JoinNode` on a node with exactly one
+    (non-loop, non-ignored) segment, `RoadValidator` re-samples with that segment's outward end direction (Hermite span
+    at the pinned end) and reports it as `RoadPreview.StartTangent/EndTangent`. `DrawRoad` stores them on the new
+    first/last `RoadSegment` (`StartTangent`/`EndTangent`); the old segment is untouched. T, X and 2+-segment nodes get none.
   - `RoadCutter` (internal) cuts a new road's samples and control points at its junctions.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
   `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created, removed and

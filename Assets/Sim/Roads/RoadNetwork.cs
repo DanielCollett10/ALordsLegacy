@@ -46,7 +46,8 @@ namespace LordsLegacy.Sim.Roads
         /// <returns>The new segment.</returns>
         /// <exception cref="ArgumentException">Fewer than 2 control points or samples, or ends that do not match.</exception>
         public RoadSegment AddSegment(string typeId, CurveKind curve,
-            IReadOnlyList<PointMm> controlPoints, IReadOnlyList<PointMm> samples)
+            IReadOnlyList<PointMm> controlPoints, IReadOnlyList<PointMm> samples,
+            RoadTangent? startTangent = null, RoadTangent? endTangent = null)
         {
             if (typeId == null) throw new ArgumentNullException(nameof(typeId));
             if (controlPoints == null) throw new ArgumentNullException(nameof(controlPoints));
@@ -58,7 +59,7 @@ namespace LordsLegacy.Sim.Roads
 
             int a = NodeAtOrNew(controlPoints[0]);
             int b = NodeAtOrNew(controlPoints[controlPoints.Count - 1]);
-            RoadSegment seg = Attach(a, b, typeId, curve, Copy(controlPoints), Copy(samples));
+            RoadSegment seg = Attach(a, b, typeId, curve, Copy(controlPoints), Copy(samples), startTangent, endTangent);
             Version++;
             return seg;
         }
@@ -119,8 +120,8 @@ namespace LordsLegacy.Sim.Roads
             int cutNode = NodeAtOrNew(p);
             int nodeA = seg.NodeA, nodeB = seg.NodeB;
             // Attach the halves before removing the original so its end nodes are never left empty and dropped.
-            RoadSegment first = Attach(nodeA, cutNode, seg.TypeId, seg.Curve, firstCps.ToArray(), firstSamples.ToArray());
-            RoadSegment second = Attach(cutNode, nodeB, seg.TypeId, seg.Curve, secondCps.ToArray(), secondSamples.ToArray());
+            RoadSegment first = Attach(nodeA, cutNode, seg.TypeId, seg.Curve, firstCps.ToArray(), firstSamples.ToArray(), seg.StartTangent, null);
+            RoadSegment second = Attach(cutNode, nodeB, seg.TypeId, seg.Curve, secondCps.ToArray(), secondSamples.ToArray(), null, seg.EndTangent);
             RemoveSegmentCore(seg);
             Version++;
             return new SplitResult(true, cutNode, first.Id, second.Id);
@@ -227,9 +228,10 @@ namespace LordsLegacy.Sim.Roads
             return id;
         }
 
-        private RoadSegment Attach(int a, int b, string typeId, CurveKind curve, PointMm[] cps, PointMm[] samples)
+        private RoadSegment Attach(int a, int b, string typeId, CurveKind curve, PointMm[] cps, PointMm[] samples,
+            RoadTangent? startTangent = null, RoadTangent? endTangent = null)
         {
-            var seg = new RoadSegment(_nextSegmentId++, a, b, typeId, curve, cps, samples);
+            var seg = new RoadSegment(_nextSegmentId++, a, b, typeId, curve, cps, samples, startTangent, endTangent);
             _segments[seg.Id] = seg;
             _nodes[a].SegmentIdList.Add(seg.Id);
             if (b != a) _nodes[b].SegmentIdList.Add(seg.Id);

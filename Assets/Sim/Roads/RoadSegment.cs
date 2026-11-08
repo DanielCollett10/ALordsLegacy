@@ -24,9 +24,15 @@ namespace LordsLegacy.Sim.Roads
         /// <summary>Length of the sampled centre line in metres.</summary>
         public double LengthM { get; }
 
+        /// <summary>Direction pinned at the first control point when the curve was sampled (RD-16), or null for a free end.</summary>
+        public RoadTangent? StartTangent { get; }
+        /// <summary>Direction pinned at the last control point when the curve was sampled (RD-16), or null for a free end.</summary>
+        public RoadTangent? EndTangent { get; }
+
         internal RoadSegment(int id, int nodeA, int nodeB, string typeId, CurveKind curve,
-            PointMm[] controlPoints, PointMm[] samples)
+            PointMm[] controlPoints, PointMm[] samples, RoadTangent? startTangent = null, RoadTangent? endTangent = null)
         {
+            StartTangent = startTangent; EndTangent = endTangent;
             Id = id; NodeA = nodeA; NodeB = nodeB; TypeId = typeId; Curve = curve;
             ControlPoints = controlPoints; Samples = samples;
             LengthM = Polylines.LengthMetres(samples);

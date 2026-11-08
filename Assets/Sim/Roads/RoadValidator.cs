@@ -34,7 +34,8 @@ namespace LordsLegacy.Sim.Roads
             if (type == null) return new RoadPreview(none, noRanges, noJunctions, 0, 0, RoadRefusal.UnknownType);
             if (controlPoints == null) return new RoadPreview(none, noRanges, noJunctions, 0, 0, RoadRefusal.NotEnoughPoints);
 
-            IReadOnlyList<PointMm> samples = new CatmullRomSampler(world.Tuning).Sample(controlPoints);
+            var sampler = new CatmullRomSampler(world.Tuning);
+            IReadOnlyList<PointMm> samples = sampler.Sample(controlPoints);
             int n = samples.Count;
             if (n < 2) return new RoadPreview(samples, noRanges, noJunctions, 0, 0, RoadRefusal.NotEnoughPoints);
 
@@ -43,6 +44,25 @@ namespace LordsLegacy.Sim.Roads
 
             double widthMm = type.WidthM * PointMm.MmPerMetre;
             double lengthM = Polylines.LengthMetres(samples);
+
+            // RD-16: an end joining a dead-end node leaves flush with the old road. The ends are the same with or
+            // without tangents, so find the joins on the free curve, then sample again with the tangents.
+            RoadTangent? startTan = null, endTan = null;
+            foreach (PlannedJunction j in PlanJunctions(samples, others, widthMm, lengthM, new List<(int Lo, int Hi)>()))
+            {
+                if (j.Kind != JunctionKind.JoinNode) continue;
+                bool atStart = j.NewArcM <= 0, atEnd = j.NewArcM >= lengthM;
+                if (!atStart && !atEnd) continue;
+                RoadTangent? outward = DeadEndDirection(world.Roads, j.NodeId, ignoreSegmentId);
+                if (!outward.HasValue) continue;
+                if (atStart) startTan = outward; else endTan = outward.Value.Reversed();
+            }
+            if (startTan.HasValue || endTan.HasValue)
+            {
+                samples = sampler.Sample(controlPoints, startTan, endTan);
+                n = samples.Count;
+                lengthM = Polylines.LengthMetres(samples);
+            }
 
             bool outside = false;
             for (int i = 0; i < n && !outside; i++)
@@ -66,7 +86,32 @@ namespace LordsLegacy.Sim.Roads
                 if (crossed != null) { reason = RoadRefusal.CrossesArea; crossedName = crossed.Name; }
             }
 
-            return new RoadPreview(samples, ranges, junctions, lengthM, maxGrade, reason, crossedName);
+            return new RoadPreview(samples, ranges, junctions, lengthM, maxGrade, reason, crossedName, startTan, endTan);
+        }
+
+        // Direction pointing away from the old road at a node that has exactly one (non-looping) segment, else null.
+        private static RoadTangent? DeadEndDirection(RoadNetwork net, int nodeId, int ignoreSegmentId)
+        {
+            RoadNode node = net.GetNode(nodeId);
+            if (node == null) return null;
+            RoadSegment only = null;
+            foreach (int id in node.SegmentIdList)
+            {
+                if (id == ignoreSegmentId) continue;
+                if (only != null) return null;
+                only = net.GetSegment(id);
+            }
+            if (only == null || only.NodeA == only.NodeB) return null;
+
+            IReadOnlyList<PointMm> s = only.Samples;
+            bool atA = only.NodeA == nodeId;
+            PointMm at = atA ? s[0] : s[s.Count - 1];
+            for (int k = 1; k < s.Count; k++)
+            {
+                PointMm nb = atA ? s[k] : s[s.Count - 1 - k];
+                if (nb != at) return new RoadTangent(at.X - nb.X, at.Z - nb.Z);
+            }
+            return null;
         }
 
         // RD-13: the lowest-id building area whose overlap with the new corridor exceeds the tolerance, or null.
