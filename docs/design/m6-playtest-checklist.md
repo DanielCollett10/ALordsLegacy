@@ -12,7 +12,9 @@ Each line matches one owner issue from M5 play (screenshots in `docs/design/sour
 ## 2-4. Edges join the points you placed (AR-30..33)
 - [ ] Points 1 and 2 on a road, point 3 away from it: the edges run 2→3 and 3→1 straight to the points, never to a spot on the road (screenshot 2)
 - [ ] Drag point 3 left, past point 2: edges still run 2→3 and 3→1, so the shape follows your points (expected-behaviour image)
-- [ ] Click points in a crossing order: the points are not reordered; the outline is red with crosses where it crosses, no fill, and Confirm is disabled
+- [ ] Screenshot 6: points 1 and 4 on the road, 2 and 3 away from it. Edge 3→4 is one straight line to point 4, not down to the road and back along it
+- [ ] Click straight-edged points in a crossing order: they're still tidied into a clean shape (auto-reorder kept)
+- [ ] A crossing draft the tidy-up can't fix (with a bent edge): red outline with crosses where it crosses, no fill, and Confirm is disabled
 - [ ] A valid 4-point area next to a road: the fill exactly matches the outline, including along the road
 
 ## 5. Can't place where it can't go (placement.md)

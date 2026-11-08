@@ -53,20 +53,21 @@ Checks run on the flattened polygon. The first failing check (in this order) is 
 
 Minimum width (GEO-07, "no thin slivers") is deferred.
 
-**AR-11 auto-fix (T-161, owner's call):** when a draft of all-straight edges crosses itself, the tool reorders the points by angle around their centroid (`AreaUntangler`, point 1 stays first) if that gives a simple polygon. Drafts with bent or road-following edges are not reordered; they stay refused ("edges cross", Confirm disabled). **Replaced in M6 by AR-31** (point order never changes once placed).
+**AR-11 auto-fix (T-161, owner's call):** when a draft of all-straight edges crosses itself, the tool reorders the points by angle around their centroid (`AreaUntangler`, point 1 stays first) if that gives a simple polygon. Drafts with bent or road-following edges are not reordered; they stay refused ("edges cross", Confirm disabled). **Kept in M6 (owner, after review):** players can drop points anywhere around the shape without worrying about order. See AR-31.
 
 ## Edges join the points you placed (M6, owner feedback from M5 play, screenshots 2, 3 and expected-behaviour)
 
 In M5 an edge with one end on a road could "hug" the road part of the way and then cut across
 (`FollowsRoadPartly`, added in T-166 as "AR-26" and never written down here). It also reordered points on its own. As a result, edges
-ended at a spot on the road instead of at the player's point, and the fill didn't match the points (owner issues 2-4).
+ended at a spot on the road instead of at the player's point, and the fill didn't match the points (owner issues 2-4, all the
+same bug; see `source/screenshot-6-points-clicked-and-expected-behaviour.png`).
 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | AR-30 | **Every edge runs from its own vertex to the next vertex, and nowhere else.** The flattened outline passes through every vertex, in the draft's order. An edge never ends at, or detours to, a road or area point that isn't one of its two vertices | DECIDED |
-| AR-31 | **Point order never changes by itself.** Clicking adds the new point **after the last point**, as clicked. Dragging moves a point but never reorders. If the result crosses itself, it's shown invalid (AR-11, AR-32) and the player fixes it. The M5 auto-reorder (`AreaUntangler`) is removed from the tool | DECIDED |
-| AR-33 | **Edge kinds are chosen only like this** (snapping on): both ends snapped to the same road side → FollowsRoad (AR-04). Both ends on the same area's outline → follows that outline. One end snapped to a road side or area outline and the other within 10 m on the outer side → NearRoad / NearArea (AR-23..25, with the taper ending exactly on the other vertex). **Anything else is Straight.** The partial road hug ("AR-26", `FollowsRoadPartly`) is removed. Snapping off: always Straight unless the player bent the edge | DECIDED |
-| AR-32 | **Drawing an invalid draft:** the fill is drawn **only** when the flattened outline is simple, and it's the exact triangulation of that outline (road-following and bent edges included). A crossing draft shows the red outline with **no fill**, plus a small red cross at each crossing point, so the player sees what to fix rather than a wrong-looking fill. A 3-point draft is a valid-looking triangle if simple, and says "too few points" | DECIDED |
+| AR-31 | **Auto-reorder stays.** The AR-11 auto-fix (`AreaUntangler`) still reorders an all-straight draft that crosses itself, so the player can place points around the shape in any order. Whatever order results, AR-30 holds: each edge joins two of the player's points. The reorder isn't the bug. The bug was the partial road hug, which made an edge stop at the road and run back along it ("snaps to the road first because it's closer, then retraces the line", screenshot 6 and expected-behaviour: the 3→4 edge should be one straight line) | DECIDED |
+| AR-33 | **Edge kinds are chosen only like this** (snapping on): both ends snapped to the same road side → FollowsRoad (AR-04). Both ends on the same area's outline → follows that outline. One end snapped to a road side or area outline and the other within 10 m on the outer side → NearRoad / NearArea (AR-23..25, with the taper ending exactly on the other vertex). **Anything else is Straight.** The partial road hug ("AR-26", `FollowsRoadPartly`) is removed. NearRoad/NearArea stay as they are (owner, M6). Snapping off: always Straight unless the player bent the edge | DECIDED |
+| AR-32 | **Drawing an invalid draft** (one the auto-fix can't untangle, e.g. with bent or road edges): the fill is drawn **only** when the flattened outline is simple, and it's the exact triangulation of that outline (road-following and bent edges included). A crossing draft shows the red outline with **no fill**, plus a small red cross at each crossing point, so the player sees what to fix rather than a wrong-looking fill. A 3-point draft is a valid-looking triangle if simple, and says "too few points" | DECIDED |
 
 **AR-11 bug (M5):** in play, the owner drew an hourglass by clicking four points in a crossing order (a figure-8 with crossing edges) and it wasn't refused.
 "Edges cross" must catch **every** self-crossing: crossings between straight edges, between bent edges, and between
