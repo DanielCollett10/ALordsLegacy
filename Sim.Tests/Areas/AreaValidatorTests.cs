@@ -1,4 +1,5 @@
 using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Map;
@@ -141,6 +142,82 @@ namespace LordsLegacy.Sim.Tests.Areas
             Assert.AreEqual("edges cross", AreaValidator.Validate(Ramp(), bow, T).ReasonText);
             Assert.AreEqual("edges cross", AreaValidator.Validate(Ramp(), bow, W).ReasonText);
         }
+
+        // ---- T-160 / AR-11: every self-crossing outline is refused, and DesignateArea changes nothing. ----
+
+        private static AreaShape Bent(PointMm[] v, int bentEdge, PointMm handle)
+        {
+            var edges = new AreaEdge[v.Length];
+            for (int i = 0; i < edges.Length; i++) edges[i] = i == bentEdge ? AreaEdge.Bent(handle) : AreaEdge.Straight();
+            return new AreaShape(v, edges);
+        }
+
+        private static PointMm[] Pts(double ox, double oz, params double[] xz)
+        {
+            var p = new PointMm[xz.Length / 2];
+            for (int i = 0; i < p.Length; i++) p[i] = M(ox + xz[2 * i], oz + xz[2 * i + 1]);
+            return p;
+        }
+
+        private static void AssertRefused(AreaShape shape)
+        {
+            SimWorld w = Ramp();
+            foreach (string type in new[] { T, W })
+                Assert.AreEqual(AreaRefusal.EdgesCross, AreaValidator.Validate(w, shape, type).Reason);
+
+            int areas = w.Areas.Version, trees = w.Trees.Version, roads = w.Roads.Version;
+            CommandResult r = w.Execute(new DesignateArea(shape, T));
+            Assert.IsFalse(r.IsAccepted);
+            Assert.AreEqual(areas, w.Areas.Version);
+            Assert.AreEqual(trees, w.Trees.Version);
+            Assert.AreEqual(roads, w.Roads.Version);
+            Assert.AreEqual(0, System.Linq.Enumerable.Count(w.Areas.All));
+        }
+
+        [Test]
+        public void OwnerRepro_FourPointsInCrossingOrder_EdgesCross() =>
+            AssertRefused(AreaShape.Straight(Pts(50, 50, 0, 0, 20, 20, 20, 0, 0, 20)));
+
+        [Test]
+        public void Hourglass_OtherVertexOrder_EdgesCross() =>
+            AssertRefused(AreaShape.Straight(Pts(50, 50, 0, 0, 0, 20, 20, 0, 20, 20)));
+
+        [Test]
+        public void Figure8_SixPoints_EdgesCross() =>
+            AssertRefused(AreaShape.Straight(Pts(50, 50, 0, 0, 10, 12, 20, 20, 20, 0, 10, 8, 0, 20)));
+
+        [Test]
+        public void Figure8_EightPoints_EdgesCross() =>
+            AssertRefused(AreaShape.Straight(Pts(60, 50, 0, 0, 10, 9, 20, 20, 30, 10, 20, 0, 10, 11, 0, 20, -10, 10)));
+
+        [Test]
+        public void BentEdgeCrossingStraightEdge_EdgesCross() =>
+            AssertRefused(Bent(Pts(50, 50, 0, 0, 20, 20, 20, 0, 0, 20), 0, M(62, 58)));
+
+        [Test]
+        public void BentEdgeBulgingThroughNonAdjacentEdge_EdgesCross() =>
+            AssertRefused(Bent(Pts(50, 50, 0, 0, 20, 0, 20, 20, 0, 20), 0, M(60, 90)));
+
+        [Test]
+        public void FollowsRoadEdgeCrossedByAnotherEdge_EdgesCross()
+        {
+            SimWorld w = Ramp();
+            RoadSegment seg = Road(w);
+            var shape = new AreaShape(
+                new[] { M(30, 51.25), M(60, 51.25), M(40, 70), M(50, 40) },
+                new[] { AreaEdge.FollowsRoad(seg.Id, RoadSide.Left), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() });
+            Assert.AreEqual(AreaRefusal.EdgesCross, AreaValidator.Validate(w, shape, T).Reason);
+            Assert.AreEqual(AreaRefusal.EdgesCross, AreaValidator.Validate(w, shape, W).Reason);
+            int areas = w.Areas.Version, trees = w.Trees.Version;
+            Assert.IsFalse(w.Execute(new DesignateArea(shape, T)).IsAccepted);
+            Assert.AreEqual(areas, w.Areas.Version);
+            Assert.AreEqual(trees, w.Trees.Version);
+            Assert.AreEqual(0, System.Linq.Enumerable.Count(w.Areas.All));
+        }
+
+        [Test]
+        public void VertexTouchingNonAdjacentEdge_EdgesCross() =>
+            AssertRefused(AreaShape.Straight(Pts(0, 0, 50, 50, 70, 50, 50, 60, 70, 70, 50, 70)));
 
         [Test]
         public void RepeatedPoint_ZeroLengthEdge_EdgesCross()
