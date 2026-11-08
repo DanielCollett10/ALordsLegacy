@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Terrain;
 using UnityEngine;
 
 namespace LordsLegacy.Game.Visuals
@@ -19,8 +20,6 @@ namespace LordsLegacy.Game.Visuals
         public const float PreviewLiftM = 0.04f;
         /// <summary>Outline ribbon width in metres.</summary>
         public const float OutlineWidthM = 0.35f;
-        /// <summary>Largest triangle edge of the fill before it is subdivided to follow the terrain, in metres.</summary>
-        public const float FillMaxEdgeM = 4f;
         /// <summary>Dash and gap lengths of a work-area outline, in metres.</summary>
         public const float DashM = 2f, GapM = 1.2f;
 
@@ -87,7 +86,7 @@ namespace LordsLegacy.Game.Visuals
                 if (_areas.ContainsKey(a.Id)) continue; // records are immutable, ids never reused
                 var type = host.World.AreaTypes.Find(a.TypeId);
                 bool work = type != null && type.Kind == AreaKind.Work;
-                var b = new MeshBuilder();
+                var b = new DrapeMesh();
                 AddFill(b, a.Polygon, work ? WorkFill : BuildingFill, HeightOffsetM);
                 AddOutline(b, a.Polygon, true, OutlineWidthM, work ? WorkOutline : BuildingOutline, HeightOffsetM + 0.01f, work);
                 var go = new GameObject(a.Name);
@@ -115,10 +114,10 @@ namespace LordsLegacy.Game.Visuals
             IReadOnlyList<PointMm> poly = preview.Polygon.Count >= 2 ? preview.Polygon : shape.Vertices;
             float lift = HeightOffsetM + PreviewLiftM;
 
-            var b = new MeshBuilder();
+            var b = new DrapeMesh();
             if (poly.Count >= 3) AddFill(b, poly, valid ? BuildingFill : InvalidFill, lift);
             AddOutline(b, poly, poly.Count >= 3, OutlineWidthM, outline, lift + 0.01f, false);
-            var m = new MeshBuilder(); // dots and handles only: shown instead of b while the ghost draws the whole shape
+            var m = new DrapeMesh(); // dots and handles only: shown instead of b while the ghost draws the whole shape
             var verts = shape.Vertices;
             for (int i = 0; i < verts.Count; i++)
             {
@@ -188,7 +187,7 @@ namespace LordsLegacy.Game.Visuals
             if (host == null || !host.IsInitialized || points == null || points.Count == 0) { HideGhost(); return; }
             var last = points[points.Count - 1];
             var first = points[0];
-            var b = new MeshBuilder();
+            var b = new DrapeMesh();
             float lift = HeightOffsetM + PreviewLiftM + 0.02f;
             int edges = 0;
             if (points.Count >= 2)
@@ -210,7 +209,7 @@ namespace LordsLegacy.Game.Visuals
             else if ((V(last) - V(cursor)).magnitude >= 1e-4f)
             {
                 var p0 = V(last); var p1 = V(cursor);
-                AddRibbon(b, p0, p1, (p1 - p0).normalized, OutlineWidthM * 0.6f, GhostColor, lift);
+                b.Append(TerrainDrape.Ribbon(Ground, new List<Vector2> { p0, p1 }, OutlineWidthM * 0.6f, lift, GhostColor, false, false));
                 edges++;
             }
             if (edges == 0) { HideGhost(); return; }
@@ -249,97 +248,42 @@ namespace LordsLegacy.Game.Visuals
             return new PointMm((a.X + c.X) / 2, (a.Z + c.Z) / 2);
         }
 
-        private Vector3 Drape(double x, double z, float lift) =>
-            new Vector3((float)x, host.World.Terrain.HeightAt((float)x, (float)z) + lift, (float)z);
-
-        private void AddDiamond(MeshBuilder b, PointMm p, float radius, Color c, float lift)
-        {
-            float x = (float)p.XMetres, z = (float)p.ZMetres;
-            int i = b.Verts.Count;
-            b.Add(Drape(x - radius, z, lift), c);
-            b.Add(Drape(x, z + radius, lift), c);
-            b.Add(Drape(x + radius, z, lift), c);
-            b.Add(Drape(x, z - radius, lift), c);
-            b.Quad(i, i + 1, i + 2, i + 3);
-        }
-
-        private void AddFill(MeshBuilder b, IReadOnlyList<PointMm> polygon, Color c, float lift)
-        {
-            foreach (var t in Triangulator.EarClip(polygon))
-                Subdivide(b, V(t.A), V(t.B), V(t.C), c, lift, 0);
-        }
+        private IHeightField Ground => host.World.Terrain;
 
         private static Vector2 V(PointMm p) => new Vector2((float)p.XMetres, (float)p.ZMetres);
 
-        private void Subdivide(MeshBuilder b, Vector2 a, Vector2 bb, Vector2 c, Color col, float lift, int depth)
+        private static List<Vector2> Plan(IReadOnlyList<PointMm> pts)
         {
-            float longest = Mathf.Max((a - bb).magnitude, Mathf.Max((bb - c).magnitude, (c - a).magnitude));
-            if (depth < 5 && longest > FillMaxEdgeM)
-            {
-                var ab = (a + bb) * 0.5f; var bc = (bb + c) * 0.5f; var ca = (c + a) * 0.5f;
-                Subdivide(b, a, ab, ca, col, lift, depth + 1);
-                Subdivide(b, ab, bb, bc, col, lift, depth + 1);
-                Subdivide(b, ca, bc, c, col, lift, depth + 1);
-                Subdivide(b, ab, bc, ca, col, lift, depth + 1);
-                return;
-            }
-            int i = b.Verts.Count;
-            b.Add(Drape(a.x, a.y, lift), col);
-            b.Add(Drape(bb.x, bb.y, lift), col);
-            b.Add(Drape(c.x, c.y, lift), col);
+            var l = new List<Vector2>(pts.Count);
+            foreach (var p in pts) l.Add(V(p));
+            return l;
+        }
+
+        private void AddDiamond(DrapeMesh b, PointMm p, float radius, Color c, float lift)
+        {
+            float x = (float)p.XMetres, z = (float)p.ZMetres;
+            int i = b.Add(TerrainDrape.Point(Ground, x - radius, z, lift), c);
+            b.Add(TerrainDrape.Point(Ground, x, z + radius, lift), c);
+            b.Add(TerrainDrape.Point(Ground, x + radius, z, lift), c);
+            b.Add(TerrainDrape.Point(Ground, x, z - radius, lift), c);
             b.Tri(i, i + 1, i + 2);
+            b.Tri(i, i + 2, i + 3);
         }
 
-        private void AddOutline(MeshBuilder b, IReadOnlyList<PointMm> pts, bool closed, float width, Color c, float lift, bool dashed)
-        {
-            int n = pts.Count;
-            int segs = closed ? n : n - 1;
-            float travelled = 0f;
-            float period = DashM + GapM;
-            for (int s = 0; s < segs; s++)
-            {
-                var p0 = V(pts[s]); var p1 = V(pts[(s + 1) % n]);
-                float len = (p1 - p0).magnitude;
-                if (len < 1e-4f) continue;
-                var dir = (p1 - p0) / len;
-                if (!dashed) AddRibbon(b, p0, p1, dir, width, c, lift);
-                else
-                {
-                    float d = 0f;
-                    while (d < len)
-                    {
-                        float phase = (travelled + d) % period;
-                        if (phase < DashM)
-                        {
-                            float end = Mathf.Min(len, d + (DashM - phase));
-                            AddRibbon(b, p0 + dir * d, p0 + dir * end, dir, width, c, lift);
-                            d = Mathf.Max(end, d + 0.01f); // always advance, float rounding must not stall
-                        }
-                        else d += Mathf.Max(period - phase, 0.01f);
-                    }
-                }
-                travelled += len;
-            }
-        }
+        private void AddFill(DrapeMesh b, IReadOnlyList<PointMm> polygon, Color c, float lift) =>
+            b.Append(TerrainDrape.Fill(Ground, polygon, lift, c));
 
-        private void AddRibbon(MeshBuilder b, Vector2 p0, Vector2 p1, Vector2 dir, float width, Color c, float lift)
-        {
-            var side = new Vector2(-dir.y, dir.x) * (width * 0.5f);
-            int i = b.Verts.Count;
-            b.Add(Drape(p0.x - side.x, p0.y - side.y, lift), c);
-            b.Add(Drape(p0.x + side.x, p0.y + side.y, lift), c);
-            b.Add(Drape(p1.x + side.x, p1.y + side.y, lift), c);
-            b.Add(Drape(p1.x - side.x, p1.y - side.y, lift), c);
-            b.Quad(i, i + 1, i + 2, i + 3);
-        }
+        private void AddOutline(DrapeMesh b, IReadOnlyList<PointMm> pts, bool closed, float width, Color c, float lift, bool dashed) =>
+            b.Append(TerrainDrape.Ribbon(Ground, Plan(pts), width, lift, c, closed, dashed, DashM, GapM));
 
         private Material GetMaterial()
         {
             if (_material == null)
             {
-                // Sprites/Default is unlit, double-sided, alpha blended and multiplies by vertex colour.
-                var shader = Shader.Find("Sprites/Default");
-                _material = new Material(shader != null ? shader : Shader.Find("Standard")) { name = "AreaMaterial" };
+                var shared = GroundOverlay.Material();
+                _material = shared != null
+                    ? new Material(shared) { name = "AreaMaterial" }
+                    : new Material(Shader.Find("Sprites/Default")) { name = "AreaMaterial" };
             }
             return _material;
         }
@@ -357,36 +301,6 @@ namespace LordsLegacy.Game.Visuals
             if (_ghostMesh != null) Destroy(_ghostMesh);
             if (_previewMarksMesh != null) Destroy(_previewMarksMesh);
             if (_material != null) Destroy(_material);
-        }
-
-        /// <summary>Collects vertices, colours and triangles; quads and triangles are emitted double-sided-safe by the material.</summary>
-        private sealed class MeshBuilder
-        {
-            public readonly List<Vector3> Verts = new List<Vector3>();
-            private readonly List<Color> _cols = new List<Color>();
-            private readonly List<int> _tris = new List<int>();
-
-            public void Add(Vector3 v, Color c) { Verts.Add(v); _cols.Add(c); }
-            // Wound so the face points up (+Y) for the XZ layout used here.
-            public void Tri(int a, int b, int c)
-            {
-                var n = Vector3.Cross(Verts[b] - Verts[a], Verts[c] - Verts[a]);
-                if (n.y >= 0f) { _tris.Add(a); _tris.Add(b); _tris.Add(c); }
-                else { _tris.Add(a); _tris.Add(c); _tris.Add(b); }
-            }
-            public void Quad(int a, int b, int c, int d) { Tri(a, b, c); Tri(a, c, d); }
-
-            public Mesh ToMesh(string name)
-            {
-                var m = new Mesh { name = name };
-                if (Verts.Count > 65000) m.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-                m.SetVertices(Verts);
-                m.SetColors(_cols);
-                m.SetTriangles(_tris, 0);
-                m.RecalculateNormals();
-                m.RecalculateBounds();
-                return m;
-            }
         }
     }
 }
