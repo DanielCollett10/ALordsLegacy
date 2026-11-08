@@ -74,7 +74,8 @@ namespace LordsLegacy.Game.Visuals
                 float width = def != null ? (float)def.WidthM : 2.5f;
                 var go = new GameObject("Road " + seg.Id);
                 go.transform.SetParent(transform, false);
-                go.AddComponent<MeshFilter>().sharedMesh = BuildMesh(seg.Samples, width, HeightOffsetM, null, "Road " + seg.Id);
+                go.AddComponent<MeshFilter>().sharedMesh = BuildMesh(seg.Samples, width, HeightOffsetM, null, "Road " + seg.Id,
+                    seg.StartTangent, seg.EndTangent);
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.sharedMaterial = RoadMaterial(def != null ? def.VisualId : "visual.road.dirt_path");
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -99,7 +100,8 @@ namespace LordsLegacy.Game.Visuals
             for (int i = 0; i < colors.Length; i++)
                 colors[i] = InRanges(preview.InvalidRanges, i) ? InvalidColor : ValidPreviewColor;
             if (_previewMesh != null) Destroy(_previewMesh);
-            _previewMesh = BuildMesh(preview.Samples, width, HeightOffsetM + PreviewLiftM, colors, "Road preview");
+            _previewMesh = BuildMesh(preview.Samples, width, HeightOffsetM + PreviewLiftM, colors, "Road preview",
+                preview.StartTangent, preview.EndTangent);
             _previewObject.GetComponent<MeshFilter>().sharedMesh = _previewMesh;
             _previewObject.SetActive(true);
         }
@@ -117,7 +119,13 @@ namespace LordsLegacy.Game.Visuals
             return false;
         }
 
-        private Mesh BuildMesh(IReadOnlyList<PointMm> samples, float width, float lift, Color[] sampleColors, string name)
+        /// <summary>
+        /// Builds the strip. At an end that carries a Sim tangent (RD-16 dead-end joint), the cross-section uses
+        /// that tangent instead of the chord of the first/last samples, so the two meshes of a flush joint share
+        /// the same cross-section line. Otherwise the cross-section is the chord, as before.
+        /// </summary>
+        private Mesh BuildMesh(IReadOnlyList<PointMm> samples, float width, float lift, Color[] sampleColors, string name,
+            RoadTangent? startTan = null, RoadTangent? endTan = null)
         {
             int n = samples.Count;
             var terrain = host.World.Terrain;
@@ -132,6 +140,8 @@ namespace LordsLegacy.Game.Visuals
                 int a = Mathf.Max(0, i - 1), b = Mathf.Min(n - 1, i + 1);
                 var d = new Vector2((float)(samples[b].XMetres - samples[a].XMetres), (float)(samples[b].ZMetres - samples[a].ZMetres));
                 d = d.sqrMagnitude > 1e-12f ? d.normalized : Vector2.right;
+                if (i == 0 && startTan.HasValue) d = new Vector2((float)startTan.Value.X, (float)startTan.Value.Z);
+                if (i == n - 1 && endTan.HasValue) d = new Vector2((float)endTan.Value.X, (float)endTan.Value.Z);
                 var right = new Vector2(d.y, -d.x);
                 if (i > 0)
                     along += (float)samples[i].DistanceTo(samples[i - 1]) / 1000f;

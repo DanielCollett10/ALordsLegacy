@@ -1,6 +1,7 @@
 using System.Collections;
 using LordsLegacy.Game;
 using LordsLegacy.Game.Visuals;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Map;
@@ -70,6 +71,46 @@ namespace LordsLegacy.Tests.PlayMode
             _renderer.Sync();
             Assert.IsNull(_renderer.GetSegmentMesh(seg.Id));
             Assert.AreEqual(0, _renderer.SegmentMeshCount);
+        }
+
+        [UnityTest]
+        public IEnumerator ExtendedDeadEndMeshesMeetFlush()
+        {
+            // RD-16: the new road bends away from the old one, so without the shared tangent the joint would kink.
+            Setup(SyntheticMap.CreateRamp());
+            var first = _host.Execute(new DrawRoad(new[] { PointMm.FromMetres(20, 50), PointMm.FromMetres(40, 50) }, RoadTypes.DirtPathId));
+            Assert.IsTrue(first.IsAccepted, "Base road rejected.");
+            var second = _host.Execute(new DrawRoad(new[] { PointMm.FromMetres(40, 50), PointMm.FromMetres(60, 58) }, RoadTypes.DirtPathId));
+            Assert.IsTrue(second.IsAccepted, "Extension rejected.");
+            yield return null;
+            _renderer.Sync();
+
+            int oldId = (int)first.Created[0];
+            int newId = -1;
+            foreach (long id in second.Created) if (id != oldId) newId = (int)id;
+            Assert.AreNotEqual(-1, newId, "No new segment in the extension result.");
+            var oldMesh = _renderer.GetSegmentMesh(oldId);
+            var newMesh = _renderer.GetSegmentMesh(newId);
+            Assert.IsNotNull(oldMesh);
+            Assert.IsNotNull(newMesh);
+
+            var ov = oldMesh.vertices;
+            var nv = newMesh.vertices;
+            int oEnd = ov.Length - 2, nStart = 0;
+            for (int k = 0; k < 2; k++)
+            {
+                float best = float.MaxValue;
+                for (int j = 0; j < 2; j++)
+                    best = Mathf.Min(best, Vector3.Distance(ov[oEnd + k], nv[nStart + j]));
+                Assert.Less(best, 0.01f, "Old end vertex " + k + " has no new start vertex within 1 cm.");
+            }
+            for (int k = 0; k < 2; k++)
+            {
+                float best = float.MaxValue;
+                for (int j = 0; j < 2; j++)
+                    best = Mathf.Min(best, Vector3.Distance(nv[nStart + k], ov[oEnd + j]));
+                Assert.Less(best, 0.01f, "New start vertex " + k + " has no old end vertex within 1 cm.");
+            }
         }
 
         [UnityTest]
