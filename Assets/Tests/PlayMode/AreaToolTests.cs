@@ -455,6 +455,103 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreNotEqual(PointMm.FromMetres(40, 40), _tool.Points[0]);
         }
 
+        private int CountMarkers(SnapMarkerKind kind)
+        {
+            int n = 0;
+            foreach (var m in _tool.ShownMarkers) if (m.Kind == kind) n++;
+            return n;
+        }
+
+        private bool HasMarker(SnapMarkerKind kind, PointMm p)
+        {
+            foreach (var m in _tool.ShownMarkers) if (m.Kind == kind && m.Point == p) return true;
+            return false;
+        }
+
+        [UnityTest]
+        public IEnumerator RoadDotsShowNearTheCursorAndNotFarAndDoNotMove()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            _tool.PointerMove(Screen(100, 105));
+            Assert.Greater(CountMarkers(SnapMarkerKind.RoadDot), 10);
+            var seg = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
+            double sideZ = seg.SideLine(LordsLegacy.Sim.Roads.RoadSide.Left)[0].ZMetres;
+            var dot = PointMm.FromMetres(60, sideZ);
+            Assert.IsTrue(HasMarker(SnapMarkerKind.RoadDot, dot) || HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(60, 200 - sideZ)));
+            Assert.AreEqual(_tool.ShownMarkers.Count, _tool.VisibleMarkerCount);
+            foreach (var m in _tool.ShownMarkers) Assert.LessOrEqual(m.Point.DistanceTo(PointMm.FromMetres(100, 105)), 25001.0);
+
+            _tool.PointerMove(Screen(104, 105)); // markers depend on the road, not the cursor
+            Assert.IsTrue(HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(100, sideZ)) || HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(100, 200 - sideZ)));
+            Assert.IsTrue(HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(105, sideZ)) || HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(105, 200 - sideZ)));
+
+            _tool.PointerMove(Screen(100, 155)); // more than 25 m from both sides
+            Assert.AreEqual(0, _tool.ShownMarkers.Count);
+            Assert.AreEqual(0, _tool.VisibleMarkerCount);
+
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            _tool.PointerMove(Screen(100, 105));
+            Assert.AreEqual(0, _tool.ShownMarkers.Count);
+            _tool.SetViewSettings(new ViewSettings());
+            _tool.PointerMove(Screen(100, 105));
+            Assert.Greater(_tool.ShownMarkers.Count, 0);
+            _controller.Toggle(AreaTool.TestToolId); // tool off
+            Assert.AreEqual(0, _tool.ShownMarkers.Count);
+            Assert.AreEqual(0, _tool.VisibleMarkerCount);
+        }
+
+        [UnityTest]
+        public IEnumerator AreaCornersAndEdgeDotsShow()
+        {
+            yield return Setup();
+            _tool.SetViewSettings(new ViewSettings());
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(), AreaTypes.TestId)).IsAccepted);
+            _tool.PointerMove(Screen(50, 50));
+            Assert.IsTrue(HasMarker(SnapMarkerKind.Corner, PointMm.FromMetres(40, 40)));
+            Assert.IsTrue(HasMarker(SnapMarkerKind.AreaDot, PointMm.FromMetres(50, 40)));
+            Assert.IsTrue(HasMarker(SnapMarkerKind.AreaDot, PointMm.FromMetres(40, 52.5)));
+            Assert.IsFalse(HasMarker(SnapMarkerKind.AreaDot, PointMm.FromMetres(40, 40)), "A corner is not also a dot.");
+            Assert.IsFalse(HasMarker(SnapMarkerKind.Corner, PointMm.FromMetres(80, 80)), "Out of range.");
+        }
+
+        [UnityTest]
+        public IEnumerator SnapOrderIsCornerThenRoadDotThenAreaDot()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            var seg = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
+            double sideZ = seg.SideLine(LordsLegacy.Sim.Roads.RoadSide.Left)[0].ZMetres;
+            double sign = sideZ > 100 ? 1 : -1;
+            double zv = 100 + sign * 1.75, zClick = 100 + sign * 1.4;
+            var shape = AreaShape.Straight(new[]
+            {
+                PointMm.FromMetres(40, zv), PointMm.FromMetres(80, zv),
+                PointMm.FromMetres(80, zv + sign * 40), PointMm.FromMetres(40, zv + sign * 40),
+            });
+            Assert.IsTrue(_host.Execute(new DesignateArea(shape, AreaTypes.TestId)).IsAccepted);
+            Click(40, (float)zClick); // corner and road dot both in range: the corner wins
+            Assert.AreEqual(PointMm.FromMetres(40, zv), _tool.Points[0]);
+            Click(60, (float)zClick); // road dot and area-edge dot in range: the road dot wins
+            Assert.AreEqual(PointMm.FromMetres(60, 100 + sign * 1.25), _tool.Points[1]);
+        }
+
+        [UnityTest]
+        public IEnumerator TerracedPlotSnappedToNeighbourConfirms()
+        {
+            yield return Setup();
+            _tool.SetViewSettings(new ViewSettings());
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(), AreaTypes.TestId)).IsAccepted);
+            Click(80.2f, 45.2f); Click(120, 45); Click(120, 80); Click(80.2f, 80.2f);
+            Assert.AreEqual(PointMm.FromMetres(80, 45), _tool.Points[0], "Snapped to an edge dot.");
+            Assert.AreEqual(PointMm.FromMetres(80, 80), _tool.Points[3], "Snapped to a corner.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            _tool.Confirm();
+            Assert.AreEqual(2, _host.World.Areas.Count);
+        }
+
         private void AssertHourglassRefused(int expectedPoints)
         {
             Assert.AreEqual(expectedPoints, _tool.PointCount);
