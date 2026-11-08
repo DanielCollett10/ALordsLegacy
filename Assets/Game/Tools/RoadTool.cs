@@ -36,6 +36,7 @@ namespace LordsLegacy.Game.Tools
         [SerializeField] private ToolController _controller;
         private bool _active;
         private RoadPreview _preview;
+        private CursorMarker _cursor;
         private string _rejection;
         private bool _subscribed;
 
@@ -68,6 +69,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (_subscribed) Unsubscribe();
             _host = host; _picker = picker; _roads = roads; _panel = panel; _controller = controller;
+            if (_cursor != null) _cursor.Configure(host);
             if (_active) Subscribe();
         }
 
@@ -100,6 +102,7 @@ namespace LordsLegacy.Game.Tools
             _active = false;
             Unsubscribe();
             ClearDraft();
+            if (_cursor != null) _cursor.Hide();
         }
 
         /// <inheritdoc />
@@ -126,6 +129,7 @@ namespace LordsLegacy.Game.Tools
         public void PointerMove(Vector2 screenPos)
         {
             if (!_active) return;
+            UpdateCursor(screenPos);
             _press.Move(screenPos);
             if (_pressVertex < 0 || !_press.IsDragging(PressButton.Left)) return;
             _dragIndex = _pressVertex;
@@ -245,6 +249,23 @@ namespace LordsLegacy.Game.Tools
             if (!SnapPicker.TryPick(cand, order, (float)pxLimit, true, out _)) return false;
             hit = h;
             return true;
+        }
+
+        /// <summary>
+        /// Shows the cursor ring (road width) at the point the next click would use; snapped colour when it snaps.
+        /// </summary>
+        private void UpdateCursor(Vector2 screenPos)
+        {
+            if (_host == null || !_host.IsInitialized || _picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue)
+            {
+                if (_cursor != null) _cursor.Hide();
+                return;
+            }
+            if (!TryResolvePoint(screenPos, out var p)) { _cursor?.Hide(); return; }
+            if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
+            _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+            bool snapped = !p.Equals(PointMm.FromMetres(s.X, s.Z));
+            _cursor.Show((float)p.XMetres, (float)p.ZMetres, snapped);
         }
 
         /// <summary>The point for a click or drag: the snapped road point when snapping applies, else the ground point.</summary>
