@@ -15,7 +15,7 @@ namespace LordsLegacy.Game.Visuals
     public sealed class AreaRenderer : MonoBehaviour
     {
         /// <summary>Height of area meshes above the terrain, in metres.</summary>
-        public const float HeightOffsetM = 0.08f;
+        public const float HeightOffsetM = 0.15f;
         /// <summary>Extra lift of the draft so it draws over confirmed areas.</summary>
         public const float PreviewLiftM = 0.04f;
         /// <summary>Outline ribbon width in metres.</summary>
