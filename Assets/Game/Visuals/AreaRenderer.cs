@@ -118,13 +118,21 @@ namespace LordsLegacy.Game.Visuals
             var b = new MeshBuilder();
             if (poly.Count >= 3) AddFill(b, poly, valid ? BuildingFill : InvalidFill, lift);
             AddOutline(b, poly, poly.Count >= 3, OutlineWidthM, outline, lift + 0.01f, false);
+            var m = new MeshBuilder(); // dots and handles only: shown instead of b while the ghost draws the whole shape
             var verts = shape.Vertices;
             for (int i = 0; i < verts.Count; i++)
             {
                 if (shape.Edges.Count > i && (verts.Count >= 3 || i < verts.Count - 1))
+                {
                     AddDiamond(b, EdgeMiddle(shape, i), 0.45f, valid ? HandleColor : InvalidColor, lift + 0.03f);
+                    AddDiamond(m, EdgeMiddle(shape, i), 0.45f, valid ? HandleColor : InvalidColor, lift + 0.03f);
+                }
             }
-            for (int i = 0; i < verts.Count; i++) AddDiamond(b, verts[i], 0.7f, tint, lift + 0.05f);
+            for (int i = 0; i < verts.Count; i++)
+            {
+                AddDiamond(b, verts[i], 0.7f, tint, lift + 0.05f);
+                AddDiamond(m, verts[i], 0.7f, tint, lift + 0.05f);
+            }
 
             if (_previewObject == null)
             {
@@ -138,14 +146,98 @@ namespace LordsLegacy.Game.Visuals
             }
             if (_previewMesh != null) Destroy(_previewMesh);
             _previewMesh = b.ToMesh("Area preview");
-            _previewObject.GetComponent<MeshFilter>().sharedMesh = _previewMesh;
+            if (_previewMarksMesh != null) Destroy(_previewMarksMesh);
+            _previewMarksMesh = m.ToMesh("Area preview marks");
             _previewObject.SetActive(true);
+            ApplyPreviewMesh();
+        }
+
+        private Mesh _previewMarksMesh;
+
+        // While the ghost is up it draws the one total shape, so the placed shape's own fill/outline is left out.
+        private void ApplyPreviewMesh()
+        {
+            if (_previewObject == null) return;
+            _previewObject.GetComponent<MeshFilter>().sharedMesh = GhostEdgeCount > 0 ? _previewMarksMesh : _previewMesh;
         }
 
         /// <summary>Hides the draft area.</summary>
         public void HidePreview()
         {
             if (_previewObject != null) _previewObject.SetActive(false);
+        }
+
+        /// <summary>Colour of the faint ghost edges (AR-21).</summary>
+        public static readonly Color GhostColor = new Color(0.95f, 0.8f, 0.35f, 0.6f);
+
+        /// <summary>Colour of the faint ghost fill (AR-21).</summary>
+        public static readonly Color GhostFill = new Color(1f, 1f, 1f, 0.12f);
+
+        private GameObject _ghostObject;
+        private Mesh _ghostMesh;
+
+        /// <summary>Number of ghost edges currently drawn (0 when hidden).</summary>
+        public int GhostEdgeCount { get; private set; }
+
+        /// <summary>
+        /// Draws the faint ghost edges last point -> cursor -> first point (AR-21). With a single placed point
+        /// (<paramref name="last"/> equals <paramref name="first"/>) only one edge is drawn. Not validated.
+        /// </summary>
+        public void ShowGhost(IReadOnlyList<PointMm> points, PointMm cursor)
+        {
+            if (host == null || !host.IsInitialized || points == null || points.Count == 0) { HideGhost(); return; }
+            var last = points[points.Count - 1];
+            var first = points[0];
+            var b = new MeshBuilder();
+            float lift = HeightOffsetM + PreviewLiftM + 0.02f;
+            int edges = 0;
+            if (points.Count >= 2)
+            {
+                // Fill the whole shape the click would make (as placed, after the hourglass auto-fix), not just the new edges.
+                var poly = new List<PointMm>(points) { cursor };
+                if (poly.Count >= 3 && AreaUntangler.TryUntangle(poly, out int[] order))
+                {
+                    var re = new List<PointMm>(poly.Count);
+                    foreach (int k in order) re.Add(poly[k]);
+                    poly = re;
+                }
+                // One total shape: fill and closed outline of the whole polygon, drawn instead of the placed shape's own.
+                AddFill(b, poly, BuildingFill, lift - 0.01f);
+                AddOutline(b, poly, true, OutlineWidthM, GhostColor, lift, false);
+                if ((V(last) - V(cursor)).magnitude >= 1e-4f) edges++;
+                if (last != first && (V(cursor) - V(first)).magnitude >= 1e-4f) edges++;
+            }
+            else if ((V(last) - V(cursor)).magnitude >= 1e-4f)
+            {
+                var p0 = V(last); var p1 = V(cursor);
+                AddRibbon(b, p0, p1, (p1 - p0).normalized, OutlineWidthM * 0.6f, GhostColor, lift);
+                edges++;
+            }
+            if (edges == 0) { HideGhost(); return; }
+            if (_ghostObject == null)
+            {
+                _ghostObject = new GameObject("Area ghost");
+                _ghostObject.transform.SetParent(transform, false);
+                _ghostObject.AddComponent<MeshFilter>();
+                var mr = _ghostObject.AddComponent<MeshRenderer>();
+                mr.sharedMaterial = GetMaterial();
+                mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                mr.receiveShadows = false;
+            }
+            if (_ghostMesh != null) Destroy(_ghostMesh);
+            _ghostMesh = b.ToMesh("Area ghost");
+            _ghostObject.GetComponent<MeshFilter>().sharedMesh = _ghostMesh;
+            _ghostObject.SetActive(true);
+            GhostEdgeCount = edges;
+            ApplyPreviewMesh();
+        }
+
+        /// <summary>Hides the ghost edges.</summary>
+        public void HideGhost()
+        {
+            GhostEdgeCount = 0;
+            if (_ghostObject != null) _ghostObject.SetActive(false);
+            ApplyPreviewMesh();
         }
 
         private static PointMm EdgeMiddle(AreaShape shape, int i)
@@ -262,6 +354,8 @@ namespace LordsLegacy.Game.Visuals
         private void OnDestroy()
         {
             if (_previewMesh != null) Destroy(_previewMesh);
+            if (_ghostMesh != null) Destroy(_ghostMesh);
+            if (_previewMarksMesh != null) Destroy(_previewMarksMesh);
             if (_material != null) Destroy(_material);
         }
 

@@ -212,6 +212,9 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     With `ViewSettings.Snapping` on, points snap (SnapPicker order: area vertex, road side line via `RoadSegment.SideLine`, area
     edge via `AreaRegistry.FindNearestSnap`) within `SnapDistancePx`; two consecutive points snapped to the same road side
     make that edge FollowsRoad. Snapping off: no snap, no FollowsRoad.
+    Cursor (AR-20, T-164): every pointer move shows a 0.6 m `CursorMarker` sphere at the (snapped) ground point, green when
+    snapped, hidden over UI and on deactivate. The ghost (AR-21, `AreaRenderer.ShowGhost`) is built but off behind
+    `AreaTool.GhostEnabled` (default false) until polished.
 - Build bar (`BuildBarView`, `Assets/Game/UI/BuildBar/`, UXML/USS): non-focusable buttons built from `ToolEntry.Defaults()`
   (Road, Test area and Test work area enabled; the rest greyed, tooltip "Coming later"). Raises `ToolClicked`.
 - Tool panel (`ToolPanelView`, `Assets/Game/UI/ToolPanel/`, UXML/USS): status line, hint line, Cancel/Confirm.

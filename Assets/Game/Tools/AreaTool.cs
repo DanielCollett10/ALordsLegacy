@@ -55,6 +55,17 @@ namespace LordsLegacy.Game.Tools
         private int _pressVertex = -1;
         private int _dragIndex = -1;
         private bool _lastReleaseAddedPoint;
+        private const float CursorSphereM = 0.6f;
+
+        /// <summary>
+        /// AR-21 ghost polygon (the shape the next click would make). Off by default after the T-164 playtest: it
+        /// followed the mouse over the panel buttons and ignored bent and road-following edges, so it needs more polish.
+        /// The cursor sphere (AR-20) is unaffected.
+        /// </summary>
+        public bool GhostEnabled { get; set; }
+        private CursorMarker _cursor;
+        private PointMm _hover;
+        private bool _hasHover, _hoverSnapped, _lastSnapped, _dragging;
 
         /// <inheritdoc />
         public string Id => _toolId;
@@ -118,6 +129,7 @@ namespace LordsLegacy.Game.Tools
         public void Deactivate()
         {
             _active = false;
+            _hasHover = false;
             Unsubscribe();
             ClearDraft();
         }
@@ -152,11 +164,51 @@ namespace LordsLegacy.Game.Tools
         {
             if (!_active) return;
             _press.Move(screenPos);
-            if (!_press.IsDragging(PressButton.Left)) return;
-            if (_pressHandle >= 0) { BendEdge(_pressHandle, screenPos); return; }
-            if (_pressVertex < 0) return;
-            _dragIndex = _pressVertex;
-            MoveDraggedPoint(screenPos);
+            if (_press.IsDragging(PressButton.Left) && (_pressHandle >= 0 || _pressVertex >= 0))
+            {
+                _dragging = true;
+                if (_pressHandle >= 0) BendEdge(_pressHandle, screenPos);
+                else { _dragIndex = _pressVertex; MoveDraggedPoint(screenPos); }
+            }
+            UpdateCursor(screenPos);
+        }
+
+        /// <summary>The 0.6 m cursor sphere (AR-20), or null before the tool first saw the cursor.</summary>
+        public CursorMarker Cursor => _cursor;
+
+        private void UpdateCursor(Vector2 screenPos)
+        {
+            if (_host == null || !_host.IsInitialized
+                || (_controller != null && _controller.IsPointerOverUiAt(screenPos))
+                || !TryGround(screenPos, out var p))
+            {
+                _hasHover = false;
+                HideCursor();
+                return;
+            }
+            _lastSnapped = false;
+            SnapPoint(screenPos, ref p, out _, out _);
+            _hover = p; _hoverSnapped = _lastSnapped; _hasHover = true;
+            if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
+            _cursor.SetShape(CursorMarkerShape.Sphere, CursorSphereM);
+            _cursor.Show((float)p.XMetres, (float)p.ZMetres, _hoverSnapped);
+            UpdateGhost();
+        }
+
+        private void HideCursor()
+        {
+            if (_cursor != null) _cursor.Hide();
+            if (_areas != null) _areas.HideGhost();
+        }
+
+        /// <summary>AR-21: faint last -> sphere -> point 1 edges while placing; hidden when dragging, with no points or no room.</summary>
+        private void UpdateGhost()
+        {
+            if (_areas == null) return;
+            var t = Type;
+            bool show = GhostEnabled && _active && _hasHover && _points.Count >= 1 && !_dragging && t != null && _points.Count < t.MaxPoints;
+            if (show) _areas.ShowGhost(_points, _hover);
+            else _areas.HideGhost();
         }
 
         /// <summary>A mouse button was released. <paramref name="time"/> is real seconds (for double-click detection).</summary>
@@ -167,6 +219,7 @@ namespace LordsLegacy.Game.Tools
             int pressedVertex = _pressVertex, pressedHandle = _pressHandle, pressedEdge = _pressEdge;
             _pressVertex = -1; _pressHandle = -1; _pressEdge = -1;
             _dragIndex = -1;
+            _dragging = false;
             _lastReleaseAddedPoint = false;
             // A drag (of either button) never acts on release; right mouse is click-only.
             if (r.Kind == PressKind.None) return;
@@ -386,6 +439,7 @@ namespace LordsLegacy.Game.Tools
             }
             if (!SnapPicker.TryPick(cands, new[] { KindAreaVertex, KindRoad, KindAreaEdge }, px, true, out var best)) return;
             p = points[best.Id]; seg = segs[best.Id]; side = sides[best.Id];
+            _lastSnapped = true;
         }
 
         private bool TryGround(Vector2 screenPos, out PointMm point)
@@ -457,6 +511,7 @@ namespace LordsLegacy.Game.Tools
                 else _areas.HidePreview();
             }
             ShowPanel();
+            UpdateGhost();
         }
 
         /// <summary>
@@ -522,7 +577,9 @@ namespace LordsLegacy.Game.Tools
             _pressVertex = -1;
             _dragIndex = -1;
             _lastReleaseAddedPoint = false;
-            if (_areas != null) _areas.HidePreview();
+            _dragging = false;
+            if (_areas != null) { _areas.HidePreview(); _areas.HideGhost(); }
+            if (!_active && _cursor != null) _cursor.Hide();
             if (_panel == null) return;
             if (_active) _panel.Show(TypeName + " · no points yet", IdleHint, false);
             else _panel.Hide();
