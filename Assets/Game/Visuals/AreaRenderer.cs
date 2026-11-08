@@ -118,13 +118,21 @@ namespace LordsLegacy.Game.Visuals
             var b = new MeshBuilder();
             if (poly.Count >= 3) AddFill(b, poly, valid ? BuildingFill : InvalidFill, lift);
             AddOutline(b, poly, poly.Count >= 3, OutlineWidthM, outline, lift + 0.01f, false);
+            var m = new MeshBuilder(); // dots and handles only: shown instead of b while the ghost draws the whole shape
             var verts = shape.Vertices;
             for (int i = 0; i < verts.Count; i++)
             {
                 if (shape.Edges.Count > i && (verts.Count >= 3 || i < verts.Count - 1))
+                {
                     AddDiamond(b, EdgeMiddle(shape, i), 0.45f, valid ? HandleColor : InvalidColor, lift + 0.03f);
+                    AddDiamond(m, EdgeMiddle(shape, i), 0.45f, valid ? HandleColor : InvalidColor, lift + 0.03f);
+                }
             }
-            for (int i = 0; i < verts.Count; i++) AddDiamond(b, verts[i], 0.7f, tint, lift + 0.05f);
+            for (int i = 0; i < verts.Count; i++)
+            {
+                AddDiamond(b, verts[i], 0.7f, tint, lift + 0.05f);
+                AddDiamond(m, verts[i], 0.7f, tint, lift + 0.05f);
+            }
 
             if (_previewObject == null)
             {
@@ -138,8 +146,19 @@ namespace LordsLegacy.Game.Visuals
             }
             if (_previewMesh != null) Destroy(_previewMesh);
             _previewMesh = b.ToMesh("Area preview");
-            _previewObject.GetComponent<MeshFilter>().sharedMesh = _previewMesh;
+            if (_previewMarksMesh != null) Destroy(_previewMarksMesh);
+            _previewMarksMesh = m.ToMesh("Area preview marks");
             _previewObject.SetActive(true);
+            ApplyPreviewMesh();
+        }
+
+        private Mesh _previewMarksMesh;
+
+        // While the ghost is up it draws the one total shape, so the placed shape's own fill/outline is left out.
+        private void ApplyPreviewMesh()
+        {
+            if (_previewObject == null) return;
+            _previewObject.GetComponent<MeshFilter>().sharedMesh = GhostEdgeCount > 0 ? _previewMarksMesh : _previewMesh;
         }
 
         /// <summary>Hides the draft area.</summary>
@@ -149,7 +168,7 @@ namespace LordsLegacy.Game.Visuals
         }
 
         /// <summary>Colour of the faint ghost edges (AR-21).</summary>
-        public static readonly Color GhostColor = new Color(1f, 1f, 1f, 0.35f);
+        public static readonly Color GhostColor = new Color(0.95f, 0.8f, 0.35f, 0.6f);
 
         /// <summary>Colour of the faint ghost fill (AR-21).</summary>
         public static readonly Color GhostFill = new Color(1f, 1f, 1f, 0.12f);
@@ -182,18 +201,18 @@ namespace LordsLegacy.Game.Visuals
                     foreach (int k in order) re.Add(poly[k]);
                     poly = re;
                 }
-                if (poly.Count >= 3) AddFill(b, poly, GhostFill, lift - 0.01f);
+                // One total shape: fill and closed outline of the whole polygon, drawn instead of the placed shape's own.
+                AddFill(b, poly, BuildingFill, lift - 0.01f);
+                AddOutline(b, poly, true, OutlineWidthM, GhostColor, lift, false);
+                if ((V(last) - V(cursor)).magnitude >= 1e-4f) edges++;
+                if (last != first && (V(cursor) - V(first)).magnitude >= 1e-4f) edges++;
             }
-            void Edge(PointMm a, PointMm c)
+            else if ((V(last) - V(cursor)).magnitude >= 1e-4f)
             {
-                var p0 = V(a); var p1 = V(c);
-                float len = (p1 - p0).magnitude;
-                if (len < 1e-4f) return;
-                AddRibbon(b, p0, p1, (p1 - p0) / len, OutlineWidthM * 0.6f, GhostColor, lift);
+                var p0 = V(last); var p1 = V(cursor);
+                AddRibbon(b, p0, p1, (p1 - p0).normalized, OutlineWidthM * 0.6f, GhostColor, lift);
                 edges++;
             }
-            Edge(last, cursor);
-            if (last != first) Edge(cursor, first);
             if (edges == 0) { HideGhost(); return; }
             if (_ghostObject == null)
             {
@@ -210,6 +229,7 @@ namespace LordsLegacy.Game.Visuals
             _ghostObject.GetComponent<MeshFilter>().sharedMesh = _ghostMesh;
             _ghostObject.SetActive(true);
             GhostEdgeCount = edges;
+            ApplyPreviewMesh();
         }
 
         /// <summary>Hides the ghost edges.</summary>
@@ -217,6 +237,7 @@ namespace LordsLegacy.Game.Visuals
         {
             GhostEdgeCount = 0;
             if (_ghostObject != null) _ghostObject.SetActive(false);
+            ApplyPreviewMesh();
         }
 
         private static PointMm EdgeMiddle(AreaShape shape, int i)
@@ -334,6 +355,7 @@ namespace LordsLegacy.Game.Visuals
         {
             if (_previewMesh != null) Destroy(_previewMesh);
             if (_ghostMesh != null) Destroy(_ghostMesh);
+            if (_previewMarksMesh != null) Destroy(_previewMarksMesh);
             if (_material != null) Destroy(_material);
         }
 
