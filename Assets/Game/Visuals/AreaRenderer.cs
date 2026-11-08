@@ -148,6 +148,60 @@ namespace LordsLegacy.Game.Visuals
             if (_previewObject != null) _previewObject.SetActive(false);
         }
 
+        /// <summary>Colour of the faint ghost edges (AR-21).</summary>
+        public static readonly Color GhostColor = new Color(1f, 1f, 1f, 0.35f);
+
+        private GameObject _ghostObject;
+        private Mesh _ghostMesh;
+
+        /// <summary>Number of ghost edges currently drawn (0 when hidden).</summary>
+        public int GhostEdgeCount { get; private set; }
+
+        /// <summary>
+        /// Draws the faint ghost edges last point -> cursor -> first point (AR-21). With a single placed point
+        /// (<paramref name="last"/> equals <paramref name="first"/>) only one edge is drawn. Not validated.
+        /// </summary>
+        public void ShowGhost(PointMm last, PointMm cursor, PointMm first)
+        {
+            if (host == null || !host.IsInitialized) { HideGhost(); return; }
+            var b = new MeshBuilder();
+            float lift = HeightOffsetM + PreviewLiftM + 0.02f;
+            int edges = 0;
+            void Edge(PointMm a, PointMm c)
+            {
+                var p0 = V(a); var p1 = V(c);
+                float len = (p1 - p0).magnitude;
+                if (len < 1e-4f) return;
+                AddRibbon(b, p0, p1, (p1 - p0) / len, OutlineWidthM * 0.6f, GhostColor, lift);
+                edges++;
+            }
+            Edge(last, cursor);
+            if (last != first) Edge(cursor, first);
+            if (edges == 0) { HideGhost(); return; }
+            if (_ghostObject == null)
+            {
+                _ghostObject = new GameObject("Area ghost");
+                _ghostObject.transform.SetParent(transform, false);
+                _ghostObject.AddComponent<MeshFilter>();
+                var mr = _ghostObject.AddComponent<MeshRenderer>();
+                mr.sharedMaterial = GetMaterial();
+                mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                mr.receiveShadows = false;
+            }
+            if (_ghostMesh != null) Destroy(_ghostMesh);
+            _ghostMesh = b.ToMesh("Area ghost");
+            _ghostObject.GetComponent<MeshFilter>().sharedMesh = _ghostMesh;
+            _ghostObject.SetActive(true);
+            GhostEdgeCount = edges;
+        }
+
+        /// <summary>Hides the ghost edges.</summary>
+        public void HideGhost()
+        {
+            GhostEdgeCount = 0;
+            if (_ghostObject != null) _ghostObject.SetActive(false);
+        }
+
         private static PointMm EdgeMiddle(AreaShape shape, int i)
         {
             var a = shape.Vertices[i];
@@ -262,6 +316,7 @@ namespace LordsLegacy.Game.Visuals
         private void OnDestroy()
         {
             if (_previewMesh != null) Destroy(_previewMesh);
+            if (_ghostMesh != null) Destroy(_ghostMesh);
             if (_material != null) Destroy(_material);
         }
 
