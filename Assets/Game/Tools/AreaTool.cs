@@ -426,7 +426,6 @@ namespace LordsLegacy.Game.Tools
             if (!SnapPicker.TryPick(cands, new[] { KindAreaVertex, KindRoad, KindAreaEdge }, px, true, out var best)) return;
             var m = markers[best.Id];
             p = m.Point; seg = m.SegmentId; side = m.Side;
-            if (m.AreaId >= 0) seg = -2 - m.AreaId; // snapped to another area's outline (AR-25); see AreaSnapOf
             _lastSnapped = true;
         }
 
@@ -536,21 +535,46 @@ namespace LordsLegacy.Game.Tools
             if (_host == null || !_host.IsInitialized || Type == null) return AreaEdge.Straight();
             if (_roadSeg[i] >= 0 && IsNearSide(_roadSeg[i], _roadSide[i], j)) return AreaEdge.NearRoad(_roadSeg[i], _roadSide[i]);
             if (_roadSeg[j] >= 0 && IsNearSide(_roadSeg[j], _roadSide[j], i)) return AreaEdge.NearRoad(_roadSeg[j], _roadSide[j]);
-            if (_roadSeg[i] <= -2 && IsNearArea(-2 - _roadSeg[i], j)) return AreaEdge.NearArea(-2 - _roadSeg[i]);
-            if (_roadSeg[j] <= -2 && IsNearArea(-2 - _roadSeg[j], i)) return AreaEdge.NearArea(-2 - _roadSeg[j]);
+            // AR-25: any area's outline counts, not just the one the cursor snapped to (a point on a shared boundary lies
+            // on several). Newest area first, so a third area follows the second rather than the one under it.
+            var onI = AreasThrough(_points[i]);
+            var onJ = AreasThrough(_points[j]);
+            for (int k = 0; k < onI.Count; k++)
+                if (onJ.Contains(onI[k])) return AreaEdge.NearArea(onI[k]); // both on one outline: hug it exactly
+            for (int k = 0; k < onI.Count; k++)
+                if (IsNearArea(onI[k], j)) return AreaEdge.NearArea(onI[k]);
+            for (int k = 0; k < onJ.Count; k++)
+                if (IsNearArea(onJ[k], i)) return AreaEdge.NearArea(onJ[k]);
             return AreaEdge.Straight();
+        }
+
+        /// <summary>Ids (newest first) of the areas whose outline passes within 5 cm of the point.</summary>
+        private List<int> AreasThrough(PointMm p)
+        {
+            var ids = new List<int>();
+            foreach (var rec in _host.World.Areas.All)
+            {
+                if (rec.Polygon.Count < 3) continue;
+                if (Polylines.Nearest(Ring(rec), p).DistanceMm <= 50.0) ids.Add(rec.Id);
+            }
+            ids.Sort((x, y) => y.CompareTo(x));
+            return ids;
+        }
+
+        private static PointMm[] Ring(LordsLegacy.Sim.Areas.AreaRecord rec)
+        {
+            var ring = new PointMm[rec.Polygon.Count + 1];
+            for (int k = 0; k < rec.Polygon.Count; k++) ring[k] = rec.Polygon[k];
+            ring[ring.Length - 1] = ring[0];
+            return ring;
         }
 
         /// <summary>AR-25: the other end lies outside the neighbour area, within reach of its outline.</summary>
         private bool IsNearArea(int areaId, int other)
         {
-            if (_roadSeg[other] == -2 - areaId) return true; // both on the same area's outline: hugs it exactly
             var rec = _host.World.Areas.Get(areaId);
             if (rec == null || rec.Polygon.Count < 3) return false;
-            var ring = new PointMm[rec.Polygon.Count + 1];
-            for (int k = 0; k < rec.Polygon.Count; k++) ring[k] = rec.Polygon[k];
-            ring[ring.Length - 1] = ring[0];
-            return IsOutsideWithin(ring, -1, _points[other]); // CCW outline: outside is the right-hand side
+            return IsOutsideWithin(Ring(rec), -1, _points[other]); // CCW outline: outside is the right-hand side
         }
 
         private bool IsOutsideWithin(PointMm[] line, double sign, PointMm p)
@@ -595,9 +619,9 @@ namespace LordsLegacy.Game.Tools
         {
             int n = _points.Count;
             if (n < 3) return false;
-            var shape = CurrentShape();
+            // Only the player's own Bent edges stop it; road/area-following edges are re-derived after the reorder.
             for (int i = 0; i < n; i++)
-                if (shape.Edges[i].Kind != AreaEdgeKind.Straight) return false;
+                if (_edges[i].Kind != AreaEdgeKind.Straight) return false;
             if (!AreaUntangler.TryUntangle(_points, out int[] order)) return false;
             var points = new List<PointMm>(n);
             var roadSeg = new List<int>(n);
