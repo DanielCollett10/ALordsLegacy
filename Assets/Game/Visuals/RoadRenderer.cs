@@ -112,6 +112,108 @@ namespace LordsLegacy.Game.Visuals
             if (_previewObject != null) _previewObject.SetActive(false);
         }
 
+        /// <summary>Number of segment previews currently shown for a node move.</summary>
+        public int NodeMovePreviewCount { get; private set; }
+
+        /// <summary>Number of node handles currently shown.</summary>
+        public int NodeHandleCount { get; private set; }
+
+        /// <summary>World positions (x, z in metres) of the node handles currently shown.</summary>
+        public IReadOnlyList<Vector2> NodeHandlePositions => _handlePositions;
+
+        private readonly List<GameObject> _movePool = new List<GameObject>();
+        private readonly List<GameObject> _handlePool = new List<GameObject>();
+        private readonly List<Vector2> _handlePositions = new List<Vector2>();
+        private Mesh _handleMesh;
+        private Material _handleMaterial;
+
+        /// <summary>
+        /// Draws every segment of a node move (RD-17) as a draft strip: red along the whole segment when that segment
+        /// is refused, otherwise valid colour with too-steep samples red.
+        /// </summary>
+        public void ShowNodeMovePreview(NodeMovePreview plan, float width)
+        {
+            if (plan == null || host == null || !host.IsInitialized) { HideNodeMovePreview(); return; }
+            int shown = 0;
+            foreach (var seg in plan.Segments)
+            {
+                var pv = seg.Preview;
+                if (pv == null || pv.Samples.Count < 2) continue;
+                GameObject go;
+                if (shown < _movePool.Count) go = _movePool[shown];
+                else
+                {
+                    go = new GameObject("Node move preview " + shown);
+                    go.transform.SetParent(transform, false);
+                    go.AddComponent<MeshFilter>();
+                    var mr = go.AddComponent<MeshRenderer>();
+                    mr.sharedMaterial = PreviewMaterial();
+                    mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    _movePool.Add(go);
+                }
+                var colors = new Color[pv.Samples.Count];
+                for (int i = 0; i < colors.Length; i++)
+                    colors[i] = !pv.IsValid || InRanges(pv.InvalidRanges, i) ? InvalidColor : ValidPreviewColor;
+                var mf = go.GetComponent<MeshFilter>();
+                if (mf.sharedMesh != null) Destroy(mf.sharedMesh);
+                mf.sharedMesh = BuildMesh(pv.Samples, width, HeightOffsetM + PreviewLiftM, colors, "Node move preview",
+                    pv.StartTangent, pv.EndTangent);
+                go.SetActive(true);
+                shown++;
+            }
+            for (int i = shown; i < _movePool.Count; i++) _movePool[i].SetActive(false);
+            NodeMovePreviewCount = shown;
+        }
+
+        /// <summary>Hides the node move preview.</summary>
+        public void HideNodeMovePreview()
+        {
+            foreach (var go in _movePool) go.SetActive(false);
+            NodeMovePreviewCount = 0;
+        }
+
+        /// <summary>Shows a round handle at each given node position (x, z in metres), replacing any shown before.</summary>
+        public void ShowNodeHandles(IReadOnlyList<Vector2> positions)
+        {
+            if (positions == null || positions.Count == 0 || host == null || !host.IsInitialized) { HideNodeHandles(); return; }
+            if (_handleMesh == null) _handleMesh = CursorMarkerMesh.Sphere(1.2f);
+            if (_handleMaterial == null)
+            {
+                var shader = Shader.Find("Sprites/Default");
+                _handleMaterial = new Material(shader != null ? shader : Shader.Find("Standard")) { name = "RoadNodeHandle", color = new Color(1f, 0.95f, 0.5f, 1f) };
+            }
+            _handlePositions.Clear();
+            for (int i = 0; i < positions.Count; i++)
+            {
+                GameObject go;
+                if (i < _handlePool.Count) go = _handlePool[i];
+                else
+                {
+                    go = new GameObject("Node handle " + i);
+                    go.transform.SetParent(transform, false);
+                    go.AddComponent<MeshFilter>().sharedMesh = _handleMesh;
+                    var mr = go.AddComponent<MeshRenderer>();
+                    mr.sharedMaterial = _handleMaterial;
+                    mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    _handlePool.Add(go);
+                }
+                float y = host.World.Terrain.HeightAt(positions[i].x, positions[i].y) + HeightOffsetM + PreviewLiftM;
+                go.transform.position = new Vector3(positions[i].x, y, positions[i].y);
+                go.SetActive(true);
+                _handlePositions.Add(positions[i]);
+            }
+            for (int i = positions.Count; i < _handlePool.Count; i++) _handlePool[i].SetActive(false);
+            NodeHandleCount = positions.Count;
+        }
+
+        /// <summary>Hides the node handles.</summary>
+        public void HideNodeHandles()
+        {
+            foreach (var go in _handlePool) go.SetActive(false);
+            _handlePositions.Clear();
+            NodeHandleCount = 0;
+        }
+
         private static bool InRanges(IReadOnlyList<InvalidRange> ranges, int index)
         {
             for (int r = 0; r < ranges.Count; r++)
@@ -208,6 +310,8 @@ namespace LordsLegacy.Game.Visuals
             if (_previewMesh != null) Destroy(_previewMesh);
             if (_fallbackMaterial != null) Destroy(_fallbackMaterial);
             if (_previewMaterial != null) Destroy(_previewMaterial);
+            if (_handleMesh != null) Destroy(_handleMesh);
+            if (_handleMaterial != null) Destroy(_handleMaterial);
         }
     }
 }
