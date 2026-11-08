@@ -8,6 +8,7 @@ Each line matches one owner issue from M5 play (screenshots in `docs/design/sour
 - [ ] Same for a draft, a ghost and a dashed work-area outline
 - [ ] Bent and road-following edges keep their curve and still follow the ground
 - [ ] FPS on the test map is still comparable to M5 (look at the F3 overlay)
+- [ ] In a Windows build (not just the Editor): roads, areas and the cursor ring still show, with no pink "missing shader" surfaces (decision 0020)
 
 ## 2-4. Edges join the points you placed (AR-30..33)
 - [ ] Points 1 and 2 on a road, point 3 away from it: the edges run 2→3 and 3→1 straight to the points, never to a spot on the road (screenshot 2)
