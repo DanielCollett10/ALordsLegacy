@@ -35,7 +35,7 @@ Reshaping a confirmed area (AREA-11) is later work.
 | AR-03 | **Bent edge:** a quadratic curve between its two vertices. The handle the player drags lies **on** the curve at its midpoint, so the edge goes through where the mouse is | DECIDED |
 | AR-04 | **Follows road:** with snapping on, when two consecutive vertices snap to the **same side** of the same road segment, the edge between them follows that road side's curve exactly (AREA-05, GEO-14) | DECIDED |
 | AR-05 | For every check the Sim **flattens** the shape into a plain polygon (integer mm): bent edges are sampled every **1 m**, followed road edges use the road side's samples. The flattened outline is stored with the area, so deleting the road later doesn't change the area | DECIDED (spacing PLACEHOLDER) |
-| AR-06 | Areas lie on the terrain: outlines are drawn draped on the ground and heights are never stored (AREA-07, GEO-01) | DECIDED |
+| AR-06 | Areas lie on the terrain: outlines are drawn draped on the ground and heights are never stored (AREA-07, GEO-01). **M6:** drawn per decision 0020. Every line is draped at least every 1 m and fills use triangles of 2 m or less, so a straight edge stays straight in plan view but follows every rise and dip, and never cuts through a hill at any zoom | DECIDED |
 
 ## Validation (checked live in the tool and again in the Sim)
 
@@ -53,7 +53,20 @@ Checks run on the flattened polygon. The first failing check (in this order) is 
 
 Minimum width (GEO-07, "no thin slivers") is deferred.
 
-**AR-11 auto-fix (T-161, owner's call):** when a draft of all-straight edges crosses itself, the tool reorders the points by angle around their centroid (`AreaUntangler`, point 1 stays first) if that gives a simple polygon. Drafts with bent or road-following edges are not reordered; they stay refused ("edges cross", Confirm disabled).
+**AR-11 auto-fix (T-161, owner's call):** when a draft of all-straight edges crosses itself, the tool reorders the points by angle around their centroid (`AreaUntangler`, point 1 stays first) if that gives a simple polygon. Drafts with bent or road-following edges are not reordered; they stay refused ("edges cross", Confirm disabled). **Replaced in M6 by AR-31** (point order never changes once placed).
+
+## Edges join the points you placed (M6, owner feedback from M5 play, screenshots 2, 3 and expected-behaviour)
+
+In M5 an edge with one end on a road could "hug" the road part of the way and then cut across
+(`FollowsRoadPartly`, added in T-166 as "AR-26" and never written down here). It also reordered points on its own. As a result, edges
+ended at a spot on the road instead of at the player's point, and the fill didn't match the points (owner issues 2-4).
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| AR-30 | **Every edge runs from its own vertex to the next vertex, and nowhere else.** The flattened outline passes through every vertex, in the draft's order. An edge never ends at, or detours to, a road or area point that isn't one of its two vertices | DECIDED |
+| AR-31 | **Point order never changes by itself.** Clicking adds the new point **after the last point**, as clicked. Dragging moves a point but never reorders. If the result crosses itself, it's shown invalid (AR-11, AR-32) and the player fixes it. The M5 auto-reorder (`AreaUntangler`) is removed from the tool | DECIDED |
+| AR-33 | **Edge kinds are chosen only like this** (snapping on): both ends snapped to the same road side → FollowsRoad (AR-04). Both ends on the same area's outline → follows that outline. One end snapped to a road side or area outline and the other within 10 m on the outer side → NearRoad / NearArea (AR-23..25, with the taper ending exactly on the other vertex). **Anything else is Straight.** The partial road hug ("AR-26", `FollowsRoadPartly`) is removed. Snapping off: always Straight unless the player bent the edge | DECIDED |
+| AR-32 | **Drawing an invalid draft:** the fill is drawn **only** when the flattened outline is simple, and it's the exact triangulation of that outline (road-following and bent edges included). A crossing draft shows the red outline with **no fill**, plus a small red cross at each crossing point, so the player sees what to fix rather than a wrong-looking fill. A 3-point draft is a valid-looking triangle if simple, and says "too few points" | DECIDED |
 
 **AR-11 bug (M5):** in play, the owner drew an hourglass by clicking four points in a crossing order (a figure-8 with crossing edges) and it wasn't refused.
 "Edges cross" must catch **every** self-crossing: crossings between straight edges, between bent edges, and between
@@ -70,6 +83,9 @@ removing a point). The preview turns red, the panel shows "edges cross", Confirm
 | AR-23 | **Edge bends to match a nearby road:** with snapping on, when one end of an edge is snapped to a road side and the other end is within **10 m** of the same side (on the side away from the road, not snapped to it), the edge becomes **NearRoad**. **Both points stay where the player clicked.** The edge copies the road's curve, starting on the road at the snapped end and drifting evenly (linear by length along the road) out to the other point, so it runs parallel-ish to the road instead of cutting a straight chord across a bend. It's checked when either end is placed or dragged, and for the closing edge on close. Beyond 10 m, or snapping off, the edge stays Straight. Double-clicking its handle straightens it (like a bent edge) | DECIDED |
 | AR-24 | **NearRoad in the Sim:** edge kind `NearRoad` (segment id + side), flattened per decision 0014's amendment: road side samples between the two vertices' nearest positions on the side, each offset outward by a distance interpolated from vertex A's to vertex B's distance. Refused as "not on road" if either vertex is more than 10 m from the side, is on the road side of the line, or the segment is missing at validation. All other checks (edges cross, crosses road, overlap...) run on the flattened outline as usual | DECIDED |
 | AR-25 | **NearArea (T-166):** the same bend works against another area's curved outline. With snapping on, when one end of an edge is snapped to another area's edge or corner and the other end is outside that area within **10 m** of its outline and not snapped to it, the edge becomes **NearArea** (area id). It follows the neighbour's flattened outline the shorter way round between the two nearest positions, tapering outward like NearRoad. Both points stay where clicked. When both ends are snapped to the same area's outline, the edge follows that outline exactly (like FollowsRoad). Refused as "not on road" if the neighbour is missing or a vertex is inside it or beyond 10 m. Double-clicking its handle straightens it | DECIDED |
+
+**Placement (M6):** where a vertex may be placed or dragged is in `placement.md` (PL-01, PL-02, PL-06). A building-area
+vertex can't go inside another building area or a road; a work-area vertex can go anywhere.
 
 ## Area kinds and effects
 
