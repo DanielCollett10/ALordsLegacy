@@ -95,7 +95,7 @@ namespace LordsLegacy.Tests.PlayMode
             _renderer = _rendererGo.AddComponent<AreaRenderer>();
             _renderer.Configure(_host);
 
-            Assert.IsTrue(_host.Execute(new DesignateArea(Square(50, 30, 20), AreaTypes.TestId)).IsAccepted);
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(50, 30, 20), AreaTypes.TestWorkId)).IsAccepted); // work type: no slope limit (the ridge is steep)
             yield return null;
             _renderer.Sync();
             int id = 1;
