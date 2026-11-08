@@ -53,6 +53,8 @@ Checks run on the flattened polygon. The first failing check (in this order) is 
 
 Minimum width (GEO-07, "no thin slivers") is deferred.
 
+**AR-11 auto-fix (T-161, owner's call):** when a draft of all-straight edges crosses itself, the tool reorders the points by angle around their centroid (`AreaUntangler`, point 1 stays first) if that gives a simple polygon. Drafts with bent or road-following edges are not reordered; they stay refused ("edges cross", Confirm disabled).
+
 **AR-11 bug (M5):** in play, the owner drew an hourglass by clicking four points in a crossing order (a figure-8 with crossing edges) and it wasn't refused.
 "Edges cross" must catch **every** self-crossing: crossings between straight edges, between bent edges, and between
 road-following edges, however the draft got there (clicking, dragging a point, inserting a point, bending an edge or

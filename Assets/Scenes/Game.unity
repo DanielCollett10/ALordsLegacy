@@ -665,8 +665,10 @@ MonoBehaviour:
   FarPitch: 70
   PanSpeedPerHeight: 1.5
   MinPanSpeed: 8
-  RotateSpeedDegPerSec: 90
   MouseRotateDegPerPixel: 0.25
+  MouseTiltDegPerPixel: 0.2
+  MinOrbitPitch: 10
+  MaxOrbitPitch: 85
   GroundMargin: 1.5
   EdgeMargin: 1
   ScreenEdgePixels: 8

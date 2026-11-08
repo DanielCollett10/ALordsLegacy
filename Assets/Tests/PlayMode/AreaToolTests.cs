@@ -455,6 +455,87 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreNotEqual(PointMm.FromMetres(40, 40), _tool.Points[0]);
         }
 
+        private void AssertHourglassRefused(int expectedPoints)
+        {
+            Assert.AreEqual(expectedPoints, _tool.PointCount);
+            Assert.IsFalse(_tool.CurrentPreview.IsValid);
+            StringAssert.Contains("edges cross", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+            _tool.Confirm();
+            _panel.ClickConfirm();
+            Assert.AreEqual(0, _host.World.Areas.Count, "An hourglass is never designated.");
+            Assert.AreEqual(expectedPoints, _tool.PointCount, "The draft is kept.");
+            StringAssert.Contains("edges cross", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+        }
+
+        /// <summary>Whatever the draft is, a refused shape can't be confirmed and a valid one can (AR-11).</summary>
+        private void AssertPanelMatchesValidity()
+        {
+            Assert.AreEqual(_tool.CurrentPreview.IsValid, _panel.IsConfirmEnabled);
+            if (_tool.CurrentPreview.IsValid) return;
+            StringAssert.Contains("edges cross", _panel.Status);
+            AssertHourglassRefused(_tool.PointCount);
+        }
+
+        [UnityTest]
+        public IEnumerator ClickingFourPointsInCrossingOrderIsReorderedIntoAValidShape()
+        {
+            yield return Setup();
+            Click(40, 40); Click(80, 80); Click(80, 40); Click(40, 80);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.IsTrue(LordsLegacy.Sim.Geometry.Polygons.IsSimple(_tool.Points), "Points were auto-reordered.");
+            Assert.AreEqual(PointMm.FromMetres(40, 40), _tool.Points[0], "Point 1 stays first.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid);
+            Assert.IsTrue(_panel.IsConfirmEnabled);
+            StringAssert.Contains("1,600 m²", _panel.Status);
+            Click(40, 40); // a click on point 1 closes the now valid shape
+            Assert.AreEqual(1, _host.World.Areas.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator DraggingAPointIntoAnHourglassIsReordered()
+        {
+            yield return Setup();
+            FourSquare();
+            Assert.IsTrue(_tool.CurrentPreview.IsValid);
+            Drag(Screen(80, 40), Screen(80, 100));
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.IsTrue(LordsLegacy.Sim.Geometry.Polygons.IsSimple(_tool.Points));
+            AssertPanelMatchesValidity();
+            Assert.IsTrue(_panel.IsConfirmEnabled);
+        }
+
+        [UnityTest]
+        public IEnumerator BendingAnEdgeIntoAnHourglassIsRefused()
+        {
+            yield return Setup();
+            FourSquare();
+            Drag(Screen(60, 40), Screen(60, 100));
+            Assert.AreEqual(AreaEdgeKind.Bent, _tool.Edges[0].Kind);
+            AssertHourglassRefused(4);
+        }
+
+        [UnityTest]
+        public IEnumerator InsertingAPointThatWouldCrossIsFixedOrRefused()
+        {
+            yield return Setup();
+            _camGo.transform.position = new Vector3(100f, 50f, 100f);
+            _cam.orthographicSize = 20f;
+            float u = 1f / (Screen(0, 101).y - Screen(0, 100).y); // metres per pixel (screen y grows with z)
+            // A body with a thin arm whose tip sits just below the bottom edge (the last edge, Br -> Bl).
+            Click(88, 100); Click(98, 100 - 2 * u); Click(98, 100 - 20 * u); Click(86, 100 - 20 * u);
+            Click(88, 112); Click(112, 112); Click(112, 100);
+            Assert.AreEqual(7, _tool.PointCount);
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _panel.Status);
+            // Insert on the bottom edge, 7 px below it: the new edge cuts across the arm's tip.
+            var p = Screen(106, 100) + new Vector2(0f, -7f);
+            _tool.PointerDown(PressButton.Left, p);
+            _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            Assert.AreEqual(8, _tool.PointCount);
+            AssertPanelMatchesValidity(); // reordered into a valid shape, or refused: never confirmable while crossing
+        }
+
         [Test]
         public void BuildBarEnablesBothAreaEntries()
         {
