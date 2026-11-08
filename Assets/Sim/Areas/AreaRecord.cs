@@ -38,7 +38,7 @@ namespace LordsLegacy.Sim.Areas
         /// so this reverses it for a clockwise shape), plus for each shape edge the index where its run starts.
         /// If the vertices cannot be found in order, edge starts fall back to an even split.
         /// </summary>
-        internal PointMm[] ShapeOrderOutline(out int[] edgeStarts)
+        public PointMm[] ShapeOrderOutline(out int[] edgeStarts)
         {
             int n = Shape.Vertices.Count, m = Polygon.Count;
             bool reversed = Polygons.SignedArea2Mm(Shape.Vertices) < 0;

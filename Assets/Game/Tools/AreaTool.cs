@@ -130,6 +130,7 @@ namespace LordsLegacy.Game.Tools
         {
             _active = false;
             _hasHover = false;
+            ShowSnapMarkers(default);
             Unsubscribe();
             ClearDraft();
         }
@@ -184,9 +185,12 @@ namespace LordsLegacy.Game.Tools
             {
                 _hasHover = false;
                 HideCursor();
+                ShowSnapMarkers(default);
                 return;
             }
             _lastSnapped = false;
+            _hasHover = true;
+            ShowSnapMarkers(p);
             SnapPoint(screenPos, ref p, out _, out _);
             _hover = p; _hoverSnapped = _lastSnapped; _hasHover = true;
             if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
@@ -409,37 +413,52 @@ namespace LordsLegacy.Game.Tools
             var settings = Settings;
             if (!settings.Snapping || _host == null || !_host.IsInitialized || _picker == null) return;
             float px = settings.SnapDistancePx;
-            if (!TryGround(screenPos + new Vector2(px, 0f), out var q)) return;
-            double radiusMm = p.DistanceTo(q) * 1.5 + 1;
-            var cands = new List<SnapCandidate>();
-            var points = new List<PointMm>();
-            var segs = new List<int>();
-            var sides = new List<RoadSide>();
-            void Add(int kind, PointMm at, int sg, RoadSide sd)
-            {
-                if (!ToScreen(at, out var s)) return;
-                cands.Add(new SnapCandidate(kind, points.Count, (s - screenPos).magnitude));
-                points.Add(at); segs.Add(sg); sides.Add(sd);
-            }
-            var world = _host.World;
-            var hit = world.Areas.FindNearestSnap(p, radiusMm);
-            if (hit.HasValue)
-                Add(hit.Value.Kind == AreaSnapKind.Vertex ? KindAreaVertex : KindAreaEdge, hit.Value.Point, -1, RoadSide.Left);
-            foreach (var segment in world.Roads.Segments)
-            {
-                for (int k = 0; k < 2; k++)
-                {
-                    RoadSide sd = k == 0 ? RoadSide.Left : RoadSide.Right;
-                    var line = segment.SideLine(sd);
-                    if (line.Length < 2) continue;
-                    var n = Polylines.Nearest(line, p);
-                    if (n.DistanceMm > radiusMm) continue;
-                    Add(KindRoad, new PointMm((long)System.Math.Round(n.X), (long)System.Math.Round(n.Z)), segment.Id, sd);
-                }
-            }
+            var markers = SnapMarkerBuilder.Build(_host.World, p, settings.SnapDotSpacingM, settings.SnapMarkerRadiusM);
+            var cands = new List<SnapCandidate>(markers.Count);
+            for (int i = 0; i < markers.Count; i++)
+                if (ToScreen(markers[i].Point, out var s))
+                    cands.Add(new SnapCandidate((int)markers[i].Kind, i, (s - screenPos).magnitude));
+            // Corner, then road-side dot, then area-edge dot (AR-22).
             if (!SnapPicker.TryPick(cands, new[] { KindAreaVertex, KindRoad, KindAreaEdge }, px, true, out var best)) return;
-            p = points[best.Id]; seg = segs[best.Id]; side = sides[best.Id];
+            var m = markers[best.Id];
+            p = m.Point; seg = m.SegmentId; side = m.Side;
             _lastSnapped = true;
+        }
+
+        private readonly List<CursorMarker> _markerPool = new List<CursorMarker>();
+        private readonly List<SnapMarker> _shownMarkers = new List<SnapMarker>();
+        private const float CornerMarkerM = 1.0f, DotMarkerM = 0.35f;
+
+        /// <summary>The snap markers currently drawn (AR-22): empty with snapping off or the tool inactive.</summary>
+        public IReadOnlyList<SnapMarker> ShownMarkers => _shownMarkers;
+
+        /// <summary>Number of marker objects currently visible.</summary>
+        public int VisibleMarkerCount
+        {
+            get
+            {
+                int n = 0;
+                for (int i = 0; i < _markerPool.Count; i++) if (_markerPool[i] != null && _markerPool[i].IsShown) n++;
+                return n;
+            }
+        }
+
+        private void ShowSnapMarkers(PointMm centre)
+        {
+            var settings = Settings;
+            _shownMarkers.Clear();
+            if (_active && _hasHover && settings.Snapping && _host != null && _host.IsInitialized)
+                _shownMarkers.AddRange(SnapMarkerBuilder.Build(_host.World, centre, settings.SnapDotSpacingM, settings.SnapMarkerRadiusM));
+            for (int i = 0; i < _shownMarkers.Count; i++)
+            {
+                if (i == _markerPool.Count) _markerPool.Add(CursorMarker.Create(transform, _host));
+                var mk = _markerPool[i];
+                bool corner = _shownMarkers[i].Kind == SnapMarkerKind.Corner;
+                mk.SetShape(CursorMarkerShape.Sphere, corner ? CornerMarkerM : DotMarkerM);
+                var pt = _shownMarkers[i].Point;
+                mk.Show((float)pt.XMetres, (float)pt.ZMetres, corner);
+            }
+            for (int i = _shownMarkers.Count; i < _markerPool.Count; i++) _markerPool[i].Hide();
         }
 
         private bool TryGround(Vector2 screenPos, out PointMm point)
