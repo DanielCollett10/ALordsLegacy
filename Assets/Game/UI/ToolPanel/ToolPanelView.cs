@@ -59,6 +59,7 @@ namespace LordsLegacy.Game
         public void Hide()
         {
             _visible = false;
+            _valid = false; // a hidden panel must not leave Confirm enabled for the next draft
             Render();
         }
 

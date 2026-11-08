@@ -117,7 +117,7 @@ namespace LordsLegacy.Tests.PlayMode
             _panel.ClickConfirm();
             Assert.AreEqual(1, _host.World.Areas.Count);
             Assert.IsFalse(_tool.HasDraft);
-            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: a successful confirm hides the panel.");
             Assert.IsNull(_renderer.PreviewMesh);
         }
 
@@ -245,7 +245,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             Click(150, 150, PressButton.Right);
             Assert.IsFalse(_tool.HasDraft, "Right click on empty ground cancels the draft.");
-            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: cancelling the draft hides the panel.");
         }
 
         [UnityTest]
@@ -752,6 +752,47 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         /// <summary>Whatever the draft is, a refused shape can't be confirmed and a valid one can (AR-11).</summary>
+        [UnityTest]
+        public IEnumerator PanelHiddenWhileIdleShownOnFirstPointHiddenOnEscapeAndBackspace()
+        {
+            yield return Setup();
+            Assert.IsFalse(_panel.IsShown, "UIP-01: activating the area tool with no draft shows no panel.");
+            Click(40, 40);
+            Assert.IsTrue(_panel.IsShown, "UIP-01: the first placed point shows the panel.");
+            Click(80, 40);
+            Assert.IsTrue(_panel.IsShown);
+            Assert.IsTrue(_tool.HandleEscape());
+            Assert.IsFalse(_panel.IsShown, "UIP-03: Escape hides the panel.");
+
+            Click(40, 40);
+            Click(80, 40);
+            // Real key path: Backspace removes the last point; the second press empties the draft.
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
+            yield return null;
+            Assert.IsTrue(_panel.IsShown, "One point left: the panel stays.");
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
+            yield return null;
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
+            yield return null;
+            Assert.AreEqual(0, _tool.PointCount);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: Backspace of the last point hides the panel.");
+            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator SphereFollowsCursorWhilePanelHidden()
+        {
+            yield return Setup();
+            Assert.IsFalse(_panel.IsShown);
+            _tool.PointerMove(Screen(60, 60));
+            Assert.IsNotNull(_tool.Cursor, "UIP-02: the sphere is created on the first pointer move.");
+            Assert.IsTrue(_tool.Cursor.IsShown, "UIP-02: the sphere shows with the panel hidden.");
+            Assert.AreEqual(CursorMarkerShape.Sphere, _tool.Cursor.Shape);
+            Assert.AreEqual(60f, _tool.Cursor.transform.position.x, 0.5f, "UIP-02: the sphere sits at the cursor.");
+            Assert.IsFalse(_panel.IsShown);
+        }
+
         private void AssertPanelMatchesValidity()
         {
             Assert.AreEqual(_tool.CurrentPreview.IsValid, _panel.IsConfirmEnabled);

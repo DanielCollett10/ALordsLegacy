@@ -128,7 +128,7 @@ namespace LordsLegacy.Game.Tools
         /// <inheritdoc />
         public bool HandleEscape()
         {
-            if (_nodeDragging) { CancelNodeDrag(); ShowIdlePanel(); return true; }
+            if (_nodeDragging) { CancelNodeDrag(); HidePanel(); return true; }
             if (!HasDraft) return false;
             ClearDraft();
             return true;
@@ -143,11 +143,11 @@ namespace LordsLegacy.Game.Tools
             {
                 // Right-click during a node drag cancels it; the matching release must not delete a road.
                 CancelNodeDrag();
-                ShowIdlePanel();
+                HidePanel();
                 _ignoreRightRelease = true;
                 return;
             }
-            if (_moveMessageShown && !HasDraft) { _moveMessageShown = false; ShowIdlePanel(); }
+            if (_moveMessageShown && !HasDraft) { _moveMessageShown = false; HidePanel(); }
             _press.Press(button, screenPos);
             _pressVertex = button == PressButton.Left ? VertexUnder(screenPos) : -1;
             _pressNode = button == PressButton.Left && !HasDraft ? NodeUnder(screenPos) : -1;
@@ -417,9 +417,9 @@ namespace LordsLegacy.Game.Tools
             var plan = _nodeMove;
             var target = _nodeTarget;
             EndNodeDrag();
-            if (plan == null || !plan.NodeFound) { ShowIdlePanel(); return; }
+            if (plan == null || !plan.NodeFound) { HidePanel(); return; }
             var result = _host.Execute(new MoveRoadNode(node, target));
-            if (result.IsAccepted) { ShowIdlePanel(); return; }
+            if (result.IsAccepted) { HidePanel(); return; }
             string reason = string.IsNullOrEmpty(result.Text) ? result.Reason.ToString() : result.Text;
             _moveMessageShown = true;
             if (_panel != null) _panel.Show(MoveLine(plan) + "Rejected: " + reason, IdleHint, false);
@@ -439,9 +439,10 @@ namespace LordsLegacy.Game.Tools
             if (_roads != null) { _roads.HideNodeMovePreview(); _roads.HideNodeHandles(); }
         }
 
-        private void ShowIdlePanel()
+        /// <summary>UIP-01/UIP-03: with nothing started the panel is hidden; the cursor ring still shows (UIP-02).</summary>
+        private void HidePanel()
         {
-            if (_active && _panel != null) _panel.Show("Road · no points yet", IdleHint, false);
+            if (_panel != null) _panel.Hide();
         }
 
         private void MoveDraggedPoint(Vector2 screenPos)
@@ -504,10 +505,8 @@ namespace LordsLegacy.Game.Tools
             _dragIndex = -1;
             _lastReleaseAddedPoint = false;
             if (_roads != null) _roads.HidePreview();
-            if (_panel == null) return;
-            // While the tool is active the panel stays up so the player can see it is waiting for a first click.
-            if (_active) _panel.Show("Road · no points yet", IdleHint, false);
-            else _panel.Hide();
+            // UIP-01/UIP-03: no draft means no panel, even while the tool is active.
+            HidePanel();
         }
 
         private void Subscribe()

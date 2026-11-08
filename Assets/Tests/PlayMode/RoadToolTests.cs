@@ -124,19 +124,34 @@ namespace LordsLegacy.Tests.PlayMode
             _tool.Confirm();
             Assert.GreaterOrEqual(_host.World.Roads.SegmentCount, 1);
             Assert.IsFalse(_tool.HasDraft);
-            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: a successful confirm hides the panel.");
             Assert.IsFalse(_panel.IsConfirmEnabled);
             Assert.IsNull(_renderer.PreviewMesh);
         }
 
         [UnityTest]
-        public IEnumerator PanelShowsAsSoonAsToolIsActive()
+        public IEnumerator PanelHiddenWhileIdleAndShownOnFirstPoint()
         {
             yield return Setup(SyntheticMap.CreateRamp());
-            Assert.IsTrue(_panel.IsShown, "Panel should be visible right after clicking Road.");
+            Assert.IsFalse(_panel.IsShown, "UIP-01: activating Road with no draft shows no panel.");
+            Click(40, 100);
+            Assert.IsTrue(_panel.IsShown, "UIP-01: the first placed point shows the panel.");
             Assert.IsFalse(_panel.IsConfirmEnabled);
             _controller.Deselect();
             Assert.IsFalse(_panel.IsShown, "Panel hides when the tool is left.");
+        }
+
+        [UnityTest]
+        public IEnumerator RingFollowsCursorWhilePanelHidden()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            Assert.IsFalse(_panel.IsShown);
+            _tool.PointerMove(Screen(60, 100));
+            var marker = _toolGo.GetComponentInChildren<CursorMarker>();
+            Assert.IsNotNull(marker, "UIP-02: the ring is created on the first pointer move.");
+            Assert.IsTrue(marker.IsShown, "UIP-02: the ring shows with the panel hidden.");
+            Assert.AreEqual(60f, marker.transform.position.x, 0.5f, "UIP-02: the ring sits at the cursor.");
+            Assert.IsFalse(_panel.IsShown);
         }
 
         [UnityTest]
@@ -180,7 +195,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             Click(60, 120, PressButton.Right);
             Assert.IsFalse(_tool.HasDraft);
-            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: cancelling the draft hides the panel.");
             Assert.IsNull(_renderer.PreviewMesh);
         }
 
@@ -191,6 +206,7 @@ namespace LordsLegacy.Tests.PlayMode
             Click(40, 100);
             Assert.IsTrue(_tool.HandleEscape());
             Assert.IsFalse(_tool.HasDraft);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: Escape hides the panel.");
             Assert.IsFalse(_tool.HandleEscape());
 
             Click(40, 100);
@@ -252,7 +268,7 @@ namespace LordsLegacy.Tests.PlayMode
             yield return null;
             Assert.AreEqual(0, _tool.PointCount);
             Assert.IsFalse(_tool.HasDraft);
-            StringAssert.Contains("no points", _panel.Status);
+            Assert.IsFalse(_panel.IsShown, "UIP-03: Backspace of the last point hides the panel.");
             InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
             yield return null;
         }
@@ -329,6 +345,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsTrue(_tool.IsDraggingNode);
             Assert.AreEqual(1, _renderer.NodeMovePreviewCount);
             StringAssert.Contains("Move node · 1 road · Valid", _panel.Status);
+            Assert.IsTrue(_panel.IsShown, "The panel shows while a road node is dragged (UIP-01).");
             _tool.PointerUp(PressButton.Left, Screen(120, 120), _time += 2f);
             Assert.IsFalse(_tool.IsDraggingNode);
             Assert.AreEqual(0, _renderer.NodeMovePreviewCount);
@@ -372,11 +389,13 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(90.0, _host.World.Roads.GetNode(node).Position.XMetres, 0.5, "Node stays put.");
             StringAssert.Contains("Rejected", _panel.Status);
             Assert.AreEqual(0, _renderer.NodeMovePreviewCount);
+            Assert.IsTrue(_panel.IsShown, "UIP-01: a refused node move keeps the panel up with its reason.");
             // The reason stays until the next input.
             _tool.PointerMove(Screen(60, 150));
             StringAssert.Contains("Rejected", _panel.Status);
+            Assert.IsTrue(_panel.IsShown);
             _tool.PointerDown(PressButton.Left, Screen(60, 150));
-            StringAssert.DoesNotContain("Rejected", _panel.Status);
+            Assert.IsFalse(_panel.IsShown, "The refused-move reason clears on the next input.");
         }
 
         [UnityTest]
