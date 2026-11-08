@@ -582,6 +582,34 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator EdgeNearNeighbourAreaCurveBecomesNearAreaAndFollowsIt()
+        {
+            yield return Setup();
+            _tool.SetViewSettings(new ViewSettings());
+            var verts = new[] { PointMm.FromMetres(40, 40), PointMm.FromMetres(80, 40), PointMm.FromMetres(80, 80), PointMm.FromMetres(40, 80) };
+            var edges = new[] { AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Bent(PointMm.FromMetres(60, 90)), AreaEdge.Straight() };
+            Assert.IsTrue(_host.Execute(new DesignateArea(new AreaShape(verts, edges), AreaTypes.TestId)).IsAccepted);
+            var neighbour = new System.Collections.Generic.List<LordsLegacy.Sim.Areas.AreaRecord>(_host.World.Areas.All)[0];
+            PointMm Curve(double x)
+            {
+                PointMm best = default; double bd = double.MaxValue;
+                foreach (var q in neighbour.Polygon)
+                    if (q.ZMetres > 80.5 && System.Math.Abs(q.XMetres - x) < bd) { bd = System.Math.Abs(q.XMetres - x); best = q; }
+                return best;
+            }
+            var a = Curve(70); var b = Curve(50);
+            Click((float)a.XMetres, (float)a.ZMetres);
+            Click((float)b.XMetres, (float)b.ZMetres + 6f);
+            Click((float)b.XMetres, 112f); Click((float)a.XMetres, 112f);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(AreaEdgeKind.NearArea, _tool.Edges[0].Kind, "6 m from the neighbour's curve gives NearArea.");
+            Assert.AreEqual(neighbour.Id, _tool.Edges[0].AreaId);
+            Assert.AreEqual(b.ZMetres + 6.0, _tool.Points[1].ZMetres, 0.05, "The far vertex stays where it was clicked.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            Assert.Greater(_tool.CurrentPreview.Polygon.Count, 8, "The outline follows the neighbour's curve, not a chord.");
+        }
+
+        [UnityTest]
         public IEnumerator SnapsToAreaVertexWithinSnapDistance()
         {
             yield return Setup();

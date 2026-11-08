@@ -48,7 +48,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   the road side line between the vertices' nearest positions, a missing segment falls back to Straight. NearRoad
   does the same but pushes each side sample outward (away from the road) by a distance interpolated by arc length
   from vertex A's perpendicular distance to vertex B's, so both vertices stay put (`FollowsRoad` = both distances 0;
-  helpers in internal `NearRoadGeometry`). `AreaTypeDef.NearRoadReachM` (10) is the vertex reach limit.
+  helpers in internal `NearRoadGeometry`). `AreaTypeDef.NearRoadReachM` (10) is the vertex reach limit. `NearArea` (AR-25, area id; internal `NearAreaGeometry`) does
+  the same along another area's flattened outline (shorter way round); `AreaFlattener.Flatten(shape, roads, areas, spacingM)` takes the registry.
   `AreaRegistry` (`SimWorld.Areas`, never null) stores `AreaRecord`s (id, type id, name, shape, flattened polygon,
   bounds); internal `Add`/`Remove` bump `Version`; names are "<prefix> N" with per-type counters that never reuse.
   Building-kind areas sit in a `SpatialGrid` (`SpatialIndexCellM`): `QueryOverlapCandidates(bounds)`. `FindAt(point,
@@ -211,7 +212,9 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     (max 8), dragging an edge's middle handle makes it Bent through the cursor, double-clicking the handle straightens it.
     With `ViewSettings.Snapping` on, points snap (SnapPicker order: area vertex, road side line via `RoadSegment.SideLine`, area
     edge via `AreaRegistry.FindNearestSnap`) within `SnapDistancePx`; two consecutive points snapped to the same road side
-    make that edge FollowsRoad. Snapping off: no snap, no FollowsRoad.
+    make that edge FollowsRoad. Snapping off: no snap, no FollowsRoad. T-166: `CurrentShape` also picks NearRoad (one end snapped to a road
+    side, the other outside it within 10 m) and NearArea (same against another area's outline, via `SnapMarker.AreaId`); a handle
+    double-click locks the edge Straight until an end moves. Validation stays in `AreaValidator`.
     Cursor (AR-20, T-164): every pointer move shows a 0.6 m `CursorMarker` sphere at the (snapped) ground point, green when
     snapped, hidden over UI and on deactivate. The ghost (AR-21, `AreaRenderer.ShowGhost`) is built but off behind
     `AreaTool.GhostEnabled` (default false) until polished.
