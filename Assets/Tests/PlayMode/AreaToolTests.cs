@@ -751,7 +751,6 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_panel.IsConfirmEnabled);
         }
 
-        /// <summary>Whatever the draft is, a refused shape can't be confirmed and a valid one can (AR-11).</summary>
         [UnityTest]
         public IEnumerator PanelHiddenWhileIdleShownOnFirstPointHiddenOnEscapeAndBackspace()
         {
@@ -793,6 +792,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_panel.IsShown);
         }
 
+        /// <summary>Whatever the draft is, a refused shape can't be confirmed and a valid one can (AR-11).</summary>
         private void AssertPanelMatchesValidity()
         {
             Assert.AreEqual(_tool.CurrentPreview.IsValid, _panel.IsConfirmEnabled);
