@@ -42,9 +42,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   (`RemoveNearPolyline`), using geo-1 on trunk positions rounded to mm; both return the removed ids sorted.
 - `Assets/Sim/Areas/` (`LordsLegacy.Sim.Areas`, decision 0014): `AreaTypeDef`/`AreaTypes` (`area.test` Building,
   `area.test_work` Work; limits per `tuning.md`), `AreaShape` (vertices plus one `AreaEdge` per vertex: Straight,
-  Bent with an on-curve handle, FollowsRoad with segment id and `RoadSide`) and `AreaFlattener.Flatten(shape, roads)`,
+  Bent with an on-curve handle, FollowsRoad and NearRoad (AR-24), both with segment id and `RoadSide`) and
+  `AreaFlattener.Flatten(shape, roads)`,
   which gives a CCW `PointMm` polygon: bent edges are quadratics sampled every `CurveFlattenSpacingM`, road edges copy
-  the road side line between the vertices' nearest positions, a missing segment falls back to Straight.
+  the road side line between the vertices' nearest positions, a missing segment falls back to Straight. NearRoad
+  does the same but pushes each side sample outward (away from the road) by a distance interpolated by arc length
+  from vertex A's perpendicular distance to vertex B's, so both vertices stay put (`FollowsRoad` = both distances 0;
+  helpers in internal `NearRoadGeometry`). `AreaTypeDef.NearRoadReachM` (10) is the vertex reach limit.
   `AreaRegistry` (`SimWorld.Areas`, never null) stores `AreaRecord`s (id, type id, name, shape, flattened polygon,
   bounds); internal `Add`/`Remove` bump `Version`; names are "<prefix> N" with per-type counters that never reuse.
   Building-kind areas sit in a `SpatialGrid` (`SpatialIndexCellM`): `QueryOverlapCandidates(bounds)`. `FindAt(point,
@@ -53,7 +57,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `RoadSegment.SideLine(side)` (half-width offset of the samples; Left is left of NodeA→NodeB) and `CorridorPolygon()`
   (CCW) support this. `AreaValidator.Validate(world, shape, typeId)` is pure and returns an `AreaPreview` (flattened polygon, m²,
   point count, `AreaRefusal`, overlapped area name). Checks in order: point count, FollowsRoad vertices within 5 cm of
-  the road side ("not on road"; a missing segment also fails), edges cross (repeated shape points or non-simple
+  the road side, or NearRoad vertices within `NearRoadReachM` of the side and not on the road side of it
+  ("not on road"; a missing segment also fails), edges cross (repeated shape points or non-simple
   outline), outside the map (any flattened point), size. Building kinds then run `AreaPlacementChecks` (internal):
   slope (AR-14), overlap with another building area (AR-15), road corridor crossing (AR-16). Work kinds stop after size.
   `DesignateArea` and `DeleteArea` are in `Commands/` (see below).

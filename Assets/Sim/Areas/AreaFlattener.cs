@@ -40,6 +40,11 @@ namespace LordsLegacy.Sim.Areas
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
                     if (seg != null) AddRoadSide(pts, a, b, seg.SideLine(e.Side));
                 }
+                else if (e.Kind == AreaEdgeKind.NearRoad)
+                {
+                    RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
+                    if (seg != null) AddNearRoad(pts, a, b, seg.SideLine(e.Side), e.Side);
+                }
             }
             var clean = new List<PointMm>(pts.Count);
             for (int i = 0; i < pts.Count; i++)
@@ -66,6 +71,32 @@ namespace LordsLegacy.Sim.Areas
                     (long)Math.Round(u * u * a.X + 2 * u * t * cx + t * t * b.X, MidpointRounding.AwayFromZero),
                     (long)Math.Round(u * u * a.Z + 2 * u * t * cz + t * t * b.Z, MidpointRounding.AwayFromZero)));
             }
+        }
+
+        // NearRoad (AR-24): side-line samples between the vertices' nearest positions, each pushed outward by a
+        // distance interpolated by arc length from vertex a's distance to vertex b's.
+        private static void AddNearRoad(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line, RoadSide side)
+        {
+            if (line.Length < 2) return;
+            double ta = Polylines.Nearest(line, a).ArcLengthMm, tb = Polylines.Nearest(line, b).ArcLengthMm;
+            double da = Math.Max(0.0, NearRoadGeometry.SignedOutwardMm(line, side, a));
+            double db = Math.Max(0.0, NearRoadGeometry.SignedOutwardMm(line, side, b));
+            var cum = new double[line.Length];
+            for (int i = 1; i < line.Length; i++) cum[i] = cum[i - 1] + line[i - 1].DistanceTo(line[i]);
+            double lo = Math.Min(ta, tb), hi = Math.Max(ta, tb);
+            var inner = new List<PointMm>();
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (!(cum[i] > lo && cum[i] < hi)) continue;
+                double f = Math.Abs(cum[i] - ta) / (hi - lo);
+                double d = da + (db - da) * f;
+                (double nx, double nz) = NearRoadGeometry.OutwardNormal(line, i, side);
+                inner.Add(d <= 0 ? line[i] : new PointMm(
+                    line[i].X + (long)Math.Round(nx * d, MidpointRounding.AwayFromZero),
+                    line[i].Z + (long)Math.Round(nz * d, MidpointRounding.AwayFromZero)));
+            }
+            if (ta > tb) inner.Reverse();
+            pts.AddRange(inner);
         }
 
         private static void AddRoadSide(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line)
