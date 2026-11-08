@@ -169,7 +169,12 @@ namespace LordsLegacy.Game.Tools
             _dragIndex = -1;
             _lastReleaseAddedPoint = false;
             // A drag (of either button) never acts on release; right mouse is click-only.
-            if (r.Kind == PressKind.None || r.Kind == PressKind.Drag) return;
+            if (r.Kind == PressKind.None) return;
+            if (r.Kind == PressKind.Drag)
+            {
+                if (HasDraft) Refresh(); // re-validate on release of a drag too (AR-11)
+                return;
+            }
 
             if (button == PressButton.Right)
             {
@@ -202,6 +207,7 @@ namespace LordsLegacy.Game.Tools
         public void Confirm()
         {
             if (!_active || _host == null || !_host.IsInitialized || !CanClose) return;
+            Refresh(); // AR-11: never trust a stale preview; re-run the validator on the draft as it is now
             if (_preview == null || !_preview.IsValid) return;
             var result = _host.Execute(new DesignateArea(CurrentShape(), _typeId));
             if (result.IsAccepted)
