@@ -510,13 +510,14 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator EdgeBeyond10mStaysStraight()
+        public IEnumerator EdgeBeyond10mBecomesPartialFollowNotNearRoad()
         {
             yield return Setup();
             DrawCurvedRoad();
             _tool.SetViewSettings(new ViewSettings());
             DrawNearRoadQuad(12f);
-            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "12 m from the side stays Straight.");
+            Assert.AreEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind, "12 m from the side hugs the road only partly (AR-26).");
+            Assert.AreEqual(_curved.Id, _tool.Edges[0].SegmentId);
         }
 
         [UnityTest]
@@ -545,7 +546,7 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator DraggingFarEndBeyondReachRevertsToStraight()
+        public IEnumerator DraggingFarEndBeyondReachBecomesPartialFollow()
         {
             yield return Setup();
             DrawCurvedRoad();
@@ -553,7 +554,7 @@ namespace LordsLegacy.Tests.PlayMode
             DrawNearRoadQuad(8f);
             Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind);
             Drag(Screen((float)_tool.Points[1].XMetres, (float)_tool.Points[1].ZMetres), Screen(SidePointOut(140, 14f, out _).x, SidePointOut(140, 14f, out _).y));
-            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind);
+            Assert.AreEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind);
         }
 
         [UnityTest]

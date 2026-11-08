@@ -52,6 +52,11 @@ namespace LordsLegacy.Sim.Areas
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
                     if (seg != null) AddNearRoad(pts, a, b, seg.SideLine(e.Side), e.Side);
                 }
+                else if (e.Kind == AreaEdgeKind.FollowsRoadPartly)
+                {
+                    RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
+                    if (seg != null) AddPartialRoad(pts, a, b, seg.SideLine(e.Side));
+                }
                 else if (e.Kind == AreaEdgeKind.NearArea)
                 {
                     AreaRecord other = areas == null ? null : areas.Get(e.AreaId);
@@ -117,6 +122,35 @@ namespace LordsLegacy.Sim.Areas
                     line[i].Z + (long)Math.Round(nz * d, MidpointRounding.AwayFromZero)));
             }
             if (ta > tb) inner.Reverse();
+            pts.AddRange(inner);
+        }
+
+        /// <summary>How far (m) a FollowsRoadPartly edge's hugged part may stray from its straight chord (AR-26).</summary>
+        public const double PartialFollowReachM = 10.0;
+
+        // FollowsRoadPartly (AR-26): from whichever vertex is nearer the side line, copy side-line vertices toward the
+        // other vertex's nearest position until one strays more than PartialFollowReachM from the chord a-b.
+        private static void AddPartialRoad(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line)
+        {
+            if (line.Length < 2) return;
+            PolylineHit ha = Polylines.Nearest(line, a), hb = Polylines.Nearest(line, b);
+            bool anchorIsA = ha.DistanceMm <= hb.DistanceMm;
+            double ta = ha.ArcLengthMm, tb = hb.ArcLengthMm;
+            if (!anchorIsA) { double t = ta; ta = tb; tb = t; } // ta = anchor's arc position, tb = the far vertex's
+            var cum = new double[line.Length];
+            for (int i = 1; i < line.Length; i++) cum[i] = cum[i - 1] + line[i - 1].DistanceTo(line[i]);
+            double lo = Math.Min(ta, tb), hi = Math.Max(ta, tb);
+            var chord = new[] { a, b };
+            double reachMm = PartialFollowReachM * PointMm.MmPerMetre;
+            var inner = new List<PointMm>();
+            for (int step = 0; step < line.Length; step++)
+            {
+                int i = ta <= tb ? step : line.Length - 1 - step;
+                if (!(cum[i] > lo && cum[i] < hi)) continue;
+                if (Polylines.Nearest(chord, line[i]).DistanceMm > reachMm) break;
+                inner.Add(line[i]);
+            }
+            if (!anchorIsA) inner.Reverse();
             pts.AddRange(inner);
         }
 
