@@ -26,9 +26,11 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 - Invalid reasons are also labelled in the world near the problem when the tool can tell where it is
   (e.g. the red stretch of a too-steep road, or the overlapped area).
 
-> Implementation note (panel visibility): the road tool and both area tools show the panel whenever they are active, with an idle hint
-> ("Road · no points yet"). That matches `roads.md` ("the tool panel shows while the tool is active") but not the
-> sentence above ("shown only while a tool has a draft"). Owner to pick one.
+| ID | Rule | Tag |
+| --- | --- | --- |
+| UIP-01 | **Owner decision (M5): the panel shows only once something has started**, i.e. a draft has at least one point, or a road node is being dragged (RD-17), or a refused node move's reason is still showing. With a tool selected but nothing started, the panel is hidden to cut clutter. This replaces the current "always shown, 'no points yet'" behaviour | DECIDED |
+| UIP-02 | With the panel hidden, the **cursor marker still shows** where the first point would go: the road ring (RD-18) and the area sphere (AR-20), including the snapped position and colour | DECIDED |
+| UIP-03 | Cancelling a draft (Escape, right-click, Cancel button), confirming it, or removing its last point with Backspace hides the panel again | DECIDED |
 >
 > Implementation note (invalid label): when invalid, line 1 shows the bare reason (e.g. `too steep`), without the
 > `Invalid:` prefix shown above.

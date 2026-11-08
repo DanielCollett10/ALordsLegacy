@@ -32,6 +32,11 @@ that says what "right" means.
 - [ ] Double-click that edge's handle: it straightens (AR-23)
 - [ ] Confirm a near-road area, then delete the road: the area keeps its shape (AR-05)
 
+## Tool panel
+- [ ] Select Road or an area tool with nothing drawn: no panel, but the ring or sphere still follows the cursor (UIP-01, UIP-02)
+- [ ] Place the first point: the panel appears. Cancel, confirm, or Backspace the last point: it hides again (UIP-01, UIP-03)
+- [ ] Drag a road node: the panel shows during the drag (UIP-01)
+
 ## Tuning in the Inspector
 - [ ] Select the `SimConfig` asset: road max grade, road width, area limits and the `SimTuning` values are there, with rule IDs in the tooltips (decision 0019)
 - [ ] Change max grade to 30%, press Play: a slope that was red before is now valid. Set it back afterwards
