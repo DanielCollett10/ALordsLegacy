@@ -294,6 +294,134 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(104.0, _tool.Points[1].ZMetres, 0.5, "Placed points do not snap when off.");
         }
 
+        private LordsLegacy.Sim.Roads.RoadNode NodeNear(float x, float z)
+        {
+            LordsLegacy.Sim.Roads.RoadNode best = null;
+            double bd = double.MaxValue;
+            foreach (var n in _host.World.Roads.Nodes)
+            {
+                double d = System.Math.Abs(n.Position.XMetres - x) + System.Math.Abs(n.Position.ZMetres - z);
+                if (d < bd) { bd = d; best = n; }
+            }
+            return best;
+        }
+
+        [UnityTest]
+        public IEnumerator HoverRoadShowsNodeHandlesAtItsEnds()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 120, 100);
+            _tool.PointerMove(Screen(80, 100));
+            Assert.AreEqual(2, _renderer.NodeHandleCount);
+            _tool.PointerMove(Screen(80, 160));
+            Assert.AreEqual(0, _renderer.NodeHandleCount, "No handles away from a road.");
+        }
+
+        [UnityTest]
+        public IEnumerator DragRoadEndMovesNodeWhenValid()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 100, 100);
+            int node = NodeNear(100, 100).Id;
+            _tool.PointerDown(PressButton.Left, Screen(100, 100));
+            _tool.PointerMove(Screen(110, 110));
+            _tool.PointerMove(Screen(120, 120));
+            Assert.IsTrue(_tool.IsDraggingNode);
+            Assert.AreEqual(1, _renderer.NodeMovePreviewCount);
+            StringAssert.Contains("Move node · 1 road · Valid", _panel.Status);
+            _tool.PointerUp(PressButton.Left, Screen(120, 120), _time += 2f);
+            Assert.IsFalse(_tool.IsDraggingNode);
+            Assert.AreEqual(0, _renderer.NodeMovePreviewCount);
+            Assert.AreEqual(1, _host.World.Roads.SegmentCount);
+            var n = _host.World.Roads.GetNode(node);
+            Assert.AreEqual(120.0, n.Position.XMetres, 0.5);
+            Assert.AreEqual(120.0, n.Position.ZMetres, 0.5);
+            Assert.IsFalse(_tool.HasDraft, "A node drag leaves no draft.");
+        }
+
+        [UnityTest]
+        public IEnumerator DragJunctionReshapesAllAttachedRoads()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 120, 100);
+            DrawExisting(80, 100, 80, 150);
+            var j = NodeNear(80, 100);
+            Assert.AreEqual(3, j.SegmentIds.Count);
+            _tool.PointerDown(PressButton.Left, Screen(80, 100));
+            _tool.PointerMove(Screen(82, 94));
+            _tool.PointerMove(Screen(80, 90));
+            Assert.AreEqual(3, _renderer.NodeMovePreviewCount, "All attached segments are previewed.");
+            StringAssert.Contains("3 roads", _panel.Status);
+            _tool.PointerUp(PressButton.Left, Screen(80, 90), _time += 2f);
+            Assert.AreEqual(90.0, _host.World.Roads.GetNode(j.Id).Position.ZMetres, 0.5);
+            Assert.AreEqual(3, _host.World.Roads.GetNode(j.Id).SegmentIds.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator InvalidNodeDragRevertsAndKeepsReason()
+        {
+            yield return Setup(SteepMap());
+            DrawExisting(50, 100, 90, 100);
+            int node = NodeNear(90, 100).Id;
+            _tool.PointerDown(PressButton.Left, Screen(90, 100));
+            _tool.PointerMove(Screen(110, 100));
+            _tool.PointerMove(Screen(130, 100));
+            StringAssert.Contains("Move node · 1 road ·", _panel.Status);
+            StringAssert.DoesNotContain("Valid", _panel.Status.Replace("Invalid", ""));
+            _tool.PointerUp(PressButton.Left, Screen(130, 100), _time += 2f);
+            Assert.AreEqual(90.0, _host.World.Roads.GetNode(node).Position.XMetres, 0.5, "Node stays put.");
+            StringAssert.Contains("Rejected", _panel.Status);
+            Assert.AreEqual(0, _renderer.NodeMovePreviewCount);
+            // The reason stays until the next input.
+            _tool.PointerMove(Screen(60, 150));
+            StringAssert.Contains("Rejected", _panel.Status);
+            _tool.PointerDown(PressButton.Left, Screen(60, 150));
+            StringAssert.DoesNotContain("Rejected", _panel.Status);
+        }
+
+        [UnityTest]
+        public IEnumerator EscapeAndRightClickCancelNodeDrag()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 100, 100);
+            int node = NodeNear(100, 100).Id;
+            _tool.PointerDown(PressButton.Left, Screen(100, 100));
+            _tool.PointerMove(Screen(110, 110));
+            _tool.PointerMove(Screen(120, 120));
+            Assert.IsTrue(_tool.IsDraggingNode);
+            Assert.IsTrue(_controller.HandleEscape());
+            Assert.IsFalse(_tool.IsDraggingNode);
+            Assert.AreEqual(0, _renderer.NodeMovePreviewCount);
+            _tool.PointerMove(Screen(130, 130));
+            _tool.PointerUp(PressButton.Left, Screen(130, 130), _time += 2f);
+            Assert.AreEqual(100.0, _host.World.Roads.GetNode(node).Position.XMetres, 0.5, "Escape changes nothing.");
+            Assert.AreSame(_tool, _controller.ActiveTool, "Escape only cancelled the drag.");
+
+            _tool.PointerDown(PressButton.Left, Screen(100, 100));
+            _tool.PointerMove(Screen(110, 110));
+            _tool.PointerMove(Screen(120, 120));
+            Assert.IsTrue(_tool.IsDraggingNode);
+            _tool.PointerDown(PressButton.Right, Screen(120, 120));
+            _tool.PointerUp(PressButton.Right, Screen(120, 120), _time += 2f);
+            Assert.IsFalse(_tool.IsDraggingNode);
+            _tool.PointerUp(PressButton.Left, Screen(120, 120), _time += 2f);
+            Assert.AreEqual(100.0, _host.World.Roads.GetNode(node).Position.XMetres, 0.5, "Right-click changes nothing.");
+            Assert.AreEqual(1, _host.World.Roads.SegmentCount, "Right-click during the drag deletes nothing.");
+        }
+
+        [UnityTest]
+        public IEnumerator ClickOnRoadEndStillStartsBranch()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            DrawExisting(40, 100, 100, 100);
+            var p = Screen(100, 100);
+            _tool.PointerDown(PressButton.Left, p);
+            _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            Assert.IsFalse(_tool.IsDraggingNode);
+            Assert.AreEqual(1, _tool.PointCount);
+            Assert.AreEqual(100.0, _tool.Points[0].XMetres, 0.01);
+        }
+
         [UnityTest]
         public IEnumerator BranchFromRoadCreatesJunction()
         {

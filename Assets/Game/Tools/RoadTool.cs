@@ -46,6 +46,15 @@ namespace LordsLegacy.Game.Tools
         private int _dragIndex = -1;
         private bool _lastReleaseAddedPoint;
 
+        // Node drag (RD-17): the confirmed node under a left press (-1 if none), whether it is being dragged,
+        // the latest preview and target, and whether a rejection message is on the panel.
+        private int _pressNode = -1;
+        private bool _nodeDragging;
+        private NodeMovePreview _nodeMove;
+        private PointMm _nodeTarget;
+        private bool _moveMessageShown;
+        private bool _ignoreRightRelease;
+
         /// <inheritdoc />
         public string Id => ToolId;
 
@@ -101,16 +110,25 @@ namespace LordsLegacy.Game.Tools
         {
             _active = false;
             Unsubscribe();
+            EndNodeDrag();
+            _moveMessageShown = false;
             ClearDraft();
             if (_cursor != null) _cursor.Hide();
         }
 
         /// <inheritdoc />
-        public void Cancel() { ClearDraft(); }
+        public void Cancel() { CancelNodeDrag(); ClearDraft(); }
+
+        /// <summary>True while a confirmed road node is being dragged (RD-17).</summary>
+        public bool IsDraggingNode => _nodeDragging;
+
+        /// <summary>The node move preview of the current drag, or null.</summary>
+        public NodeMovePreview NodeMove => _nodeMove;
 
         /// <inheritdoc />
         public bool HandleEscape()
         {
+            if (_nodeDragging) { CancelNodeDrag(); ShowIdlePanel(); return true; }
             if (!HasDraft) return false;
             ClearDraft();
             return true;
@@ -121,16 +139,35 @@ namespace LordsLegacy.Game.Tools
         {
             if (!_active) return;
             if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) return;
+            if (_nodeDragging && button == PressButton.Right)
+            {
+                // Right-click during a node drag cancels it; the matching release must not delete a road.
+                CancelNodeDrag();
+                ShowIdlePanel();
+                _ignoreRightRelease = true;
+                return;
+            }
+            if (_moveMessageShown && !HasDraft) { _moveMessageShown = false; ShowIdlePanel(); }
             _press.Press(button, screenPos);
             _pressVertex = button == PressButton.Left ? VertexUnder(screenPos) : -1;
+            _pressNode = button == PressButton.Left && !HasDraft ? NodeUnder(screenPos) : -1;
         }
 
         /// <summary>The cursor moved. While a press that started on a placed point is dragged, that point follows the cursor.</summary>
         public void PointerMove(Vector2 screenPos)
         {
             if (!_active) return;
-            UpdateCursor(screenPos);
             _press.Move(screenPos);
+            if (_pressNode >= 0 && _press.IsDragging(PressButton.Left))
+            {
+                _nodeDragging = true;
+                if (_cursor != null) _cursor.Hide();
+                if (_roads != null) _roads.HideNodeHandles();
+                MoveDraggedNode(screenPos);
+                return;
+            }
+            UpdateCursor(screenPos);
+            UpdateHoverHandles(screenPos);
             if (_pressVertex < 0 || !_press.IsDragging(PressButton.Left)) return;
             _dragIndex = _pressVertex;
             MoveDraggedPoint(screenPos);
@@ -141,6 +178,17 @@ namespace LordsLegacy.Game.Tools
         {
             if (!_active) return;
             var r = _press.Release(button, screenPos, time);
+            if (button == PressButton.Right && _ignoreRightRelease)
+            {
+                _ignoreRightRelease = false;
+                return;
+            }
+            if (button == PressButton.Left && _nodeDragging)
+            {
+                FinishNodeDrag(screenPos);
+                return;
+            }
+            _pressNode = -1;
             bool pressedVertex = _pressVertex >= 0;
             bool previousClickAddedPoint = _lastReleaseAddedPoint;
             _pressVertex = -1;
@@ -284,6 +332,98 @@ namespace LordsLegacy.Game.Tools
             if (_host == null || _picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
             if (!TryHitRoad(screenPos, s, out var hit)) return;
             _host.Execute(new DeleteRoadSegment(hit.SegmentId));
+        }
+
+        /// <summary>Id of the road node under the screen position (within the hit radius), or -1.</summary>
+        private int NodeUnder(Vector2 screenPos)
+        {
+            if (_host == null || !_host.IsInitialized || _picker == null) return -1;
+            var candidates = new List<HitCandidate>();
+            foreach (var n in _host.World.Roads.Nodes)
+            {
+                if (!_picker.TryWorldToScreen((float)n.Position.XMetres, (float)n.Position.ZMetres, out var s)) continue;
+                candidates.Add(HitCandidate.Point(ToolHitKind.Vertex, n.Id, s));
+            }
+            var hit = ToolHitTester.Test(candidates, screenPos);
+            return hit.Kind == ToolHitKind.Vertex ? hit.Id : -1;
+        }
+
+        /// <summary>With no draft, shows handles at the ends of the road under the cursor (or of the road of a hovered handle).</summary>
+        private void UpdateHoverHandles(Vector2 screenPos)
+        {
+            if (_roads == null) return;
+            if (HasDraft || _press.IsDown(PressButton.Left) || _host == null || !_host.IsInitialized || _picker == null)
+            {
+                _roads.HideNodeHandles();
+                return;
+            }
+            var net = _host.World.Roads;
+            int segId = -1;
+            int node = NodeUnder(screenPos);
+            if (node >= 0)
+            {
+                var n = net.GetNode(node);
+                if (n != null && n.SegmentIds.Count > 0) segId = n.SegmentIds[0];
+            }
+            else if (_picker.TryPickScreen(screenPos, out var g) && g.HasValue && TryHitRoad(screenPos, g, out var hit))
+                segId = hit.SegmentId;
+            var seg = segId >= 0 ? net.GetSegment(segId) : null;
+            if (seg == null) { _roads.HideNodeHandles(); return; }
+            var list = new List<Vector2>(2);
+            var a = net.GetNode(seg.NodeA);
+            var b = net.GetNode(seg.NodeB);
+            if (a != null) list.Add(new Vector2((float)a.Position.XMetres, (float)a.Position.ZMetres));
+            if (b != null && seg.NodeB != seg.NodeA) list.Add(new Vector2((float)b.Position.XMetres, (float)b.Position.ZMetres));
+            _roads.ShowNodeHandles(list);
+        }
+
+        private void MoveDraggedNode(Vector2 screenPos)
+        {
+            if (_host == null || !_host.IsInitialized || _picker == null) return;
+            if (!_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
+            _nodeTarget = PointMm.FromMetres(s.X, s.Z); // no snapping while dragging a node
+            _nodeMove = RoadValidator.PreviewMove(_host.World, _pressNode, _nodeTarget);
+            if (_roads != null) _roads.ShowNodeMovePreview(_nodeMove, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+            if (_panel == null) return;
+            string verdict = _nodeMove.IsValid ? "Valid" : (_nodeMove.NodeFound ? _nodeMove.ReasonText : "node not found");
+            _panel.Show(MoveLine(_nodeMove) + verdict, IdleHint, false);
+        }
+
+        private static string MoveLine(NodeMovePreview m) =>
+            "Move node · " + m.Segments.Count + (m.Segments.Count == 1 ? " road · " : " roads · ");
+
+        private void FinishNodeDrag(Vector2 screenPos)
+        {
+            int node = _pressNode;
+            MoveDraggedNode(screenPos);
+            var plan = _nodeMove;
+            var target = _nodeTarget;
+            EndNodeDrag();
+            if (plan == null || !plan.NodeFound) { ShowIdlePanel(); return; }
+            var result = _host.Execute(new MoveRoadNode(node, target));
+            if (result.IsAccepted) { ShowIdlePanel(); return; }
+            string reason = string.IsNullOrEmpty(result.Text) ? result.Reason.ToString() : result.Text;
+            _moveMessageShown = true;
+            if (_panel != null) _panel.Show(MoveLine(plan) + "Rejected: " + reason, IdleHint, false);
+        }
+
+        private void CancelNodeDrag()
+        {
+            if (!_nodeDragging && _pressNode < 0) return;
+            EndNodeDrag();
+        }
+
+        private void EndNodeDrag()
+        {
+            _nodeDragging = false;
+            _pressNode = -1;
+            _nodeMove = null;
+            if (_roads != null) { _roads.HideNodeMovePreview(); _roads.HideNodeHandles(); }
+        }
+
+        private void ShowIdlePanel()
+        {
+            if (_active && _panel != null) _panel.Show("Road · no points yet", IdleHint, false);
         }
 
         private void MoveDraggedPoint(Vector2 screenPos)
