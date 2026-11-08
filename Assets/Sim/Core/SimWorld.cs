@@ -49,26 +49,40 @@ namespace LordsLegacy.Sim.Core
         /// <summary>All player areas. Never null; empty at the start.</summary>
         public AreaRegistry Areas { get; }
 
-        /// <summary>Builds a world whose terrain and trees come from baked map data.</summary>
-        public static SimWorld FromMapData(MapData map, SimTuning tuning)
+        /// <summary>The road types this world knows. Never null; today's defaults unless passed in (decision 0019).</summary>
+        public RoadTypeCatalog RoadTypes { get; }
+
+        /// <summary>The area types this world knows. Never null; today's defaults unless passed in (decision 0019).</summary>
+        public AreaTypeCatalog AreaTypes { get; }
+
+        /// <summary>
+        /// Builds a world whose terrain and trees come from baked map data. Null catalogs mean the default
+        /// definitions.
+        /// </summary>
+        public static SimWorld FromMapData(MapData map, SimTuning tuning, RoadTypeCatalog roadTypes = null,
+            AreaTypeCatalog areaTypes = null)
         {
             if (map == null) throw new ArgumentNullException(nameof(map));
             var trees = new TreeRegistry();
             foreach (var t in map.Trees) trees.Add(t.Id, t.X, t.Z, t.TrunkLengthM);
-            return new SimWorld(tuning, map.Heights, trees);
+            return new SimWorld(tuning, map.Heights, trees, roadTypes, areaTypes);
         }
 
-        /// <summary>Creates a world with flat terrain and no trees.</summary>
-        public SimWorld(SimTuning tuning) : this(tuning, new FlatHeightField(), new TreeRegistry())
+        /// <summary>Creates a world with flat terrain and no trees. Null catalogs mean the default definitions.</summary>
+        public SimWorld(SimTuning tuning, RoadTypeCatalog roadTypes = null, AreaTypeCatalog areaTypes = null)
+            : this(tuning, new FlatHeightField(), new TreeRegistry(), roadTypes, areaTypes)
         {
         }
 
-        private SimWorld(SimTuning tuning, IHeightField terrain, TreeRegistry trees)
+        private SimWorld(SimTuning tuning, IHeightField terrain, TreeRegistry trees, RoadTypeCatalog roadTypes,
+            AreaTypeCatalog areaTypes)
         {
             Tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
             Terrain = terrain;
             Trees = trees;
-            Areas = new AreaRegistry(tuning.SpatialIndexCellM);
+            RoadTypes = roadTypes ?? LordsLegacy.Sim.Roads.RoadTypes.DefaultCatalog;
+            AreaTypes = areaTypes ?? LordsLegacy.Sim.Areas.AreaTypes.DefaultCatalog;
+            Areas = new AreaRegistry(tuning.SpatialIndexCellM, AreaTypes);
             _calendar = new GameCalendar(tuning.StartMonth, tuning.StartDay, tuning.StartHour,
                 tuning.StartMinute, tuning.StartWeekday, tuning.DaysPerYear);
         }

@@ -30,8 +30,14 @@ namespace LordsLegacy.Sim.Areas
         /// As above, with the area registry NearArea edges look their neighbour up in (AR-25); a missing area or a null
         /// registry makes such an edge Straight.
         /// </summary>
-        public static PointMm[] Flatten(AreaShape shape, RoadNetwork roads, AreaRegistry areas, double spacingM)
+        public static PointMm[] Flatten(AreaShape shape, RoadNetwork roads, AreaRegistry areas, double spacingM) =>
+            Flatten(shape, roads, areas, spacingM, RoadTypes.DefaultCatalog);
+
+        /// <summary>As above, taking road widths from the given catalog (the world's, decision 0019).</summary>
+        public static PointMm[] Flatten(AreaShape shape, RoadNetwork roads, AreaRegistry areas, double spacingM,
+            RoadTypeCatalog roadTypes)
         {
+            if (roadTypes == null) throw new ArgumentNullException(nameof(roadTypes));
             if (shape == null) throw new ArgumentNullException(nameof(shape));
             if (!(spacingM > 0)) spacingM = 1.0;
             int n = shape.Vertices.Count;
@@ -45,17 +51,17 @@ namespace LordsLegacy.Sim.Areas
                 else if (e.Kind == AreaEdgeKind.FollowsRoad)
                 {
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
-                    if (seg != null) AddRoadSide(pts, a, b, seg.SideLine(e.Side));
+                    if (seg != null) AddRoadSide(pts, a, b, seg.SideLine(e.Side, roadTypes));
                 }
                 else if (e.Kind == AreaEdgeKind.NearRoad)
                 {
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
-                    if (seg != null) AddNearRoad(pts, a, b, seg.SideLine(e.Side), e.Side);
+                    if (seg != null) AddNearRoad(pts, a, b, seg.SideLine(e.Side, roadTypes), e.Side);
                 }
                 else if (e.Kind == AreaEdgeKind.FollowsRoadPartly)
                 {
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
-                    if (seg != null) AddPartialRoad(pts, a, b, seg.SideLine(e.Side));
+                    if (seg != null) AddPartialRoad(pts, a, b, seg.SideLine(e.Side, roadTypes));
                 }
                 else if (e.Kind == AreaEdgeKind.NearArea)
                 {

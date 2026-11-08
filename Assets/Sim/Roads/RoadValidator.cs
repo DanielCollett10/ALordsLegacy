@@ -58,7 +58,7 @@ namespace LordsLegacy.Sim.Roads
             var noJunctions = new List<PlannedJunction>();
             var none = new List<PointMm>();
 
-            RoadTypeDef type = typeId == null ? null : RoadTypes.Find(typeId);
+            RoadTypeDef type = typeId == null ? null : world.RoadTypes.Find(typeId);
             if (type == null) return new RoadPreview(none, noRanges, noJunctions, 0, 0, RoadRefusal.UnknownType);
             if (controlPoints == null) return new RoadPreview(none, noRanges, noJunctions, 0, 0, RoadRefusal.NotEnoughPoints);
 
@@ -169,7 +169,7 @@ namespace LordsLegacy.Sim.Roads
         {
             if (world.Areas.Count == 0) return null;
             PointMm[] corridor = new RoadSegment(0, 0, 0, typeId, CurveKind.CatmullRomCentripetal,
-                new PointMm[0], ToArray(samples)).CorridorPolygon();
+                new PointMm[0], ToArray(samples)).CorridorPolygon(world.RoadTypes);
             if (corridor.Length < 3) return null;
             BoundsMm b = Polygons.Bounds(corridor);
             Areas.AreaRecord best = null;

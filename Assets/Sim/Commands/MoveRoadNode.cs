@@ -63,7 +63,7 @@ namespace LordsLegacy.Sim.Commands
             {
                 removedIds.Add(old[i].Id);
                 createdIds.Add(created[i].Id);
-                double clearM = RoadTypes.Find(created[i].TypeId).WidthM / 2 + world.Tuning.RoadTreeClearanceM;
+                double clearM = world.RoadTypes.Find(created[i].TypeId).WidthM / 2 + world.Tuning.RoadTreeClearanceM;
                 foreach (TreeId t in TreeClearing.RemoveNearPolyline(world.Trees, created[i].Samples, clearM))
                     trees.Add(t.Value);
             }

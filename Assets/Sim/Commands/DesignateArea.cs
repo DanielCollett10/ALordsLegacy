@@ -39,7 +39,7 @@ namespace LordsLegacy.Sim.Commands
             AreaPreview p = AreaValidator.Validate(world, Shape, TypeId);
             if (!p.IsValid) return CommandResult.Rejected(CodeFor(p.Reason), p.ReasonText);
 
-            AreaTypeDef type = AreaTypes.Find(TypeId);
+            AreaTypeDef type = world.AreaTypes.Find(TypeId);
             var record = new AreaRecord(world.Areas.NextId(), type.Id, world.Areas.NextName(type), Shape, p.Polygon);
             world.Areas.Add(record);
 

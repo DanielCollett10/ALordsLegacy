@@ -89,7 +89,7 @@ namespace LordsLegacy.Sim.Commands
             List<PointMm> cps = ControlPointFilter.Clean(_controlPoints, world.Tuning.RoadMinPointSpacingM);
             // Trees within half a width + clearance of each new centre line go (RD-11, BLD-10-B). Each query
             // only sees trees still standing, so no tree id is reported twice.
-            double clearM = RoadTypes.Find(TypeId).WidthM / 2 + world.Tuning.RoadTreeClearanceM;
+            double clearM = world.RoadTypes.Find(TypeId).WidthM / 2 + world.Tuning.RoadTreeClearanceM;
             var treesRemoved = new List<long>();
             List<RoadPiece> cut = RoadCutter.Cut(preview.Samples, cps, startNode, endNode, interior);
             for (int pi = 0; pi < cut.Count; pi++)

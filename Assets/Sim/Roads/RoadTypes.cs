@@ -15,7 +15,10 @@ namespace LordsLegacy.Sim.Roads
         /// <summary>All road types.</summary>
         public static readonly IReadOnlyList<RoadTypeDef> All = new[] { DirtPath };
 
-        /// <summary>Finds a type by id, or null if unknown.</summary>
+        /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
+        public static readonly RoadTypeCatalog DefaultCatalog = new RoadTypeCatalog(All);
+
+        /// <summary>Finds a default type by id, or null if unknown. Sim code must use the world's catalog instead.</summary>
         public static RoadTypeDef Find(string id)
         {
             for (int i = 0; i < All.Count; i++) if (All[i].Id == id) return All[i];

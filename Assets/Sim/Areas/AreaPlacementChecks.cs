@@ -49,7 +49,7 @@ namespace LordsLegacy.Sim.Areas
             BoundsMm b = Polygons.Bounds(poly);
             foreach (RoadSegment seg in world.Roads.Segments)
             {
-                PointMm[] corridor = seg.CorridorPolygon();
+                PointMm[] corridor = seg.CorridorPolygon(world.RoadTypes);
                 if (corridor.Length < 3 || !Polygons.Bounds(corridor).Intersects(b)) continue;
                 if (PolygonOverlap.Overlaps(poly, corridor, world.Tuning.OverlapToleranceM2)) return true;
             }

@@ -15,9 +15,15 @@ namespace LordsLegacy.Sim.Areas
         private readonly Dictionary<string, int> _nameCounters = new Dictionary<string, int>();
         private int _nextId = 1;
 
-        /// <summary>Creates an empty registry whose spatial grid uses the given cell size in metres.</summary>
-        public AreaRegistry(double cellSizeM)
+        private readonly AreaTypeCatalog _types;
+
+        /// <summary>
+        /// Creates an empty registry whose spatial grid uses the given cell size in metres. Types are looked up in
+        /// <paramref name="types"/> (the default definitions when null).
+        /// </summary>
+        public AreaRegistry(double cellSizeM, AreaTypeCatalog types = null)
         {
+            _types = types ?? AreaTypes.DefaultCatalog;
             _buildingGrid = new SpatialGrid<AreaRecord>(cellSizeM);
         }
 
@@ -53,7 +59,7 @@ namespace LordsLegacy.Sim.Areas
         internal void Add(AreaRecord record)
         {
             if (record == null) throw new ArgumentNullException(nameof(record));
-            AreaTypeDef type = AreaTypes.Find(record.TypeId);
+            AreaTypeDef type = _types.Find(record.TypeId);
             if (type == null) throw new ArgumentException("Unknown area type " + record.TypeId, nameof(record));
             if (_byId.ContainsKey(record.Id)) throw new ArgumentException("Area id already used", nameof(record));
             _byId.Add(record.Id, record);
@@ -83,7 +89,7 @@ namespace LordsLegacy.Sim.Areas
         {
             foreach (var r in _byId.Values)
             {
-                AreaTypeDef type = AreaTypes.Find(r.TypeId);
+                AreaTypeDef type = _types.Find(r.TypeId);
                 if (type == null || type.Kind != kind) continue;
                 if (!r.Bounds.Contains(point)) continue;
                 if (Polygons.Contains(r.Polygon, point)) return r;
