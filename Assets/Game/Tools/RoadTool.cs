@@ -158,11 +158,16 @@ namespace LordsLegacy.Game.Tools
         {
             if (!_active) return;
             _press.Move(screenPos);
+            if (_controller != null && _controller.IsPointerOverUiAt(screenPos))
+            {
+                if (_cursor != null) _cursor.Hide();
+                return;
+            }
             if (_pressNode >= 0 && _press.IsDragging(PressButton.Left))
             {
                 _nodeDragging = true;
-                if (_cursor != null) _cursor.Hide();
                 if (_roads != null) _roads.HideNodeHandles();
+                ShowNodeDragCursor(screenPos);
                 MoveDraggedNode(screenPos);
                 return;
             }
@@ -275,7 +280,7 @@ namespace LordsLegacy.Game.Tools
         }
 
         /// <summary>
-        /// Finds the road feature under the cursor. Snapping on: radius is SnapDistancePx, ends before centre lines
+        /// Finds the road feature under the cursor. Snapping on: radius is RoadSnapDistancePx (16), ends before centre lines
         /// (RoadNetwork.FindNearest + SnapPicker). Snapping off: only the drawn road width counts, so a click on a road
         /// still hits it (roads.md steps 5-6) but nothing near it snaps.
         /// </summary>
@@ -286,7 +291,7 @@ namespace LordsLegacy.Game.Tools
             double mpp = MetresPerPixel(screenPos, g);
             if (mpp <= 0) return false;
             double pxLimit = Settings.Snapping
-                ? Settings.SnapDistancePx
+                ? Settings.RoadSnapDistancePx
                 : RoadTypes.Find(RoadTypes.DirtPathId).WidthM * 0.5 / mpp;
             double maxMm = pxLimit * mpp * 1000.0 * 1.5 + 1;
             var h = _host.World.Roads.FindNearest(PointMm.FromMetres(g.X, g.Z), maxMm);
@@ -314,6 +319,19 @@ namespace LordsLegacy.Game.Tools
             _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
             bool snapped = !p.Equals(PointMm.FromMetres(s.X, s.Z));
             _cursor.Show((float)p.XMetres, (float)p.ZMetres, snapped);
+        }
+
+        /// <summary>During a node drag the ring sits on the ground point (node drags do not snap).</summary>
+        private void ShowNodeDragCursor(Vector2 screenPos)
+        {
+            if (_host == null || !_host.IsInitialized || _picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue)
+            {
+                _cursor?.Hide();
+                return;
+            }
+            if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
+            _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+            _cursor.Show((float)s.X, (float)s.Z, false);
         }
 
         /// <summary>The point for a click or drag: the snapped road point when snapping applies, else the ground point.</summary>

@@ -14,5 +14,8 @@ namespace LordsLegacy.Game
 
         /// <summary>Snap distance in screen pixels, used by the drawing tools (ui.md, roads.md). Presentation-only.</summary>
         public float SnapDistancePx { get; set; } = 12f;
+
+        /// <summary>Snap distance in screen pixels for the road tool (roads.md RD-18, from M5). Area tools keep <see cref="SnapDistancePx"/>.</summary>
+        public float RoadSnapDistancePx { get; set; } = 16f;
     }
 }
