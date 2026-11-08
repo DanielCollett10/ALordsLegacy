@@ -43,6 +43,7 @@ namespace LordsLegacy.Game.Tools
         private readonly List<AreaEdge> _edges = new List<AreaEdge>();
         private readonly List<int> _roadSeg = new List<int>();
         private readonly List<RoadSide> _roadSide = new List<RoadSide>();
+        private readonly List<bool> _locked = new List<bool>(); // edge straightened by the player: never NearRoad (AR-23)
         private ViewSettings _settings;
         [SerializeField] private TopBarController _topBar;
         private int _pressHandle = -1;
@@ -302,8 +303,8 @@ namespace LordsLegacy.Game.Tools
         private void RemovePoint(int index)
         {
             int n = _points.Count;
-            if (n > 1) _edges[(index - 1 + n) % n] = AreaEdge.Straight();
-            _points.RemoveAt(index); _edges.RemoveAt(index); _roadSeg.RemoveAt(index); _roadSide.RemoveAt(index);
+            if (n > 1) { _edges[(index - 1 + n) % n] = AreaEdge.Straight(); _locked[(index - 1 + n) % n] = false; }
+            _points.RemoveAt(index); _edges.RemoveAt(index); _roadSeg.RemoveAt(index); _roadSide.RemoveAt(index); _locked.RemoveAt(index);
             _rejection = null;
             _pressVertex = -1;
             _dragIndex = -1;
@@ -374,6 +375,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (edge >= EdgeCount || !TryGround(screenPos, out var p)) return;
             _edges[edge] = AreaEdge.Bent(p);
+            _locked[edge] = false;
             _rejection = null;
             Refresh();
         }
@@ -382,6 +384,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (edge >= EdgeCount) return;
             _edges[edge] = AreaEdge.Straight();
+            _locked[edge] = true; // stays Straight even if the ends are still near a road (AR-23)
             _rejection = null;
             Refresh();
         }
@@ -394,6 +397,7 @@ namespace LordsLegacy.Game.Tools
             SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
             _points.Insert(edge + 1, p);
             _roadSeg.Insert(edge + 1, seg); _roadSide.Insert(edge + 1, side);
+            _locked.Insert(edge + 1, false); _locked[edge] = false;
             _edges[edge] = AreaEdge.Straight();
             _edges.Insert(edge + 1, AreaEdge.Straight());
             _rejection = null;
@@ -485,6 +489,7 @@ namespace LordsLegacy.Game.Tools
             _roadSeg[_dragIndex] = seg; _roadSide[_dragIndex] = side;
             if (p == _points[_dragIndex]) { Refresh(); return; }
             _points[_dragIndex] = p;
+            _locked[_dragIndex] = false; _locked[(_dragIndex - 1 + _points.Count) % _points.Count] = false; // re-check (AR-23)
             _rejection = null;
             Refresh();
         }
@@ -495,7 +500,7 @@ namespace LordsLegacy.Game.Tools
             if (t == null || _points.Count >= t.MaxPoints) return false;
             if (!TryGround(screenPos, out var p)) return false;
             SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
-            _points.Add(p); _edges.Add(AreaEdge.Straight()); _roadSeg.Add(seg); _roadSide.Add(side);
+            _points.Add(p); _edges.Add(AreaEdge.Straight()); _roadSeg.Add(seg); _roadSide.Add(side); _locked.Add(false);
             _rejection = null;
             Refresh();
             return true;
@@ -514,8 +519,39 @@ namespace LordsLegacy.Game.Tools
                 if (snapping && edges[i].Kind == AreaEdgeKind.Straight && j != i && _roadSeg[i] >= 0
                     && _roadSeg[i] == _roadSeg[j] && _roadSide[i] == _roadSide[j])
                     edges[i] = AreaEdge.FollowsRoad(_roadSeg[i], _roadSide[i]);
+                else if (snapping && edges[i].Kind == AreaEdgeKind.Straight && i < EdgeCount && !_locked[i])
+                    edges[i] = ChooseNearRoad(i, j);
             }
             return new AreaShape(_points, edges);
+        }
+
+        /// <summary>
+        /// AR-23: Straight edge i (point i to point j) becomes NearRoad when one end is snapped to a road side and the
+        /// other, not snapped to that side, lies within the type's reach on the far side from the road. The Sim
+        /// (<see cref="AreaValidator"/>) still enforces the rules; this only picks the kind.
+        /// </summary>
+        private AreaEdge ChooseNearRoad(int i, int j)
+        {
+            if (_host == null || !_host.IsInitialized || Type == null) return AreaEdge.Straight();
+            if (_roadSeg[i] >= 0 && IsNearSide(_roadSeg[i], _roadSide[i], j)) return AreaEdge.NearRoad(_roadSeg[i], _roadSide[i]);
+            if (_roadSeg[j] >= 0 && IsNearSide(_roadSeg[j], _roadSide[j], i)) return AreaEdge.NearRoad(_roadSeg[j], _roadSide[j]);
+            return AreaEdge.Straight();
+        }
+
+        private bool IsNearSide(int segId, RoadSide side, int other)
+        {
+            if (_roadSeg[other] == segId && _roadSide[other] == side) return false; // snapped to it: FollowsRoad's job
+            var seg = _host.World.Roads.GetSegment(segId);
+            if (seg == null) return false;
+            var line = seg.SideLine(side);
+            if (line.Length < 2) return false;
+            var p = _points[other];
+            var h = Polylines.Nearest(line, p);
+            int k = Mathf.Min(h.SegmentIndex, line.Length - 2);
+            double dx = line[k + 1].X - line[k].X, dz = line[k + 1].Z - line[k].Z;
+            double sign = side == RoadSide.Left ? 1 : -1;
+            double dot = sign * ((p.X - h.X) * -dz + (p.Z - h.Z) * dx);
+            return dot > 0 && h.DistanceMm <= Type.NearRoadReachM * PointMm.MmPerMetre;
         }
 
         private void Refresh()
@@ -557,7 +593,7 @@ namespace LordsLegacy.Game.Tools
             _points.Clear(); _points.AddRange(points);
             _roadSeg.Clear(); _roadSeg.AddRange(roadSeg);
             _roadSide.Clear(); _roadSide.AddRange(roadSide);
-            for (int i = 0; i < n; i++) _edges[i] = AreaEdge.Straight();
+            for (int i = 0; i < n; i++) { _edges[i] = AreaEdge.Straight(); _locked[i] = false; }
             return true;
         }
 
@@ -589,7 +625,7 @@ namespace LordsLegacy.Game.Tools
 
         private void ClearDraft()
         {
-            _points.Clear(); _edges.Clear(); _roadSeg.Clear(); _roadSide.Clear();
+            _points.Clear(); _edges.Clear(); _roadSeg.Clear(); _roadSide.Clear(); _locked.Clear();
             _pressHandle = -1; _pressEdge = -1;
             _preview = null;
             _rejection = null;

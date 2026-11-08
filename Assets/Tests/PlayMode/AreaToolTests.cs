@@ -441,6 +441,146 @@ namespace LordsLegacy.Tests.PlayMode
             for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoad, _tool.Edges[i].Kind);
         }
 
+        // ---- T-166: NearRoad edges (AR-23) ----
+
+        private LordsLegacy.Sim.Roads.RoadSegment _curved;
+
+        private void DrawCurvedRoad()
+        {
+            Assert.IsTrue(_host.Execute(new DrawRoad(
+                new[] { PointMm.FromMetres(20, 100), PointMm.FromMetres(100, 130), PointMm.FromMetres(180, 100) }, "road.dirt_path")).IsAccepted);
+            _curved = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
+        }
+
+        /// <summary>A point on the Left side line near x (metres) pushed <paramref name="outM"/> metres away from the road.</summary>
+        private Vector2 SidePointOut(float x, float outM, out PointMm onSide)
+        {
+            var line = _curved.SideLine(LordsLegacy.Sim.Roads.RoadSide.Left);
+            int k = 0;
+            for (int i = 0; i < line.Length - 1; i++) if (line[i].XMetres <= x) k = i;
+            onSide = line[k];
+            double dx = line[k + 1].XMetres - line[k].XMetres, dz = line[k + 1].ZMetres - line[k].ZMetres;
+            double len = System.Math.Sqrt(dx * dx + dz * dz);
+            double nx = -dz / len, nz = dx / len; // Left normal = away from the road on the Left side
+            return new Vector2((float)(onSide.XMetres + nx * outM), (float)(onSide.ZMetres + nz * outM));
+        }
+
+        private void ClickAt(Vector2 p) { Click(p.x, p.y); }
+
+        private static double MaxChordDeviationM(System.Collections.Generic.IReadOnlyList<PointMm> poly, PointMm a, PointMm b)
+        {
+            double dx = b.XMetres - a.XMetres, dz = b.ZMetres - a.ZMetres, len = System.Math.Sqrt(dx * dx + dz * dz), max = 0;
+            foreach (var p in poly) max = System.Math.Max(max, System.Math.Abs((p.XMetres - a.XMetres) * dz - (p.ZMetres - a.ZMetres) * dx) / len);
+            return max;
+        }
+
+        private void DrawNearRoadQuad(float farOutM)
+        {
+            var p0 = SidePointOut(60, 0, out _);
+            ClickAt(p0);
+            ClickAt(SidePointOut(140, farOutM, out _));
+            ClickAt(SidePointOut(140, farOutM + 20, out _));
+            ClickAt(SidePointOut(60, 20, out _));
+        }
+
+        [UnityTest]
+        public IEnumerator EdgeWithin10mOfSnappedRoadSideIsNearRoadAndFollowsTheCurve()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            DrawNearRoadQuad(8f);
+            Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind, "8 m from the side gives NearRoad.");
+            Assert.AreEqual(_curved.Id, _tool.Edges[0].SegmentId);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[1].Kind);
+            SidePointOut(140, 8f, out _);
+            var clickedFar = SidePointOut(140, 8f, out _);
+            Assert.AreEqual(clickedFar.x, (float)_tool.Points[1].XMetres, 0.05f, "The far vertex stays where it was clicked.");
+            Assert.AreEqual(clickedFar.y, (float)_tool.Points[1].ZMetres, 0.05f);
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            Assert.Greater(MaxChordDeviationM(_tool.CurrentPreview.Polygon, _tool.Points[0], _tool.Points[1]), 2.0, "Outline follows the curve, not the chord.");
+            _tool.Confirm();
+            Assert.AreEqual(1, _host.World.Areas.Count);
+            foreach (var a in _host.World.Areas.All)
+            {
+                Assert.AreEqual(AreaEdgeKind.NearRoad, a.Shape.Edges[0].Kind);
+                Assert.IsTrue(new System.Collections.Generic.List<PointMm>(a.Polygon).Contains(a.Shape.Vertices[1]), "Clicked vertex is in the outline.");
+                Assert.Greater(MaxChordDeviationM(a.Polygon, a.Shape.Vertices[0], a.Shape.Vertices[1]), 2.0);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator EdgeBeyond10mStaysStraight()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            DrawNearRoadQuad(12f);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "12 m from the side stays Straight.");
+        }
+
+        [UnityTest]
+        public IEnumerator ClosingEdgeBecomesNearRoadOnClose()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            ClickAt(SidePointOut(60, 8f, out _));
+            ClickAt(SidePointOut(60, 28f, out _));
+            ClickAt(SidePointOut(140, 28f, out _));
+            ClickAt(SidePointOut(140, 0f, out _));
+            Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[3].Kind, "The closing edge (last to first) is checked.");
+            for (int i = 0; i < 3; i++) Assert.AreNotEqual(AreaEdgeKind.NearRoad, _tool.Edges[i].Kind);
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+        }
+
+        [UnityTest]
+        public IEnumerator SnappingOffGivesNoNearRoadEdge()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            DrawNearRoadQuad(8f);
+            for (int i = 0; i < 4; i++) Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[i].Kind);
+        }
+
+        [UnityTest]
+        public IEnumerator DraggingFarEndBeyondReachRevertsToStraight()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            DrawNearRoadQuad(8f);
+            Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind);
+            Drag(Screen((float)_tool.Points[1].XMetres, (float)_tool.Points[1].ZMetres), Screen(SidePointOut(140, 14f, out _).x, SidePointOut(140, 14f, out _).y));
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind);
+        }
+
+        [UnityTest]
+        public IEnumerator DoubleClickingNearRoadHandleStraightensAndDraggingBendsIt()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            DrawNearRoadQuad(8f);
+            var a = _tool.Points[0]; var b = _tool.Points[1];
+            var mid = Screen((float)(a.XMetres + b.XMetres) / 2f, (float)(a.ZMetres + b.ZMetres) / 2f);
+            _tool.PointerDown(PressButton.Left, mid); _tool.PointerUp(PressButton.Left, mid, _time += 2f);
+            _tool.PointerDown(PressButton.Left, mid); _tool.PointerUp(PressButton.Left, mid, _time += 0.1f);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind);
+            Assert.AreEqual(a, _tool.Points[0]);
+            Assert.AreEqual(b, _tool.Points[1]);
+
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            _tool.SetViewSettings(new ViewSettings());
+            // Re-make it NearRoad by moving the far end a little, then bend it by dragging the handle.
+            Drag(Screen((float)b.XMetres, (float)b.ZMetres), Screen((float)b.XMetres + 0.5f, (float)b.ZMetres));
+            Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind, "Moving an end re-checks the edge.");
+            var m2 = Screen((float)(a.XMetres + _tool.Points[1].XMetres) / 2f, (float)(a.ZMetres + _tool.Points[1].ZMetres) / 2f);
+            Drag(m2, m2 + new Vector2(0f, 30f));
+            Assert.AreEqual(AreaEdgeKind.Bent, _tool.Edges[0].Kind);
+        }
+
         [UnityTest]
         public IEnumerator SnapsToAreaVertexWithinSnapDistance()
         {
