@@ -28,6 +28,9 @@ specified as a **vertical clearance** and converted to a push along the ray:
 The constant part covers the close-range gap between Unity's two-triangles-per-cell terrain and the Sim's bilinear
 heights (a few cm on hills). Terrain `heightmapPixelError` = 1 (T-196) must be in place before judging the result;
 the bias is a safety margin, not the main fix. Roads only benefit once they use the overlay material (T-198).
+The owner confirmed the sinking shows when zoomed far out, not up close, so LOD is the cause. The owner accepts that a
+far-off overlay may show through a low ridge in front of it (up to about `h` tall). If that looks wrong in play, lower
+`_BiasPerDist` on the material; don't remove the grazing-angle term.
 
 **Consequences.** Overlay meshes have more vertices (fine at today's counts; roads already sample every 1 m). New
 ground visuals must use `TerrainDrape` and the overlay shader. A visual can still be overdrawn by a tall object in
