@@ -2,7 +2,9 @@ using System.Diagnostics;
 using System.IO;
 using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.Tuning;
 using UnityEngine;
@@ -33,12 +35,25 @@ namespace LordsLegacy.Game
         /// <summary>True once <see cref="Initialize"/> has run.</summary>
         public bool IsInitialized => World != null;
 
+        [SerializeField, Tooltip("Sim values (decision 0019). Null uses the code defaults. Read once at Start.")]
+        private SimConfig _config;
+
+        /// <summary>The config asset, or null for code defaults. Set before the world is built.</summary>
+        public SimConfig Config { get => _config; set => _config = value; }
+
         private readonly Stopwatch _clock = Stopwatch.StartNew();
 
-        /// <summary>Creates the world and pacer from the tuning and map.</summary>
+        /// <summary>Creates the world and pacer from the tuning and map; type catalogs come from the config (or defaults).</summary>
         public void Initialize(SimTuning tuning, MapData map)
         {
-            World = SimWorld.FromMapData(map, tuning);
+            Initialize(tuning, map, _config != null ? _config.BuildRoadCatalog() : null,
+                _config != null ? _config.BuildAreaCatalog() : null);
+        }
+
+        /// <summary>Creates the world and pacer with explicit type catalogs (null = code defaults).</summary>
+        public void Initialize(SimTuning tuning, MapData map, RoadTypeCatalog roadTypes, AreaTypeCatalog areaTypes)
+        {
+            World = SimWorld.FromMapData(map, tuning, roadTypes, areaTypes);
             Pacer = new TickPacer(tuning);
         }
 
@@ -47,7 +62,7 @@ namespace LordsLegacy.Game
             if (IsInitialized) return;
             string path = Path.Combine(Application.streamingAssetsPath, "Maps", DefaultMapFile);
             var map = TryLoadMap(path);
-            if (map != null) Initialize(new SimTuning(), map);
+            if (map != null) Initialize(_config != null ? _config.BuildTuning() : new SimTuning(), map);
         }
 
         /// <summary>Reads a map file; logs a clear error and returns null if missing or unreadable.</summary>

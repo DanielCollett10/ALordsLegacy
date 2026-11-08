@@ -70,7 +70,7 @@ namespace LordsLegacy.Game.Visuals
             foreach (var seg in roads.Segments)
             {
                 if (_segments.ContainsKey(seg.Id)) continue; // segments are immutable, ids never reused
-                var def = RoadTypes.Find(seg.TypeId);
+                var def = host.World.RoadTypes.Find(seg.TypeId);
                 float width = def != null ? (float)def.WidthM : 2.5f;
                 var go = new GameObject("Road " + seg.Id);
                 go.transform.SetParent(transform, false);

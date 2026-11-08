@@ -157,7 +157,7 @@ namespace LordsLegacy.Game
                 _areaName.text = "Area --"; _areaType.text = "Type --"; _areaM2.text = "Area -- m²";
                 return;
             }
-            var type = AreaTypes.Find(area.TypeId);
+            var type = (_host != null && _host.World != null ? _host.World.AreaTypes.Find(area.TypeId) : null);
             var c = CultureInfo.InvariantCulture;
             _areaName.text = "Area " + area.Name;
             _areaType.text = "Type " + (type != null ? type.NamePrefix : area.TypeId);
