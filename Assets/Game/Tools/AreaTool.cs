@@ -28,7 +28,6 @@ namespace LordsLegacy.Game.Tools
         /// <summary>Build bar id of the Test work area tool.</summary>
         public const string TestWorkToolId = "test-work-area";
 
-        private const string IdleHint = "Left-click the ground to place the first point · Esc leaves the tool";
         private const string DraftHint = "Drag a point to move it · Click point 1, double-click or Enter closes (4+ points) · Backspace removes the last point · Right-click a point removes it · Right-click or Esc cancels";
 
         [SerializeField] private string _toolId = TestToolId;
@@ -683,9 +682,8 @@ namespace LordsLegacy.Game.Tools
             _dragging = false;
             if (_areas != null) { _areas.HidePreview(); _areas.HideGhost(); }
             if (!_active && _cursor != null) _cursor.Hide();
-            if (_panel == null) return;
-            if (_active) _panel.Show(TypeName + " · no points yet", IdleHint, false);
-            else _panel.Hide();
+            // UIP-01/UIP-03: no draft means no panel, even while the tool is active. The cursor sphere (UIP-02) is unaffected.
+            if (_panel != null) _panel.Hide();
         }
 
         private void Subscribe()
