@@ -24,5 +24,10 @@ perpendicular to the side line). Both vertices stay where the player put them. `
 where both distances are 0. The Sim accepts `NearRoad` only if both vertices are within 10 m of that side and on
 the side away from the road.
 
+**Amendment (T-166, AR-25).** A fifth edge kind, `NearArea` (area id), does the same against another area's flattened
+(counter-clockwise) outline, going the shorter way round it; outward is the side away from that area.
+`AreaFlattener` takes the `AreaRegistry` to look the neighbour up (missing area: the edge is Straight; the validator
+refuses it as "not on road").
+
 **Consequences.** Areas are reshape-ready and independent of later road edits. The flattened outline can hold
 hundreds of points, so overlap tests use the spatial index and bounding boxes first.

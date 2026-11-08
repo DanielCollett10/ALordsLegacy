@@ -29,10 +29,13 @@ namespace LordsLegacy.Game.Tools.Shared
         /// <summary>Road side for a road dot.</summary>
         public readonly RoadSide Side;
 
+        /// <summary>Id of the area a corner or area dot belongs to (AR-25), else -1.</summary>
+        public readonly int AreaId;
+
         /// <summary>Creates a marker.</summary>
-        public SnapMarker(SnapMarkerKind kind, PointMm point, int segmentId, RoadSide side)
+        public SnapMarker(SnapMarkerKind kind, PointMm point, int segmentId, RoadSide side, int areaId = -1)
         {
-            Kind = kind; Point = point; SegmentId = segmentId; Side = side;
+            Kind = kind; Point = point; SegmentId = segmentId; Side = side; AreaId = areaId;
         }
     }
 
@@ -55,7 +58,7 @@ namespace LordsLegacy.Game.Tools.Shared
                 {
                     vertexSet.Add(vs[i]);
                     if (vs[i].DistanceTo(centre) <= radiusMm)
-                        result.Add(new SnapMarker(SnapMarkerKind.Corner, vs[i], -1, RoadSide.Left));
+                        result.Add(new SnapMarker(SnapMarkerKind.Corner, vs[i], -1, RoadSide.Left, area.Id));
                 }
             }
             foreach (var segment in world.Roads.Segments)
@@ -81,7 +84,7 @@ namespace LordsLegacy.Game.Tools.Shared
                     for (int j = from; j <= to; j++) run.Add(outline[j % m]);
                     if (run.Count < 2) continue;
                     foreach (var p in Polylines.PointsEveryWithin(run, spacingM, centre, radiusM))
-                        if (!vertexSet.Contains(p)) result.Add(new SnapMarker(SnapMarkerKind.AreaDot, p, -1, RoadSide.Left));
+                        if (!vertexSet.Contains(p)) result.Add(new SnapMarker(SnapMarkerKind.AreaDot, p, -1, RoadSide.Left, area.Id));
                 }
             }
             return result;
