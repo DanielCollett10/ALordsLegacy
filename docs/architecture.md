@@ -185,7 +185,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `LateUpdate`. Steady light is `ViewSettings.SteadyLight` (set by the top bar): fixed sun, visual only.
 - Top bar (`TopBarController`, UI Toolkit, `Assets/Game/UI/TopBar/`): date and time, pause, speed buttons from
   `Pacer.Speeds`, steady-light toggle, "running slower" notice (`SlowedDown`), snapping toggle. Sends commands through `SimHost`.
-- Snapping (T-096): `ViewSettings.Snapping` (default On) and `SnapDistancePx` (12) are presentation-only. The top bar
+- Snapping (T-096): `ViewSettings.Snapping` (default On) and `SnapDistancePx` (12, area tools) and `RoadSnapDistancePx` (16, road tool) are presentation-only. The top bar
   button "Snapping: On/Off" and the Input System action `ToggleSnapping` (`SnappingHotkey`, bound to `<Keyboard>/alt`,
   a button action so it toggles once per press) both flip `Snapping`. Tools read it; the Sim never does (decision 0017).
 - No-focus rule (ui.md UIK-01, UIK-02, `UiFocusRules` in `Assets/Game/UI/`): game UI never takes keyboard focus. Top bar,
