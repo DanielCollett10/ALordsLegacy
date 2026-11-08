@@ -24,7 +24,7 @@ that says what "right" means.
 - [ ] Click points in a crossing order (hourglass): red, "edges cross", Confirm disabled (AR-11)
 - [ ] Make an hourglass by dragging a point, inserting a point and bending an edge: each is refused the same way (AR-11)
 - [ ] A sphere sits under the cursor and changes colour when snapped (AR-20)
-- [ ] Ghost edges show the shape the next click would make (AR-21)
+- [ ] ~~Ghost edges show the shape the next click would make (AR-21)~~ deferred: ghost is off (`AreaTool.GhostEnabled`) until polished
 - [ ] Near a road, dots every 2.5 m show along its sides within about 25 m, and points snap to them (AR-22)
 - [ ] Next to an existing area, its corners show as bigger markers and its edges show dots; a new plot snapped to them touches without overlapping (terraced plots, AR-22, AR-15)
 - [ ] Snap one point to a road side with the previous point within 10 m of it, along a curved road: both points stay where you clicked, and the edge bends to follow the road's curve, drifting out to the other point (AR-23)
