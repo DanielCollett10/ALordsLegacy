@@ -15,7 +15,9 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>Copies one side line of a road segment.</summary>
         FollowsRoad = 2,
         /// <summary>Follows a road side's curve at a distance that tapers from one vertex to the other (AR-24).</summary>
-        NearRoad = 3
+        NearRoad = 3,
+        /// <summary>Follows another area's outline the same way NearRoad follows a road side (AR-25).</summary>
+        NearArea = 4
     }
 
     /// <summary>One edge of an area shape. Edge i runs from vertex i to vertex i+1. Immutable.</summary>
@@ -29,6 +31,9 @@ namespace LordsLegacy.Sim.Areas
         public int SegmentId { get; }
         /// <summary>For FollowsRoad: which side of the road.</summary>
         public RoadSide Side { get; }
+
+        /// <summary>For NearArea: the id of the area whose outline is followed (stored in <see cref="SegmentId"/>).</summary>
+        public int AreaId => SegmentId;
 
         private AreaEdge(AreaEdgeKind kind, PointMm handle, int segmentId, RoadSide side)
         {
@@ -45,6 +50,9 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>An edge that follows a road side's curve at a tapering distance away from the road (AR-24).</summary>
         public static AreaEdge NearRoad(int segmentId, RoadSide side) =>
             new AreaEdge(AreaEdgeKind.NearRoad, default, segmentId, side);
+        /// <summary>An edge that follows another area's outline at a tapering distance outside it (AR-25).</summary>
+        public static AreaEdge NearArea(int areaId) =>
+            new AreaEdge(AreaEdgeKind.NearArea, default, areaId, RoadSide.Left);
     }
 
     /// <summary>The player's area: ordered vertices plus one edge per vertex (decision 0014). Immutable.</summary>

@@ -25,7 +25,7 @@ namespace LordsLegacy.Sim.Areas
             int count = shape.Vertices.Count;
             PointMm[] poly = count == 0
                 ? new PointMm[0]
-                : AreaFlattener.Flatten(shape, world.Roads, world.Tuning);
+                : AreaFlattener.Flatten(shape, world.Roads, world.Areas, world.Tuning.CurveFlattenSpacingM);
             double area = poly.Length >= 3 ? Math.Abs(Polygons.SignedAreaM2(poly)) : 0.0;
 
             AreaTypeDef type = AreaTypes.Find(typeId);
@@ -72,6 +72,14 @@ namespace LordsLegacy.Sim.Areas
             for (int i = 0; i < n; i++)
             {
                 AreaEdge e = shape.Edges[i];
+                if (e.Kind == AreaEdgeKind.NearArea)
+                {
+                    AreaRecord other = world.Areas.Get(e.AreaId);
+                    if (other == null) return false;
+                    if (!NearAreaGeometry.VertexOk(other.Polygon, shape.Vertices[i], type.NearRoadReachM)) return false;
+                    if (!NearAreaGeometry.VertexOk(other.Polygon, shape.Vertices[(i + 1) % n], type.NearRoadReachM)) return false;
+                    continue;
+                }
                 if (e.Kind != AreaEdgeKind.FollowsRoad && e.Kind != AreaEdgeKind.NearRoad) continue;
                 RoadSegment seg = world.Roads.GetSegment(e.SegmentId);
                 if (seg == null) return false;

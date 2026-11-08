@@ -23,7 +23,14 @@ namespace LordsLegacy.Sim.Areas
         /// positions of their two vertices; a missing road segment (or a null network) makes the edge Straight.
         /// The result is counter-clockwise (clockwise input is reversed) and has no consecutive duplicate points.
         /// </summary>
-        public static PointMm[] Flatten(AreaShape shape, RoadNetwork roads, double spacingM)
+        public static PointMm[] Flatten(AreaShape shape, RoadNetwork roads, double spacingM) =>
+            Flatten(shape, roads, null, spacingM);
+
+        /// <summary>
+        /// As above, with the area registry NearArea edges look their neighbour up in (AR-25); a missing area or a null
+        /// registry makes such an edge Straight.
+        /// </summary>
+        public static PointMm[] Flatten(AreaShape shape, RoadNetwork roads, AreaRegistry areas, double spacingM)
         {
             if (shape == null) throw new ArgumentNullException(nameof(shape));
             if (!(spacingM > 0)) spacingM = 1.0;
@@ -44,6 +51,15 @@ namespace LordsLegacy.Sim.Areas
                 {
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
                     if (seg != null) AddNearRoad(pts, a, b, seg.SideLine(e.Side), e.Side);
+                }
+                else if (e.Kind == AreaEdgeKind.NearArea)
+                {
+                    AreaRecord other = areas == null ? null : areas.Get(e.AreaId);
+                    if (other != null && other.Polygon.Count >= 3)
+                    {
+                        PointMm[] guide = NearAreaGeometry.Guide(other.Polygon, a, b, out RoadSide side);
+                        if (guide.Length >= 2) AddNearGuide(pts, a, b, guide, side, 0.0, Polylines.Nearest(guide, b).ArcLengthMm);
+                    }
                 }
             }
             var clean = new List<PointMm>(pts.Count);
@@ -78,7 +94,12 @@ namespace LordsLegacy.Sim.Areas
         private static void AddNearRoad(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line, RoadSide side)
         {
             if (line.Length < 2) return;
-            double ta = Polylines.Nearest(line, a).ArcLengthMm, tb = Polylines.Nearest(line, b).ArcLengthMm;
+            AddNearGuide(pts, a, b, line, side, Polylines.Nearest(line, a).ArcLengthMm, Polylines.Nearest(line, b).ArcLengthMm);
+        }
+
+        private static void AddNearGuide(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line, RoadSide side, double ta, double tb)
+        {
+            if (!(Math.Abs(ta - tb) > 0)) return;
             double da = Math.Max(0.0, NearRoadGeometry.SignedOutwardMm(line, side, a));
             double db = Math.Max(0.0, NearRoadGeometry.SignedOutwardMm(line, side, b));
             var cum = new double[line.Length];
