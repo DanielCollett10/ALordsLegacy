@@ -173,6 +173,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 - `Assets/Game/` reads Sim state and draws it; it turns player input into Sim commands and holds
   no game rules (see `CLAUDE.md`).
 - `SimHost` (`Assets/Game/Bootstrap/`, MonoBehaviour in the Game scene) owns `SimWorld` and `TickPacer` (decision 0006).
+  It has a serialized `SimConfig` (`Assets/Game/Config/SimConfig.cs`, asset `SimConfig.asset`, decision 0019): when set,
+  `Start` builds `SimTuning` and the road/area catalogs from it once (edits apply on the next Play); when null it uses
+  the code defaults. Unity code reads types from `World.RoadTypes`/`World.AreaTypes`, never the static lists.
+  `LordsLegacy/Config/Create default SimConfig` creates the asset (idempotent, never overwrites).
   `Initialize(SimTuning, MapData)`; if not initialised, `Start` reads `StreamingAssets/Maps/testmap.lsmap` (`TryLoadMap`
   logs an error naming the path and the bake menu item if missing). `Update` calls `Tick(Time.deltaTime)` when
   `AutoUpdate`. `Tick` runs `World.Step(Pacer.Advance(..))`, or resets the pacer while paused. Views read
@@ -280,7 +284,7 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
 - `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
   menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
   and `SceneYamlNormalizer` gives its objects stable fileIDs, so two runs give the same file. Serialized references are wired in code.
-- Contents: `Terrain`; `SimHost`; `Main Camera` (Camera + `CameraRig`); `Directional Light` (Light + `SunLightController`
+- Contents: `Terrain`; `SimHost` (`_config` -> `Assets/Game/Config/SimConfig.asset`, wired by `GameSceneGenerator.CreateSimHost`); `Main Camera` (Camera + `CameraRig`); `Directional Light` (Light + `SunLightController`
   -> SimHost, light, TopBar); `TreeRenderer` (-> SimHost, `VisualRegistry.asset`, main camera); `GroundPicker`
   (-> main camera, SimHost); UIDocuments `TopBar` (`TopBarController`), `BuildBar` (`BuildBarView`, plus `ToolController`
   -> build bar, camera rig), `ToolPanel` (`ToolPanelView`), `GroundReadout` (`GroundReadoutView` -> picker) and

@@ -151,6 +151,8 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(host, "No SimHost in Game scene.");
             Assert.IsTrue(host.IsInitialized, "SimHost did not initialise from testmap.lsmap.");
             Assert.Greater(host.World.Trees.Count, 0);
+            Assert.IsNotNull(host.Config, "SimHost has no SimConfig wired (T-169).");
+            Assert.AreEqual("SimConfig", host.Config.name);
 
             var terrain = Terrain.activeTerrain;
             Assert.IsNotNull(terrain, "No terrain in Game scene.");

@@ -279,6 +279,16 @@ namespace LordsLegacy.Game.Tools
             return System.Math.Sqrt(dx * dx + dz * dz);
         }
 
+        /// <summary>Width of the dirt path in this world's catalog (decision 0019).</summary>
+        private double RoadWidthM
+        {
+            get
+            {
+                var def = _host != null && _host.IsInitialized ? _host.World.RoadTypes.Find(RoadTypes.DirtPathId) : null;
+                return def != null ? def.WidthM : 1.0;
+            }
+        }
+
         /// <summary>
         /// Finds the road feature under the cursor. Snapping on: radius is RoadSnapDistancePx (16), ends before centre lines
         /// (RoadNetwork.FindNearest + SnapPicker). Snapping off: only the drawn road width counts, so a click on a road
@@ -292,7 +302,7 @@ namespace LordsLegacy.Game.Tools
             if (mpp <= 0) return false;
             double pxLimit = Settings.Snapping
                 ? Settings.RoadSnapDistancePx
-                : RoadTypes.Find(RoadTypes.DirtPathId).WidthM * 0.5 / mpp;
+                : RoadWidthM * 0.5 / mpp;
             double maxMm = pxLimit * mpp * 1000.0 * 1.5 + 1;
             var h = _host.World.Roads.FindNearest(PointMm.FromMetres(g.X, g.Z), maxMm);
             if (h.Kind == RoadHitKind.None) return false;
@@ -316,7 +326,7 @@ namespace LordsLegacy.Game.Tools
             }
             if (!TryResolvePoint(screenPos, out var p)) { _cursor?.Hide(); return; }
             if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
-            _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+            _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadWidthM);
             bool snapped = !p.Equals(PointMm.FromMetres(s.X, s.Z));
             _cursor.Show((float)p.XMetres, (float)p.ZMetres, snapped);
         }
@@ -330,7 +340,7 @@ namespace LordsLegacy.Game.Tools
                 return;
             }
             if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
-            _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+            _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadWidthM);
             _cursor.Show((float)s.X, (float)s.Z, false);
         }
 
@@ -401,7 +411,7 @@ namespace LordsLegacy.Game.Tools
             if (!_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
             _nodeTarget = PointMm.FromMetres(s.X, s.Z); // no snapping while dragging a node
             _nodeMove = RoadValidator.PreviewMove(_host.World, _pressNode, _nodeTarget);
-            if (_roads != null) _roads.ShowNodeMovePreview(_nodeMove, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+            if (_roads != null) _roads.ShowNodeMovePreview(_nodeMove, (float)RoadWidthM);
             if (_panel == null) return;
             string verdict = _nodeMove.IsValid ? "Valid" : (_nodeMove.NodeFound ? _nodeMove.ReasonText : "node not found");
             _panel.Show(MoveLine(_nodeMove) + verdict, IdleHint, false);
@@ -472,7 +482,7 @@ namespace LordsLegacy.Game.Tools
                 : null;
             if (_roads != null)
             {
-                if (_preview != null) _roads.ShowPreview(_preview, (float)RoadTypes.Find(RoadTypes.DirtPathId).WidthM);
+                if (_preview != null) _roads.ShowPreview(_preview, (float)RoadWidthM);
                 else _roads.HidePreview();
             }
             ShowPanel();

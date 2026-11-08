@@ -85,7 +85,7 @@ namespace LordsLegacy.Game.Visuals
             foreach (var a in areas.All)
             {
                 if (_areas.ContainsKey(a.Id)) continue; // records are immutable, ids never reused
-                var type = AreaTypes.Find(a.TypeId);
+                var type = host.World.AreaTypes.Find(a.TypeId);
                 bool work = type != null && type.Kind == AreaKind.Work;
                 var b = new MeshBuilder();
                 AddFill(b, a.Polygon, work ? WorkFill : BuildingFill, HeightOffsetM);

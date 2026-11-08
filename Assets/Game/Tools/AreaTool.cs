@@ -88,7 +88,7 @@ namespace LordsLegacy.Game.Tools
         /// <summary>True while this tool is the active tool.</summary>
         public bool IsActive => _active;
 
-        private AreaTypeDef Type => AreaTypes.Find(_typeId);
+        private AreaTypeDef Type => _host != null && _host.IsInitialized ? _host.World.AreaTypes.Find(_typeId) : null;
 
         /// <summary>Sets the view settings (snapping on/off and distance). Without them the top bar's, or defaults (snapping on, 12 px).</summary>
         public void SetViewSettings(ViewSettings settings) { _settings = settings; }

@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f211cd006fc53442aebd9563c5b9b45, type: 3}
+  m_Name: SimConfig
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.SimConfig
+  realMinutesPerGameDayAt1x: 15
+  speeds: 010000000200000004000000080000001000000020000000
+  maxTicksPerFrame: 8
+  startMonth: 3
+  startDay: 1
+  startHour: 6
+  startMinute: 0
+  startWeekday: 0
+  daysPerYear: 365
+  minDaylightHours: 8
+  maxDaylightHours: 16
+  restDayEnabled: 1
+  walkSpeedMPerGameMinute: 0.87
+  oxSpeedMPerGameMinute: 0.52
+  standardLogLengthM: 4
+  trunkLengthMinM: 12
+  trunkLengthMaxM: 20
+  startingOxen: 2
+  roadSampleSpacingM: 1
+  roadMinPointSpacingM: 1
+  roadTreeClearanceM: 0.5
+  curveFlattenSpacingM: 1
+  slopeSampleGridM: 2
+  overlapToleranceM2: 0.1
+  spatialIndexCellM: 32
+  roadTypes:
+  - id: road.dirt_path
+    widthM: 2.5
+    maxGradePercent: 15
+    speedMultiplier: 1.5
+    visualId: visual.road.dirt_path
+  areaTypes:
+  - id: area.test
+    namePrefix: Test area
+    kind: 0
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 5000
+    limitSlope: 1
+    maxSlopeDegrees: 10
+    clearsTrees: 1
+    blocksRoads: 1
+    nearRoadReachM: 10
+  - id: area.test_work
+    namePrefix: Test work area
+    kind: 1
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 40000
+    limitSlope: 0
+    maxSlopeDegrees: 10
+    clearsTrees: 0
+    blocksRoads: 0
+    nearRoadReachM: 10

@@ -68,7 +68,8 @@ namespace LordsLegacy.EditorTools.Scenes
         public static GameObject CreateSimHost()
         {
             var go = new GameObject("SimHost");
-            go.AddComponent<SimHost>();
+            var host = go.AddComponent<SimHost>();
+            SetRef(host, "_config", SimConfigGenerator.EnsureAsset());
             return go;
         }
 
