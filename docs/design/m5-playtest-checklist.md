@@ -26,6 +26,7 @@ that says what "right" means.
 - [ ] A sphere sits under the cursor and changes colour when snapped (AR-20)
 - [ ] Ghost edges show the shape the next click would make (AR-21)
 - [ ] Near a road, dots every 2.5 m show along its sides within about 25 m, and points snap to them (AR-22)
+- [ ] Next to an existing area, its corners show as bigger markers and its edges show dots; a new plot snapped to them touches without overlapping (terraced plots, AR-22, AR-15)
 - [ ] Snap one point to a road side with the previous point within 10 m of it, along a curved road: both points stay where you clicked, and the edge bends to follow the road's curve, drifting out to the other point (AR-23)
 - [ ] Same with the other point 15 m away: the edge stays straight (AR-23)
 - [ ] Double-click that edge's handle: it straightens (AR-23)
