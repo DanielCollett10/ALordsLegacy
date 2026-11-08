@@ -544,7 +544,7 @@ namespace LordsLegacy.Game.Tools
         /// <summary>AR-25: the other end lies outside the neighbour area, within reach of its outline.</summary>
         private bool IsNearArea(int areaId, int other)
         {
-            if (_roadSeg[other] == -2 - areaId) return false; // both on the same area's outline: stays Straight
+            if (_roadSeg[other] == -2 - areaId) return true; // both on the same area's outline: hugs it exactly
             var rec = _host.World.Areas.Get(areaId);
             if (rec == null || rec.Polygon.Count < 3) return false;
             var ring = new PointMm[rec.Polygon.Count + 1];

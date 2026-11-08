@@ -610,6 +610,22 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator BothEndsOnNeighbourCurveHugItExactly()
+        {
+            yield return Setup();
+            _tool.SetViewSettings(new ViewSettings());
+            var verts = new[] { PointMm.FromMetres(40, 40), PointMm.FromMetres(80, 40), PointMm.FromMetres(80, 80), PointMm.FromMetres(40, 80) };
+            var edges = new[] { AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Bent(PointMm.FromMetres(60, 90)), AreaEdge.Straight() };
+            Assert.IsTrue(_host.Execute(new DesignateArea(new AreaShape(verts, edges), AreaTypes.TestId)).IsAccepted);
+            Click(80, 80); Click(40, 80); Click(40, 112); Click(80, 112);
+            Assert.AreEqual(AreaEdgeKind.NearArea, _tool.Edges[0].Kind, "Both ends on the neighbour's outline follow its curve.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            double maxZ = 0;
+            foreach (var q in _tool.CurrentPreview.Polygon) maxZ = System.Math.Max(maxZ, q.ZMetres);
+            Assert.Greater(_tool.CurrentPreview.Polygon.Count, 8);
+        }
+
+        [UnityTest]
         public IEnumerator SnapsToAreaVertexWithinSnapDistance()
         {
             yield return Setup();
