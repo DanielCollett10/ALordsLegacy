@@ -19,6 +19,19 @@ and road meshes sank under the terrain when the camera zoomed out. There are two
   drops below the M2 numbers.
 - No projectors or decals (the built-in pipeline's Projector is costly and hard to test).
 
+**Amendment (after T-195/T-197, overlays still sank).** Pushing a vertex a distance `s` along the view ray lifts it
+only `s · sin(grazing angle)` above the ground, so the first bias (`0.05 + 0.01·dist` along the ray) gave far too
+little at low camera pitch (pitch 20°, 400 m: ~1.4 m lift vs ~2 m terrain LOD error at pixel error 5). The bias is now
+specified as a **vertical clearance** and converted to a push along the ray:
+- `h = _BiasConst + _BiasPerDist · dist` (vertical metres; defaults `_BiasConst = 0.15`, `_BiasPerDist = 0.004`),
+- `s = min(h / max(dir.y, _MinSin), dist · 0.5)`, where `dir` is the unit vector vertex→camera and `_MinSin = 0.1`.
+The constant part covers the close-range gap between Unity's two-triangles-per-cell terrain and the Sim's bilinear
+heights (a few cm on hills). Terrain `heightmapPixelError` = 1 (T-196) must be in place before judging the result;
+the bias is a safety margin, not the main fix. Roads only benefit once they use the overlay material (T-198).
+The owner confirmed the sinking shows when zoomed far out, not up close, so LOD is the cause. The owner accepts that a
+far-off overlay may show through a low ridge in front of it (up to about `h` tall). If that looks wrong in play, lower
+`_BiasPerDist` on the material; don't remove the grazing-angle term.
+
 **Consequences.** Overlay meshes have more vertices (fine at today's counts; roads already sample every 1 m). New
 ground visuals must use `TerrainDrape` and the overlay shader. A visual can still be overdrawn by a tall object in
 front of it, and that's correct.
