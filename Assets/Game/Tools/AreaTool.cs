@@ -706,6 +706,9 @@ namespace LordsLegacy.Game.Tools
             {
                 string verdict = _rejection != null ? "Rejected: " + _rejection
                     : _preview.IsValid ? "Valid" : _preview.ReasonText;
+                // AR-34: name what the outline was trimmed around ("road" for roads), joined with ', '.
+                if (_rejection == null && _preview.IsValid && _preview.FittedAround.Count > 0)
+                    verdict += " · fitted around " + string.Join(", ", _preview.FittedAround);
                 status = TypeName + " · " + n + " · " + _preview.AreaM2.ToString("#,0") + " m² · " + verdict;
                 valid = _preview.IsValid && _rejection == null;
             }
