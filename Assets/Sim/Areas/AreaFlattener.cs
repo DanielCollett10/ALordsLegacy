@@ -58,11 +58,6 @@ namespace LordsLegacy.Sim.Areas
                     RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
                     if (seg != null) AddNearRoad(pts, a, b, seg.SideLine(e.Side, roadTypes), e.Side);
                 }
-                else if (e.Kind == AreaEdgeKind.FollowsRoadPartly)
-                {
-                    RoadSegment seg = roads == null ? null : roads.GetSegment(e.SegmentId);
-                    if (seg != null) AddPartialRoad(pts, a, b, seg.SideLine(e.Side, roadTypes));
-                }
                 else if (e.Kind == AreaEdgeKind.NearArea)
                 {
                     AreaRecord other = areas == null ? null : areas.Get(e.AreaId);
@@ -108,9 +103,22 @@ namespace LordsLegacy.Sim.Areas
             AddNearGuide(pts, a, b, line, side, Polylines.Nearest(line, a).ArcLengthMm, Polylines.Nearest(line, b).ArcLengthMm);
         }
 
+        // AR-33: from the snapped (nearer) vertex A to the far vertex B, the edge doubles back when
+        // dot(P - A, B - A) < 0, where P is B's nearest point on the line.
+        private static bool DoublesBack(PointMm a, PointMm b, PointMm[] line)
+        {
+            PolylineHit ha = Polylines.Nearest(line, a), hb = Polylines.Nearest(line, b);
+            bool aSnapped = ha.DistanceMm <= hb.DistanceMm;
+            PointMm snapped = aSnapped ? a : b, far = aSnapped ? b : a;
+            PolylineHit p = aSnapped ? hb : ha;
+            double dot = (p.X - snapped.X) * (far.X - snapped.X) + (p.Z - snapped.Z) * (far.Z - snapped.Z);
+            return dot < 0;
+        }
+
         private static void AddNearGuide(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line, RoadSide side, double ta, double tb)
         {
             if (!(Math.Abs(ta - tb) > 0)) return;
+            if (DoublesBack(a, b, line)) return; // AR-33: the edge would run back along the line, so it stays straight
             double da = Math.Max(0.0, NearRoadGeometry.SignedOutwardMm(line, side, a));
             double db = Math.Max(0.0, NearRoadGeometry.SignedOutwardMm(line, side, b));
             var cum = new double[line.Length];
@@ -128,35 +136,6 @@ namespace LordsLegacy.Sim.Areas
                     line[i].Z + (long)Math.Round(nz * d, MidpointRounding.AwayFromZero)));
             }
             if (ta > tb) inner.Reverse();
-            pts.AddRange(inner);
-        }
-
-        /// <summary>How far (m) a FollowsRoadPartly edge's hugged part may stray from its straight chord (AR-26).</summary>
-        public const double PartialFollowReachM = 10.0;
-
-        // FollowsRoadPartly (AR-26): from whichever vertex is nearer the side line, copy side-line vertices toward the
-        // other vertex's nearest position until one strays more than PartialFollowReachM from the chord a-b.
-        private static void AddPartialRoad(List<PointMm> pts, PointMm a, PointMm b, PointMm[] line)
-        {
-            if (line.Length < 2) return;
-            PolylineHit ha = Polylines.Nearest(line, a), hb = Polylines.Nearest(line, b);
-            bool anchorIsA = ha.DistanceMm <= hb.DistanceMm;
-            double ta = ha.ArcLengthMm, tb = hb.ArcLengthMm;
-            if (!anchorIsA) { double t = ta; ta = tb; tb = t; } // ta = anchor's arc position, tb = the far vertex's
-            var cum = new double[line.Length];
-            for (int i = 1; i < line.Length; i++) cum[i] = cum[i - 1] + line[i - 1].DistanceTo(line[i]);
-            double lo = Math.Min(ta, tb), hi = Math.Max(ta, tb);
-            var chord = new[] { a, b };
-            double reachMm = PartialFollowReachM * PointMm.MmPerMetre;
-            var inner = new List<PointMm>();
-            for (int step = 0; step < line.Length; step++)
-            {
-                int i = ta <= tb ? step : line.Length - 1 - step;
-                if (!(cum[i] > lo && cum[i] < hi)) continue;
-                if (Polylines.Nearest(chord, line[i]).DistanceMm > reachMm) break;
-                inner.Add(line[i]);
-            }
-            if (!anchorIsA) inner.Reverse();
             pts.AddRange(inner);
         }
 

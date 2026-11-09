@@ -515,7 +515,7 @@ namespace LordsLegacy.Tests.PlayMode
             }
         }
 
-        // T-199 (AR-33): the old partial road hug (AR-26, FollowsRoadPartly) is gone. An edge beyond 10 m is Straight.
+        // T-199 (AR-33): the old partial road hug (AR-26) is gone. An edge beyond 10 m is Straight.
         [UnityTest]
         public IEnumerator EdgeBeyond10mIsStraightNotPartialFollow()
         {
@@ -524,7 +524,6 @@ namespace LordsLegacy.Tests.PlayMode
             _tool.SetViewSettings(new ViewSettings());
             DrawNearRoadQuad(12f);
             Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "12 m from the side is Straight (AR-33).");
-            for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[i].Kind);
         }
 
         [UnityTest]
@@ -579,7 +578,6 @@ namespace LordsLegacy.Tests.PlayMode
             ClickAt(SidePointOut(140, 0, out _)); // point 4: on the road side
             Assert.AreEqual(4, _tool.PointCount);
             Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[2].Kind, "Edge 3->4 is Straight (AR-33).");
-            for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[i].Kind);
 
             // The flattened outline goes from point 3 directly to point 4: no road sample between them.
             var poly = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
@@ -649,7 +647,6 @@ namespace LordsLegacy.Tests.PlayMode
             ClickAt(SidePointOut(100, 8, out _));  // point 4: neighbour of point 1, within reach, 40 m along the road towards point 2
             Assert.AreEqual(4, _tool.PointCount);
             Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "Edge 1->2 would double back along the road (AR-33).");
-            Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind);
         }
 
         /// <summary>AR-31: four all-straight points clicked in a crossing order are reordered into a simple shape.</summary>

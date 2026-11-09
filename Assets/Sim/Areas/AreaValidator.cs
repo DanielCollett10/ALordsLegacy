@@ -80,19 +80,11 @@ namespace LordsLegacy.Sim.Areas
                     if (!NearAreaGeometry.VertexOk(other.Polygon, shape.Vertices[(i + 1) % n], type.NearRoadReachM)) return false;
                     continue;
                 }
-                if (e.Kind != AreaEdgeKind.FollowsRoad && e.Kind != AreaEdgeKind.NearRoad && e.Kind != AreaEdgeKind.FollowsRoadPartly) continue;
+                if (e.Kind != AreaEdgeKind.FollowsRoad && e.Kind != AreaEdgeKind.NearRoad) continue;
                 RoadSegment seg = world.Roads.GetSegment(e.SegmentId);
                 if (seg == null) return false;
                 PointMm[] side = seg.SideLine(e.Side, world.RoadTypes);
                 if (side.Length == 0) return false;
-                if (e.Kind == AreaEdgeKind.FollowsRoadPartly)
-                {
-                    // AR-26: at least one end must sit on the side line; the other may be anywhere.
-                    double d0 = Polylines.Nearest(side, shape.Vertices[i]).DistanceMm;
-                    double d1 = Polylines.Nearest(side, shape.Vertices[(i + 1) % n]).DistanceMm;
-                    if (System.Math.Min(d0, d1) > FollowsRoadToleranceMm) return false;
-                    continue;
-                }
                 if (e.Kind == AreaEdgeKind.NearRoad)
                 {
                     if (!NearRoadGeometry.VertexOk(side, e.Side, shape.Vertices[i], type.NearRoadReachM)) return false;
