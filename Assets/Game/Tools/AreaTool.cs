@@ -544,10 +544,8 @@ namespace LordsLegacy.Game.Tools
                 if (IsNearArea(onI[k], j)) return AreaEdge.NearArea(onI[k]);
             for (int k = 0; k < onJ.Count; k++)
                 if (IsNearArea(onJ[k], i)) return AreaEdge.NearArea(onJ[k]);
-            // AR-26: one end on a road side but the other beyond reach (or across the road): hug the road as far as it
-            // runs along the chord, then go straight.
-            if (_roadSeg[i] >= 0 && !SameSide(i, j)) return AreaEdge.FollowsRoadPartly(_roadSeg[i], _roadSide[i]);
-            if (_roadSeg[j] >= 0 && !SameSide(j, i)) return AreaEdge.FollowsRoadPartly(_roadSeg[j], _roadSide[j]);
+            // AR-33: anything else is Straight. (The old partial road hug, AR-26, is removed: it stopped at the road
+            // and ran back along it.)
             return AreaEdge.Straight();
         }
 
@@ -588,8 +586,6 @@ namespace LordsLegacy.Game.Tools
             double dot = sign * ((p.X - h.X) * -dz + (p.Z - h.Z) * dx);
             return dot > 0 && h.DistanceMm <= Type.NearRoadReachM * PointMm.MmPerMetre;
         }
-
-        private bool SameSide(int a, int b) => _roadSeg[a] == _roadSeg[b] && _roadSide[a] == _roadSide[b];
 
         private bool IsNearSide(int segId, RoadSide side, int other)
         {
