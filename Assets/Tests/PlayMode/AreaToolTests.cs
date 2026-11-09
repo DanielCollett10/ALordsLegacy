@@ -515,15 +515,16 @@ namespace LordsLegacy.Tests.PlayMode
             }
         }
 
+        // T-199 (AR-33): the old partial road hug (AR-26, FollowsRoadPartly) is gone. An edge beyond 10 m is Straight.
         [UnityTest]
-        public IEnumerator EdgeBeyond10mBecomesPartialFollowNotNearRoad()
+        public IEnumerator EdgeBeyond10mIsStraightNotPartialFollow()
         {
             yield return Setup();
             DrawCurvedRoad();
             _tool.SetViewSettings(new ViewSettings());
             DrawNearRoadQuad(12f);
-            Assert.AreEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind, "12 m from the side hugs the road only partly (AR-26).");
-            Assert.AreEqual(_curved.Id, _tool.Edges[0].SegmentId);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "12 m from the side is Straight (AR-33).");
+            for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[i].Kind);
         }
 
         [UnityTest]
@@ -552,7 +553,7 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator DraggingFarEndBeyondReachBecomesPartialFollow()
+        public IEnumerator DraggingFarEndBeyondReachBecomesStraight()
         {
             yield return Setup();
             DrawCurvedRoad();
@@ -560,7 +561,108 @@ namespace LordsLegacy.Tests.PlayMode
             DrawNearRoadQuad(8f);
             Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind);
             Drag(Screen((float)_tool.Points[1].XMetres, (float)_tool.Points[1].ZMetres), Screen(SidePointOut(140, 14f, out _).x, SidePointOut(140, 14f, out _).y));
-            Assert.AreEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "Dragged beyond 10 m the edge is Straight, not partly following (AR-33).");
+        }
+
+        // ---- T-199: AR-33 edge kinds and AR-31 auto-reorder ----
+
+        /// <summary>Screenshot 6: points 1 and 4 snapped to a road side, 2 and 3 more than 10 m away. Edge 3->4 is Straight.</summary>
+        [UnityTest]
+        public IEnumerator Screenshot6EdgeFromFarPointToSnappedPointIsStraight()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            ClickAt(SidePointOut(60, 0, out _));  // point 1: on the road side
+            ClickAt(SidePointOut(60, 20, out _)); // point 2: 20 m out
+            ClickAt(SidePointOut(140, 20, out _)); // point 3: 20 m out
+            ClickAt(SidePointOut(140, 0, out _)); // point 4: on the road side
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[2].Kind, "Edge 3->4 is Straight (AR-33).");
+            for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[i].Kind);
+
+            // The flattened outline goes from point 3 directly to point 4: no road sample between them.
+            var poly = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
+            PointMm p3 = _tool.Points[2], p4 = _tool.Points[3];
+            // (The preview may wind either way round, so accept p4 directly after p3 or directly before it.)
+            Assert.IsTrue(OutlineGoesDirectly(poly, p3, p4) || OutlineGoesDirectly(poly, p4, p3),
+                "The outline runs from point 3 straight to point 4.");
+        }
+
+        /// <summary>Expected-behaviour case: points 1 and 2 on a road, point 3 20 m away, then point 3 dragged left past point 2.</summary>
+        [UnityTest]
+        public IEnumerator DraggingPointPastRoadPointKeepsEdgesStraight()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            Click(60, 100.9f);  // point 1: snapped to the road side
+            Click(140, 100.9f); // point 2: snapped to the road side
+            Click(170, 121f);   // point 3: about 20 m off the road
+            Assert.AreEqual(3, _tool.PointCount);
+            Drag(Screen(170, 121f), Screen(110, 121f)); // point 3 left, past point 2
+            Assert.AreEqual(3, _tool.PointCount, "A drag moves a point, it does not add one.");
+            Assert.AreEqual(110.0, _tool.Points[2].XMetres, 0.5);
+            // Edges touching point 3: 2->3 (index 1) and 3->1 (index 2) are Straight and end on points 2 and 1.
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[1].Kind);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[2].Kind);
+            // The flattened outline runs point 2 -> point 3 -> point 1 with no road sample in between.
+            PointMm p1 = _tool.Points[0], p2 = _tool.Points[1], p3 = _tool.Points[2];
+            var flat = AreaFlattener.Flatten(new AreaShape(_tool.Points, _tool.Edges), _host.World.Roads, _host.World.Areas, 1.0);
+            Assert.IsTrue(OutlineGoesDirectly(flat, p2, p3), "Edge 2->3 ends on points 2 and 3 and nothing else.");
+            Assert.IsTrue(OutlineGoesDirectly(flat, p3, p1), "Edge 3->1 ends on points 3 and 1 and nothing else.");
+        }
+
+        /// <summary>True when the closed outline has <paramref name="b"/> immediately after <paramref name="a"/> (exact to 2 mm).</summary>
+        private static bool OutlineGoesDirectly(System.Collections.Generic.IReadOnlyList<PointMm> poly, PointMm a, PointMm b)
+        {
+            for (int k = 0; k < poly.Count; k++)
+                if (poly[k].DistanceTo(a) < 2.0 && poly[(k + 1) % poly.Count].DistanceTo(b) < 2.0) return true;
+            return false;
+        }
+
+        /// <summary>AR-23: a NearRoad edge (other point 8 m away) still forms and the outline ends exactly on both points.</summary>
+        [UnityTest]
+        public IEnumerator NearRoadEightMetresStillFormsAndEndsOnBothPoints()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            DrawNearRoadQuad(8f);
+            Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind);
+            var poly = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
+            Assert.IsTrue(poly.Exists(p => p.DistanceTo(_tool.Points[0]) < 2.0), "Outline passes exactly through point 1.");
+            Assert.IsTrue(poly.Exists(p => p.DistanceTo(_tool.Points[1]) < 2.0), "Outline passes exactly through point 2.");
+        }
+
+        /// <summary>AR-33 'behind': the other neighbour of the snapped vertex lies the same way along the road as the far
+        /// vertex, so a NearRoad edge would double back over it. The edge is Straight.</summary>
+        [UnityTest]
+        public IEnumerator NearRoadEdgeThatWouldDoubleBackIsStraight()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            ClickAt(SidePointOut(60, 0, out _));   // point 1: on the road side
+            ClickAt(SidePointOut(140, 8, out _));  // point 2: 8 m out, would normally be NearRoad
+            ClickAt(SidePointOut(140, 28, out _)); // point 3
+            ClickAt(SidePointOut(100, 8, out _));  // point 4: neighbour of point 1, within reach, 40 m along the road towards point 2
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "Edge 1->2 would double back along the road (AR-33).");
+            Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind);
+        }
+
+        /// <summary>AR-31: four all-straight points clicked in a crossing order are reordered into a simple shape.</summary>
+        [UnityTest]
+        public IEnumerator CrossingOrderAllStraightIsReorderedIntoSimpleShape()
+        {
+            yield return Setup();
+            Click(40, 40); Click(80, 80); Click(80, 40); Click(40, 80); // bow-tie order: edges 1->2 and 3->4 cross
+            Assert.AreEqual(4, _tool.PointCount);
+            for (int i = 0; i < 4; i++) Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[i].Kind, "Every edge joins two placed points.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            Assert.AreEqual(40.0, _tool.Points[0].XMetres, 0.5, "Point 1 stays first.");
+            Assert.AreEqual(40.0, _tool.Points[0].ZMetres, 0.5);
         }
 
         [UnityTest]
@@ -773,17 +875,14 @@ namespace LordsLegacy.Tests.PlayMode
 
             Click(40, 40);
             Click(80, 40);
-            // Real key path: Backspace removes the last point; the second press empties the draft.
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
-            yield return null;
+            // Backspace calls RemoveLastPoint. Keyboard events aren't delivered while the Game view is unfocused (as in
+            // BackspaceRemovesLastPoint), so call what the key calls. The second call empties the draft.
+            _tool.RemoveLastPoint();
+            Assert.AreEqual(1, _tool.PointCount);
             Assert.IsTrue(_panel.IsShown, "One point left: the panel stays.");
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
-            yield return null;
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
-            yield return null;
+            _tool.RemoveLastPoint();
             Assert.AreEqual(0, _tool.PointCount);
             Assert.IsFalse(_panel.IsShown, "UIP-03: Backspace of the last point hides the panel.");
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
             yield return null;
         }
 

@@ -532,8 +532,8 @@ namespace LordsLegacy.Game.Tools
         private AreaEdge ChooseNearRoad(int i, int j)
         {
             if (_host == null || !_host.IsInitialized || Type == null) return AreaEdge.Straight();
-            if (_roadSeg[i] >= 0 && IsNearSide(_roadSeg[i], _roadSide[i], j)) return AreaEdge.NearRoad(_roadSeg[i], _roadSide[i]);
-            if (_roadSeg[j] >= 0 && IsNearSide(_roadSeg[j], _roadSide[j], i)) return AreaEdge.NearRoad(_roadSeg[j], _roadSide[j]);
+            if (_roadSeg[i] >= 0 && IsNearSide(_roadSeg[i], _roadSide[i], i, j)) return AreaEdge.NearRoad(_roadSeg[i], _roadSide[i]);
+            if (_roadSeg[j] >= 0 && IsNearSide(_roadSeg[j], _roadSide[j], j, i)) return AreaEdge.NearRoad(_roadSeg[j], _roadSide[j]);
             // AR-25: any area's outline counts, not just the one the cursor snapped to (a point on a shared boundary lies
             // on several). Newest area first, so a third area follows the second rather than the one under it.
             var onI = AreasThrough(_points[i]);
@@ -541,13 +541,11 @@ namespace LordsLegacy.Game.Tools
             for (int k = 0; k < onI.Count; k++)
                 if (onJ.Contains(onI[k])) return AreaEdge.NearArea(onI[k]); // both on one outline: hug it exactly
             for (int k = 0; k < onI.Count; k++)
-                if (IsNearArea(onI[k], j)) return AreaEdge.NearArea(onI[k]);
+                if (IsNearArea(onI[k], i, j)) return AreaEdge.NearArea(onI[k]);
             for (int k = 0; k < onJ.Count; k++)
-                if (IsNearArea(onJ[k], i)) return AreaEdge.NearArea(onJ[k]);
-            // AR-26: one end on a road side but the other beyond reach (or across the road): hug the road as far as it
-            // runs along the chord, then go straight.
-            if (_roadSeg[i] >= 0 && !SameSide(i, j)) return AreaEdge.FollowsRoadPartly(_roadSeg[i], _roadSide[i]);
-            if (_roadSeg[j] >= 0 && !SameSide(j, i)) return AreaEdge.FollowsRoadPartly(_roadSeg[j], _roadSide[j]);
+                if (IsNearArea(onJ[k], j, i)) return AreaEdge.NearArea(onJ[k]);
+            // AR-33: anything else is Straight. (The old partial road hug, AR-26, is removed: it stopped at the road
+            // and ran back along it.)
             return AreaEdge.Straight();
         }
 
@@ -573,11 +571,41 @@ namespace LordsLegacy.Game.Tools
         }
 
         /// <summary>AR-25: the other end lies outside the neighbour area, within reach of its outline.</summary>
-        private bool IsNearArea(int areaId, int other)
+        private bool IsNearArea(int areaId, int snapped, int other)
         {
             var rec = _host.World.Areas.Get(areaId);
             if (rec == null || rec.Polygon.Count < 3) return false;
-            return IsOutsideWithin(Ring(rec), -1, _points[other]); // CCW outline: outside is the right-hand side
+            var ring = Ring(rec);
+            // CCW outline: outside is the right-hand side
+            return IsOutsideWithin(ring, -1, _points[other]) && !DoublesBack(ring, snapped, other);
+        }
+
+        /// <summary>
+        /// AR-33: a NearRoad/NearArea edge from the snapped vertex to <paramref name="far"/> is Straight when it would
+        /// double back along the line. That is when the far vertex's nearest point on the line lies on the same side of
+        /// the snapped vertex (along the line) as the snapped vertex's other neighbour: the edge would then run back
+        /// over ground the neighbouring edge already covers. "Same side" is the sign of the arc-length offset from the snapped
+        /// vertex's nearest point to each one's nearest point on the line. A neighbour more than the type's reach (10 m) from the
+        /// line, or under 3 m along from the snapped vertex, is ignored.
+        /// </summary>
+        private bool DoublesBack(PointMm[] line, int snapped, int far)
+        {
+            int n = _points.Count;
+            int prev = (snapped - 1 + n) % n, next = (snapped + 1) % n;
+            int other = prev == far ? next : prev;
+            if (other == far || other == snapped) return false;
+            var hs = Polylines.Nearest(line, _points[snapped]);
+            var hf = Polylines.Nearest(line, _points[far]);
+            double delta = hf.ArcLengthMm - hs.ArcLengthMm;
+            if (System.Math.Abs(delta) < 1.0) return false;
+            // Where the neighbour's nearest point on the line sits, relative to the snapped vertex, measured along the line
+            // (not the raw tangent, which would mistake a tilted outline for a neighbour that lies "ahead").
+            var ho = Polylines.Nearest(line, _points[other]);
+            // A neighbour beyond reach of the line isn't hugging it, so it can't be what the edge doubles back over.
+            if (ho.DistanceMm > Type.NearRoadReachM * PointMm.MmPerMetre) return false;
+            double along = ho.ArcLengthMm - hs.ArcLengthMm;
+            if (System.Math.Abs(along) < 3.0 * PointMm.MmPerMetre) return false;
+            return (along > 0) == (delta > 0);
         }
 
         private bool IsOutsideWithin(PointMm[] line, double sign, PointMm p)
@@ -589,16 +617,14 @@ namespace LordsLegacy.Game.Tools
             return dot > 0 && h.DistanceMm <= Type.NearRoadReachM * PointMm.MmPerMetre;
         }
 
-        private bool SameSide(int a, int b) => _roadSeg[a] == _roadSeg[b] && _roadSide[a] == _roadSide[b];
-
-        private bool IsNearSide(int segId, RoadSide side, int other)
+        private bool IsNearSide(int segId, RoadSide side, int snapped, int other)
         {
             if (_roadSeg[other] == segId && _roadSide[other] == side) return false; // snapped to it: FollowsRoad's job
             var seg = _host.World.Roads.GetSegment(segId);
             if (seg == null) return false;
             var line = seg.SideLine(side);
             if (line.Length < 2) return false;
-            return IsOutsideWithin(line, side == RoadSide.Left ? 1 : -1, _points[other]);
+            return IsOutsideWithin(line, side == RoadSide.Left ? 1 : -1, _points[other]) && !DoublesBack(line, snapped, other);
         }
 
         private void Refresh()

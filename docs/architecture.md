@@ -55,9 +55,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   from vertex A's perpendicular distance to vertex B's, so both vertices stay put (`FollowsRoad` = both distances 0;
   helpers in internal `NearRoadGeometry`). `AreaTypeDef.NearRoadReachM` (10) is the vertex reach limit. `NearArea` (AR-25, area id; internal `NearAreaGeometry`) does
   the same along another area's flattened outline (shorter way round); `AreaFlattener.Flatten(shape, roads, areas, spacingM)` takes the registry.
-  `FollowsRoadPartly` (AR-26, segment + side): one vertex on the side line, the other anywhere; the flattener copies side-line
-  vertices from the snapped end while they stay within `AreaFlattener.PartialFollowReachM` (10 m) of the chord, then goes straight.
-  `AreaTool.ChooseNearRoad` uses it as the fallback when one end is snapped to a road side and NearRoad/NearArea don't apply.
+  `FollowsRoadPartly` (AR-26, segment + side) is still understood by the Sim (flattener and validator) for old data, but
+  `AreaTool` never creates it (T-199, AR-33): when NearRoad/NearArea/FollowsRoad don't apply, `AreaTool.ChooseNearRoad` returns Straight.
   `AreaRegistry` (`SimWorld.Areas`, never null) stores `AreaRecord`s (id, type id, name, shape, flattened polygon,
   bounds); internal `Add`/`Remove` bump `Version`; names are "<prefix> N" with per-type counters that never reuse.
   Building-kind areas sit in a `SpatialGrid` (`SpatialIndexCellM`): `QueryOverlapCandidates(bounds)`. `FindAt(point,
