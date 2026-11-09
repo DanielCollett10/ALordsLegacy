@@ -76,6 +76,33 @@ namespace LordsLegacy.Sim.Geometry
             return SignedArea2Mm(poly) != 0;
         }
 
+        /// <summary>
+        /// The points where non-adjacent edges cross or touch, one entry per such pair, in edge order (pairs
+        /// sorted by the first edge, then the second). Each entry is <see cref="Segments.MeetingPoint"/> for that
+        /// pair: a crossing is rounded to the nearest mm; a touch or collinear overlap is the shared point (for an
+        /// overlap, its start). Adjacent edges are never reported, so a spike that doubles back on its neighbour is
+        /// not listed here (<see cref="IsSimple"/> still rejects it). Empty for fewer than 3 vertices and for a
+        /// simple polygon.
+        /// </summary>
+        public static PointMm[] Crossings(IReadOnlyList<PointMm> poly)
+        {
+            var result = new List<PointMm>();
+            int n = poly.Count;
+            if (n < 3) return result.ToArray();
+            for (int i = 0; i < n; i++)
+            {
+                PointMm a1 = poly[i], a2 = poly[(i + 1) % n];
+                for (int j = i + 2; j < n; j++)
+                {
+                    if (i == 0 && j == n - 1) continue; // edge n-1 is adjacent to edge 0
+                    PointMm b1 = poly[j], b2 = poly[(j + 1) % n];
+                    if (Segments.Classify(a1, a2, b1, b2) != SegmentRelation.None)
+                        result.Add(Segments.MeetingPoint(a1, a2, b1, b2));
+                }
+            }
+            return result.ToArray();
+        }
+
         /// <summary>Classifies a point against the polygon. Exact for any simple polygon.</summary>
         public static PointLocation Locate(IReadOnlyList<PointMm> poly, PointMm p)
         {

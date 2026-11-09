@@ -73,7 +73,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   slope (AR-14), overlap with another building area (AR-15), road corridor crossing (AR-16). Work kinds stop after size.
   `DesignateArea` and `DeleteArea` are in `Commands/` (see below).
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
-  classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds), `Polylines` (length, nearest,
+  classify/intersect), `Polygons` (area, winding, `IsSimple`, `Locate`, bounds, `Crossings` = where non-adjacent edges cross or touch, one point per pair, T-201; `Segments.MeetingPoint` gives the point for one pair), `Polylines` (length, nearest,
   min distance, `PointsEvery(line, spacingM)` points at arc length 0, s, 2s… rounded to mm, empty for zero-length
   lines, throws for spacing ≤ 0; `PointsEveryWithin(line, spacingM, centre, radiusM)` the inclusive subset; snap dots, AR-22), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
   Predicates are exact; distances are double mm.

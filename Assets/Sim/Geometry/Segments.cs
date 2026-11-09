@@ -50,6 +50,42 @@ namespace LordsLegacy.Sim.Geometry
             return SegmentRelation.None;
         }
 
+        /// <summary>
+        /// One representative point where two segments meet. Throws <see cref="ArgumentException"/> when
+        /// <see cref="Classify"/> reports <see cref="SegmentRelation.None"/>.
+        /// Crossing: the intersection rounded to the nearest mm (away from zero on ties), so it may be up to
+        /// 0.5 mm off the exact point. Touching: the shared point (an endpoint). Collinear overlap: the start of
+        /// the overlap, the lower end along the dominant axis (X when the segments span more in X, else Z).
+        /// Zero-length segments are handled: a point segment's own point is the meeting point.
+        /// </summary>
+        public static PointMm MeetingPoint(PointMm a1, PointMm a2, PointMm b1, PointMm b2)
+        {
+            SegmentRelation rel = Classify(a1, a2, b1, b2);
+            if (rel == SegmentRelation.None)
+                throw new ArgumentException("Segments do not meet.");
+
+            if (rel == SegmentRelation.Crossing)
+            {
+                // a1 + t*r = b1 + u*s  =>  t = cross(b1 - a1, s) / cross(r, s); denominator is non-zero for a crossing.
+                long rx = a2.X - a1.X, rz = a2.Z - a1.Z, sx = b2.X - b1.X, sz = b2.Z - b1.Z;
+                long qx = b1.X - a1.X, qz = b1.Z - a1.Z;
+                double t = (double)(qx * sz - qz * sx) / (rx * sz - rz * sx);
+                return new PointMm(RoundMm(a1.X + t * rx), RoundMm(a1.Z + t * rz));
+            }
+
+            // Touching or collinear: every shared point is one of the four endpoints, so take the lowest of those
+            // that lie on both segments. For a single touch that is the only candidate.
+            bool useX = SpanX(a1, a2) + SpanX(b1, b2) >= SpanZ(a1, a2) + SpanZ(b1, b2);
+            PointMm best = default;
+            bool found = false;
+            foreach (PointMm p in new[] { a1, a2, b1, b2 })
+            {
+                if (!ContainsPoint(a1, a2, p) || !ContainsPoint(b1, b2, p)) continue;
+                if (!found || Less(p, best, useX)) { best = p; found = true; }
+            }
+            return best;
+        }
+
         /// <summary>True if the segments share any point (crossing, touching or overlapping).</summary>
         public static bool Intersects(PointMm a1, PointMm a2, PointMm b1, PointMm b2) =>
             Classify(a1, a2, b1, b2) != SegmentRelation.None;
@@ -80,6 +116,9 @@ namespace LordsLegacy.Sim.Geometry
         }
 
         private static long Axis(PointMm p, bool useX) => useX ? p.X : p.Z;
+        private static bool Less(PointMm p, PointMm q, bool useX) =>
+            useX ? (p.X < q.X || (p.X == q.X && p.Z < q.Z)) : (p.Z < q.Z || (p.Z == q.Z && p.X < q.X));
+        private static long RoundMm(double v) => (long)Math.Round(v, MidpointRounding.AwayFromZero);
         private static long SpanX(PointMm a, PointMm b) => Math.Abs(a.X - b.X);
         private static long SpanZ(PointMm a, PointMm b) => Math.Abs(a.Z - b.Z);
 
