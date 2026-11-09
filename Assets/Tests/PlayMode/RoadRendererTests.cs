@@ -74,6 +74,26 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator RoadPreviewAndHandleRenderersUseGroundOverlayShader()
+        {
+            Setup(SyntheticMap.CreateRamp());
+            var samples = Line(20, 40, 50, 1);
+            var seg = _host.World.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
+                new[] { samples[0], samples[samples.Length - 1] }, samples);
+            yield return null;
+            _renderer.Sync();
+            _renderer.ShowNodeHandles(new[] { new Vector2(30, 50) });
+            Assert.IsNotNull(_renderer.GetSegmentMesh(seg.Id));
+            int checkedRenderers = 0;
+            foreach (var mr in _rendererGo.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                Assert.AreEqual(GroundOverlay.ShaderName, mr.sharedMaterial.shader.name, mr.name);
+                checkedRenderers++;
+            }
+            Assert.GreaterOrEqual(checkedRenderers, 2, "Expected a road segment and a node handle.");
+        }
+
+        [UnityTest]
         public IEnumerator ExtendedDeadEndMeshesMeetFlush()
         {
             // RD-16: the new road bends away from the old one, so without the shared tangent the joint would kink.

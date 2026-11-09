@@ -30,6 +30,7 @@ namespace LordsLegacy.Game.Visuals
         private int _builtVersion = -1;
         private Material _fallbackMaterial;
         private Material _previewMaterial;
+        private readonly Dictionary<Material, Material> _overlayMaterials = new Dictionary<Material, Material>();
         private GameObject _previewObject;
         private Mesh _previewMesh;
 
@@ -179,8 +180,10 @@ namespace LordsLegacy.Game.Visuals
             if (_handleMesh == null) _handleMesh = CursorMarkerMesh.Sphere(1.2f);
             if (_handleMaterial == null)
             {
-                var shader = Shader.Find("Sprites/Default");
-                _handleMaterial = new Material(shader != null ? shader : Shader.Find("Standard")) { name = "RoadNodeHandle", color = new Color(1f, 0.95f, 0.5f, 1f) };
+                var shared = GroundOverlay.Material();
+                _handleMaterial = shared != null
+                    ? new Material(shared) { name = "RoadNodeHandle", color = new Color(1f, 0.95f, 0.5f, 1f) }
+                    : new Material(Shader.Find("Sprites/Default")) { name = "RoadNodeHandle", color = new Color(1f, 0.95f, 0.5f, 1f) };
             }
             _handlePositions.Clear();
             for (int i = 0; i < positions.Count; i++)
@@ -197,8 +200,7 @@ namespace LordsLegacy.Game.Visuals
                     mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                     _handlePool.Add(go);
                 }
-                float y = host.World.Terrain.HeightAt(positions[i].x, positions[i].y) + HeightOffsetM + PreviewLiftM;
-                go.transform.position = new Vector3(positions[i].x, y, positions[i].y);
+                go.transform.position = TerrainDrape.Point(host.World.Terrain, positions[i].x, positions[i].y, HeightOffsetM + PreviewLiftM);
                 go.SetActive(true);
                 _handlePositions.Add(positions[i]);
             }
@@ -250,8 +252,8 @@ namespace LordsLegacy.Game.Visuals
                 // Height is sampled at the edge vertices so the strip hugs a cross slope.
                 float lx = x - right.x * half, lz = z - right.y * half;
                 float rx = x + right.x * half, rz = z + right.y * half;
-                verts[i * 2] = new Vector3(lx, terrain.HeightAt(lx, lz) + lift, lz);
-                verts[i * 2 + 1] = new Vector3(rx, terrain.HeightAt(rx, rz) + lift, rz);
+                verts[i * 2] = TerrainDrape.Point(terrain, lx, lz, lift);
+                verts[i * 2 + 1] = TerrainDrape.Point(terrain, rx, rz, lift);
                 uvs[i * 2] = new Vector2(0f, along);
                 uvs[i * 2 + 1] = new Vector2(1f, along);
                 if (cols != null) { cols[i * 2] = sampleColors[i]; cols[i * 2 + 1] = sampleColors[i]; }
@@ -277,10 +279,25 @@ namespace LordsLegacy.Game.Visuals
         private Material RoadMaterial(string visualId)
         {
             if (registry != null && registry.TryGet(visualId, out var def) && def.Materials.Length > 0 && def.Materials[0] != null)
-                return def.Materials[0];
+            {
+                var src = def.Materials[0];
+                if (src.shader != null && src.shader.name == GroundOverlay.ShaderName) return src;
+                // Definition material uses another shader: carry its texture and colour onto the overlay shader.
+                if (_overlayMaterials.TryGetValue(src, out var cached) && cached != null) return cached;
+                var shared = GroundOverlay.Material();
+                if (shared != null)
+                {
+                    var m = new Material(shared) { name = "RoadOverlay_" + src.name, color = src.color, mainTexture = src.mainTexture };
+                    _overlayMaterials[src] = m;
+                    return m;
+                }
+                return src;
+            }
             if (_fallbackMaterial == null)
             {
-                _fallbackMaterial = new Material(Shader.Find("Standard")) { name = "RoadFallback" };
+                var shared = GroundOverlay.Material();
+                _fallbackMaterial = shared != null ? new Material(shared) : new Material(Shader.Find("Standard"));
+                _fallbackMaterial.name = "RoadFallback";
                 _fallbackMaterial.color = new Color(0.55f, 0.42f, 0.28f);
             }
             return _fallbackMaterial;
@@ -290,9 +307,11 @@ namespace LordsLegacy.Game.Visuals
         {
             if (_previewMaterial == null)
             {
-                // Sprites/Default is unlit, double-sided and multiplies by vertex colour.
-                var shader = Shader.Find("Sprites/Default");
-                _previewMaterial = new Material(shader != null ? shader : Shader.Find("Standard")) { name = "RoadPreview" };
+                // GroundOverlay is unlit, alpha blended and multiplies by vertex colour.
+                var shared = GroundOverlay.Material();
+                _previewMaterial = shared != null
+                    ? new Material(shared) { name = "RoadPreview" }
+                    : new Material(Shader.Find("Sprites/Default")) { name = "RoadPreview" };
             }
             return _previewMaterial;
         }
@@ -310,6 +329,7 @@ namespace LordsLegacy.Game.Visuals
             if (_previewMesh != null) Destroy(_previewMesh);
             if (_fallbackMaterial != null) Destroy(_fallbackMaterial);
             if (_previewMaterial != null) Destroy(_previewMaterial);
+            foreach (var m in _overlayMaterials.Values) if (m != null) Destroy(m);
             if (_handleMesh != null) Destroy(_handleMesh);
             if (_handleMaterial != null) Destroy(_handleMaterial);
         }
