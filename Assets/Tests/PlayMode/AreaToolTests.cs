@@ -467,6 +467,12 @@ namespace LordsLegacy.Tests.PlayMode
 
         private void ClickAt(Vector2 p) { Click(p.x, p.y); }
 
+        private Vector2 SidePointOutScreen(float x, float outM)
+        {
+            var g = SidePointOut(x, outM, out _);
+            return Screen(g.x, g.y);
+        }
+
         private static double MaxChordDeviationM(System.Collections.Generic.IReadOnlyList<PointMm> poly, PointMm a, PointMm b)
         {
             double dx = b.XMetres - a.XMetres, dz = b.ZMetres - a.ZMetres, len = System.Math.Sqrt(dx * dx + dz * dz), max = 0;
@@ -575,7 +581,8 @@ namespace LordsLegacy.Tests.PlayMode
             _tool.SetViewSettings(new ViewSettings { Snapping = false });
             _tool.SetViewSettings(new ViewSettings());
             // Re-make it NearRoad by moving the far end a little, then bend it by dragging the handle.
-            Drag(Screen((float)b.XMetres, (float)b.ZMetres), Screen((float)b.XMetres + 0.5f, (float)b.ZMetres));
+            // Move it 2 m towards the road (still 6 m out): the move must clear the 4 px drag threshold in any Game view size.
+            Drag(Screen((float)b.XMetres, (float)b.ZMetres), SidePointOutScreen(140, 6f));
             Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind, "Moving an end re-checks the edge.");
             var m2 = Screen((float)(a.XMetres + _tool.Points[1].XMetres) / 2f, (float)(a.ZMetres + _tool.Points[1].ZMetres) / 2f);
             Drag(m2, m2 + new Vector2(0f, 30f));
@@ -663,8 +670,9 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.Greater(CountMarkers(SnapMarkerKind.RoadDot), 10);
             var seg = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
             double sideZ = seg.SideLine(LordsLegacy.Sim.Roads.RoadSide.Left)[0].ZMetres;
-            var dot = PointMm.FromMetres(60, sideZ);
-            Assert.IsTrue(HasMarker(SnapMarkerKind.RoadDot, dot) || HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(60, 200 - sideZ)));
+            // AR-22: markers show within 25 m of the cursor (100, 105); x = 100 is 80 m from the road start, a multiple of 2.5.
+            var dot = PointMm.FromMetres(100, sideZ);
+            Assert.IsTrue(HasMarker(SnapMarkerKind.RoadDot, dot) || HasMarker(SnapMarkerKind.RoadDot, PointMm.FromMetres(100, 200 - sideZ)));
             Assert.AreEqual(_tool.ShownMarkers.Count, _tool.VisibleMarkerCount);
             foreach (var m in _tool.ShownMarkers) Assert.LessOrEqual(m.Point.DistanceTo(PointMm.FromMetres(100, 105)), 25001.0);
 
