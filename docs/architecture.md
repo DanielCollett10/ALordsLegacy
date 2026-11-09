@@ -77,6 +77,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   min distance, `PointsEvery(line, spacingM)` points at arc length 0, s, 2s… rounded to mm, empty for zero-length
   lines, throws for spacing ≤ 0; `PointsEveryWithin(line, spacingM, centre, radiusM)` the inclusive subset; snap dots, AR-22), `Triangulator.EarClip` (n−2 integer-exact triangles; collinear vertices become zero-area triangles).
   Predicates are exact; distances are double mm.
+  `PolygonBoolean.Difference(subject, clips, out holes)` (decision 0021, T-204) subtracts clip polygons from a subject
+  via the vendored Clipper2 (`Assets/Sim/ThirdParty/Clipper2/`, pin and compatibility edits in its `VERSION.txt`).
+  It returns CCW outer pieces and reports holes (CCW, belonging to the piece that contains them) through `holes`.
+  Clipper types stay private; integer mm in and out, with new crossing vertices rounded to the nearest mm.
   `SpatialGrid<T>` (decision 0012, GEO-16) is a uniform-grid index over `BoundsMm` with a cell size in metres
   (rounded to mm, `SimTuning.SpatialIndexCellM` is the value to pass). `Insert(item, bounds)`, `Remove(item)`
   (false if unknown), `QueryRect(bounds)` and `QueryPoint(point)` return each item once, in ascending insertion
