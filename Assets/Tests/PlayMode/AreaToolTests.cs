@@ -1002,6 +1002,98 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(preview.AreaM2, _renderer.PreviewFillAreaM2, preview.AreaM2 * 0.01);
         }
 
+        // ---- T-207: fitted outline and 'fitted around <name>' status (AR-34) ----
+
+        /// <summary>The road side that lies north (z above 100) of the east-west road from <see cref="DrawEastWestRoad"/>.</summary>
+        private static LordsLegacy.Sim.Roads.RoadSide NorthSide(LordsLegacy.Sim.Roads.RoadSegment seg, out double sideZ)
+        {
+            var side = LordsLegacy.Sim.Roads.RoadSide.Left;
+            sideZ = seg.SideLine(side)[0].ZMetres;
+            if (sideZ < 100) { side = LordsLegacy.Sim.Roads.RoadSide.Right; sideZ = seg.SideLine(side)[0].ZMetres; }
+            Assert.Greater(sideZ, 100.0, "One road side lies north of the road.");
+            return side;
+        }
+
+        /// <summary>Screenshot 7 on a road: a neighbour whose bottom edge follows the road side, and a draft whose
+        /// point 2 is snapped onto the neighbour's top-right corner while edge 2->3 cuts into the neighbour.</summary>
+        [UnityTest]
+        public IEnumerator Screenshot7DraftFittedAroundFollowsRoadNeighbourConfirms()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            var seg = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
+            var side = NorthSide(seg, out double sideZ);
+            double far = sideZ + 50.0;
+            var nVerts = new[]
+            {
+                PointMm.FromMetres(60, sideZ), PointMm.FromMetres(100, sideZ),
+                PointMm.FromMetres(100, far), PointMm.FromMetres(60, far),
+            };
+            var nEdges = new[] { AreaEdge.FollowsRoad(seg.Id, side), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() };
+            Assert.IsTrue(_host.Execute(new DesignateArea(new AreaShape(nVerts, nEdges), AreaTypes.TestId)).IsAccepted);
+            var neighbour = new System.Collections.Generic.List<AreaRecord>(_host.World.Areas.All)[0];
+
+            // Frame the draft (z 120..160) inside the view.
+            _camGo.transform.position = new Vector3(100f, 50f, 115f);
+            _cam.orthographicSize = 70f;
+            Click(40, 160);              // point 1
+            Click(100, (float)far);      // point 2: snaps onto the neighbour's corner
+            Click(55, 120);              // point 3: edge 2->3 cuts the neighbour
+            Click(35, 120);              // point 4
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(PointMm.FromMetres(100, far), _tool.Points[1], "Point 2 snapped onto the neighbour's corner.");
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            StringAssert.Contains("fitted around " + neighbour.Name, _panel.Status);
+            Assert.IsTrue(_panel.IsConfirmEnabled);
+
+            var expected = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
+            _panel.ClickConfirm();
+            var areas = new System.Collections.Generic.List<AreaRecord>(_host.World.Areas.All);
+            Assert.AreEqual(2, areas.Count, "The trimmed plot is designated.");
+            CollectionAssert.AreEqual(expected, new System.Collections.Generic.List<PointMm>(areas[1].Polygon),
+                "The confirmed polygon is the preview polygon.");
+        }
+
+        /// <summary>A plot straddling the road end is trimmed around the road: 'fitted around road', Confirm enabled.</summary>
+        [UnityTest]
+        public IEnumerator PlotClippingRoadEndIsFittedAroundRoadAndConfirms()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            _camGo.transform.position = new Vector3(140f, 50f, 110f);
+            Click(170, 90); Click(190, 90); Click(190, 110); Click(170, 110);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
+            Assert.AreEqual(1, _tool.CurrentPreview.FittedAround.Count);
+            StringAssert.Contains("fitted around road", _panel.Status);
+            Assert.IsTrue(_panel.IsConfirmEnabled);
+
+            var expected = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
+            _panel.ClickConfirm();
+            var areas = new System.Collections.Generic.List<AreaRecord>(_host.World.Areas.All);
+            Assert.AreEqual(1, areas.Count);
+            CollectionAssert.AreEqual(expected, new System.Collections.Generic.List<PointMm>(areas[0].Polygon));
+        }
+
+        /// <summary>A road running through the draft splits it: 'crosses road' and Confirm disabled.</summary>
+        [UnityTest]
+        public IEnumerator RoadThroughDraftStatusCrossesRoadAndConfirmDisabled()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            Click(60, 90); Click(100, 90); Click(100, 110); Click(60, 110);
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.IsFalse(_tool.CurrentPreview.IsValid);
+            StringAssert.Contains("crosses road", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+            _tool.Confirm();
+            _panel.ClickConfirm();
+            Assert.AreEqual(0, _host.World.Areas.Count, "A plot split by a road is never designated.");
+        }
+
         [Test]
         public void BuildBarEnablesBothAreaEntries()
         {
