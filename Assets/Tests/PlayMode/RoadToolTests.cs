@@ -485,6 +485,76 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(1, _host.World.Roads.SegmentCount, "Exactly one segment deleted.");
         }
 
+        // Test building area covering x 60..80, z 60..80 (PL-03/PL-06).
+        private void AddTestArea()
+        {
+            var P = new System.Func<double, double, LordsLegacy.Sim.Geometry.PointMm>(LordsLegacy.Sim.Geometry.PointMm.FromMetres);
+            var shape = LordsLegacy.Sim.Areas.AreaShape.Straight(new[] { P(60, 60), P(80, 60), P(80, 80), P(60, 80) });
+            var r = _host.Execute(new LordsLegacy.Sim.Commands.DesignateArea(shape, LordsLegacy.Sim.Areas.AreaTypes.TestId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+        }
+
+        [UnityTest]
+        public IEnumerator ClickInsideBuildingAreaAddsNothingAndHidesRing()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            AddTestArea();
+            _tool.PointerMove(Screen(40, 100));
+            var marker = _toolGo.GetComponentInChildren<CursorMarker>();
+            Assert.IsTrue(marker != null && marker.IsShown, "Ring shows outside the area.");
+            _tool.PointerMove(Screen(70, 70));
+            Assert.IsFalse(marker.IsShown, "PL-03: ring hidden inside a building area.");
+            Click(70, 70);
+            Assert.AreEqual(0, _tool.PointCount, "PL-03: the click adds nothing.");
+            Assert.IsFalse(marker.IsShown);
+            Click(40, 100);
+            Assert.AreEqual(1, _tool.PointCount, "Outside the area still works.");
+        }
+
+        [UnityTest]
+        public IEnumerator DraftPointDragStopsAtAreaEdge()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            AddTestArea();
+            Click(40, 70);
+            Click(40, 120);
+            _tool.PointerDown(PressButton.Left, Screen(40, 70));
+            for (float x = 42; x <= 70; x += 2) _tool.PointerMove(Screen(x, 70));
+            Assert.Less(_tool.Points[0].XMetres, 60.5, "Point stays outside the area.");
+            Assert.Greater(_tool.Points[0].XMetres, 55.0, "Point reached the area edge.");
+            _tool.PointerUp(PressButton.Left, Screen(70, 70), _time += 2f);
+            Assert.AreEqual(2, _tool.PointCount);
+        }
+
+        [UnityTest]
+        public IEnumerator ClickOnRoadInsideNothingStillBranchesWithAreaPresent()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            AddTestArea();
+            DrawExisting(40, 100, 120, 100);
+            var p = Screen(100, 100) + new Vector2(0f, 4f);
+            _tool.PointerDown(PressButton.Left, p);
+            _tool.PointerUp(PressButton.Left, p, _time += 2f);
+            Assert.AreEqual(1, _tool.PointCount, "A click on a road still starts a branch.");
+            Assert.AreEqual(100.0, _tool.Points[0].ZMetres, 0.01);
+        }
+
+        [UnityTest]
+        public IEnumerator NodeDragIntoAreaStopsAtItsEdge()
+        {
+            yield return Setup(SyntheticMap.CreateRamp());
+            AddTestArea();
+            DrawExisting(20, 70, 40, 70);
+            int node = NodeNear(40, 70).Id;
+            _tool.PointerDown(PressButton.Left, Screen(40, 70));
+            for (float x = 42; x <= 72; x += 2) _tool.PointerMove(Screen(x, 70));
+            Assert.IsTrue(_tool.IsDraggingNode);
+            _tool.PointerUp(PressButton.Left, Screen(72, 70), _time += 2f);
+            double nx = _host.World.Roads.GetNode(node).Position.XMetres;
+            Assert.Less(nx, 60.5, "PL-06: node stops at the area edge.");
+            Assert.Greater(nx, 55.0, "Node followed the cursor up to the edge.");
+        }
+
         [UnityTest]
         public IEnumerator DoubleClickAddsExactlyOnePointAndConfirms()
         {
