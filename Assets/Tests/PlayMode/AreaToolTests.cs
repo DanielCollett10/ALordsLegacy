@@ -584,10 +584,9 @@ namespace LordsLegacy.Tests.PlayMode
             // The flattened outline goes from point 3 directly to point 4: no road sample between them.
             var poly = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
             PointMm p3 = _tool.Points[2], p4 = _tool.Points[3];
-            int idx = -1;
-            for (int k = 0; k < poly.Count; k++) if (poly[k].DistanceTo(p3) < 1000.0) { idx = k; break; }
-            Assert.GreaterOrEqual(idx, 0, "Point 3 is on the outline.");
-            Assert.Less(poly[(idx + 1) % poly.Count].DistanceTo(p4), 1000.0, "The outline runs from point 3 straight to point 4.");
+            // (The preview may wind either way round, so accept p4 directly after p3 or directly before it.)
+            Assert.IsTrue(OutlineGoesDirectly(poly, p3, p4) || OutlineGoesDirectly(poly, p4, p3),
+                "The outline runs from point 3 straight to point 4.");
         }
 
         /// <summary>Expected-behaviour case: points 1 and 2 on a road, point 3 20 m away, then point 3 dragged left past point 2.</summary>

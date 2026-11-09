@@ -584,8 +584,8 @@ namespace LordsLegacy.Game.Tools
         /// AR-33: a NearRoad/NearArea edge from the snapped vertex to <paramref name="far"/> is Straight when it would
         /// double back along the line. That is when the far vertex's nearest point on the line lies on the same side of
         /// the snapped vertex (along the line) as the snapped vertex's other neighbour: the edge would then run back
-        /// over ground the neighbouring edge already covers. Side tested by the sign of the line direction at the
-        /// snapped vertex dotted with the vector to the neighbour (ignored under 3 m, which is just noise).
+        /// over ground the neighbouring edge already covers. "Same side" is the sign of the arc-length offset from the snapped
+        /// vertex's nearest point to each one's nearest point on the line (neighbour offsets under 3 m are ignored as noise).
         /// </summary>
         private bool DoublesBack(PointMm[] line, int snapped, int far)
         {
@@ -597,13 +597,11 @@ namespace LordsLegacy.Game.Tools
             var hf = Polylines.Nearest(line, _points[far]);
             double delta = hf.ArcLengthMm - hs.ArcLengthMm;
             if (System.Math.Abs(delta) < 1.0) return false;
-            int k = Mathf.Min(hs.SegmentIndex, line.Length - 2);
-            double tx = line[k + 1].X - line[k].X, tz = line[k + 1].Z - line[k].Z;
-            double len = System.Math.Sqrt(tx * tx + tz * tz);
-            if (len <= 0) return false;
-            double dot = ((_points[other].X - _points[snapped].X) * tx + (_points[other].Z - _points[snapped].Z) * tz) / len;
-            if (System.Math.Abs(dot) < 3.0 * PointMm.MmPerMetre) return false;
-            return (dot > 0) == (delta > 0);
+            // Where the neighbour's nearest point on the line sits, relative to the snapped vertex, measured along the line
+            // (not the raw tangent, which would mistake a tilted outline for a neighbour that lies "ahead").
+            double along = Polylines.Nearest(line, _points[other]).ArcLengthMm - hs.ArcLengthMm;
+            if (System.Math.Abs(along) < 3.0 * PointMm.MmPerMetre) return false;
+            return (along > 0) == (delta > 0);
         }
 
         private bool IsOutsideWithin(PointMm[] line, double sign, PointMm p)
