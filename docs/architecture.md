@@ -26,6 +26,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   catalog-less `SideLine`/`CorridorPolygon` overloads (`[Obsolete]`) remain only for the Unity layer until it migrates.
   **One tick = one game minute.** `Step(n)` advances `Tick` by n and does nothing while `Paused`; `Pause()` and
   `Resume()` set it. `Now` is the `GameTime` for the current tick. The Sim has no notion of real seconds.
+- `Assets/Sim/Placement/` (`LordsLegacy.Sim.Placement`, placement.md PL-01..05, PL-07): `PlacementRules.CanPlaceAreaVertex(world,
+  areaTypeId, point)` and `CanPlaceRoadPoint(world, point)` answer whether one (already snapped) point may be placed. They
+  return a `PlacementResult` (`Ok`, or `Reason` = `InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`; `Text` for the UI).
+  Pure queries, no state change. "Inside" means strictly inside: within `BoundaryToleranceMm` (50 mm) of an area edge or
+  road side line counts as boundary and is Ok. Work-area vertices are Ok anywhere on the map; road points are refused only
+  inside a building area. The tools only ask; shape checks (AR-15, AR-16, RD-13) still run on the finished shape.
 - `Assets/Sim/Time/` (namespace `LordsLegacy.Sim.Calendar`, to avoid clashing with `UnityEngine.Time`):
   - `GameCalendar`: tick → `GameTime` (year, date, weekday, time, season). 365-day year, no leap years,
     the year number increments on 1 January.
