@@ -18,6 +18,8 @@ namespace LordsLegacy.EditorTools.MapGen
         /// <summary>Output folder.</summary>
         public const string Folder = "Assets/Maps/TestMap";
         const string ObjectName = "TestMapTerrain";
+        /// <summary>Terrain LOD error in pixels (T-196). Matches GameSceneGenerator.TerrainHeightmapPixelError.</summary>
+        const float HeightmapPixelError = 1f;
         const float SizeXZ = 2048f, SizeY = 120f, BaseHeight = 40f;
         const int HeightRes = 1025, AlphaRes = 512;
         // Flat corridor for trunk road and camp-site: full width of the map.
@@ -144,6 +146,7 @@ namespace LordsLegacy.EditorTools.MapGen
             var go = Terrain.CreateTerrainGameObject(td); // adds Terrain + TerrainCollider
             go.name = ObjectName;
             go.transform.position = Vector3.zero;
+            go.GetComponent<Terrain>().heightmapPixelError = HeightmapPixelError;
             EditorSceneManager.MarkSceneDirty(go.scene);
             EditorSceneManager.SaveScene(go.scene);
         }
