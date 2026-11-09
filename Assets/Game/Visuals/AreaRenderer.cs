@@ -115,8 +115,25 @@ namespace LordsLegacy.Game.Visuals
             float lift = HeightOffsetM + PreviewLiftM;
 
             var b = new DrapeMesh();
-            if (poly.Count >= 3) AddFill(b, poly, valid ? BuildingFill : InvalidFill, lift);
-            AddOutline(b, poly, poly.Count >= 3, OutlineWidthM, outline, lift + 0.01f, false);
+            // AR-32: fill only when the flattened outline is simple; otherwise no fill and a red cross per crossing.
+            PreviewCrossCount = 0;
+            PreviewFillAreaM2 = 0.0;
+            PreviewFillTriangleCount = 0;
+            bool simple = poly.Count < 3 || Polygons.IsSimple(poly);
+            if (poly.Count >= 3 && simple)
+            {
+                var fill = TerrainDrape.Fill(Ground, poly, lift, valid ? BuildingFill : InvalidFill);
+                PreviewFillTriangleCount = fill.Triangles.Count / 3;
+                PreviewFillAreaM2 = PlanArea(fill);
+                b.Append(fill);
+            }
+            AddOutline(b, poly, poly.Count >= 3, OutlineWidthM, simple ? outline : InvalidColor, lift + 0.01f, false);
+            var crosses = new DrapeMesh();
+            if (!simple)
+            {
+                foreach (var c in Polygons.Crossings(poly)) { AddCross(crosses, c, lift + 0.06f); PreviewCrossCount++; }
+                b.Append(crosses);
+            }
             var m = new DrapeMesh(); // dots and handles only: shown instead of b while the ghost draws the whole shape
             var verts = shape.Vertices;
             for (int i = 0; i < verts.Count; i++)
@@ -133,6 +150,7 @@ namespace LordsLegacy.Game.Visuals
                 AddDiamond(m, verts[i], 0.7f, tint, lift + 0.05f);
             }
 
+            m.Append(crosses);
             if (_previewObject == null)
             {
                 _previewObject = new GameObject("Area preview");
@@ -153,6 +171,32 @@ namespace LordsLegacy.Game.Visuals
 
         private Mesh _previewMarksMesh;
 
+        /// <summary>Red crosses drawn on the draft (one per self-crossing point, AR-32).</summary>
+        public int PreviewCrossCount { get; private set; }
+        /// <summary>Triangles in the draft's fill (0 when the outline is not simple).</summary>
+        public int PreviewFillTriangleCount { get; private set; }
+        /// <summary>Plan-view area of the draft's fill in m².</summary>
+        public double PreviewFillAreaM2 { get; private set; }
+
+        private static double PlanArea(DrapeMesh mesh)
+        {
+            double sum = 0;
+            var t = mesh.Triangles; var v = mesh.Vertices;
+            for (int i = 0; i + 2 < t.Count; i += 3)
+            {
+                var a = v[t[i]]; var c = v[t[i + 1]]; var d = v[t[i + 2]];
+                sum += System.Math.Abs(((double)c.x - a.x) * ((double)d.z - a.z) - ((double)d.x - a.x) * ((double)c.z - a.z)) * 0.5;
+            }
+            return sum;
+        }
+
+        private void AddCross(DrapeMesh b, PointMm p, float lift)
+        {
+            float x = (float)p.XMetres, z = (float)p.ZMetres, r = 0.9f;
+            b.Append(TerrainDrape.Ribbon(Ground, new List<Vector2> { new Vector2(x - r, z - r), new Vector2(x + r, z + r) }, 0.3f, lift, InvalidColor, false, false));
+            b.Append(TerrainDrape.Ribbon(Ground, new List<Vector2> { new Vector2(x - r, z + r), new Vector2(x + r, z - r) }, 0.3f, lift, InvalidColor, false, false));
+        }
+
         // While the ghost is up it draws the one total shape, so the placed shape's own fill/outline is left out.
         private void ApplyPreviewMesh()
         {
@@ -163,6 +207,7 @@ namespace LordsLegacy.Game.Visuals
         /// <summary>Hides the draft area.</summary>
         public void HidePreview()
         {
+            PreviewCrossCount = 0; PreviewFillTriangleCount = 0; PreviewFillAreaM2 = 0.0;
             if (_previewObject != null) _previewObject.SetActive(false);
         }
 
@@ -201,8 +246,9 @@ namespace LordsLegacy.Game.Visuals
                     poly = re;
                 }
                 // One total shape: fill and closed outline of the whole polygon, drawn instead of the placed shape's own.
-                AddFill(b, poly, BuildingFill, lift - 0.01f);
-                AddOutline(b, poly, true, OutlineWidthM, GhostColor, lift, false);
+                bool simple = Polygons.IsSimple(poly);
+                if (simple) AddFill(b, poly, BuildingFill, lift - 0.01f); // AR-32: no misleading fill when crossing
+                AddOutline(b, poly, true, OutlineWidthM, simple ? GhostColor : InvalidColor, lift, false);
                 if ((V(last) - V(cursor)).magnitude >= 1e-4f) edges++;
                 if (last != first && (V(cursor) - V(first)).magnitude >= 1e-4f) edges++;
             }

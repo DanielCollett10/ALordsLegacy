@@ -963,6 +963,45 @@ namespace LordsLegacy.Tests.PlayMode
             AssertPanelMatchesValidity(); // reordered into a valid shape, or refused: never confirmable while crossing
         }
 
+        // ---- T-202: AR-32 preview without fill when crossing ----
+
+        [UnityTest]
+        public IEnumerator CrossingDraftWithBentEdgeHasNoFillAndACrossPerCrossing()
+        {
+            yield return Setup();
+            var verts = new[] { PointMm.FromMetres(40, 40), PointMm.FromMetres(80, 40), PointMm.FromMetres(80, 80), PointMm.FromMetres(40, 80) };
+            var edges = new[] { AreaEdge.Bent(PointMm.FromMetres(60, 140)), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() };
+            var shape = new AreaShape(verts, edges);
+            var preview = AreaValidator.Validate(_host.World, shape, AreaTypes.TestId);
+            Assert.IsFalse(Polygons.IsSimple(preview.Polygon));
+            int n = Polygons.Crossings(preview.Polygon).Length;
+            Assert.GreaterOrEqual(n, 1);
+            _renderer.ShowPreview(preview, shape);
+            Assert.AreEqual(0, _renderer.PreviewFillTriangleCount);
+            Assert.AreEqual(n, _renderer.PreviewCrossCount);
+            Assert.IsNotNull(_renderer.PreviewMesh);
+        }
+
+        [UnityTest]
+        public IEnumerator ValidDraftFollowingARoadFillsItsWholeOutline()
+        {
+            yield return Setup();
+            DrawEastWestRoad();
+            var seg = new System.Collections.Generic.List<LordsLegacy.Sim.Roads.RoadSegment>(_host.World.Roads.Segments)[0];
+            var side = LordsLegacy.Sim.Roads.RoadSide.Left;
+            double sideZ = seg.SideLine(side)[0].ZMetres;
+            double far = sideZ + (sideZ > 100 ? 50 : -50);
+            var verts = new[] { PointMm.FromMetres(60, sideZ), PointMm.FromMetres(140, sideZ), PointMm.FromMetres(140, far), PointMm.FromMetres(60, far) };
+            var edges = new[] { AreaEdge.FollowsRoad(seg.Id, side), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() };
+            var shape = new AreaShape(verts, edges);
+            var preview = AreaValidator.Validate(_host.World, shape, AreaTypes.TestId);
+            Assert.IsTrue(Polygons.IsSimple(preview.Polygon));
+            _renderer.ShowPreview(preview, shape);
+            Assert.Greater(_renderer.PreviewFillTriangleCount, 0);
+            Assert.AreEqual(0, _renderer.PreviewCrossCount);
+            Assert.AreEqual(preview.AreaM2, _renderer.PreviewFillAreaM2, preview.AreaM2 * 0.01);
+        }
+
         [Test]
         public void BuildBarEnablesBothAreaEntries()
         {
