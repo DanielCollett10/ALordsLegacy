@@ -10,8 +10,8 @@ Shader "LordsLegacy/GroundOverlay"
     {
         _MainTex ("Texture (optional)", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
-        _BiasConst ("Depth bias (constant, world units)", Float) = 0.05
-        _BiasPerDist ("Depth bias per unit of view distance", Float) = 0.01
+        _BiasConst ("Depth bias (constant, world units)", Float) = 0.15
+        _BiasPerDist ("Depth bias per unit of view distance", Float) = 0.03
     }
     SubShader
     {

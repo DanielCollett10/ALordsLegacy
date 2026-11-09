@@ -85,6 +85,47 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator AreaOverARidgeIsDenseAndNeverBelowGround()
+        {
+            _hostGo = new GameObject("SyntheticSimHost");
+            _host = _hostGo.AddComponent<SimHost>();
+            _host.Initialize(new SimTuning(), SyntheticMap.CreateRidge());
+            _host.AutoUpdate = false;
+            _rendererGo = new GameObject("TestAreaRenderer");
+            _renderer = _rendererGo.AddComponent<AreaRenderer>();
+            _renderer.Configure(_host);
+
+            Assert.IsTrue(_host.Execute(new DesignateArea(Square(50, 30, 20), AreaTypes.TestWorkId)).IsAccepted); // work type: no slope limit (the ridge is steep)
+            yield return null;
+            _renderer.Sync();
+            int id = 1;
+            foreach (var a in _host.World.Areas.All) id = a.Id;
+            var mesh = _renderer.GetAreaMesh(id);
+            Assert.IsNotNull(mesh);
+            var verts = mesh.vertices;
+            var cols = mesh.colors;
+            var terrain = _host.World.Terrain;
+            bool sawRidge = false;
+            for (int i = 0; i < verts.Length; i++)
+            {
+                float ground = terrain.HeightAt(verts[i].x, verts[i].z);
+                Assert.GreaterOrEqual(verts[i].y, ground, "vertex below ground at " + verts[i]);
+                if (ground > 4f) sawRidge = true;
+                bool outline = cols[i].a > 0.5f;
+                float limit = outline ? 1.1f : 2.1f;
+                float best = float.MaxValue;
+                for (int j = 0; j < verts.Length; j++)
+                {
+                    if (j == i || (cols[j].a > 0.5f) != outline) continue;
+                    var d = new Vector2(verts[i].x - verts[j].x, verts[i].z - verts[j].z).magnitude;
+                    if (d > 1e-4f && d < best) best = d;
+                }
+                Assert.LessOrEqual(best, limit, "vertex " + verts[i] + " has no neighbour within " + limit + " m");
+            }
+            Assert.IsTrue(sawRidge, "test area should cross the ridge crest");
+        }
+
+        [UnityTest]
         public IEnumerator PreviewIsRedWhenInvalidAndHidesAgain()
         {
             Setup();

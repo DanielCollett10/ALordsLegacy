@@ -7,6 +7,24 @@ namespace LordsLegacy.Sim.Map
     public static class SyntheticMap
     {
         /// <summary>
+        /// A 200x200 m map like <see cref="CreateRamp"/> but with a 5 m high triangular ridge along z centred on x = 60
+        /// (12 m either side), flat elsewhere.
+        /// </summary>
+        public static MapData CreateRidge(string mapId = "synthetic-ridge")
+        {
+            const int nodes = 101;
+            var h = new float[nodes * nodes];
+            for (int iz = 0; iz < nodes; iz++)
+                for (int ix = 0; ix < nodes; ix++)
+                {
+                    float d = System.Math.Abs(ix * 2f - 60f);
+                    h[iz * nodes + ix] = d >= 12f ? 0f : 5f * (1f - d / 12f);
+                }
+            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
+            return new MapData(mapId, grid, new MapTree[0]);
+        }
+
+        /// <summary>
         /// A 200x200 m map from origin (0,0), 2 m cells (101x101 nodes). Height rises 0.1 m per metre of x
         /// (so HeightAt(x, z) = 0.1 * x). Five trees with ids 1..5 and trunk length 8 + id metres.
         /// </summary>
