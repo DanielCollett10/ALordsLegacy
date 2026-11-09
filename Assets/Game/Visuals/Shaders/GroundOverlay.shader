@@ -1,17 +1,23 @@
 // Unlit, alpha-blended shader for things drawn on the terrain (roads, area outlines, fills, drafts, markers).
-// Decision 0020. Output = vertex colour x _Color x optional _MainTex.
-// Depth bias: each vertex is pulled towards the camera along its view ray by
-// _BiasConst + _BiasPerDist * distance (world units). Moving along the view ray leaves the screen
-// position unchanged, so only the depth test is affected; this keeps overlays above terrain that
-// Unity's terrain LOD lifts or drops when zoomed out.
+// Decision 0020 (see its Amendment). Output = vertex colour x _Color x optional _MainTex.
+//
+// Depth bias (vertical clearance, converted to a push along the view ray):
+//   dist = |camera - vertex|,  dir = unit vector vertex->camera
+//   h    = _BiasConst + _BiasPerDist * dist          (vertical metres of clearance wanted)
+//   s    = min(h / max(dir.y, _MinSin), dist * 0.5)  (distance to push the vertex towards the camera)
+// Pushing a vertex s along the view ray lifts it s * sin(grazing angle) above the ground, so dividing
+// by dir.y (the sine of the grazing angle) gives the clearance h at any camera pitch. _MinSin caps
+// the push at very low pitch; dist * 0.5 keeps the vertex in front of the camera.
+// Moving along the view ray leaves the screen position unchanged, so only the depth test is affected.
 Shader "LordsLegacy/GroundOverlay"
 {
     Properties
     {
         _MainTex ("Texture (optional)", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
-        _BiasConst ("Depth bias (constant, world units)", Float) = 0.15
-        _BiasPerDist ("Depth bias per unit of view distance", Float) = 0.03
+        _BiasConst ("Depth bias: vertical clearance, constant (m)", Float) = 0.15
+        _BiasPerDist ("Depth bias: vertical clearance per metre of view distance", Float) = 0.004
+        _MinSin ("Depth bias: minimum sine of grazing angle", Float) = 0.1
     }
     SubShader
     {
@@ -35,6 +41,7 @@ Shader "LordsLegacy/GroundOverlay"
             fixed4 _Color;
             float _BiasConst;
             float _BiasPerDist;
+            float _MinSin;
 
             struct appdata
             {
@@ -57,7 +64,8 @@ Shader "LordsLegacy/GroundOverlay"
                 float3 toCam = _WorldSpaceCameraPos - worldPos;
                 float dist = length(toCam);
                 float3 dir = toCam / max(dist, 1e-4);
-                worldPos += dir * min(_BiasConst + _BiasPerDist * dist, dist * 0.5);
+                float h = _BiasConst + _BiasPerDist * dist;
+                worldPos += dir * min(h / max(dir.y, _MinSin), dist * 0.5);
                 o.pos = mul(UNITY_MATRIX_VP, float4(worldPos, 1.0));
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.color = v.color * _Color;
