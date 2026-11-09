@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Roads;
@@ -31,14 +32,16 @@ namespace LordsLegacy.Sim.Areas
             AreaTypeDef type = world.AreaTypes.Find(typeId);
             if (type == null) return new AreaPreview(poly, area, count, AreaRefusal.UnknownType);
 
-            AreaRefusal reason = FirstReason(world, shape, type, poly, area, out string overlapName);
-            return new AreaPreview(poly, area, count, reason, overlapName);
+            AreaRefusal reason = FirstReason(world, shape, type, ref poly, ref area, out string overlapName,
+                out List<string> fitted);
+            return new AreaPreview(poly, area, count, reason, overlapName, fitted);
         }
 
-        private static AreaRefusal FirstReason(SimWorld world, AreaShape shape, AreaTypeDef type, PointMm[] poly,
-            double area, out string overlapName)
+        private static AreaRefusal FirstReason(SimWorld world, AreaShape shape, AreaTypeDef type, ref PointMm[] poly,
+            ref double area, out string overlapName, out List<string> fitted)
         {
             overlapName = string.Empty;
+            fitted = null;
             int n = shape.Vertices.Count;
             if (n < type.MinPoints) return AreaRefusal.TooFewPoints;
             if (n > type.MaxPoints) return AreaRefusal.TooManyPoints;
@@ -46,6 +49,16 @@ namespace LordsLegacy.Sim.Areas
             if (HasZeroLengthEdge(shape) || !Polygons.IsSimple(poly)) return AreaRefusal.EdgesCross;
             for (int i = 0; i < poly.Length; i++)
                 if (!world.Terrain.Contains((float)poly[i].XMetres, (float)poly[i].ZMetres)) return AreaRefusal.OutsideMap;
+            if (type.Kind == AreaKind.Building)
+            {
+                // AR-34: fit around neighbouring building areas, before size/slope/overlap/road checks.
+                if (!AreaTrim.TryFit(world, shape, poly, out PointMm[] trimmed, out fitted, out AreaRecord first))
+                {
+                    overlapName = first.Name;
+                    return AreaRefusal.OverlapsArea;
+                }
+                if (fitted.Count > 0) { poly = trimmed; area = Math.Abs(Polygons.SignedAreaM2(poly)); }
+            }
             if (area < type.MinAreaM2) return AreaRefusal.TooSmall;
             if (area > type.MaxAreaM2) return AreaRefusal.TooLarge;
             if (type.Kind != AreaKind.Building) return AreaRefusal.Valid; // work areas skip checks 6-8

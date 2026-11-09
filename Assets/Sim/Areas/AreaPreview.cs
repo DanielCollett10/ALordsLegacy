@@ -73,9 +73,13 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>Name of the area overlapped when <see cref="Reason"/> is OverlapsArea; otherwise empty.</summary>
         public string OverlapName { get; }
 
+        /// <summary>Names of the neighbouring building areas the outline was fitted around (AR-34); empty when untrimmed.</summary>
+        public IReadOnlyList<string> FittedAround { get; }
+
         internal AreaPreview(IReadOnlyList<PointMm> polygon, double areaM2, int pointCount, AreaRefusal reason,
-            string overlapName = "")
+            string overlapName = "", IReadOnlyList<string> fittedAround = null)
         {
+            FittedAround = fittedAround ?? new string[0];
             Polygon = polygon; AreaM2 = areaM2; PointCount = pointCount; Reason = reason;
             OverlapName = overlapName ?? string.Empty;
         }

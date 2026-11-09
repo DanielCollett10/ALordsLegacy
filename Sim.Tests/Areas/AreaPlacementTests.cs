@@ -140,7 +140,10 @@ namespace LordsLegacy.Sim.Tests.Areas
             Road(w);
             AddArea(w, AreaTypes.Test, Square(50, 40, 20));
             AreaShape s = Square(55, 45, 20); // steep, overlaps the area and crosses the road
-            Assert.AreEqual(AreaRefusal.TooSteep, AreaValidator.Validate(w, s, T).Reason);
+            // AR-34: a point inside the neighbour can't be fitted around, so that refusal comes before slope.
+            Assert.AreEqual(AreaRefusal.OverlapsArea, AreaValidator.Validate(w, s, T).Reason);
+            // A steep plot with no neighbour is still refused for slope.
+            Assert.AreEqual(AreaRefusal.TooSteep, AreaValidator.Validate(Steep(), s, T).Reason);
 
             w = Ramp();
             Road(w);

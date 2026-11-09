@@ -69,7 +69,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   point count, `AreaRefusal`, overlapped area name). Checks in order: point count, FollowsRoad vertices within 5 cm of
   the road side, or NearRoad vertices within `NearRoadReachM` of the side and not on the road side of it
   ("not on road"; a missing segment also fails), edges cross (repeated shape points or non-simple
-  outline), outside the map (any flattened point), size. Building kinds then run `AreaPlacementChecks` (internal):
+  outline), outside the map (any flattened point). Building kinds then get AR-34 trimming (internal `AreaTrim`, T-205):
+  the outline minus every building area it overlaps by more than `OverlapToleranceM2` (`PolygonBoolean.Difference`, pieces under
+  the tolerance dropped). Exactly one piece with every shape vertex within 5 cm of it becomes the preview polygon/m² (and the
+  stored outline) and `AreaPreview.FittedAround` lists the neighbour names (id order); a split, a hole, or a lost vertex gives
+  `OverlapsArea` naming the lowest-id neighbour. Work kinds are never trimmed. Then size, and building kinds run `AreaPlacementChecks` (internal):
   slope (AR-14), overlap with another building area (AR-15), road corridor crossing (AR-16). Work kinds stop after size.
   `DesignateArea` and `DeleteArea` are in `Commands/` (see below).
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact
