@@ -3,6 +3,7 @@ using LordsLegacy.Game.Tools.Shared;
 using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Placement;
 using LordsLegacy.Sim.Roads;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -52,6 +53,7 @@ namespace LordsLegacy.Game.Tools
         private bool _nodeDragging;
         private NodeMovePreview _nodeMove;
         private PointMm _nodeTarget;
+        private bool _nodeTargetSet;
         private bool _moveMessageShown;
         private bool _ignoreRightRelease;
 
@@ -167,8 +169,8 @@ namespace LordsLegacy.Game.Tools
             {
                 _nodeDragging = true;
                 if (_roads != null) _roads.HideNodeHandles();
-                ShowNodeDragCursor(screenPos);
                 MoveDraggedNode(screenPos);
+                ShowNodeDragCursor();
                 return;
             }
             UpdateCursor(screenPos);
@@ -324,24 +326,28 @@ namespace LordsLegacy.Game.Tools
                 if (_cursor != null) _cursor.Hide();
                 return;
             }
-            if (!TryResolvePoint(screenPos, out var p)) { _cursor?.Hide(); return; }
+            if (!TryResolvePoint(screenPos, out var p) || !CanPlace(p)) { _cursor?.Hide(); return; }
             if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
             _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadWidthM);
             bool snapped = !p.Equals(PointMm.FromMetres(s.X, s.Z));
             _cursor.Show((float)p.XMetres, (float)p.ZMetres, snapped);
         }
 
-        /// <summary>During a node drag the ring sits on the ground point (node drags do not snap).</summary>
-        private void ShowNodeDragCursor(Vector2 screenPos)
+        /// <summary>PL-03/PL-06: whether a road point may go here (not in a building area, on the map). Asked after snapping.</summary>
+        private bool CanPlace(PointMm p) =>
+            _host == null || !_host.IsInitialized || PlacementRules.CanPlaceRoadPoint(_host.World, p).Ok;
+
+        /// <summary>During a node drag the ring sits on the (clamped) drag target (node drags do not snap).</summary>
+        private void ShowNodeDragCursor()
         {
-            if (_host == null || !_host.IsInitialized || _picker == null || !_picker.TryPickScreen(screenPos, out var s) || !s.HasValue)
+            if (_host == null || !_host.IsInitialized || !_nodeTargetSet)
             {
                 _cursor?.Hide();
                 return;
             }
             if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
             _cursor.SetShape(CursorMarkerShape.Ring, (float)RoadWidthM);
-            _cursor.Show((float)s.X, (float)s.Z, false);
+            _cursor.Show((float)_nodeTarget.XMetres, (float)_nodeTarget.ZMetres, false);
         }
 
         /// <summary>The point for a click or drag: the snapped road point when snapping applies, else the ground point.</summary>
@@ -409,7 +415,10 @@ namespace LordsLegacy.Game.Tools
         {
             if (_host == null || !_host.IsInitialized || _picker == null) return;
             if (!_picker.TryPickScreen(screenPos, out var s) || !s.HasValue) return;
-            _nodeTarget = PointMm.FromMetres(s.X, s.Z); // no snapping while dragging a node
+            var target = PointMm.FromMetres(s.X, s.Z); // no snapping while dragging a node
+            // PL-06: inside a building area the node stays at the last placeable position.
+            if (!CanPlace(target)) { if (!_nodeTargetSet) return; }
+            else { _nodeTarget = target; _nodeTargetSet = true; }
             _nodeMove = RoadValidator.PreviewMove(_host.World, _pressNode, _nodeTarget);
             if (_roads != null) _roads.ShowNodeMovePreview(_nodeMove, (float)RoadWidthM);
             if (_panel == null) return;
@@ -444,6 +453,7 @@ namespace LordsLegacy.Game.Tools
         private void EndNodeDrag()
         {
             _nodeDragging = false;
+            _nodeTargetSet = false;
             _pressNode = -1;
             _nodeMove = null;
             if (_roads != null) { _roads.HideNodeMovePreview(); _roads.HideNodeHandles(); }
@@ -459,6 +469,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (_dragIndex < 0 || _dragIndex >= _points.Count) return;
             if (!TryResolvePoint(screenPos, out var p)) return;
+            if (!CanPlace(p)) return; // PL-06: stays at the last placeable position
             if (p == _points[_dragIndex]) return;
             _points[_dragIndex] = p;
             _rejection = null;
@@ -468,6 +479,7 @@ namespace LordsLegacy.Game.Tools
         private bool AddPointAt(Vector2 screenPos)
         {
             if (!TryResolvePoint(screenPos, out var p)) return false;
+            if (!CanPlace(p)) { _cursor?.Hide(); return false; } // PL-03: refused, nothing added
             _points.Add(p);
             _rejection = null;
             Refresh();
