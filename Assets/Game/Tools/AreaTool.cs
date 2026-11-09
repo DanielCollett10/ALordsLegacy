@@ -4,6 +4,7 @@ using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Placement;
 using LordsLegacy.Sim.Roads;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -193,10 +194,22 @@ namespace LordsLegacy.Game.Tools
             ShowSnapMarkers(p);
             SnapPoint(screenPos, ref p, out _, out _);
             _hover = p; _hoverSnapped = _lastSnapped; _hasHover = true;
+            if (!CanPlace(p))
+            {
+                // PL-06: no marker means you can't place here.
+                HideCursor();
+                return;
+            }
             if (_cursor == null) _cursor = CursorMarker.Create(transform, _host);
             _cursor.SetShape(CursorMarkerShape.Sphere, CursorSphereM);
             _cursor.Show((float)p.XMetres, (float)p.ZMetres, _hoverSnapped);
             UpdateGhost();
+        }
+
+        /// <summary>PL-05/PL-06: whether a point (already snapped) may be placed for this tool's area type.</summary>
+        private bool CanPlace(PointMm p)
+        {
+            return _host == null || !_host.IsInitialized || PlacementRules.CanPlaceAreaVertex(_host.World, _typeId, p).Ok;
         }
 
         private void HideCursor()
@@ -394,6 +407,7 @@ namespace LordsLegacy.Game.Tools
             if (t == null || _points.Count >= t.MaxPoints || edge >= EdgeCount) return false;
             if (!TryGround(screenPos, out var p)) return false;
             SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
+            if (!CanPlace(p)) return false;
             _points.Insert(edge + 1, p);
             _roadSeg.Insert(edge + 1, seg); _roadSide.Insert(edge + 1, side);
             _locked.Insert(edge + 1, false); _locked[edge] = false;
@@ -485,6 +499,7 @@ namespace LordsLegacy.Game.Tools
             if (_dragIndex < 0 || _dragIndex >= _points.Count) return;
             if (!TryGround(screenPos, out var p)) return;
             SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
+            if (!CanPlace(p)) return; // PL-06: stay at the last placeable position
             _roadSeg[_dragIndex] = seg; _roadSide[_dragIndex] = side;
             if (p == _points[_dragIndex]) { Refresh(); return; }
             _points[_dragIndex] = p;
@@ -499,6 +514,7 @@ namespace LordsLegacy.Game.Tools
             if (t == null || _points.Count >= t.MaxPoints) return false;
             if (!TryGround(screenPos, out var p)) return false;
             SnapPoint(screenPos, ref p, out int seg, out RoadSide side);
+            if (!CanPlace(p)) return false;
             _points.Add(p); _edges.Add(AreaEdge.Straight()); _roadSeg.Add(seg); _roadSide.Add(side); _locked.Add(false);
             _rejection = null;
             Refresh();
