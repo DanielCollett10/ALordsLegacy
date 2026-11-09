@@ -83,6 +83,9 @@ namespace LordsLegacy.EditorTools.Visuals
                 mat = new Material(Shader.Find("Standard")) { name = "PlaceholderRoadDirtPath" };
                 AssetDatabase.CreateAsset(mat, RoadMaterialPath);
             }
+            // Roads draw on the ground overlay shader (decision 0020); the colour is the tint.
+            var overlay = Shader.Find(LordsLegacy.Game.GroundOverlay.ShaderName);
+            if (overlay != null && mat.shader != overlay) mat.shader = overlay;
             mat.color = new Color(0.55f, 0.42f, 0.28f);
             EditorUtility.SetDirty(mat);
             return mat;

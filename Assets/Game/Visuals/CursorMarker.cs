@@ -145,9 +145,11 @@ namespace LordsLegacy.Game.Visuals
         {
             if (cache == null)
             {
-                // Sprites/Default is unlit, alpha blended and tints by the material colour.
-                var shader = Shader.Find("Sprites/Default");
-                cache = new Material(shader != null ? shader : Shader.Find("Standard")) { name = name, color = colour };
+                // GroundOverlay is unlit, alpha blended, tints by the material colour and biases depth (decision 0020).
+                var shared = GroundOverlay.Material();
+                cache = shared != null
+                    ? new Material(shared) { name = name, color = colour }
+                    : new Material(Shader.Find("Sprites/Default")) { name = name, color = colour };
             }
             return cache;
         }
