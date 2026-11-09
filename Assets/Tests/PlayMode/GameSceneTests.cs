@@ -158,6 +158,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(terrain, "No terrain in Game scene.");
             Assert.IsNotNull(terrain.GetComponent<TerrainCollider>(), "Terrain has no TerrainCollider.");
             Assert.AreEqual(Vector3.zero, terrain.transform.position);
+            Assert.AreEqual(1f, terrain.heightmapPixelError, 0.001f, "Terrain heightmapPixelError must be 1 (T-196).");
 
             foreach (var p in Points)
             {

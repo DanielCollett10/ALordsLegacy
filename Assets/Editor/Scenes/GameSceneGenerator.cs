@@ -22,6 +22,8 @@ namespace LordsLegacy.EditorTools.Scenes
         public const string TerrainDataPath = "Assets/Maps/TestMap/TestMapTerrain.asset";
         /// <summary>Name of the terrain object in the scene.</summary>
         public const string TerrainName = "Terrain";
+        /// <summary>Terrain LOD error in pixels (T-196). 1 keeps roads and areas on the ground at every zoom.</summary>
+        public const float TerrainHeightmapPixelError = 1f;
 
         /// <summary>Menu entry: regenerates Game.unity and updates Build Settings.</summary>
         [MenuItem("LordsLegacy/Scenes/Generate Game scene")]
@@ -61,6 +63,7 @@ namespace LordsLegacy.EditorTools.Scenes
             var go = Terrain.CreateTerrainGameObject(td);
             go.name = TerrainName;
             go.transform.position = Vector3.zero;
+            go.GetComponent<Terrain>().heightmapPixelError = TerrainHeightmapPixelError;
             return go;
         }
 
