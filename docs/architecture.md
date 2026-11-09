@@ -61,7 +61,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   from vertex A's perpendicular distance to vertex B's, so both vertices stay put (`FollowsRoad` = both distances 0;
   helpers in internal `NearRoadGeometry`). `AreaTypeDef.NearRoadReachM` (10) is the vertex reach limit. `NearArea` (AR-25, area id; internal `NearAreaGeometry`) does
   the same along another area's flattened outline (shorter way round); `AreaFlattener.Flatten(shape, roads, areas, spacingM)` takes the registry.
-  `FollowsRoadPartly` (AR-26) is gone from the Sim (T-200); `AreaTool.ChooseNearRoad` returns Straight when NearRoad/NearArea/FollowsRoad
+  `AreaTool.ChooseNearRoad` returns Straight when NearRoad/NearArea/FollowsRoad
   don't apply (T-199, AR-33). The flattener guarantees AR-30 for every edge kind: the outline passes through every shape vertex in
   order and each edge's run starts at its vertex and ends at the next. A NearRoad/NearArea edge whose far vertex's nearest guide point
   lies behind the snapped vertex (dot(P-A, B-A) < 0) flattens to the plain straight segment (AR-33). Pinned by `FlattenInvariantTests`.
@@ -190,8 +190,13 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
 
 - `Assets/Game/` reads Sim state and draws it; it turns player input into Sim commands and holds
   no game rules (see `CLAUDE.md`).
+- `TerrainDrape` (`Assets/Game/Visuals/`, decision 0020) is the one shared helper for ground visuals: `Point`, `Ribbon`
+  (a polyline as a dashed or solid strip, at most 1 m between points) and `Fill` (a polygon as triangles of at most 2 m).
+  Each point sits at Sim terrain height + a lift; straight lines stay straight in plan view. `RoadRenderer`,
+  `AreaRenderer` and the area/road drafts use it. Any new ground visual must use it.
 - `GroundOverlay.Material(texture = null)` (`Assets/Game/Visuals/`, shader `LordsLegacy/GroundOverlay`, decision 0020):
-  use it for anything drawn on the terrain (roads, area outlines/fills, drafts, markers) instead of `Sprites/Default`.
+  use it for anything drawn on the terrain (roads, area outlines/fills, drafts, markers). Renderers fall back to
+  `Sprites/Default` only if the overlay shader or its material is missing; that is not the normal path.
   Unlit, alpha blended, vertex colour x optional texture, pulls geometry towards the camera by a bias growing with
   view distance so terrain LOD doesn't cover it. Materials are cached; don't destroy them. The shader ships through
   the `Assets/Game/Resources/GroundOverlay.mat` material (loaded with `Resources.Load`).

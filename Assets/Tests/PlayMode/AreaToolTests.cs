@@ -436,8 +436,9 @@ namespace LordsLegacy.Tests.PlayMode
             yield return Setup();
             DrawEastWestRoad();
             _tool.SetViewSettings(new ViewSettings { Snapping = false });
-            Click(60, 100.9f); Click(140, 100.9f); Click(140, 150); Click(60, 150);
-            Assert.AreEqual(100.9, _tool.Points[0].ZMetres, 0.05, "No snapping to the road side.");
+            // 101.6 is just outside the road corridor (side line at 101.25); inside it the point would be refused (PL-01).
+            Click(60, 101.6f); Click(140, 101.6f); Click(140, 150); Click(60, 150);
+            Assert.AreEqual(101.6, _tool.Points[0].ZMetres, 0.05, "No snapping to the road side.");
             for (int i = 0; i < 4; i++) Assert.AreNotEqual(AreaEdgeKind.FollowsRoad, _tool.Edges[i].Kind);
         }
 
@@ -738,11 +739,12 @@ namespace LordsLegacy.Tests.PlayMode
             yield return Setup();
             _tool.SetViewSettings(new ViewSettings());
             Assert.IsTrue(_host.Execute(new DesignateArea(Square(), AreaTypes.TestId)).IsAccepted);
-            Click(40.3f, 40.3f);
+            // Just outside the square: points inside a building area are refused (PL-01, T-209).
+            Click(39.7f, 39.7f);
             Assert.AreEqual(PointMm.FromMetres(40, 40), _tool.Points[0]);
             _panel.ClickCancel();
             _tool.SetViewSettings(new ViewSettings { Snapping = false });
-            Click(40.3f, 40.3f);
+            Click(39.7f, 39.7f);
             Assert.AreNotEqual(PointMm.FromMetres(40, 40), _tool.Points[0]);
         }
 
