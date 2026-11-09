@@ -30,7 +30,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _BiasConst: 0.15
-    - _BiasPerDist: 0.03
+    - _BiasPerDist: 0.004
+    - _MinSin: 0.1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
