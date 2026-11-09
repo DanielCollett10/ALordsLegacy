@@ -73,7 +73,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   the outline minus every building area it overlaps by more than `OverlapToleranceM2` (`PolygonBoolean.Difference`, pieces under
   the tolerance dropped). Exactly one piece with every shape vertex within 5 cm of it becomes the preview polygon/m² (and the
   stored outline) and `AreaPreview.FittedAround` lists the neighbour names (id order); a split, a hole, or a lost vertex gives
-  `OverlapsArea` naming the lowest-id neighbour. Work kinds are never trimmed. Then size, and building kinds run `AreaPlacementChecks` (internal):
+  `OverlapsArea` naming the lowest-id neighbour. T-206 (AR-34 point 5): the same step also subtracts every overlapping road
+  corridor (`RoadSegment.CorridorPolygon`); `FittedAround` then ends with `"road"` (once). A split/hole/lost vertex that only
+  happens once corridors are subtracted gives `CrossesRoad`; if the areas alone already cause it, `OverlapsArea` wins.
+  Work kinds are never trimmed. Then size, and building kinds run `AreaPlacementChecks` (internal):
   slope (AR-14), overlap with another building area (AR-15), road corridor crossing (AR-16). Work kinds stop after size.
   `DesignateArea` and `DeleteArea` are in `Commands/` (see below).
 - `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`, decision 0012): integer-mm `PointMm`, `Segments` (exact

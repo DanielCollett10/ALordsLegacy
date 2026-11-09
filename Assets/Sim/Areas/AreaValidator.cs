@@ -52,11 +52,14 @@ namespace LordsLegacy.Sim.Areas
             if (type.Kind == AreaKind.Building)
             {
                 // AR-34: fit around neighbouring building areas, before size/slope/overlap/road checks.
-                if (!AreaTrim.TryFit(world, shape, poly, out PointMm[] trimmed, out fitted, out AreaRecord first))
+                AreaTrim.FitResult fit = AreaTrim.Fit(world, shape, poly, out PointMm[] trimmed, out fitted,
+                    out AreaRecord first);
+                if (fit == AreaTrim.FitResult.OverlapsArea)
                 {
                     overlapName = first.Name;
                     return AreaRefusal.OverlapsArea;
                 }
+                if (fit == AreaTrim.FitResult.CrossesRoad) return AreaRefusal.CrossesRoad;
                 if (fitted.Count > 0) { poly = trimmed; area = Math.Abs(Polygons.SignedAreaM2(poly)); }
             }
             if (area < type.MinAreaM2) return AreaRefusal.TooSmall;
