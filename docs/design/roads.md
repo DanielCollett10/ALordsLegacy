@@ -55,6 +55,11 @@ the map, too steep, crosses itself, overlaps road, crosses area, would join a ro
 
 Verified (T-119 replay): left-clicking an existing road starts a branch and makes a junction (item 6). No change needed.
 
+Verified (T-211, end of M6): refusal order and texts match `RoadRefusal` and `RoadValidator` (RD-08..10, RD-13, RD-17);
+RD-02 matches `ControlPointFilter.Clean`; RD-18 ring and the 16 px snap order match `RoadTool`; RD-20 matches
+`PlacementRules.CanPlaceRoadPoint` (building areas only); RD-19 matches `RoadRenderer` (`TerrainDrape`, overlay material).
+No mismatch found beyond the implementation notes below.
+
 > Implementation note (RD-03, sample spacing): each control-point span is split into `round(span length ÷ 1 m)` equal
 > steps, so the spacing is close to 1 m, not exact.
 >
