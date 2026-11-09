@@ -1035,18 +1035,19 @@ namespace LordsLegacy.Tests.PlayMode
             var neighbour = new System.Collections.Generic.List<AreaRecord>(_host.World.Areas.All)[0];
 
             // Frame the draft (z 120..160) inside the view.
-            _camGo.transform.position = new Vector3(100f, 50f, 115f);
+            _camGo.transform.position = new Vector3(90f, 50f, 115f);
             _cam.orthographicSize = 70f;
+            // Points 1, 3 and 4 are more than 10 m from the neighbour's outline, so edge 2->3 stays Straight (not
+            // NearArea, AR-25) and really cuts into the neighbour.
             Click(40, 160);              // point 1
             Click(100, (float)far);      // point 2: snaps onto the neighbour's corner
-            Click(55, 120);              // point 3: edge 2->3 cuts the neighbour
-            Click(35, 120);              // point 4
+            Click(45, 120);              // point 3: edge 2->3 cuts the neighbour
+            Click(30, 120);              // point 4
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[1].Kind, "Edge 2->3 cuts the neighbour, it does not hug it.");
             Assert.AreEqual(4, _tool.PointCount);
             Assert.AreEqual(PointMm.FromMetres(100, far), _tool.Points[1], "Point 2 snapped onto the neighbour's corner.");
             Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
-            StringAssert.Contains("fitted around " + neighbour.Name, _panel.Status,
-                "pts=" + string.Join(" ", System.Array.ConvertAll(new System.Collections.Generic.List<PointMm>(_tool.Points).ToArray(), p => p.XMetres + "," + p.ZMetres))
-                + " fitted=" + string.Join("|", _tool.CurrentPreview.FittedAround) + " status=" + _panel.Status);
+            StringAssert.Contains("fitted around " + neighbour.Name, _panel.Status);
             Assert.IsTrue(_panel.IsConfirmEnabled);
 
             var expected = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
