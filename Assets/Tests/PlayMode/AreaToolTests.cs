@@ -646,7 +646,7 @@ namespace LordsLegacy.Tests.PlayMode
             ClickAt(SidePointOut(60, 0, out _));   // point 1: on the road side
             ClickAt(SidePointOut(140, 8, out _));  // point 2: 8 m out, would normally be NearRoad
             ClickAt(SidePointOut(140, 28, out _)); // point 3
-            ClickAt(SidePointOut(100, 20, out _)); // point 4: neighbour of point 1, 40 m along the road towards point 2
+            ClickAt(SidePointOut(100, 8, out _));  // point 4: neighbour of point 1, within reach, 40 m along the road towards point 2
             Assert.AreEqual(4, _tool.PointCount);
             Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "Edge 1->2 would double back along the road (AR-33).");
             Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind);
@@ -875,17 +875,14 @@ namespace LordsLegacy.Tests.PlayMode
 
             Click(40, 40);
             Click(80, 40);
-            // Real key path: Backspace removes the last point; the second press empties the draft.
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
-            yield return null;
+            // Backspace calls RemoveLastPoint. Keyboard events aren't delivered while the Game view is unfocused (as in
+            // BackspaceRemovesLastPoint), so call what the key calls. The second call empties the draft.
+            _tool.RemoveLastPoint();
+            Assert.AreEqual(1, _tool.PointCount);
             Assert.IsTrue(_panel.IsShown, "One point left: the panel stays.");
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
-            yield return null;
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState(Key.Backspace));
-            yield return null;
+            _tool.RemoveLastPoint();
             Assert.AreEqual(0, _tool.PointCount);
             Assert.IsFalse(_panel.IsShown, "UIP-03: Backspace of the last point hides the panel.");
-            InputSystem.QueueStateEvent(Keyboard.current, new KeyboardState());
             yield return null;
         }
 

@@ -585,7 +585,8 @@ namespace LordsLegacy.Game.Tools
         /// double back along the line. That is when the far vertex's nearest point on the line lies on the same side of
         /// the snapped vertex (along the line) as the snapped vertex's other neighbour: the edge would then run back
         /// over ground the neighbouring edge already covers. "Same side" is the sign of the arc-length offset from the snapped
-        /// vertex's nearest point to each one's nearest point on the line (neighbour offsets under 3 m are ignored as noise).
+        /// vertex's nearest point to each one's nearest point on the line. A neighbour more than the type's reach (10 m) from the
+        /// line, or under 3 m along from the snapped vertex, is ignored.
         /// </summary>
         private bool DoublesBack(PointMm[] line, int snapped, int far)
         {
@@ -599,7 +600,10 @@ namespace LordsLegacy.Game.Tools
             if (System.Math.Abs(delta) < 1.0) return false;
             // Where the neighbour's nearest point on the line sits, relative to the snapped vertex, measured along the line
             // (not the raw tangent, which would mistake a tilted outline for a neighbour that lies "ahead").
-            double along = Polylines.Nearest(line, _points[other]).ArcLengthMm - hs.ArcLengthMm;
+            var ho = Polylines.Nearest(line, _points[other]);
+            // A neighbour beyond reach of the line isn't hugging it, so it can't be what the edge doubles back over.
+            if (ho.DistanceMm > Type.NearRoadReachM * PointMm.MmPerMetre) return false;
+            double along = ho.ArcLengthMm - hs.ArcLengthMm;
             if (System.Math.Abs(along) < 3.0 * PointMm.MmPerMetre) return false;
             return (along > 0) == (delta > 0);
         }
