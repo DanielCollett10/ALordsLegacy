@@ -1044,7 +1044,9 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(4, _tool.PointCount);
             Assert.AreEqual(PointMm.FromMetres(100, far), _tool.Points[1], "Point 2 snapped onto the neighbour's corner.");
             Assert.IsTrue(_tool.CurrentPreview.IsValid, _tool.CurrentPreview.ReasonText);
-            StringAssert.Contains("fitted around " + neighbour.Name, _panel.Status);
+            StringAssert.Contains("fitted around " + neighbour.Name, _panel.Status,
+                "pts=" + string.Join(" ", System.Array.ConvertAll(new System.Collections.Generic.List<PointMm>(_tool.Points).ToArray(), p => p.XMetres + "," + p.ZMetres))
+                + " fitted=" + string.Join("|", _tool.CurrentPreview.FittedAround) + " status=" + _panel.Status);
             Assert.IsTrue(_panel.IsConfirmEnabled);
 
             var expected = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
