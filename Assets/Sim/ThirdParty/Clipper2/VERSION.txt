@@ -1,0 +1,22 @@
+Clipper2 (C# source), vendored for the Sim (decision 0021)
+
+Upstream:   https://github.com/AngusJohnson/Clipper2 (CSharp folder), Angus Johnson
+Licence:    Boost Software License 1.0 (LICENSE.txt in this folder)
+Version:    No release tag is recorded in the vendored source. The file headers are dated:
+            Clipper.Core.cs 12 Dec 2025, Clipper.Triangulation.cs 13 Dec 2025 (BETA), Clipper.Offset.cs 11 Oct 2025,
+            PooledList.cs and HashCode.cs 7 Oct 2025, Clipper.Engine.cs and others as in their headers.
+            Pin = these files as they are. Upgrading is a deliberate task (decision 0021).
+Defines:    USINGZ is not defined, so the Clipper2Lib namespace is used and Z is not carried.
+
+Compatibility edits (every change made to a vendored file):
+  1. Clipper.Offset.cs, Clipper.Triangulation.cs, PooledList.cs, HashCode.cs: added `#nullable enable` as the first
+     line. Why: these files use `?` reference annotations without a nullable context, which gives warning CS8632
+     in Sim.Tests (Nullable disabled) and would in Unity. The other Clipper files already had the directive.
+     No code change.
+
+No other edits. The files compile unmodified at LangVersion 9.0 (Sim.Tests.csproj). They use no UnityEngine
+types, no System.Numerics, no Span/Unsafe/BitOperations. The Sim.asmdef (noEngineReferences: true) covers this
+folder, so no separate asmdef is needed.
+
+Only Sim code calls Clipper, through Assets/Sim/Geometry/PolygonBoolean.cs. No Clipper type appears in a public
+Sim API.
