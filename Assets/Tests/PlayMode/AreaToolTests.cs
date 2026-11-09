@@ -607,8 +607,50 @@ namespace LordsLegacy.Tests.PlayMode
             // Edges touching point 3: 2->3 (index 1) and 3->1 (index 2) are Straight and end on points 2 and 1.
             Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[1].Kind);
             Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[2].Kind);
-            Assert.AreEqual(_tool.Points[1].XMetres, 140.0, 0.5);
-            Assert.AreEqual(_tool.Points[0].XMetres, 60.0, 0.5);
+            // The flattened outline runs point 2 -> point 3 -> point 1 with no road sample in between.
+            PointMm p1 = _tool.Points[0], p2 = _tool.Points[1], p3 = _tool.Points[2];
+            var flat = AreaFlattener.Flatten(new AreaShape(_tool.Points, _tool.Edges), _host.World.Roads, _host.World.Areas, 1.0);
+            Assert.IsTrue(OutlineGoesDirectly(flat, p2, p3), "Edge 2->3 ends on points 2 and 3 and nothing else.");
+            Assert.IsTrue(OutlineGoesDirectly(flat, p3, p1), "Edge 3->1 ends on points 3 and 1 and nothing else.");
+        }
+
+        /// <summary>True when the closed outline has <paramref name="b"/> immediately after <paramref name="a"/> (exact to 2 mm).</summary>
+        private static bool OutlineGoesDirectly(System.Collections.Generic.IReadOnlyList<PointMm> poly, PointMm a, PointMm b)
+        {
+            for (int k = 0; k < poly.Count; k++)
+                if (poly[k].DistanceTo(a) < 2.0 && poly[(k + 1) % poly.Count].DistanceTo(b) < 2.0) return true;
+            return false;
+        }
+
+        /// <summary>AR-23: a NearRoad edge (other point 8 m away) still forms and the outline ends exactly on both points.</summary>
+        [UnityTest]
+        public IEnumerator NearRoadEightMetresStillFormsAndEndsOnBothPoints()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            DrawNearRoadQuad(8f);
+            Assert.AreEqual(AreaEdgeKind.NearRoad, _tool.Edges[0].Kind);
+            var poly = new System.Collections.Generic.List<PointMm>(_tool.CurrentPreview.Polygon);
+            Assert.IsTrue(poly.Exists(p => p.DistanceTo(_tool.Points[0]) < 2.0), "Outline passes exactly through point 1.");
+            Assert.IsTrue(poly.Exists(p => p.DistanceTo(_tool.Points[1]) < 2.0), "Outline passes exactly through point 2.");
+        }
+
+        /// <summary>AR-33 'behind': the other neighbour of the snapped vertex lies the same way along the road as the far
+        /// vertex, so a NearRoad edge would double back over it. The edge is Straight.</summary>
+        [UnityTest]
+        public IEnumerator NearRoadEdgeThatWouldDoubleBackIsStraight()
+        {
+            yield return Setup();
+            DrawCurvedRoad();
+            _tool.SetViewSettings(new ViewSettings());
+            ClickAt(SidePointOut(60, 0, out _));   // point 1: on the road side
+            ClickAt(SidePointOut(140, 8, out _));  // point 2: 8 m out, would normally be NearRoad
+            ClickAt(SidePointOut(140, 28, out _)); // point 3
+            ClickAt(SidePointOut(100, 20, out _)); // point 4: neighbour of point 1, 40 m along the road towards point 2
+            Assert.AreEqual(4, _tool.PointCount);
+            Assert.AreEqual(AreaEdgeKind.Straight, _tool.Edges[0].Kind, "Edge 1->2 would double back along the road (AR-33).");
+            Assert.AreNotEqual(AreaEdgeKind.FollowsRoadPartly, _tool.Edges[0].Kind);
         }
 
         /// <summary>AR-31: four all-straight points clicked in a crossing order are reordered into a simple shape.</summary>
