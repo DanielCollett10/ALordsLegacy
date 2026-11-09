@@ -17,13 +17,7 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>Follows a road side's curve at a distance that tapers from one vertex to the other (AR-24).</summary>
         NearRoad = 3,
         /// <summary>Follows another area's outline the same way NearRoad follows a road side (AR-25).</summary>
-        NearArea = 4,
-        /// <summary>
-        /// One vertex sits on a road side line; the edge hugs that side line for as long as it stays within
-        /// <see cref="AreaFlattener.PartialFollowReachM"/> of the straight chord, then runs straight to the other
-        /// vertex, which may be anywhere (AR-26).
-        /// </summary>
-        FollowsRoadPartly = 5
+        NearArea = 4
     }
 
     /// <summary>One edge of an area shape. Edge i runs from vertex i to vertex i+1. Immutable.</summary>
@@ -56,9 +50,6 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>An edge that follows a road side's curve at a tapering distance away from the road (AR-24).</summary>
         public static AreaEdge NearRoad(int segmentId, RoadSide side) =>
             new AreaEdge(AreaEdgeKind.NearRoad, default, segmentId, side);
-        /// <summary>An edge that hugs a road side from its snapped vertex as far as it runs along the chord (AR-26).</summary>
-        public static AreaEdge FollowsRoadPartly(int segmentId, RoadSide side) =>
-            new AreaEdge(AreaEdgeKind.FollowsRoadPartly, default, segmentId, side);
         /// <summary>An edge that follows another area's outline at a tapering distance outside it (AR-25).</summary>
         public static AreaEdge NearArea(int areaId) =>
             new AreaEdge(AreaEdgeKind.NearArea, default, areaId, RoadSide.Left);
