@@ -3,6 +3,9 @@
 **Status: PROVISIONAL.** Being verified by the performance spike (M1, epic "Architecture
 check"). Locked or revised once `docs/findings/perf-spike.md` exists.
 
+**Status note (10/11/2026).** The perf findings weren't kept after the cleanup (T-017). The owner is going ahead
+with plain C# for MVP-1. Treat this decision as the working rule. Movement follows decision 0022.
+
 **Context.** Tech spec v0.2 (ARC-02, ENG-02, DEV-11, NAV-08) puts all game state in Unity
 ECS/DOTS with Burst jobs. Decision 0001 and `CLAUDE.md` put all rules in `Assets/Sim` as
 plain C# with no UnityEngine, tested with `dotnet test`. The owner asked the lead to choose.

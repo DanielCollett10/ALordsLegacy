@@ -43,7 +43,7 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | TIME-A5 | **Seasonal daylight:** sunrise and sunset follow the calendar, about 8 h of daylight in midwinter and 16 h in midsummer (southern-England-like). Families work from sunrise to sunset, with a meal break. Night length varies to match | DECIDED |
 | TIME-A6 | **Steady light** toggle in the top bar: freezes the on-screen lighting at daytime. It is visual only; the Sim's day, night and schedules are unchanged | DECIDED |
 | TIME-A7 | Combat (later) must feel good at 1–4×; the pace will be retuned when combat exists | DECIDED |
-| TIME-A8 | Real walking speed stays; MVP layouts are kept short instead (start camp at the forest edge, about 100–150 m from the first trees). The midday meal is eaten **on site**, with no walk home (replaces TIME-05's "meal at home" and FOOD-02's walk). Full rules: `people.md` PPL-01..06 | DECIDED |
+| TIME-A8 | At 1× walking always looks real. The start camp sits at the forest edge. **Citizens eat once a week, on Sunday evening at home**; there is no meal in the working day (replaces TIME-05's daily meal at home, FOOD-02's walk and FOOD-A9's daily eating). Full rules: `people.md` | DECIDED |
 
 ## Visuals (ART)
 

@@ -38,7 +38,13 @@ Derived: clock runs 96× real time at 1×. A year is 91 h at 1×, 11.4 h at 8×,
 | --- | --- | --- | --- |
 | Walk speed | 0.87 | m per game minute (= 5 km/h on screen at 1×) | TIME-04, decision 0004 |
 | Ox speed | 0.52 | m per game minute (= 3 km/h on screen at 1×) | TIME-04 |
-| Road speed multiplier | 1.5 | × | ROAD-10 |
+| Road speed multiplier | 1.5 (under review, MOV-09) | × | ROAD-10 |
+| Max walkable slope | 30 | degrees (slope never slows walking) | MOV-01, MOV-02 |
+| Nav grid cell | 2 | m | decision 0022 |
+| Milling radius / stay | 25 / 20–90 | m from camp fire / game minutes | PPL-31 |
+| Debug send-to linger | 30 | game minutes | PPL-33 |
+| Meals every | 7 | days (Sunday evening, at home) | PPL-21, PPL-23 |
+| Camp footprint | 24 × 16 | m | CMP-02 |
 
 > Implementation note (Walk and ox speed, TIME-04): `SimTuning` holds both values, but no Sim system moves anyone yet.
 > The road multiplier is stored on the dirt path type (`RoadTypeDef.SpeedMultiplier` = 1.5), but no movement reads it.
