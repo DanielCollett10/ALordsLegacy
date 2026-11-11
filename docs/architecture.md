@@ -41,6 +41,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   - **People (T-251, PPL-10..14):** `SimWorld.People` (`Assets/Sim/People/Population.cs`, partial in `SimWorld.People.cs`)
     holds `Family`, `Citizen` and `Ox` records by explicit int id, iterated in id order. Ids are never reused after
     removal. `Version` bumps on add/remove. `Citizen.AgeYears(nowTick, SimTuning.AgeingRate)` implements POP-27.
+  - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
+    holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
+    of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
+    `FindAt`, `QueryRect`, `Ids`, and `Version` (bumps on add/remove).
   - **Random (T-250, CLK-07):** `SimWorld.Random` (`Assets/Sim/Core/SimRandom.cs`, partial in `SimWorld.Random.cs`) is the
     world's one deterministic source, never null. It is a PCG-XSH-RR 64/32 written in Sim code (no `System.Random`). It is
     seeded from `SimTuning.WorldSeed` (default 12345). `NextInt(min, max)` is max-exclusive and unbiased, `NextDouble()` is in
