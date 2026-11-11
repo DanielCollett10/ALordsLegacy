@@ -45,6 +45,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
     `FindAt`, `QueryRect`, `Ids`, and `Version` (bumps on add/remove).
+  - **Start layout (T-253, CMP-01..07):** `StartLayout` (`Assets/Sim/Start/`) is pure data: camp centre/rotation, fire,
+    stockpile, ox stand and tent spots relative to the camp (rotated with it), trunk road control points, families with
+    citizens, ox count. `StartLayoutApplier.Apply(world, layout)` adds the camp footprint (clearing trees under it), draws
+    the trunk road via `world.Execute(DrawRoad)` (throws `InvalidOperationException` with the refusal text if refused),
+    adds families (home = tent spot), citizens at home and oxen at the stand. `SimWorld.Camp` (`CampInfo`,
+    `SimWorld.Start.cs`) exposes the footprint id and world-space fire, stockpile and stand points; null until applied.
   - **Random (T-250, CLK-07):** `SimWorld.Random` (`Assets/Sim/Core/SimRandom.cs`, partial in `SimWorld.Random.cs`) is the
     world's one deterministic source, never null. It is a PCG-XSH-RR 64/32 written in Sim code (no `System.Random`). It is
     seeded from `SimTuning.WorldSeed` (default 12345). `NextInt(min, max)` is max-exclusive and unbiased, `NextDouble()` is in
