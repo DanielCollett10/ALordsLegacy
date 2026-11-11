@@ -122,6 +122,12 @@ namespace LordsLegacy.Sim.Tuning
         public int WakeStaggerMaxMinutes { get; set; } = 30;
 
         /// <summary>
+        /// Game minutes a citizen stays where a debug send-to left them, before the routine resumes.
+        /// Unit: game minutes. Rule: PPL-33 (tuning.md "Debug send-to linger").
+        /// </summary>
+        public int DebugLingerMinutes { get; set; } = 30;
+
+        /// <summary>
         /// Length of one standard log. Unit: metres. Rule: TMB-04.
         /// </summary>
         public double StandardLogLengthM { get; set; } = 4;

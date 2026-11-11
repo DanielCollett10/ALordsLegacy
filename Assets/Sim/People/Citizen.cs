@@ -52,6 +52,11 @@ namespace LordsLegacy.Sim.People
         /// <summary>Current activity.</summary>
         public Activity Activity { get; set; }
 
+        /// <summary>
+        /// The debug "send to" in progress (PPL-33), or null. While set, the routine does not move this citizen.
+        /// </summary>
+        public DebugSendState DebugSend { get; set; }
+
         /// <inheritdoc />
         public double PreviousX { get; set; }
 

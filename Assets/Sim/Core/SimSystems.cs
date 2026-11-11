@@ -40,6 +40,7 @@ namespace LordsLegacy.Sim.Core
                 // steps
                 // movement
                 new LordsLegacy.Sim.Navigation.MovementSystem(),
+                new LordsLegacy.Sim.People.DebugSendSystem(),
                 // operations
             };
         }

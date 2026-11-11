@@ -66,6 +66,8 @@ namespace LordsLegacy.Sim.People
 
         private void StepCitizen(SimWorld world, Citizen c, bool day)
         {
+            // A debug send-to owns the citizen (PPL-33). Forget the routine state so it starts afresh afterwards.
+            if (c.DebugSend != null) { _states.Remove(c.Id); return; }
             long now = world.Tick;
             _states.TryGetValue(c.Id, out State st);
             if (st != null && c.Move != st.Order)
