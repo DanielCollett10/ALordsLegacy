@@ -128,6 +128,11 @@ namespace LordsLegacy.Sim.Tuning
         public int DebugLingerMinutes { get; set; } = 30;
 
         /// <summary>
+        /// The dispatcher runs on ticks that are a multiple of this. Unit: game minutes. Rule: tech spec section 6.
+        /// </summary>
+        public int DispatchIntervalMinutes { get; set; } = 10;
+
+        /// <summary>
         /// Length of one standard log. Unit: metres. Rule: TMB-04.
         /// </summary>
         public double StandardLogLengthM { get; set; } = 4;

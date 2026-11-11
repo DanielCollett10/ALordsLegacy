@@ -13,7 +13,11 @@ namespace LordsLegacy.Sim.Tasks
     {
         private readonly SortedDictionary<int, TaskRecord> _byId = new SortedDictionary<int, TaskRecord>();
         private readonly TreeRegistry _trees;
+        private readonly HashSet<int> _busy = new HashSet<int>();
         private int _nextId = 1;
+
+        /// <summary>True while the citizen holds an Assigned or Active task (WC-26: such a worker is not idle).</summary>
+        public bool IsBusy(int citizenId) => _busy.Contains(citizenId);
 
         /// <summary>Builds a board that reserves trees in <paramref name="trees"/>.</summary>
         public TaskBoard(TreeRegistry trees)
@@ -74,6 +78,7 @@ namespace LordsLegacy.Sim.Tasks
             var t = Get(taskId);
             if (t == null || t.State != TaskState.Open) return false;
             t.State = TaskState.Assigned; t.AssigneeId = citizenId;
+            _busy.Add(citizenId);
             Version++;
             return true;
         }
@@ -99,6 +104,7 @@ namespace LordsLegacy.Sim.Tasks
             {
                 t.CurrentStep = t.Def.Steps.Count;
                 t.State = TaskState.Done;
+                if (t.AssigneeId.HasValue) _busy.Remove(t.AssigneeId.Value);
                 ReleaseAll(t);
             }
             Version++;
@@ -133,6 +139,7 @@ namespace LordsLegacy.Sim.Tasks
             var t = Get(taskId);
             if (t == null || t.IsFinished) return false;
             t.State = TaskState.Cancelled;
+            if (t.AssigneeId.HasValue) _busy.Remove(t.AssigneeId.Value);
             t.AssigneeId = null;
             ReleaseAll(t);
             Version++;

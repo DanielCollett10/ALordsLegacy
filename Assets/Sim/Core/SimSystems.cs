@@ -37,7 +37,9 @@ namespace LordsLegacy.Sim.Core
                 // routine
                 new LordsLegacy.Sim.People.RoutineSystem(),
                 // dispatch
+                new LordsLegacy.Sim.Tasks.DispatchSystem(),
                 // steps
+                new LordsLegacy.Sim.Tasks.StepRunnerSystem(),
                 // movement
                 new LordsLegacy.Sim.Navigation.MovementSystem(),
                 new LordsLegacy.Sim.People.DebugSendSystem(),
