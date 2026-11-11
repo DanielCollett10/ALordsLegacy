@@ -41,12 +41,12 @@ namespace LordsLegacy.Tests.PlayMode
         [TearDown]
         public void TearDown()
         {
-            if (_rendGo != null) Object.Destroy(_rendGo);
-            if (_hostGo != null) Object.Destroy(_hostGo);
+            if (_rendGo != null) Object.DestroyImmediate(_rendGo);
+            if (_hostGo != null) Object.DestroyImmediate(_hostGo);
             if (_registry != null)
             {
-                foreach (var d in _registry.Definitions) Object.Destroy(d);
-                Object.Destroy(_registry);
+                foreach (var d in _registry.Definitions) Object.DestroyImmediate(d);
+                Object.DestroyImmediate(_registry);
             }
         }
 
