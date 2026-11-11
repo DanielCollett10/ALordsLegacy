@@ -15,6 +15,7 @@ system doc with rules. Source: T-119 notes (M3/M4 play), triaged 07/11/2026.
 
 After M6: **M7 People walk the land** (GDD MVP-1 foundations: families, citizens and movement over terrain and roads),
 then **woodcutting** (MVP-1 loop), which needs walking. Reshaping (FG-05) and save/load come later, once those exist.
-The M7 epics will be planned in a later conversation.
+Update 11/11/2026: M7 People walk the land, then **M8 Woodcutters fell trees**, **M9 Oxen haul logs** and **M10
+Build it first** (which completes MVP-1). See `people.md`, `movement.md`, `camp.md` and `woodcutting.md`.
 
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).

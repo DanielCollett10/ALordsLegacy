@@ -14,7 +14,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | WC-03 | A module must sit **fully inside** its building area and must not overlap another module | DECIDED |
 | WC-04 | Placing a module: it follows the cursor and can be rotated freely. With snapping on, an edge snaps flush to the nearest area edge (and turns to match it) when within the snap distance. Placement shows red with a reason when it's invalid | DECIDED |
 | WC-05 | Hut: exactly 1, mandatory. Log storage: at least 1, 20 logs each (INV-A3). Oxen stand: optional, holds 1 ox | DECIDED |
-| WC-06 | Blocking: the hut blocks movement. Log storage and the oxen stand don't (people and oxen walk onto them to unload and tie up) | PROPOSED |
+| WC-06 | Blocking: the hut blocks movement. Log storage and the oxen stand don't (people and oxen walk onto them to unload and tie up) | DECIDED |
 | WC-07 | **M8: placed modules are built instantly** (placeholder). Real construction by odd-jobbers comes in M9 | DECIDED |
 | WC-08 | Trees under a placed module are removed and yield nothing (BLD-10-A) | DECIDED |
 
@@ -23,7 +23,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | WC-10 | **Default:** with no drawn work area, the operation harvests **in a circle around the hut**, nearest tree first and working outwards. Nearest is measured by straight-line distance from the hut's access point | DECIDED |
-| WC-11 | Default circle radius: **80 m** (`DefaultWorkRadiusM`) | PLACEHOLDER (lead's default) |
+| WC-11 | Default circle radius: **a third of a day's walk** (owner: "a big distance"), stored as `DefaultWorkRadiusM`. Because trees are taken nearest first, the radius only matters once the near trees are gone. Value: see the open question below | DECIDED (value OPEN) |
 | WC-12 | The player can instead **draw a work area from the hut panel** (WORK-02). The drawn area replaces the circle. The order inside it is still nearest to the hut first. A "Use default" button goes back to the circle | DECIDED |
 | WC-13 | The work area (circle or drawn) is shown only while the operation's panel is open (WORK-04, MVP-1-03) | DECIDED |
 | WC-14 | Trees are reserved one per feller (TMB-08), so overlapping work areas never share a tree (WORK-05) | DECIDED |
@@ -31,16 +31,17 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 ## Who does what (a family's workers)
 
-The task system decides who does what. It aims for **one feller and one ox handler**, so nobody makes
-pointless walks back and forth.
+The task system decides who does what. There are **no fixed roles**: whoever is free takes the next task, and
+nobody stands idle.
 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | WC-20 | Workers are the working-age members of the assigned families (14+ for these heavy steps, POP-A3b). Up to 2 families per hut | DECIDED |
 | WC-21 | **Felling always comes first.** If the operation has no ox (none assigned and none free in the pool), every worker fells | DECIDED |
-| WC-22 | When an ox can be had and there are 2+ workers, **one worker is the ox handler** and the rest fell. With 1 worker, they do both: fell a tree, then haul once a full load (4 logs) is waiting | DECIDED |
-| WC-23 | **Fetch in good time:** the handler sets off for the ox early enough that the ox reaches the tree about when its logs are cut: when the time left on the tree ≤ handler's walk to the ox + ox's walk to the tree | PROPOSED |
-| WC-24 | A handler with nothing to haul **waits with the ox at the operation** (log storage). They don't go back to felling, to avoid back-and-forth | PROPOSED |
+| WC-22 | A **Haul** task opens when a full load (4 logs, WCO-07) is waiting at a tree site, or less when no standing tree is left to add to it. It goes to a **free** worker (one not in the middle of a tree), nearest to the ox first | DECIDED |
+| WC-23 | **Fetch in good time:** when a tree's logs will make a full load, the Haul opens early, at the moment the time left on that tree ≤ the free worker's walk to the ox + the ox's walk to the tree. That way the ox arrives about when the logs are cut | PROPOSED |
+| WC-24 | **After a haul the handler goes back to felling.** They leave the ox at the log storage (or its stand), and the next Haul goes to whoever is free. If nobody else is free, the previous handler takes it once their current tree is done. With one worker, they simply alternate | DECIDED |
+| WC-26 | A worker in the middle of a tree finishes that tree before taking a Haul (no abandoned trees) | DECIDED |
 | WC-25 | Felling stops when logs already cut (on the ground plus in storage) reach the total storage capacity, so logs never pile up with nowhere to go. Shows *Storage full* (INV-08) | PROPOSED |
 
 ## Oxen
@@ -55,12 +56,34 @@ pointless walks back and forth.
 
 ## Timber chain timing (TMB-01..03)
 
-| Stage | Enabled in M8 | Duration | Tag |
-| --- | --- | --- | --- |
-| Fell | yes | 90 game minutes | PLACEHOLDER |
-| Delimb | no (its time is added to the next enabled stage, TMB-02) | 30 | PLACEHOLDER |
-| Buck (cut to length) | yes | 15 per log | PLACEHOLDER |
-| Load / unload ox | yes | 10 each | PLACEHOLDER |
+Durations are in **game minutes** (decision 0004; the Sim tick is one game minute). With the 30-minute day, one game
+minute is 1.25 real seconds at 1×.
+
+| Stage | Enabled | Duration (game min) | At 1× (real) | Tag |
+| --- | --- | --- | --- | --- |
+| Fell | yes (M8) | 90 | ~1 min 53 s | PLACEHOLDER |
+| Delimb | no (its time is added to the next enabled stage, TMB-02) | 30 | ~38 s | PLACEHOLDER |
+| Buck (cut to length) | yes (M8) | 15 per log | ~19 s per log | PLACEHOLDER |
+| Load / unload ox | yes (M9) | 10 each | ~13 s | PLACEHOLDER |
+
+A 4-log tree takes about 3 game hours, or about 3¾ real minutes at 1×.
+
+## Milestones (owner 11/11/2026)
+
+- **M8 Woodcutters fell trees:** the woodcutting area, placing modules (built instantly), assigning families, the
+  work schedule, felling and bucking into log piles on the ground, stumps, and the operation panel.
+- **M9 Oxen haul logs:** the inventory ledger, the camp stockpile, ox leading, storage stacks, the Oxen tab and
+  oxen stand, *Waiting for ox*, *Storage full*, and a second storage raising capacity to 40.
+- **M10 Build it first:** construction by odd-jobbers (`people.md` PPL-40..44). Completes MVP-1.
+
+## Open
+
+- **WC-11 radius.** "A third of a day's walk" could mean a third of 24 hours (~830 m) or a third of a ~12 h
+  working day (~420 m). An ox needs `2r ÷ 1.04` game minutes for a round trip, so one haul fits in a day only up to
+  about **490 m in summer** (16 h of daylight) and about **230 m in winter** (8 h).
+- **Hauls that can't finish before sunset.** Either (a) a haul only starts if it can finish before sunset, so
+  logs beyond that wait for longer days; or (b) the handler ties the ox where it stands at sunset (logs stay
+  loaded), goes home, and carries on in the morning (PPL-24).
 
 ## Operation panel (M8)
 
