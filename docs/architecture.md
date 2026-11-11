@@ -105,6 +105,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     adds the footprint (`FootprintRegistry.NextId()`), lists it on the operation, clears trees under it (ids in
     `RemovedTreeIds`); built at once. `RemoveModule(footprintId)` removes it (unknown → NotFound). Blocking modules push
     agents aside through the existing nav sync + `MovementSystem`.
+  - **Operation commands (T-270, WCO-05/10, POP-05, WC-12):** `AssignFamily` / `UnassignFamily` (`Assets/Sim/Commands/`)
+    set and clear `Family.WorkplaceId` (= operation id) and the operation's family list; assign is refused (NotFound /
+    NotAllowed) for unknown ids, a family that already has a workplace, or no free slot. Unassign cancels the
+    operation's unfinished tasks held by the family's members via `TaskBoard.Cancel` (reservations released).
+    `PauseOperation`, `ResumeOperation`, `SetWorkArea` (area must be the type's work area type) and `UseDefaultWorkArea`
+    are in `OperationSettings.cs`. `DeleteArea` resets any operation linked to the deleted work area to the default.
+    Nothing assigns automatically.
   - **Inventory ledger part 1 (T-273, INV-01/11, LED-01/03/09):** `SimWorld.Inventory` (`Assets/Sim/Inventory/`, partial in
     `SimWorld.Inventory.cs`) is a `Ledger` of `LedgerLocation`s (`GroundPile` at a point with optional owner operation id,
     or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
