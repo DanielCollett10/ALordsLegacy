@@ -6,7 +6,11 @@ namespace LordsLegacy.Sim.Forestry
     public enum TreeState
     {
         /// <summary>Upright and unfelled.</summary>
-        Standing = 0
+        Standing = 0,
+        /// <summary>Cut down; the trunk lies on the ground waiting to be cut into logs.</summary>
+        Felled = 1,
+        /// <summary>Only the stump is left.</summary>
+        Stump = 2
     }
 
     /// <summary>One tree: stable id, ground position and usable trunk length.</summary>
@@ -21,7 +25,9 @@ namespace LordsLegacy.Sim.Forestry
         /// <summary>Usable trunk length in metres.</summary>
         public double TrunkLengthM { get; }
         /// <summary>Current state.</summary>
-        public TreeState State { get; set; } = TreeState.Standing;
+        public TreeState State { get; internal set; } = TreeState.Standing;
+        /// <summary>Owner (e.g. worker id) that reserved this tree, or null when unreserved.</summary>
+        public int? ReservedBy { get; internal set; }
 
         /// <summary>Creates a standing tree.</summary>
         public TreeRecord(TreeId id, float x, float z, double trunkLengthM)

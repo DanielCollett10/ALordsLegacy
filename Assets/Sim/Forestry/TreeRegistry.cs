@@ -13,6 +13,7 @@ namespace LordsLegacy.Sim.Forestry
         private readonly Dictionary<long, List<TreeRecord>> _cells = new Dictionary<long, List<TreeRecord>>();
         private readonly float _cellSize;
         private int _version;
+        private int _standing;
 
         /// <summary>Creates an empty registry. <paramref name="cellSizeM"/> is the spatial grid cell size in metres.</summary>
         public TreeRegistry(float cellSizeM = 16f)
@@ -22,16 +23,104 @@ namespace LordsLegacy.Sim.Forestry
         }
 
         /// <summary>Number of standing trees (removed trees are not counted).</summary>
-        public int Count => _byId.Count;
+        public int Count => _standing;
 
         /// <summary>
-        /// Increases by one on every change (each <see cref="Add"/> and each successful <see cref="Remove"/>).
+        /// Increases by one on every change (each <see cref="Add"/>, each successful <see cref="Remove"/> and each
+        /// <see cref="SetState"/> that changes a state). Reservations do not change it.
         /// Views compare it with the last value they drew to know when to rebuild.
         /// </summary>
         public int Version => _version;
 
-        /// <summary>All standing trees in ascending id order. Do not remove trees while enumerating this.</summary>
-        public IEnumerable<TreeRecord> All => _byId.Values;
+        /// <summary>Standing trees in ascending id order. Do not change trees while enumerating this.</summary>
+        public IEnumerable<TreeRecord> All => InState(TreeState.Standing);
+
+        /// <summary>Stumps in ascending id order (for the renderer).</summary>
+        public IEnumerable<TreeRecord> Stumps => InState(TreeState.Stump);
+
+        /// <summary>Felled trunks in ascending id order (for the renderer).</summary>
+        public IEnumerable<TreeRecord> Felled => InState(TreeState.Felled);
+
+        private IEnumerable<TreeRecord> InState(TreeState s)
+        {
+            foreach (var t in _byId.Values)
+                if (t.State == s) yield return t;
+        }
+
+        /// <summary>
+        /// Moves a tree to a new state and bumps <see cref="Version"/>. Only forward steps are allowed
+        /// (Standing → Felled → Stump, or Standing → Stump). Leaving Standing cancels any reservation.
+        /// Returns false (no change) if the id is unknown or the state is already <paramref name="state"/>;
+        /// throws <see cref="InvalidOperationException"/> for a backward step.
+        /// </summary>
+        public bool SetState(TreeId id, TreeState state)
+        {
+            if (!_byId.TryGetValue(id.Value, out var t)) return false;
+            if (t.State == state) return false;
+            if (state < t.State) throw new InvalidOperationException("Tree " + id + " cannot go from " + t.State + " to " + state);
+            if (t.State == TreeState.Standing) _standing--;
+            t.State = state;
+            t.ReservedBy = null;
+            _version++;
+            return true;
+        }
+
+        /// <summary>
+        /// Reserves a standing tree for <paramref name="ownerId"/>. Returns false if the tree is unknown, not
+        /// standing, or reserved by someone else. Reserving again as the same owner returns true.
+        /// </summary>
+        public bool Reserve(TreeId id, int ownerId)
+        {
+            if (!_byId.TryGetValue(id.Value, out var t) || t.State != TreeState.Standing) return false;
+            if (t.ReservedBy.HasValue) return t.ReservedBy.Value == ownerId;
+            t.ReservedBy = ownerId;
+            return true;
+        }
+
+        /// <summary>Clears a reservation. Returns false if the tree is unknown or was not reserved.</summary>
+        public bool Release(TreeId id)
+        {
+            if (!_byId.TryGetValue(id.Value, out var t) || !t.ReservedBy.HasValue) return false;
+            t.ReservedBy = null;
+            return true;
+        }
+
+        /// <summary>True when any standing tree has trunk inside the region.</summary>
+        public bool AnyStandingIn(TreeRegion region) => CountStandingIn(region, true) > 0;
+
+        /// <summary>Number of standing trees with trunk inside the region.</summary>
+        public int CountStandingIn(TreeRegion region) => CountStandingIn(region, false);
+
+        private int CountStandingIn(TreeRegion region, bool stopAtOne)
+        {
+            if (region == null) throw new ArgumentNullException(nameof(region));
+            int n = 0;
+            foreach (var t in QueryRect(region.Bounds()))
+            {
+                if (!region.Contains(t.X, t.Z)) continue;
+                n++;
+                if (stopAtOne) break;
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// The standing, unreserved tree closest to (x,z) that lies inside <paramref name="region"/> (null = anywhere),
+        /// or null if none. Ties go to the lowest id.
+        /// </summary>
+        public TreeRecord NearestUnreservedStanding(float x, float z, TreeRegion region = null)
+        {
+            TreeRecord best = null;
+            double bestD = double.MaxValue;
+            foreach (var t in region == null ? All : QueryRect(region.Bounds()))
+            {
+                if (t.State != TreeState.Standing || t.ReservedBy.HasValue) continue;
+                if (region != null && !region.Contains(t.X, t.Z)) continue;
+                double dx = t.X - x, dz = t.Z - z, d = dx * dx + dz * dz;
+                if (d < bestD || (d == bestD && t.Id.Value < best.Id.Value)) { best = t; bestD = d; }
+            }
+            return best;
+        }
 
         /// <summary>
         /// Adds a standing tree. Throws <see cref="ArgumentException"/> if the id exists or was removed before
@@ -47,6 +136,7 @@ namespace LordsLegacy.Sim.Forestry
             long key = Key(Cell(x), Cell(z));
             if (!_cells.TryGetValue(key, out var list)) { list = new List<TreeRecord>(); _cells[key] = list; }
             list.Add(t);
+            _standing++;
             _version++;
             return t;
         }
@@ -60,6 +150,8 @@ namespace LordsLegacy.Sim.Forestry
             if (!_byId.TryGetValue(id.Value, out var t)) return false;
             _byId.Remove(id.Value);
             _removedIds.Add(id.Value);
+            if (t.State == TreeState.Standing) _standing--;
+            t.ReservedBy = null; // removing a tree cancels its reservation
             long key = Key(Cell(t.X), Cell(t.Z));
             var list = _cells[key];
             list.Remove(t);
@@ -95,7 +187,7 @@ namespace LordsLegacy.Sim.Forestry
                 for (int cz = z0; cz <= z1; cz++)
                     if (_cells.TryGetValue(Key(cx, cz), out var list))
                         foreach (var t in list)
-                            if (b.Contains(t.X, t.Z)) result.Add(t);
+                            if (t.State == TreeState.Standing && b.Contains(t.X, t.Z)) result.Add(t);
             result.Sort((a, c) => a.Id.Value.CompareTo(c.Id.Value));
             return result;
         }
