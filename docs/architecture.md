@@ -118,7 +118,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   market, construction and population numbers are not in code yet. The Sim never hard-codes these.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
-  length and `State` (only `Standing` exists yet). Trees come from the baked map. `Remove(TreeId)` takes a tree out of
+  length, `State` (Standing → Felled → Stump, via `SetState`, forward only, bumps `Version`) and `ReservedBy`.
+  `Reserve`/`Release` claim a standing tree for a worker; `Remove` and leaving Standing cancel it.
+  `NearestUnreservedStanding(x, z, region)`, `AnyStandingIn`/`CountStandingIn` take a `TreeRegion` (circle or polygon);
+  `Felled` and `Stumps` list the other states for the renderer. Trees come from the baked map. `Remove(TreeId)` takes a tree out of
   the records and grid (false if unknown); a removed id can never be added again (BLD-10-D). `Version` increases on
   every Add or Remove, so views rebuild only when it changes. `Count`, `All` and the queries show standing trees only.
   `TreeClearing` (static) removes the trees under a polygon (`RemoveInPolygon`) or within a distance of a polyline
