@@ -25,7 +25,7 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 > Dropped ticks are never run later. The tech spec says "slows itself rather than skipping simulation steps".
 > Owner to decide whether dropping is the intended behaviour or whether due ticks should be carried and run later.
 
-> Implementation note (Rest day, FOOD-A4): `SimTuning.RestDayEnabled` exists (default on), but no Sim system reads it yet.
+> Implementation note (Rest day, FOOD-A4): `SimTuning.RestDayEnabled` exists (default off, as above), but no Sim system reads it yet.
 
 Calendar: DayOfYear counts from 1 Jan (1 Jan = day 1, so 1 Mar = day 60). The year number
 goes up on **1 January**, so Year 1 is a short first year (1 Mar – 31 Dec) and Year 2 starts
@@ -47,9 +47,6 @@ Derived: the clock runs 48× real time at 1×. A year is 182 h at 1×, 22.8 h at
 | Debug send-to linger | 30 | game minutes | PPL-33 |
 | Meals every | 7 | days (Sunday evening, at home) | PPL-21, PPL-23 |
 | Camp footprint | 24 × 16 | m | CMP-02 |
-
-> Implementation note: the code still holds the old defaults (15-minute day, 0.87 / 0.52, road 1.5, rest day on).
-> The M7 task "Pace change" updates `SimTuning`, `RoadTypes` and `SimConfig.asset` together.
 
 Derived (walking, off-road): 104 m per game hour, a quarter day ≈ 625 m, a half day ≈ 1.25 km,
 a full day ≈ 2.5 km. Crossing a 25 km world ≈ 10 game days. A 300 m commute ≈ 2.9 h (2.3 h on a road).
@@ -99,7 +96,7 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Ageing rate | 2 | × calendar | POP-27 |
 | Starting oxen | 2 | | Oxen |
 
-> Implementation note (Starting oxen): `SimTuning.StartingOxen` = 2 exists, but no oxen are created yet.
+> Implementation note (Starting oxen): `SimTuning.StartingOxen` (2) is not read. The start layout's `OxCount` (2) creates the oxen.
 
 ## Food
 

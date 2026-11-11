@@ -16,6 +16,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | PPL-13 | Oxen are records too (id, name, home stand). The start has 2 (`StartingOxen`). In M7 they stand at the camp's ox stand and never move on their own. An ox moves only when a citizen leads it (M8) | DECIDED |
 | PPL-14 | Every citizen and ox has a position, a facing and an activity the UI can show (Sleeping, Milling about, Walking, Working, Waiting, plus the task name from M8) | DECIDED |
 
+> Implementation note (PPL-13): the 2 starting oxen come from the start layout's `OxCount`. `SimTuning.StartingOxen` is not read (see `tuning.md`).
+
 ## Distances (DECIDED, owner 10/11/2026)
 
 | ID | Rule | Tag |
@@ -50,6 +52,9 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 | PPL-31 | M7 milling: pick a random spot within `MillRadiusM` (25 m) of the camp fire on walkable ground, walk there, stay 20–90 game minutes, repeat. Each citizen's choices come from the seeded Sim random, and start times are spread so people don't move in step | PLACEHOLDER (values) |
 | PPL-32 | Children under working age always mill about near home (POP-11) | DECIDED |
 | PPL-33 | Debug only: a **send to** action moves one selected citizen to a clicked point, to test movement. After arriving they stay 30 game minutes, then go back to their routine. Not in player builds | DECIDED |
+
+> Implementation note (PPL-33): the Sim side exists (`SendCitizenTo` command and `DebugSendSystem`, decision 0026), but no
+> Unity control calls it yet, so the action can't be used in the game. The "not in player builds" gate is therefore not built.
 
 ## Odd jobs (unassigned families)
 
