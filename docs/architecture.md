@@ -271,6 +271,11 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `AutoUpdate`. `Tick` runs `World.Step(Pacer.Advance(..))`, or resets the pacer while paused. Views read
   `World`, `Pacer`, `TickFraction` and `Stats`. Views send commands only through `Execute(ISimCommand)`,
   `TogglePause` and `TickPacer.SetSpeed`.
+- Start layout (T-261): `StartLayoutConfig` (`Assets/Game/Config/`, ScriptableObject) converts to the Sim `StartLayout` (`ToLayout()`).
+  `SimHost` has a serialized `_startLayout`; `Initialize` applies it with `StartLayoutApplier` after building the world (null = no camp).
+  Menu `LordsLegacy/Map/Generate Start Layout` (`StartLayoutGenerator`) writes `Assets/Maps/TestMap/StartLayout.asset`
+  (flat spot at most 5 degrees west of the forest edge, 50+ trees within 50 m, north-south trunk road past the camp; idempotent).
+  `GameSceneGenerator` wires the asset into SimHost when it exists.
 - `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` and `TicksPerSecond`
   (ticks in the last real second). Sim code never reads it.
 - Terrain: Unity Terrain built from `TestMapTerrain.asset` is drawn by Unity and is the collider for picking.
