@@ -150,6 +150,8 @@ namespace LordsLegacy.EditorTools.Scenes
             var people = new GameObject("PeopleRenderer").AddComponent<LordsLegacy.Game.Visuals.PeopleRenderer>();
             SetRef(people, "host", host);
             SetRef(people, "registry", registry);
+            var modules = new GameObject("ModuleRenderer").AddComponent<LordsLegacy.Game.Visuals.ModuleRenderer>();
+            SetRef(modules, "host", host);
             var camp = new GameObject("CampRenderer").AddComponent<LordsLegacy.Game.Visuals.CampRenderer>();
             SetRef(camp, "host", host);
             SetRef(camp, "registry", registry);
@@ -219,6 +221,7 @@ namespace LordsLegacy.EditorTools.Scenes
             {
                 new[] { "TestAreaTool", LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Sim.Areas.AreaTypes.TestId },
                 new[] { "TestWorkAreaTool", LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, LordsLegacy.Sim.Areas.AreaTypes.TestWorkId },
+                new[] { "WoodcutterAreaTool", "woodcutter", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
             };
             GameObject last = null;
             foreach (var d in defs)
@@ -234,6 +237,11 @@ namespace LordsLegacy.EditorTools.Scenes
                 SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
                 SetRef(tool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             }
+            var moduleTool = new GameObject("ModuleTool").AddComponent<LordsLegacy.Game.Tools.ModuleTool>();
+            SetRef(moduleTool, "_host", host);
+            SetRef(moduleTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(moduleTool, "_panel", panel);
+            SetRef(moduleTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             return last;
         }
 

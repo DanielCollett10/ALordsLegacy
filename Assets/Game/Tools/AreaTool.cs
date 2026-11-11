@@ -4,6 +4,7 @@ using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.Placement;
 using LordsLegacy.Sim.Roads;
 using UnityEngine;
@@ -144,7 +145,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (!HasDraft) return false;
             ClearDraft();
-            return true;
+            return !StartsOperation; // operation areas: false lets the controller deselect, so Esc returns to no tool
         }
 
         /// <summary>A mouse button went down at a screen position (pixels).</summary>
@@ -283,10 +284,32 @@ namespace LordsLegacy.Game.Tools
             if (result.IsAccepted)
             {
                 ClearDraft();
+                HandOffToModules(result);
                 return;
             }
             _rejection = string.IsNullOrEmpty(result.Text) ? result.Reason.ToString() : result.Text;
             ShowPanel();
+        }
+
+        /// <summary>True when this tool draws an operation's building area (e.g. the woodcutter), which has modules to place next.</summary>
+        private bool StartsOperation => OperationTypes.FindByBuildingArea(_typeId) != null;
+
+        /// <summary>WC-01: a new operation's area was designated, so activate the module tool: hut first, then log storage.</summary>
+        private void HandOffToModules(CommandResult result)
+        {
+            if (_controller == null || result.Created.Length == 0) return;
+            var op = _host.World.Operations.FindByArea((int)result.Created[0]);
+            if (op == null) return;
+            var def = OperationTypes.Find(op.TypeId);
+            if (def == null) return;
+            _controller.BeginModulePlacement(op.Id, new[] { def.HutTypeId, def.LogStorageTypeId });
+        }
+
+        /// <summary>Drops the draft; for an operation area the tool is left too, so cancelling returns to no tool.</summary>
+        private void CancelDraft()
+        {
+            ClearDraft();
+            if (StartsOperation && _controller != null && _controller.ActiveTool == (ITool)this) _controller.Deselect();
         }
 
         /// <summary>Backspace: removes the last placed point. The draft is cleared when no point is left.</summary>
@@ -309,7 +332,7 @@ namespace LordsLegacy.Game.Tools
         {
             int v = VertexUnder(screenPos);
             if (v >= 0) { RemovePoint(v); return; }
-            if (HasDraft) ClearDraft(); else DeleteAreaUnder(screenPos);
+            if (HasDraft) CancelDraft(); else DeleteAreaUnder(screenPos);
         }
 
         private void RemovePoint(int index)
@@ -746,7 +769,7 @@ namespace LordsLegacy.Game.Tools
             _subscribed = false;
         }
 
-        private void OnPanelCancelled() { ClearDraft(); }
+        private void OnPanelCancelled() { CancelDraft(); }
 
         private void OnEnable()
         {
