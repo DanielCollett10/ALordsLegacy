@@ -107,6 +107,12 @@ namespace LordsLegacy.Sim.Tuning
         public int StartingOxen { get; set; } = 2;
 
         /// <summary>
+        /// Seed of the world's random source (<c>SimWorld.Random</c>). Same seed, same sequence of routine choices.
+        /// Unit: integer seed (no unit). Rule: CLK-07 (decision 0022). Read by the world at construction.
+        /// </summary>
+        public int WorldSeed { get; set; } = 12345;
+
+        /// <summary>
         /// Distance between sampled points along a road centre line. Unit: metres. Rule: RD-03
         /// (tuning.md "Roads and areas"). Read by roads.
         /// </summary>
