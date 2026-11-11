@@ -41,6 +41,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   - **People (T-251, PPL-10..14):** `SimWorld.People` (`Assets/Sim/People/Population.cs`, partial in `SimWorld.People.cs`)
     holds `Family`, `Citizen` and `Ox` records by explicit int id, iterated in id order. Ids are never reused after
     removal. `Version` bumps on add/remove. `Citizen.AgeYears(nowTick, SimTuning.AgeingRate)` implements POP-27.
+  - **Nav grid (T-256, decision 0022):** `SimWorld.Nav` (`Assets/Sim/Navigation/NavGrid.cs`, partial in
+    `SimWorld.Nav.cs`, never null) is a grid of `NavCellSizeM` (2 m) cells over the terrain bounds with per-cell
+    `IsBlocked` (centre slope over `MaxWalkSlopeDeg`, or centre inside a movement-blocking footprint) and
+    `SpeedMultiplier` (highest road-corridor multiplier, else 1). `NavSyncSystem` is first in `SimSystems` and also runs on
+    `OnCommandApplied`; the first `Sync` is a full build, later ones diff road segment / blocking footprint ids and
+    recompute only the cells under added or removed items. `Version` bumps when any cell changes. A world with no map
+    has a grid with no cells.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).

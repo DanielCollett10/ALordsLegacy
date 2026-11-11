@@ -33,6 +33,7 @@ namespace LordsLegacy.Sim.Core
             return new ISimSystem[]
             {
                 // sync
+                new LordsLegacy.Sim.Navigation.NavSyncSystem(),
                 // routine
                 // dispatch
                 // steps

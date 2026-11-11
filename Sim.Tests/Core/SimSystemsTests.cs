@@ -146,9 +146,9 @@ namespace LordsLegacy.Sim.Tests
         }
 
         [Test]
-        public void DefaultSystemListIsEmptyUntilSubsystemsRegister()
+        public void DefaultSystemListStartsWithNavSync()
         {
-            Assert.That(SimSystems.CreateDefault(), Is.Empty);
+            Assert.That(SimSystems.CreateDefault()[0], Is.InstanceOf<LordsLegacy.Sim.Navigation.NavSyncSystem>());
         }
 
         [Test]

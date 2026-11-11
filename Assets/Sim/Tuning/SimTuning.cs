@@ -161,6 +161,17 @@ namespace LordsLegacy.Sim.Tuning
         public double SlopeSampleGridM { get; set; } = 2;
 
         /// <summary>
+        /// Side of one walk-grid cell. Unit: metres. Rule: decision 0022 (NavGrid). Read by navigation.
+        /// </summary>
+        public double NavCellSizeM { get; set; } = 2;
+
+        /// <summary>
+        /// Ground steeper than this at a cell centre cannot be walked. Unit: degrees. Rule: MOV-02, decision 0022.
+        /// Read by navigation.
+        /// </summary>
+        public double MaxWalkSlopeDeg { get; set; } = 30;
+
+        /// <summary>
         /// Overlap area allowed between two areas before they count as overlapping. Unit: square metres.
         /// Rule: AR-15 (tuning.md "Roads and areas"). Read by areas.
         /// </summary>
