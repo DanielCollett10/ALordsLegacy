@@ -117,7 +117,7 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 
 | Value | Default | Unit | Rule |
 | --- | --- | --- | --- |
-| Market range | 630 | m walking distance (≈ ¼ day since the 30-minute day; was ½ day; owner may revisit) | MKT-06 |
+| Market range | 630 | m walking distance (≈ ¼ day since the 30-minute day; owner kept 630 m on 11/11/2026, to revisit with MVP-2) | MKT-06 |
 | Stall cost | 1 log (later 2 planks) | | MKT-03 |
 | Hand carry per trip (no container) | 10 | items | MKT-03e |
 | Load / unload time per trip | 10 | game minutes | PROPOSED |

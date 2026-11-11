@@ -39,7 +39,7 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 | PPL-23 | Meal frequency is a tuning value (`MealsEveryDays` = 7) | PLACEHOLDER |
 | PPL-24 | Night: citizens walk home and sleep there. A task that isn't finished when the citizen stops work is **paused**: it keeps its progress and reservations, and the citizen goes back to it and continues the next morning (TSK-15, TSK-16) | DECIDED |
 | PPL-25 | **Commuting happens outside daylight.** A worker leaves home early enough to reach the workplace (or the task's first target) at sunrise, works until sunset, then walks home in the dark. The commute time comes from the route's travel time, worked out when they set off | DECIDED |
-| PPL-26 | Minimum sleep: `MinSleepHours` (6) at home each night. If the commute would cut sleep below that, the worker sets off later and starts work after sunrise. This is how a far workplace still costs daylight, mostly in summer when nights are short | PLACEHOLDER (lead's default) |
+| PPL-26 | Minimum sleep: `MinSleepHours` (6) at home each night. If the commute would cut sleep below that, the worker sets off later and starts work after sunrise. This is how a far workplace still costs daylight, mostly in summer when nights are short. Purpose (owner): sleep is always met without using more of the night than needed, so travel moves into the dark and daylight goes to work | DECIDED (owner 11/11/2026; hours PLACEHOLDER) |
 | PPL-27 | In M7 there is no work, so citizens follow the milling routine (PPL-31). PPL-25/26 and the Sunday rule (PPL-21) start with work in M8 | DECIDED |
 
 ## When there is nothing to do
