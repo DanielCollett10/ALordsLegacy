@@ -91,6 +91,7 @@ namespace LordsLegacy.Sim.Core
             AreaTypeCatalog areaTypes, IEnumerable<ISimSystem> systems)
         {
             Tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+            InitRandom();
             Terrain = terrain;
             Trees = trees;
             RoadTypes = roadTypes ?? LordsLegacy.Sim.Roads.RoadTypes.DefaultCatalog;
