@@ -38,6 +38,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `Step` in list order. A paused world runs no systems on `Step`. `Execute` still notifies systems while paused,
     because commands work while paused. Rejected commands notify nobody. The list is empty until subsystems register.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
+  - **Random (T-250, CLK-07):** `SimWorld.Random` (`Assets/Sim/Core/SimRandom.cs`, partial in `SimWorld.Random.cs`) is the
+    world's one deterministic source, never null. It is a PCG-XSH-RR 64/32 written in Sim code (no `System.Random`). It is
+    seeded from `SimTuning.WorldSeed` (default 12345). `NextInt(min, max)` is max-exclusive and unbiased, `NextDouble()` is in
+    [0, 1), `NextUInt()` gives 32 bits. Its whole state is one `ulong` (`State`); a save stores that and calls `Restore`.
+    Routine choices draw from it, time alone does not.
 - `Assets/Sim/Placement/` (`LordsLegacy.Sim.Placement`, placement.md PL-01..05, PL-07): `PlacementRules.CanPlaceAreaVertex(world,
   areaTypeId, point)` and `CanPlaceRoadPoint(world, point)` answer whether one (already snapped) point may be placed. They
   return a `PlacementResult` (`Ok`, or `Reason` = `InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`; `Text` for the UI).
