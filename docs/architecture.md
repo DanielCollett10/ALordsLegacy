@@ -280,7 +280,11 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `SimHost` has a serialized `_startLayout`; `Initialize` applies it with `StartLayoutApplier` after building the world (null = no camp).
   Menu `LordsLegacy/Map/Generate Start Layout` (`StartLayoutGenerator`) writes `Assets/Maps/TestMap/StartLayout.asset`
   (flat spot at most 5 degrees west of the forest edge, 50+ trees within 50 m, north-south trunk road past the camp; idempotent).
-  `GameSceneGenerator` wires the asset into SimHost when it exists.
+  `GameSceneGenerator.CreateSimHost` wires the asset into SimHost and fails if the asset is missing.
+- Picking and citizen panel (T-263, `Assets/Game/Picking/`, `Assets/Game/UI/CitizenPanel/`): `AgentPicker` turns a left click
+  (no tool active, not over UI) into a selected citizen or ox by screen-space distance to the interpolated positions; it only
+  reads the Sim. `SelectionRing` marks the selection. `CitizenPanelView` (a UIDocument built in code, no UXML) shows name,
+  age, family, activity and position of the selected citizen, read-only, and calls `UiFocusRules.Apply`.
 - `SimStats` (`LordsLegacy.Game`) is the only Unity-side measurement: `LastStepMs` and `TicksPerSecond`
   (ticks in the last real second). Sim code never reads it.
 - Terrain: Unity Terrain built from `TestMapTerrain.asset` is drawn by Unity and is the collider for picking.
@@ -389,10 +393,20 @@ new `RoadNetwork.Version` and builds meshes for the new segments only.
 Area drawing follows the same path: `AreaTool` previews with `AreaValidator.Validate`, confirm sends `DesignateArea`
 through `SimHost.Execute` (which also clears trees), and `AreaRenderer.Sync` sees the new `AreaRegistry.Version`.
 
+Start layout (camp and people): `SimHost.Initialize` builds the world from the map, then applies `StartLayoutConfig.ToLayout()`
+through `StartLayoutApplier` (camp footprint, trunk road via `Execute(DrawRoad)`, families, citizens, oxen). Each tick
+`SimSystems` runs nav sync, routine, movement, debug send. `PeopleRenderer` and `CampRenderer` read `World.People` and
+`World.Camp` and lerp by `TickFraction`. A click goes `AgentPicker` → selection → `CitizenPanelView`; a debug right click
+goes `DebugSendController` → `SimHost.Execute(SendCitizenTo)` → `Citizen.DebugSend` → `RoutineSystem` skips it, `MovementSystem` walks it.
+
 ## Scene
 
 _Owner: the scene and prefab tasks. Other tasks do not edit this section._
 
+- M7 pieces (T-262..T-265, all wired in code by `GameSceneGenerator`): `SimHost._startLayout` -> `Assets/Maps/TestMap/StartLayout.asset`;
+  `PeopleRenderer` and `CampRenderer` (`CreatePeopleRenderers`, -> SimHost, `VisualRegistry.asset`); `CreateAgentSelection` adds
+  `AgentPicker` (-> SimHost, picker, ToolController), `SelectionRing`, UIDocument `CitizenPanel` (`CitizenPanelView`, no UXML),
+  `DebugPathOverlay` and `DebugSendController`.
 - `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
   menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
   and `SceneYamlNormalizer` gives its objects stable fileIDs, so two runs give the same file. Serialized references are wired in code.
@@ -412,3 +426,5 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   `GameSceneTests.GameSceneHasM3RoadToolWired` does the same for BuildBarView, ToolPanelView, ToolController,
   RoadRenderer and RoadTool; the UIDocument list must match the generator. `GameSceneTests.GameSceneHasM4AreaToolsAndOverlayWired`
   checks AreaRenderer, the two AreaTool ids and the overlay's area labels (T-116).
+  `GameSceneTests.GameSceneHasM7PeopleWired` checks SimHost.StartLayout, PeopleRenderer, CampRenderer, CitizenPanelView (+ UIDocument),
+  AgentPicker, DebugSendController and that citizens exist after start (T-265).
