@@ -23,6 +23,8 @@ namespace LordsLegacy.Sim.Tasks
     public sealed class StepRunnerSystem : ISimSystem
     {
         private readonly Dictionary<int, MoveOrder> _orders = new Dictionary<int, MoveOrder>();
+        // Tasks paused mid-Work: the worker must walk back to the tree before work continues.
+        private readonly HashSet<int> _returning = new HashSet<int>();
 
         /// <inheritdoc />
         public void Step(SimWorld world)
@@ -40,6 +42,13 @@ namespace LordsLegacy.Sim.Tasks
         {
             Citizen c = t.AssigneeId.HasValue ? world.People.FindCitizen(t.AssigneeId.Value) : null;
             if (c == null) { Fail(world, t, null); return; }
+            if (!world.WorkDay.OnShift(world, c))
+            {
+                // Night, or not yet time to leave (PPL-24): keep progress and reservations; the routine walks the worker home.
+                _orders.Remove(t.Id);
+                if (t.Def.Steps[t.CurrentStep].Kind == StepKind.Work) _returning.Add(t.Id);
+                return;
+            }
             if (t.Target.HasValue)
             {
                 if (!world.Trees.TryGet(t.Target.Value, out TreeRecord tree) || tree.State == TreeState.Stump)
@@ -50,11 +59,12 @@ namespace LordsLegacy.Sim.Tasks
             }
 
             TaskStep step = t.Def.Steps[t.CurrentStep];
-            if (step.Kind == StepKind.MoveTo) StepMove(world, t, c);
+            if (step.Kind == StepKind.MoveTo) StepMove(world, t, c, true);
+            else if (_returning.Contains(t.Id)) StepMove(world, t, c, false); // back to the tree after a night
             else StepWork(world, t, c, step);
         }
 
-        private void StepMove(SimWorld world, TaskRecord t, Citizen c)
+        private void StepMove(SimWorld world, TaskRecord t, Citizen c, bool advance)
         {
             if (!t.Target.HasValue || !world.Trees.TryGet(t.Target.Value, out TreeRecord tree))
             {
@@ -74,7 +84,8 @@ namespace LordsLegacy.Sim.Tasks
             {
                 c.Move = null;
                 _orders.Remove(t.Id);
-                Advance(world, t, c);
+                if (advance) Advance(world, t, c);
+                else _returning.Remove(t.Id);
             }
         }
 
@@ -96,6 +107,7 @@ namespace LordsLegacy.Sim.Tasks
         private void Fail(SimWorld world, TaskRecord t, Citizen c)
         {
             _orders.Remove(t.Id);
+            _returning.Remove(t.Id);
             world.Tasks.Cancel(t.Id);
             if (c != null)
             {

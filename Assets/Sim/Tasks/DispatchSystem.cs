@@ -43,7 +43,9 @@ namespace LordsLegacy.Sim.Tasks
         public static bool IsIdle(SimWorld world, Citizen c)
         {
             if (world.Tasks.IsBusy(c.Id)) return false;
-            if (c.DebugSend != null || c.Activity == Activity.Sleeping) return false;
+            if (c.DebugSend != null) return false;
+            // A sleeping worker of an assigned family can take tomorrow's task now (commute in the dark, PPL-25).
+            if (c.Activity == Activity.Sleeping) return WorkDay.AppliesTo(world, c) && (c.Move == null || c.Move.IsFinished);
             return c.Move == null || c.Move.IsFinished || c.Activity == Activity.MillingAbout;
         }
 

@@ -45,7 +45,9 @@ namespace LordsLegacy.Sim.People
                 _daylight = new Daylight(world.Tuning.MinDaylightHours, world.Tuning.MaxDaylightHours);
 
             bool day = IsDay(world.Now);
-            foreach (Citizen c in world.People.Citizens) StepCitizen(world, c, day);
+            bool workDaylight = world.WorkDay.IsWorkingDaylight(world);
+            foreach (Citizen c in world.People.Citizens)
+                StepCitizen(world, c, WorkDay.AppliesTo(world, c) ? workDaylight : day);
             foreach (Ox o in world.People.Oxen)
             {
                 if (o.Move == null || o.Move.IsFinished) o.Activity = Activity.Waiting;
@@ -69,7 +71,12 @@ namespace LordsLegacy.Sim.People
             // A debug send-to owns the citizen (PPL-33). Forget the routine state so it starts afresh afterwards.
             if (c.DebugSend != null) { _states.Remove(c.Id); return; }
             // A citizen holding a task belongs to the step runner; the routine starts afresh afterwards.
-            if (world.Tasks.IsBusy(c.Id)) { _states.Remove(c.Id); return; }
+            if (world.Tasks.IsBusy(c.Id))
+            {
+                if (world.WorkDay.OnShift(world, c)) { _states.Remove(c.Id); return; }
+                StepPausedWorker(world, c); // PPL-24: night, or not yet time to leave
+                return;
+            }
             long now = world.Tick;
             _states.TryGetValue(c.Id, out State st);
             if (st != null && c.Move != st.Order)
@@ -91,6 +98,28 @@ namespace LordsLegacy.Sim.People
                 case Phase.Milling: StepMilling(world, c, st, day, now); break;
                 case Phase.GoingHome: StepGoingHome(world, c, st); break;
             }
+        }
+
+        /// <summary>
+        /// A worker holding a task but off shift: walk home if not there, then stay asleep until the shift starts. The
+        /// task keeps its progress and reservations (the step runner leaves it alone meanwhile).
+        /// </summary>
+        private void StepPausedWorker(SimWorld world, Citizen c)
+        {
+            _states.TryGetValue(c.Id, out State st);
+            if (st == null)
+            {
+                st = new State { Phase = c.Activity == Activity.Sleeping ? Phase.Asleep : Phase.GoingHome };
+                _states[c.Id] = st;
+                if (st.Phase == Phase.GoingHome) c.Move = null; // drop the step runner's order
+            }
+            if (st.Phase == Phase.Milling) st.Phase = Phase.GoingHome;
+            if (st.Phase == Phase.Asleep) { c.Activity = Activity.Sleeping; return; }
+            if (st.Order == null || c.Move != st.Order) { GoHome(world, c, st); return; }
+            if (!st.Order.IsFinished) return;
+            c.Move = null;
+            st.Order = null;
+            FallAsleep(c, st);
         }
 
         private static State Init(SimWorld world, Citizen c, bool day)
@@ -191,7 +220,9 @@ namespace LordsLegacy.Sim.People
         private static bool TryPickMillSpot(SimWorld world, Citizen c, out double x, out double z)
         {
             double cx, cz;
-            if (world.Camp != null) { cx = world.Camp.Fire.XMetres; cz = world.Camp.Fire.ZMetres; }
+            Family own = world.People.FindFamily(c.FamilyId);
+            // Workers of an assigned family with nothing to do mill about near home (PPL-45).
+            if (world.Camp != null && !(own != null && own.WorkplaceId.HasValue)) { cx = world.Camp.Fire.XMetres; cz = world.Camp.Fire.ZMetres; }
             else
             {
                 Family f = world.People.FindFamily(c.FamilyId);
