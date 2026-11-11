@@ -78,7 +78,13 @@ A 4-log tree takes about 3 game hours, or about 3¾ real minutes at 1×.
   oxen stand, *Waiting for ox*, *Storage full*, and a second storage raising capacity to 40.
 - **M10 Build it first:** construction by odd-jobbers (`people.md` PPL-40..44). Completes MVP-1.
 
-## Open: felling times (throughput)
+## Felling times (DECIDED owner 11/11/2026: "Current", tuning values)
+
+The owner chose **Current: fell 90, buck 15 per log** (stage table above). They're tuning values and will be
+refined. A quick feller can fill storage fast, but the **ox haul is the intended bottleneck** for a long time
+(see "Ox side" below), so felling speed isn't the main lever.
+
+Options that were compared:
 
 Assumptions: one feller, one tree at a time, about 3 min walking between neighbouring trees, about 3.5 logs per
 tree (12–20 m trunks ÷ 4 m), Delimb off, the whole of daylight worked (commutes happen in the dark). With the

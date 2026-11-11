@@ -152,6 +152,10 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 | Ox load | 4 | logs per trip | WCO-07 |
 | Log storage | 20 | logs at minimum size | INV-A3 |
 | Woodcutting family slots | 2 | per hut | WCO |
+| Fell / Delimb (off) / Buck | 90 / 30 / 15 per log | game minutes (1 game min = 1.25 real s at 1×) | woodcutting.md, TMB-01 |
+| Load / unload ox | 10 / 10 | game minutes | woodcutting.md |
+| Default work radius | 420 | m from the hut | WC-11 |
+| Hut / log storage / oxen stand | 6×4 / 8×6 / 3×3 | m | WC-02 |
 
 > Implementation note (Trunk length and tree density, TMB-06, DEF-03): the 12–20 m trunk range is in both
 > `SimTuning` (`TrunkLengthMinM`/`MaxM`, read by nothing) and `ForestScatter` (`MinTrunkM`/`MaxTrunkM`, which the
