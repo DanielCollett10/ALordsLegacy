@@ -39,7 +39,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     because commands work while paused. Rejected commands notify nobody.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
     Registered today: `NavSyncSystem` (sync), `RoutineSystem` (routine), `MovementSystem` and `DebugSendSystem` (movement).
-    Dispatch, steps and operations are empty.
+    `DispatchSystem` (dispatch) and `StepRunnerSystem` (steps) are registered too (T-275). Operations is empty.
   - **People (T-251, PPL-10..14):** `SimWorld.People` (`Assets/Sim/People/Population.cs`, partial in `SimWorld.People.cs`)
     holds `Family`, `Citizen` and `Ox` records by explicit int id, iterated in id order. Ids are never reused after
     removal. `Version` bumps on add/remove. `Citizen.AgeYears(nowTick, SimTuning.AgeingRate)` implements POP-27.
@@ -79,7 +79,16 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     list of MoveTo / Work(duration) each with a heavy flag, `EligibilityPolicy`, `RequiredResource`). State machine
     Open → Assigned → Active → Done, or Cancelled; illegal transitions return false. A task reserves trees in
     `Trees` using its own id as owner; `Cancel` and completion release them. Queries `ByOwner`, `ByAssignee`,
-    `InState`; `Version` bumps on change. No dispatcher yet.
+    `InState`, `IsBusy(citizenId)` (holds an Assigned/Active task); `Version` bumps on change.
+  - **Dispatcher and step runner (T-275, TSK-07/08/12/13, PPL-44/45, WC-26):** `DispatchSystem` runs when
+    `Tick % SimTuning.DispatchIntervalMinutes (10) == 0`. Idle = awake, no debug send, no task (`IsBusy`), and not mid-walk
+    unless milling. Pass 1: workers (id order) of the family whose `WorkplaceId` = task owner; pass 2: helper families
+    (no workplace) for `AssignedThenHelpers`/`HelpersOnly`. An assigned family never takes other work. Heavy tasks need
+    age 14+. Best task = highest priority, then shortest straight-line distance to the target tree, then id. It reserves
+    the tree, then `Assign` + `Start`. Tasks needing an ox stay open (no ox handling yet); a task whose tree is gone is
+    cancelled. `StepRunnerSystem` runs Active tasks in id order: MoveTo issues a `MoveOrder` to the tree and waits (Walking);
+    Work adds one progress tick per tick (Working). Target gone, no assignee or a Failed move cancels the task and frees
+    the worker. `RoutineSystem` ignores busy citizens and resumes when the task ends.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
