@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -20,6 +21,8 @@ namespace LordsLegacy.Game
         private Label _hintLabel;
         private Button _cancelButton;
         private Button _confirmButton;
+        private VisualElement _actionsRow;
+        private readonly List<KeyValuePair<string, string>> _actions = new List<KeyValuePair<string, string>>();
 
         // Model state, kept so a rebuild (OnEnable again) shows the same panel.
         private bool _visible;
@@ -32,6 +35,38 @@ namespace LordsLegacy.Game
 
         /// <summary>Raised when Confirm is pressed while the panel is shown and the draft is valid.</summary>
         public event Action Confirmed;
+
+        /// <summary>Raised with the action name when an extra action button (see <see cref="SetActions"/>) is pressed.</summary>
+        public event Action<string> ActionClicked;
+
+        /// <summary>Names of the extra action buttons currently set, in order.</summary>
+        public IReadOnlyList<string> ActionNames
+        {
+            get { var l = new List<string>(); foreach (var a in _actions) l.Add(a.Key); return l; }
+        }
+
+        /// <summary>
+        /// Replaces the extra action buttons (name, label) shown between the text and Cancel; null or empty removes them.
+        /// Pressing one raises <see cref="ActionClicked"/>. The panel holds no tool rules.
+        /// </summary>
+        public void SetActions(IEnumerable<KeyValuePair<string, string>> actions)
+        {
+            var next = actions == null ? new List<KeyValuePair<string, string>>() : new List<KeyValuePair<string, string>>(actions);
+            bool same = next.Count == _actions.Count;
+            for (int i = 0; same && i < next.Count; i++) same = next[i].Key == _actions[i].Key && next[i].Value == _actions[i].Value;
+            if (same) return;
+            _actions.Clear();
+            _actions.AddRange(next);
+            Render();
+        }
+
+        /// <summary>Presses an extra action button as if clicked. Ignored while hidden or if the name is not set.</summary>
+        public void ClickAction(string name)
+        {
+            if (!_visible) return;
+            foreach (var a in _actions)
+                if (a.Key == name) { ActionClicked?.Invoke(name); return; }
+        }
 
         /// <summary>True while the panel is shown.</summary>
         public bool IsShown => _visible;
@@ -100,6 +135,9 @@ namespace LordsLegacy.Game
             _confirmButton = root.Q<Button>("tool-panel-confirm");
             _cancelButton.clicked += ClickCancel;
             _confirmButton.clicked += ClickConfirm;
+            _actionsRow = new VisualElement { name = "tool-panel-actions" };
+            _actionsRow.AddToClassList("tool-panel__actions");
+            _panel.Insert(1, _actionsRow);
             UiFocusRules.Apply(root);
         }
 
@@ -110,7 +148,24 @@ namespace LordsLegacy.Game
             _statusLabel.text = _status;
             _hintLabel.text = _hint;
             _confirmButton.SetEnabled(_valid);
+            RenderActions();
             _panel.style.display = _visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private void RenderActions()
+        {
+            if (_actionsRow == null) return;
+            _actionsRow.Clear();
+            foreach (var a in _actions)
+            {
+                string name = a.Key;
+                var b = new Button { name = "tool-panel-action-" + name, text = a.Value };
+                b.AddToClassList("tool-panel__button");
+                b.clicked += () => ClickAction(name);
+                _actionsRow.Add(b);
+            }
+            UiFocusRules.Apply(_actionsRow);
+            _actionsRow.style.display = _actions.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private static void BuildFallback(VisualElement root)

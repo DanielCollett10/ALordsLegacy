@@ -1040,6 +1040,7 @@ MonoBehaviour:
   _picker: {fileID: 100033}
   _panel: {fileID: 100079}
   _controller: {fileID: 100075}
+  _topBar: {fileID: 100083}
 --- !u!1 &100048
 GameObject:
   m_ObjectHideFlags: 0
