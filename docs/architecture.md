@@ -92,6 +92,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     MissingStorage, NoWorkers (no member aged 14+), NoTrees (`TreeRegistry.AnyStandingIn` on the work polygon or the
     default circle round the hut), StorageFull. `OperationStatus.LogLoad` is the single place the storage-full sum
     lives (own ground piles plus own storages, against total storage capacity).
+  - **Module placement (T-269, WC-03/04/07/08):** `ModulePlacement.Preview(world, operationId, moduleTypeId, centre,
+    rotationDeg)` (`Assets/Sim/Operations/`, pure) returns a `ModulePlacementResult` (`Ok`, `Refusal`: UnknownOperation,
+    OutsideArea, OverlapsModule, NotAllowedType, TooMany, plus `Text`). Fully inside = footprint area missing from the
+    area polygon ≤ 0.001 m² and no corner more than 2 mm outside; touching edges is fine. `PlaceModule` re-runs it,
+    adds the footprint (`FootprintRegistry.NextId()`), lists it on the operation, clears trees under it (ids in
+    `RemovedTreeIds`); built at once. `RemoveModule(footprintId)` removes it (unknown → NotFound). Blocking modules push
+    agents aside through the existing nav sync + `MovementSystem`.
   - **Inventory ledger part 1 (T-273, INV-01/11, LED-01/03/09):** `SimWorld.Inventory` (`Assets/Sim/Inventory/`, partial in
     `SimWorld.Inventory.cs`) is a `Ledger` of `LedgerLocation`s (`GroundPile` at a point with optional owner operation id,
     or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
