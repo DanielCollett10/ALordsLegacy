@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Forestry;
+using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
 
 namespace LordsLegacy.Sim.Tasks
@@ -86,7 +87,9 @@ namespace LordsLegacy.Sim.Tasks
 
         private void Advance(SimWorld world, TaskRecord t, Citizen c)
         {
+            TaskStep done = t.Def.Steps[t.CurrentStep];
             world.Tasks.CompleteStep(t.Id);
+            FellingOutcome.OnStepCompleted(world, t, done);
             if (t.State == TaskState.Done) c.Activity = Activity.MillingAbout;
         }
 
