@@ -31,6 +31,8 @@ namespace LordsLegacy.Sim.Commands
         {
             if (!world.Areas.Remove(AreaId))
                 return CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId);
+            foreach (Operation linked in new System.Collections.Generic.List<Operation>(world.Operations.All))
+                if (linked.WorkAreaId == AreaId) world.Operations.SetWorkArea(linked.Id, null);
             Operation op = world.Operations.FindByArea(AreaId);
             if (op != null)
             {
