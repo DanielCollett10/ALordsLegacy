@@ -8,9 +8,9 @@ namespace LordsLegacy.Sim.Roads
         /// <summary>Id of the dirt path.</summary>
         public const string DirtPathId = "road.dirt_path";
 
-        /// <summary>The dirt path: 2.5 m wide, 15% max grade, 1.5x speed (tuning.md "Roads and areas").</summary>
+        /// <summary>The dirt path: 2.5 m wide, 15% max grade, 1.25x speed (ROAD-10-A, decision 0023).</summary>
         public static readonly RoadTypeDef DirtPath =
-            new RoadTypeDef(DirtPathId, 2.5, 0.15, 1.5, "visual.road.dirt_path");
+            new RoadTypeDef(DirtPathId, 2.5, 0.15, 1.25, "visual.road.dirt_path");
 
         /// <summary>All road types.</summary>
         public static readonly IReadOnlyList<RoadTypeDef> All = new[] { DirtPath };

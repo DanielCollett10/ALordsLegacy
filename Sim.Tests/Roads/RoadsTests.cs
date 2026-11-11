@@ -18,7 +18,7 @@ namespace LordsLegacy.Sim.Tests.Roads
             Assert.That(t, Is.Not.Null);
             Assert.That(t.WidthM, Is.EqualTo(2.5));
             Assert.That(t.MaxGrade, Is.EqualTo(0.15));
-            Assert.That(t.SpeedMultiplier, Is.EqualTo(1.5));
+            Assert.That(t.SpeedMultiplier, Is.EqualTo(1.25)); // ROAD-10-A, decision 0023 (no tuning value for this)
             Assert.That(t.VisualId, Is.EqualTo("visual.road.dirt_path"));
             Assert.That(RoadTypes.Find("nope"), Is.Null);
         }
