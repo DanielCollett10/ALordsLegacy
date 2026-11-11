@@ -66,6 +66,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     home and become Sleeping on arrival. Oxen stay Waiting. A citizen with an order set by someone else is skipped until
     that order finishes, so later phases (work, debug send) can take over. Milling shows as `MillingAbout` (walking
     to a spot included); only the trip home is `Walking`.
+  - **Debug send-to (T-260, PPL-33; decision 0026):** `Citizen.DebugSend` (`DebugSendState`: the walk `Order` and
+    `LingerUntilTick`) is set by `SendCitizenTo(citizenId, PathPoint)` (`Assets/Sim/Commands/`; unknown id → `NotFound`,
+    no route from where the citizen stands → `NotAllowed` "No route", non-finite point → `InvalidArgument`). While it is set,
+    `RoutineSystem` skips the citizen and drops its routine state. `DebugSendSystem` (movement slot, after
+    `MovementSystem`) sets the linger on arrival (`DebugLingerMinutes`, 30), then clears `DebugSend` so the routine starts
+    afresh (by day it mills, at night it walks home). A walk that fails mid-way ends the send at once. Works while paused.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
@@ -203,7 +209,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   after "overlaps road": a corridor overlapping a building area by more than `OverlapToleranceM2` is refused with
   `RoadRefusal.CrossesArea` ("crosses <name>", `RoadPreview.CrossedAreaName`; `DrawRoad` rejects as `Conflict`).
   Work areas are not in the building index so never block roads. With no areas the road checks are unchanged.
-- Not built yet: tasks, pathing, buildings, citizens, economy, saving. Decision 0005 (task types as data)
+- Not built yet: tasks, buildings, economy, saving (pathing and citizens exist; see People and Navigation above). Decision 0005 (task types as data)
   describes future work with no code.
 
 ## Map pipeline
