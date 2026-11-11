@@ -48,6 +48,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `OnCommandApplied`; the first `Sync` is a full build, later ones diff road segment / blocking footprint ids and
     recompute only the cells under added or removed items. `Version` bumps when any cell changes. A world with no map
     has a grid with no cells.
+  - **Pathfinder (T-257, MOV-10..13):** `GridPathfinder.Find(nav, PathPoint from, PathPoint to)` (`IPathfinder` for
+    injection) runs 8-neighbour A* over `NavGrid` (no corner cutting; step cost = length ÷ mean of the two cells'
+    multipliers; heuristic ÷ top multiplier; ties by f, h, cell index). Blocked ends snap to the nearest walkable
+    centre within 20 m. Result `PathResult` (`Ok`, `Points` in metres, `TravelMinutes` at 1 m/min) is smoothed over
+    straight lines crossing only equal-multiplier walkable cells.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
