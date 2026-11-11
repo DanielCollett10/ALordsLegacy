@@ -44,6 +44,8 @@ namespace LordsLegacy.Sim.Tests
             Assert.AreEqual(2, t.SlopeSampleGridM, 1e-9);
             Assert.AreEqual(0.1, t.OverlapToleranceM2, 1e-9);
             Assert.AreEqual(32, t.SpatialIndexCellM, 1e-9);
+            Assert.AreEqual(2, t.NavCellSizeM, 1e-9);
+            Assert.AreEqual(30, t.MaxWalkSlopeDeg, 1e-9);
         }
 
         [Test]

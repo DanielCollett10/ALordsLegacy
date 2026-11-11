@@ -96,6 +96,7 @@ namespace LordsLegacy.Sim.Core
             Trees = trees;
             RoadTypes = roadTypes ?? LordsLegacy.Sim.Roads.RoadTypes.DefaultCatalog;
             AreaTypes = areaTypes ?? LordsLegacy.Sim.Areas.AreaTypes.DefaultCatalog;
+            InitNav();
             Areas = new AreaRegistry(tuning.SpatialIndexCellM, AreaTypes);
             _calendar = new GameCalendar(tuning.StartMonth, tuning.StartDay, tuning.StartHour,
                 tuning.StartMinute, tuning.StartWeekday, tuning.DaysPerYear);
