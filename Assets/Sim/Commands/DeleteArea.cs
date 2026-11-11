@@ -1,4 +1,5 @@
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Operations;
 
 namespace LordsLegacy.Sim.Commands
 {
@@ -30,6 +31,12 @@ namespace LordsLegacy.Sim.Commands
         {
             if (!world.Areas.Remove(AreaId))
                 return CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId);
+            Operation op = world.Operations.FindByArea(AreaId);
+            if (op != null)
+            {
+                foreach (int moduleId in op.ModuleIds) world.Footprints.Remove(moduleId);
+                world.Operations.Remove(op.Id);
+            }
             return CommandResult.Accepted(removed: new long[] { AreaId });
         }
     }

@@ -30,6 +30,13 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>All operation types.</summary>
         public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting };
 
+        /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
+        public static OperationTypeDef FindByBuildingArea(string areaTypeId)
+        {
+            for (int i = 0; i < All.Count; i++) if (All[i].BuildingAreaTypeId == areaTypeId) return All[i];
+            return null;
+        }
+
         /// <summary>Finds an operation type by id, or null if unknown.</summary>
         public static OperationTypeDef Find(string id)
         {

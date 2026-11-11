@@ -2,6 +2,7 @@ using System;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Forestry;
+using LordsLegacy.Sim.Operations;
 
 namespace LordsLegacy.Sim.Commands
 {
@@ -42,6 +43,8 @@ namespace LordsLegacy.Sim.Commands
             AreaTypeDef type = world.AreaTypes.Find(TypeId);
             var record = new AreaRecord(world.Areas.NextId(), type.Id, world.Areas.NextName(type), Shape, p.Polygon);
             world.Areas.Add(record);
+            OperationTypeDef opType = OperationTypes.FindByBuildingArea(type.Id);
+            if (opType != null) world.Operations.Create(opType.Id, record.Id);
 
             long[] trees = null;
             if (type.ClearsTrees)
