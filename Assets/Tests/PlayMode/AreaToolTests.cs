@@ -1121,6 +1121,30 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ModuleToolShowsPanelAndClickPlacesHutThenLogStorageThenReturnsToNoTool()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            var module = _toolGo.AddComponent<ModuleTool>();
+            module.Configure(_host, Object.FindFirstObjectByType<GroundPicker>(), _panel, _controller);
+            _controller.Register(module);
+            Click(40, 40); Click(80, 40); Click(80, 80); Click(40, 80);
+            _panel.ClickConfirm();
+
+            Assert.AreSame(module, _controller.ActiveTool);
+            Assert.IsTrue(_panel.IsShown);
+            StringAssert.Contains("hut", _panel.Status);
+
+            module.ClickAt(Screen(55, 60));
+            Assert.AreEqual(1, module.Queue.Count, _panel.Status);
+            Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.LogStorageId, module.Queue[0]);
+            StringAssert.Contains("log storage", _panel.Status);
+
+            module.ClickAt(Screen(70, 60));
+            Assert.IsNull(_controller.ActiveTool, _panel.Status);
+            Assert.IsFalse(_panel.IsShown);
+        }
+
+        [UnityTest]
         public IEnumerator WoodcutterCancelDraftReturnsToNoTool()
         {
             yield return Setup("woodcutter", AreaTypes.WoodcuttingId);

@@ -111,7 +111,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(areaRenderer, "AreaRenderer missing.");
             AssertNoNullRefs(areaRenderer);
             var areaTools = Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None);
-            Assert.AreEqual(2, areaTools.Length, "Test area and Test work area tools expected.");
+            Assert.AreEqual(3, areaTools.Length, "Test area, Test work area and Woodcutter tools expected.");
             foreach (var t in areaTools) AssertNoNullRefs(t);
         }
 
@@ -131,7 +131,10 @@ namespace LordsLegacy.Tests.PlayMode
             foreach (var t in Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None))
                 ids.Add(t.Id);
             ids.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId }, ids);
+            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter" }, ids);
+            var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
+            Assert.IsNotNull(moduleTool, "ModuleTool missing.");
+            AssertNoNullRefs(moduleTool);
 
             // The overlay's area labels are in the UXML the generator wires (T-116).
             var overlay = Object.FindFirstObjectByType<DebugOverlayView>();

@@ -990,6 +990,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 347605351551abf44a239141e93f6e52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.ModuleTool
+  _host: {fileID: 100059}
+  _picker: {fileID: 100033}
+  _panel: {fileID: 100076}
+  _controller: {fileID: 100072}
 --- !u!1 &100045
 GameObject:
   m_ObjectHideFlags: 0
