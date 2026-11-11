@@ -84,6 +84,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     holds `OperationTypeDef` (ids of the building and work area types, hut, log storage, optional oxen stand, family
     slots, default work radius) and `OperationTypes` (static, `Woodcutting`, `Find`, `All`). Definitions only; the
     woodcutting area types live in `AreaTypes` (`area.woodcutting` Building, `area.work_woodcutting` Work). Not yet on the world catalogs.
+  - **Inventory ledger part 1 (T-273, INV-01/11, LED-01/03/09):** `SimWorld.Inventory` (`Assets/Sim/Inventory/`, partial in
+    `SimWorld.Inventory.cs`) is a `Ledger` of `LedgerLocation`s (`GroundPile` at a point with optional owner operation id,
+    or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
+    into the nearest same-owner pile within 1 m. `TotalOf(item)`, per-location counts, `Version`, and `Audit()` (null =
+    consistent; compares location sums with the produced journal). `Items.Log` is `item.log` (category Log). Reserve,
+    transfer, carriers come in M9.
   - **Start layout (T-253, CMP-01..07):** `StartLayout` (`Assets/Sim/Start/`) is pure data: camp centre/rotation, fire,
     stockpile, ox stand and tent spots relative to the camp (rotated with it), trunk road control points, families with
     citizens, ox count. `StartLayoutApplier.Apply(world, layout)` adds the camp footprint (clearing trees under it), draws
