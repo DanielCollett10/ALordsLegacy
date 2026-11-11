@@ -41,6 +41,12 @@ namespace LordsLegacy.Game
         /// <summary>The config asset, or null for code defaults. Set before the world is built.</summary>
         public SimConfig Config { get => _config; set => _config = value; }
 
+        [SerializeField, Tooltip("Start layout applied after the world is built (camp, people, oxen, trunk road). Null = no camp.")]
+        private StartLayoutConfig _startLayout;
+
+        /// <summary>The start layout asset, or null for no camp. Set before the world is built.</summary>
+        public StartLayoutConfig StartLayout { get => _startLayout; set => _startLayout = value; }
+
         private readonly Stopwatch _clock = Stopwatch.StartNew();
 
         /// <summary>Creates the world and pacer from the tuning and map; type catalogs come from the config (or defaults).</summary>
@@ -55,6 +61,7 @@ namespace LordsLegacy.Game
         {
             World = SimWorld.FromMapData(map, tuning, roadTypes, areaTypes);
             Pacer = new TickPacer(tuning);
+            if (_startLayout != null) LordsLegacy.Sim.Start.StartLayoutApplier.Apply(World, _startLayout.ToLayout());
         }
 
         private void Start()

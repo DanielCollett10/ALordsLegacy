@@ -819,6 +819,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.SimHost
   _config: {fileID: 11400000, guid: 1e00c3597f58e47488aedf568d472f2c, type: 2}
+  _startLayout: {fileID: 11400000, guid: 28028089bf3e2664ba08183ca2c99bc7, type: 2}
 --- !u!1 &100035
 GameObject:
   m_ObjectHideFlags: 0
