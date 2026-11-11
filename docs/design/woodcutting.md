@@ -23,7 +23,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | WC-10 | **Default:** with no drawn work area, the operation harvests **in a circle around the hut**, nearest tree first and working outwards. Nearest is measured by straight-line distance from the hut's access point | DECIDED |
-| WC-11 | Default circle radius: **a third of a day's walk** (owner: "a big distance"), stored as `DefaultWorkRadiusM`. Because trees are taken nearest first, the radius only matters once the near trees are gone. Value: see the open question below | DECIDED (value OPEN) |
+| WC-11 | Default circle radius: **420 m** (`DefaultWorkRadiusM`; at most about ⅓ of a day's walk at ox speed). Because trees are taken nearest first, the radius only matters once the near trees are gone | DECIDED (value PLACEHOLDER) |
 | WC-12 | The player can instead **draw a work area from the hut panel** (WORK-02). The drawn area replaces the circle. The order inside it is still nearest to the hut first. A "Use default" button goes back to the circle | DECIDED |
 | WC-13 | The work area (circle or drawn) is shown only while the operation's panel is open (WORK-04, MVP-1-03) | DECIDED |
 | WC-14 | Trees are reserved one per feller (TMB-08), so overlapping work areas never share a tree (WORK-05) | DECIDED |
@@ -53,6 +53,8 @@ nobody stands idle.
 | WC-32 | A pool ox goes back after a haul to the nearest free oxen stand (the camp stand or any operation's empty stand) | DECIDED |
 | WC-33 | Leading an ox: the handler walks to the ox, they walk together at ox speed (MOV-16), load up to 4 logs at the tree (WCO-07), drag them to the log storage with free space nearest the tree (WCO-08), and unload | DECIDED |
 | WC-34 | No ox can be had and logs are waiting → *Waiting for ox* (WCO-06) | DECIDED |
+| WC-35 | **Haul cut short at sunset:** if a haul is still under way at the end of the working day, the handler **unloads the logs where they are** (a new ground pile at that spot, INV-11), takes the ox back to its stand, then walks home. The next day a new Haul picks the pile up from there. Unloading takes the normal unload time | DECIDED |
+| WC-36 | The worker who needs the ox walks to fetch it (MVP). Possible later change: an ox assigned to a building gets its own **ox operator**, who does the hauling when the woodcutters are busy. Not in MVP-1 | DECIDED (future idea noted) |
 
 ## Timber chain timing (TMB-01..03)
 
@@ -76,14 +78,22 @@ A 4-log tree takes about 3 game hours, or about 3¾ real minutes at 1×.
   oxen stand, *Waiting for ox*, *Storage full*, and a second storage raising capacity to 40.
 - **M10 Build it first:** construction by odd-jobbers (`people.md` PPL-40..44). Completes MVP-1.
 
-## Open
+## Open: felling times (throughput)
 
-- **WC-11 radius.** "A third of a day's walk" could mean a third of 24 hours (~830 m) or a third of a ~12 h
-  working day (~420 m). An ox needs `2r ÷ 1.04` game minutes for a round trip, so one haul fits in a day only up to
-  about **490 m in summer** (16 h of daylight) and about **230 m in winter** (8 h).
-- **Hauls that can't finish before sunset.** Either (a) a haul only starts if it can finish before sunset, so
-  logs beyond that wait for longer days; or (b) the handler ties the ox where it stands at sunset (logs stay
-  loaded), goes home, and carries on in the morning (PPL-24).
+Assumptions: one feller, one tree at a time, about 3 min walking between neighbouring trees, about 3.5 logs per
+tree (12–20 m trunks ÷ 4 m), Delimb off, the whole of daylight worked (commutes happen in the dark). With the
+30-minute day, **1 game minute = 1.25 real seconds at 1×** (0.16 s at 8×, 0.04 s at 32×). 1 game hour = 75 real s at 1×.
+
+| Option | Fell | Buck per log | One tree (game min) | One tree at 1× (real) | Trees / logs per worker, 12 h day | Summer 16 h | Winter 8 h |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Quick | 45 | 15 | ~100 | ~2 min | 7 / 25 | 10 / 34 | 5 / 17 |
+| Brisk | 60 | 15 | ~115 | ~2.4 min | 6 / 22 | 8 / 29 | 4 / 15 |
+| Current | 90 | 15 | ~145 | ~3 min | 5 / 17 | 7 / 23 | 3 / 12 |
+| Heavy (closer to real axe work) | 120 | 30 | ~230 | ~4.8 min | 3 / 11 | 4 / 15 | 2 / 7 |
+
+Ox side for comparison (4 logs per trip, load and unload 20 min): trees 50 m from storage ≈ 2 h per round trip ≈
+24 logs per 12 h day; 200 m ≈ 6.8 h ≈ 7 logs per day. So hauling, not felling, becomes the limit as the forest
+recedes, which is what makes oxen stands, closer storage and a second operation worth building.
 
 ## Operation panel (M8)
 
