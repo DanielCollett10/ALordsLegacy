@@ -29,8 +29,29 @@ namespace LordsLegacy.Tests.EditMode
         {
             var cfg = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath);
             Assert.IsNotNull(cfg, "Run LordsLegacy/Config/Create default SimConfig");
-            var t = cfg.BuildTuning();
-            var d = new SimTuning();
+            AssertTuningEquals(cfg.BuildTuning(), new SimTuning());
+        }
+
+        [Test]
+        public void DefaultSimConfigBuildsCodeDefaultTuning()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                AssertTuningEquals(cfg.BuildTuning(), new SimTuning());
+                Assert.AreEqual(30, cfg.BuildTuning().RealMinutesPerGameDayAt1x, Eps);
+                Assert.AreEqual(1.74, cfg.BuildTuning().WalkSpeedMPerGameMinute, Eps);
+                Assert.AreEqual(1.04, cfg.BuildTuning().OxSpeedMPerGameMinute, Eps);
+                Assert.IsFalse(cfg.BuildTuning().RestDayEnabled);
+                Assert.AreEqual(120, cfg.BuildTuning().SundayMealMinutes);
+                Assert.AreEqual(6, cfg.BuildTuning().MinSleepHours, Eps);
+                Assert.AreEqual(1.25, cfg.BuildRoadCatalog().All[0].SpeedMultiplier, Eps);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        private static void AssertTuningEquals(SimTuning t, SimTuning d)
+        {
             foreach (var p in typeof(SimTuning).GetProperties())
             {
                 if (!p.CanWrite) continue;
