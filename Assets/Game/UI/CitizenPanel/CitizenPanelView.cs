@@ -112,6 +112,10 @@ namespace LordsLegacy.Game
         private void Update()
         {
             if (!_subscribed) Subscribe();
+            // The UIDocument can recreate its root (panel settings reload, late attach); rebuild if ours was dropped.
+            var doc = GetComponent<UIDocument>();
+            if (_panel == null || _panel.panel == null || (doc.rootVisualElement != null && _panel.panel != doc.rootVisualElement.panel))
+                Build();
             Refresh();
             var kb = Keyboard.current;
             if (kb != null && kb.escapeKey.wasPressedThisFrame && _panel != null
