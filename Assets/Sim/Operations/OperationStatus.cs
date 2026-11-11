@@ -105,7 +105,8 @@ namespace LordsLegacy.Sim.Operations
             return false;
         }
 
-        private static Footprint Hut(SimWorld world, Operation op)
+        /// <summary>The operation's hut module, or null.</summary>
+        public static Footprint Hut(SimWorld world, Operation op)
         {
             OperationTypeDef type = OperationTypes.Find(op.TypeId);
             if (type == null) return null;

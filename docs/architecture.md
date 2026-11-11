@@ -39,7 +39,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     because commands work while paused. Rejected commands notify nobody.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
     Registered today: `NavSyncSystem` (sync), `RoutineSystem` (routine), `MovementSystem` and `DebugSendSystem` (movement).
-    `DispatchSystem` (dispatch) and `StepRunnerSystem` (steps) are registered too (T-275). Operations is empty.
+    `DispatchSystem` (dispatch) and `StepRunnerSystem` (steps) are registered too (T-275). `WoodcuttingSystem` is the
+    one operations-phase system (T-276, WC-10..15/25, TMB-05/07): for each Working woodcutting operation it keeps one Open
+    `task.fell_tree` per idle adult worker of the assigned families, targeting the nearest standing unreserved tree to the
+    hut access point inside `OperationStatus.WorkRegion`, reserved at creation. Steps = MoveTo + `ProcessDefs.Timber`
+    effective stages (`TaskStep.StageId` carries the stage). `FellingOutcome` (called by `StepRunnerSystem` after each
+    step) sets the tree Felled after fell, and on the last step Stump plus floor(trunk ÷ StandardLogLengthM) logs in an
+    operation-owned ground pile at the tree. New tasks stop when log load + yield of unfinished tasks reaches storage
+    capacity; open tasks are cancelled when the status is not Working.
   - **People (T-251, PPL-10..14):** `SimWorld.People` (`Assets/Sim/People/Population.cs`, partial in `SimWorld.People.cs`)
     holds `Family`, `Citizen` and `Ox` records by explicit int id, iterated in id order. Ids are never reused after
     removal. `Version` bumps on add/remove. `Citizen.AgeYears(nowTick, SimTuning.AgeingRate)` implements POP-27.

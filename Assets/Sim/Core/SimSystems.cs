@@ -44,6 +44,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Navigation.MovementSystem(),
                 new LordsLegacy.Sim.People.DebugSendSystem(),
                 // operations
+                new LordsLegacy.Sim.Operations.WoodcuttingSystem(),
             };
         }
     }
