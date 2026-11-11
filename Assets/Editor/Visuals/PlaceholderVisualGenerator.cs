@@ -55,10 +55,52 @@ namespace LordsLegacy.EditorTools.Visuals
             roadDefinition.Configure(RoadId, Resources.GetBuiltinResource<Mesh>("Quad.fbx"), new[] { roadMaterial }, 1f, true);
             EditorUtility.SetDirty(roadDefinition);
             registry.Register(roadDefinition);
+            GeneratePeopleAndCamp(registry);
             EditorUtility.SetDirty(registry);
 
             AssetDatabase.SaveAssets();
             Debug.Log("Placeholder visuals written: " + TreeDefinitionPath + ", " + RegistryPath);
+        }
+
+        // id, built-in mesh, colour, definition scale (T-262). Sizes in metres come from VisualSizes.
+        private static readonly (string id, string mesh, Color colour, float scale)[] PeopleAndCamp =
+        {
+            (VisualSizes.CitizenAdult, "Capsule.fbx", new Color(0.85f, 0.7f, 0.5f), 1f),
+            (VisualSizes.CitizenChild, "Capsule.fbx", new Color(0.95f, 0.8f, 0.55f), 0.7f),
+            (VisualSizes.Ox, "Cube.fbx", new Color(0.4f, 0.28f, 0.18f), 1f),
+            (VisualSizes.CampTent, "Cube.fbx", new Color(0.8f, 0.75f, 0.6f), 1f),
+            (VisualSizes.CampFire, "Cylinder.fbx", new Color(0.9f, 0.4f, 0.1f), 1f),
+            (VisualSizes.CampLogPile, "Cube.fbx", new Color(0.45f, 0.3f, 0.15f), 1f),
+            (VisualSizes.CampTiePost, "Cylinder.fbx", new Color(0.35f, 0.25f, 0.15f), 1f),
+        };
+
+        private static void GeneratePeopleAndCamp(VisualRegistry registry)
+        {
+            foreach (var (id, meshName, colour, scale) in PeopleAndCamp)
+            {
+                string matPath = Folder + "/Materials/Placeholder_" + id + ".mat";
+                string defPath = Folder + "/Definitions/" + id + ".asset";
+                var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+                if (mat == null)
+                {
+                    mat = new Material(Shader.Find("Standard")) { name = "Placeholder_" + id };
+                    AssetDatabase.CreateAsset(mat, matPath);
+                }
+                mat.enableInstancing = true;
+                mat.color = colour;
+                EditorUtility.SetDirty(mat);
+
+                var def = AssetDatabase.LoadAssetAtPath<VisualDefinition>(defPath);
+                if (def == null)
+                {
+                    def = ScriptableObject.CreateInstance<VisualDefinition>();
+                    def.name = id;
+                    AssetDatabase.CreateAsset(def, defPath);
+                }
+                def.Configure(id, Resources.GetBuiltinResource<Mesh>(meshName), new[] { mat }, scale, true);
+                EditorUtility.SetDirty(def);
+                registry.Register(def);
+            }
         }
 
         private static Material LoadOrCreateMaterial()

@@ -38,6 +38,7 @@ namespace LordsLegacy.EditorTools.Scenes
             var cam = CreateCamera().GetComponent<Camera>();
             var light = CreateLight().GetComponent<Light>();
             CreateTreeRenderer(host, cam);
+            CreatePeopleRenderers(host);
             CreateGroundPicker(host, cam);
             var topBar = CreateTopBar(host);
             CreateBuildBar();
@@ -140,6 +141,18 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(c, "registry", Load<LordsLegacy.Game.Visuals.VisualRegistry>(RegistryPath));
             SetRef(c, "cullCamera", cam);
             return go;
+        }
+
+        /// <summary>Adds the PeopleRenderer and CampRenderer wired to SimHost and the visual registry (T-262).</summary>
+        public static void CreatePeopleRenderers(SimHost host)
+        {
+            var registry = Load<LordsLegacy.Game.Visuals.VisualRegistry>(RegistryPath);
+            var people = new GameObject("PeopleRenderer").AddComponent<LordsLegacy.Game.Visuals.PeopleRenderer>();
+            SetRef(people, "host", host);
+            SetRef(people, "registry", registry);
+            var camp = new GameObject("CampRenderer").AddComponent<LordsLegacy.Game.Visuals.CampRenderer>();
+            SetRef(camp, "host", host);
+            SetRef(camp, "registry", registry);
         }
 
         /// <summary>Adds the GroundPicker wired to the camera and SimHost.</summary>

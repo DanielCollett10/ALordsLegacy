@@ -23,5 +23,11 @@ namespace LordsLegacy.Game
 
         /// <summary>Snap distance in screen pixels for the road tool (roads.md RD-18, from M5). Area tools keep <see cref="SnapDistancePx"/>.</summary>
         public float RoadSnapDistancePx { get; set; } = 16f;
+
+        /// <summary>
+        /// Placeholder walk animation (MOV-09): steps taken per metre walked. Step rate = metres per real second ×
+        /// this value, so faster ground (road 1.25×) steps faster. Tunable; presentation-only.
+        /// </summary>
+        public float WalkStepsPerMetre { get; set; } = 0.7f;
     }
 }
