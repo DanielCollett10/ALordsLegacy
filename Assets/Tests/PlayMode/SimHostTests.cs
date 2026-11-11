@@ -28,14 +28,14 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void TickAdvancesWhileRunningAndNotWhilePaused()
         {
-            _host.Tick(1f);
+            _host.Tick(2f); // default pace is 0.8 game minutes per real second, so 1 s is not a whole tick
             long t = _host.World.Tick;
             Assert.Greater(t, 0);
             _host.TogglePause();
-            _host.Tick(1f);
+            _host.Tick(2f);
             Assert.AreEqual(t, _host.World.Tick);
             _host.TogglePause();
-            _host.Tick(1f);
+            _host.Tick(2f);
             Assert.Greater(_host.World.Tick, t);
         }
 

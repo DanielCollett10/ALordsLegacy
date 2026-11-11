@@ -289,6 +289,13 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `visual.tree.generic` definition. Trees are grouped in 64 m cells, frustum-culled, and drawn with
   `Graphics.RenderMeshInstanced` in batches of 1023. Cells are rebuilt only when `TreeRegistry.Version` changes.
   There are no per-tree GameObjects and no colliders (decision 0008).
+- People and camp (T-262): `PeopleRenderer` draws every citizen (adult/child by `AgeYears` < 16) and ox with
+  `RenderMeshInstanced` (no GameObjects, no colliders), lerping `PreviousX/Z`→`X/Z` by `SimHost.TickFraction` (current position
+  while paused), height from Sim terrain, yaw from `FacingRad`. Placeholder walk bob (`WalkBob`): steps per real second =
+  metres walked per tick × game minutes per real second × `ViewSettings.WalkStepsPerMetre`; none when still or paused.
+  `CampRenderer` draws tents (family homes), fire, log pile and tie post from `World.Camp`, rebuilding when
+  `FootprintRegistry.Version`, the camp or the family count changes. Visuals `visual.citizen.adult|child`, `visual.ox`,
+  `visual.camp.tent|fire|logpile|tiepost` are written by `PlaceholderVisualGenerator`; box sizes are in `VisualSizes`.
 - Roads (`RoadRenderer`, `Assets/Game/Visuals/`): one child GameObject with a mesh per `RoadSegment`, built from its
   samples, the type width and the Sim terrain height + 0.05 m. `Sync()` (every frame) rebuilds only when
   `RoadNetwork.Version` changes: new segments get meshes, removed ones are destroyed. `ShowPreview(RoadPreview, width)`

@@ -15,3 +15,10 @@ MonoBehaviour:
   definitions:
   - {fileID: 11400000, guid: 7164540fd3db1ef4c8b0caf403992af4, type: 2}
   - {fileID: 11400000, guid: 2b4bc47e9c8d71d47acfde32f34bb268, type: 2}
+  - {fileID: 11400000, guid: 6b2ff5547f9e0aa4e84db4c9464a2a92, type: 2}
+  - {fileID: 11400000, guid: 315fc53029b6dad4f9c52c3d071fcf34, type: 2}
+  - {fileID: 11400000, guid: 33ec412dbd0a17145a9ac37fd106798a, type: 2}
+  - {fileID: 11400000, guid: 0a764a9320384804d9ffe718d683c443, type: 2}
+  - {fileID: 11400000, guid: 05064e2339443364c843f960d14489c1, type: 2}
+  - {fileID: 11400000, guid: 26d2063e3fdc8644b846ddc506f594df, type: 2}
+  - {fileID: 11400000, guid: eee514badecd8e948bafcec125583c58, type: 2}
