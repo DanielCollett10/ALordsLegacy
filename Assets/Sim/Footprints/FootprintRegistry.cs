@@ -9,6 +9,8 @@ namespace LordsLegacy.Sim.Footprints
     {
         private readonly SortedDictionary<int, Footprint> _items = new SortedDictionary<int, Footprint>();
 
+        private int _nextId = 1;
+
         /// <summary>Increases by one on every add and every successful remove.</summary>
         public int Version { get; private set; }
 
@@ -27,9 +29,13 @@ namespace LordsLegacy.Sim.Footprints
             if (_items.ContainsKey(id)) throw new ArgumentException("Footprint id already in use: " + id, nameof(id));
             var f = new Footprint(id, type, centre, rotationDegrees);
             _items.Add(id, f);
+            if (id >= _nextId) _nextId = id + 1;
             Version++;
             return f;
         }
+
+        /// <summary>An id above every id ever added here, so ids of removed footprints are not reused.</summary>
+        public int NextId() => _nextId;
 
         /// <summary>Removes a footprint. Returns false (and leaves Version alone) if the id is unknown.</summary>
         public bool Remove(int id)
