@@ -78,6 +78,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
     `FindAt`, `QueryRect`, `Ids`, and `Version` (bumps on add/remove).
+    `FootprintTypeDef` also has `LogCapacity` / `OxCapacity` (0 by default). `ModuleTypes` (`Assets/Sim/Footprints/`,
+    T-267) holds the woodcutting module types: hut 6×4 (blocks), log storage 8×6 (20 logs), oxen stand 3×3 (1 ox).
+  - **Operation types (T-267, woodcutting.md WC-01..WC-11):** `Assets/Sim/Operations/` (`LordsLegacy.Sim.Operations`)
+    holds `OperationTypeDef` (ids of the building and work area types, hut, log storage, optional oxen stand, family
+    slots, default work radius) and `OperationTypes` (static, `Woodcutting`, `Find`, `All`). Definitions only; the
+    woodcutting area types live in `AreaTypes` (`area.woodcutting` Building, `area.work_woodcutting` Work). Not yet on the world catalogs.
   - **Start layout (T-253, CMP-01..07):** `StartLayout` (`Assets/Sim/Start/`) is pure data: camp centre/rotation, fire,
     stockpile, ox stand and tent spots relative to the camp (rotated with it), trunk road control points, families with
     citizens, ox count. `StartLayoutApplier.Apply(world, layout)` adds the camp footprint (clearing trees under it), draws

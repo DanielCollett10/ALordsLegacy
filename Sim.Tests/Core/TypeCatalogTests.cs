@@ -53,7 +53,7 @@ namespace LordsLegacy.Sim.Tests.Core
             var a = new SimWorld(new SimTuning(), null, null);
             var b = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning(), null, null);
             Assert.AreEqual(1, a.RoadTypes.All.Count);
-            Assert.AreEqual(2, b.AreaTypes.All.Count);
+            Assert.AreEqual(4, b.AreaTypes.All.Count);
         }
 
         [Test]

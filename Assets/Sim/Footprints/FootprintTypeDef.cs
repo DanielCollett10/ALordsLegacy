@@ -19,11 +19,17 @@ namespace LordsLegacy.Sim.Footprints
         public bool BlocksMovement { get; }
         /// <summary>True if trees under it are cleared.</summary>
         public bool ClearsTrees { get; }
+        /// <summary>Logs it holds (log storage: 20, INV-A3); 0 for modules that hold none.</summary>
+        public int LogCapacity { get; }
+        /// <summary>Oxen it holds (oxen stand: 1, WC-05); 0 for modules that hold none.</summary>
+        public int OxCapacity { get; }
 
         /// <summary>Creates a type definition.</summary>
-        public FootprintTypeDef(string id, long widthMm, long depthMm, bool blocksMovement, bool clearsTrees)
+        public FootprintTypeDef(string id, long widthMm, long depthMm, bool blocksMovement, bool clearsTrees,
+            int logCapacity = 0, int oxCapacity = 0)
         {
             Id = id; WidthMm = widthMm; DepthMm = depthMm; BlocksMovement = blocksMovement; ClearsTrees = clearsTrees;
+            LogCapacity = logCapacity; OxCapacity = oxCapacity;
         }
     }
 }
