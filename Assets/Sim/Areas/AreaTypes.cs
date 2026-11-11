@@ -57,6 +57,10 @@ namespace LordsLegacy.Sim.Areas
         public const string TestId = "area.test";
         /// <summary>Id of the test work area.</summary>
         public const string TestWorkId = "area.test_work";
+        /// <summary>Id of the woodcutting building area (WC-01).</summary>
+        public const string WoodcuttingId = "area.woodcutting";
+        /// <summary>Id of the woodcutting work area (WC-10..12).</summary>
+        public const string WoodcuttingWorkId = "area.work_woodcutting";
 
         /// <summary>Test area: building, 4–8 points, 100–5,000 m², 10°, clears trees, blocks roads.</summary>
         public static readonly AreaTypeDef Test =
@@ -66,8 +70,16 @@ namespace LordsLegacy.Sim.Areas
         public static readonly AreaTypeDef TestWork =
             new AreaTypeDef(TestWorkId, "Test work area", AreaKind.Work, 4, 8, 100, 40000, null, false, false);
 
-        /// <summary>All area types.</summary>
-        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork };
+        /// <summary>Woodcutting building area: 4–8 points, 150–5,000 m², 10° max slope, clears trees, blocks roads (WC-01).</summary>
+        public static readonly AreaTypeDef Woodcutting =
+            new AreaTypeDef(WoodcuttingId, "Woodcutter", AreaKind.Building, 4, 8, 150, 5000, 10, true, true);
+
+        /// <summary>Woodcutting work area: 4–8 points, 100–40,000 m², no slope limit, no clearing, no blocking (WC-10).</summary>
+        public static readonly AreaTypeDef WoodcuttingWork =
+            new AreaTypeDef(WoodcuttingWorkId, "Woodcutting work area", AreaKind.Work, 4, 8, 100, 40000, null, false, false);
+
+        /// <summary>All area types, in definition order.</summary>
+        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork };
 
         /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
         public static readonly AreaTypeCatalog DefaultCatalog = new AreaTypeCatalog(All);
