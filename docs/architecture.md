@@ -36,8 +36,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     dispatch → steps → movement → operations** (the phase meanings are documented in `SimSystems.cs`). A new system
     goes in the block of its phase. `Step(n)` runs n ticks; each tick advances `Tick` by one, then runs every system's
     `Step` in list order. A paused world runs no systems on `Step`. `Execute` still notifies systems while paused,
-    because commands work while paused. Rejected commands notify nobody. The list is empty until subsystems register.
+    because commands work while paused. Rejected commands notify nobody.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
+    Registered today: `NavSyncSystem` (sync), `RoutineSystem` (routine), `MovementSystem` and `DebugSendSystem` (movement).
+    Dispatch, steps and operations are empty.
   - **People (T-251, PPL-10..14):** `SimWorld.People` (`Assets/Sim/People/Population.cs`, partial in `SimWorld.People.cs`)
     holds `Family`, `Citizen` and `Ox` records by explicit int id, iterated in id order. Ids are never reused after
     removal. `Version` bumps on add/remove. `Citizen.AgeYears(nowTick, SimTuning.AgeingRate)` implements POP-27.
@@ -71,7 +73,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     no route from where the citizen stands → `NotAllowed` "No route", non-finite point → `InvalidArgument`). While it is set,
     `RoutineSystem` skips the citizen and drops its routine state. `DebugSendSystem` (movement slot, after
     `MovementSystem`) sets the linger on arrival (`DebugLingerMinutes`, 30), then clears `DebugSend` so the routine starts
-    afresh (by day it mills, at night it walks home). A walk that fails mid-way ends the send at once. Works while paused.
+    afresh (by day it mills, at night it walks home). A walk that fails mid-way ends the send at once. Works while paused. No Unity control calls `SendCitizenTo` yet.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
@@ -82,12 +84,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     the trunk road via `world.Execute(DrawRoad)` (throws `InvalidOperationException` with the refusal text if refused),
     adds families (home = tent spot), citizens at home and oxen at the stand. `SimWorld.Camp` (`CampInfo`,
     `SimWorld.Start.cs`) exposes the footprint id and world-space fire, stockpile and stand points; null until applied.
+    The oxen count comes from the layout (`OxCount`), not `SimTuning.StartingOxen`. Decision 0027.
   - **Random (T-250, CLK-07):** `SimWorld.Random` (`Assets/Sim/Core/SimRandom.cs`, partial in `SimWorld.Random.cs`) is the
     world's one deterministic source, never null. It is a PCG-XSH-RR 64/32 written in Sim code (no `System.Random`). It is
     seeded from `SimTuning.WorldSeed` (default 12345). `NextInt(min, max)` is max-exclusive and unbiased, `NextDouble()` is in
     [0, 1), `NextUInt()` gives 32 bits. Its whole state is one `ulong` (`State`); a save stores that and calls `Restore`.
     Routine choices draw from it, time alone does not.
-- `Assets/Sim/Placement/` (`LordsLegacy.Sim.Placement`, placement.md PL-01..05, PL-07): `PlacementRules.CanPlaceAreaVertex(world,
+- `Assets/Sim/Placement/` (`LordsLegacy.Sim.Placement`, placement.md PL-01..05, PL-07, decision 0028): `PlacementRules.CanPlaceAreaVertex(world,
   areaTypeId, point)` and `CanPlaceRoadPoint(world, point)` answer whether one (already snapped) point may be placed. They
   return a `PlacementResult` (`Ok`, or `Reason` = `InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`; `Text` for the UI).
   Pure queries, no state change. "Inside" means strictly inside: within `BoundaryToleranceMm` (50 mm) of an area edge or
@@ -96,14 +99,16 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Time/` (namespace `LordsLegacy.Sim.Calendar`, to avoid clashing with `UnityEngine.Time`):
   - `GameCalendar`: tick → `GameTime` (year, date, weekday, time, season). 365-day year, no leap years,
     the year number increments on 1 January.
-  - `Daylight`: seasonal sunrise and sunset from min/max daylight hours. Pure, no state.
+  - `Daylight`: seasonal sunrise and sunset from min/max daylight hours. Pure, no state. Returns `SunTimes`.
+  - Value types: `GameTime`, `Season`, `Weekday`, `SunTimes`.
   - `TickPacer`: owns the selected speed (`SetSpeed`, `CurrentSpeed`, `Speeds`) and turns real seconds into
     whole ticks (`Advance`), carrying the remainder (`Fraction`). Over `MaxTicksPerFrame` it drops the excess
     and sets `SlowedDown`. `Reset()` clears the carry (the host calls it while paused). No pause state (decision 0006).
 - `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the balancing numbers. Read by code today: pace,
-  speeds, start date, daylight, standard log length, road sample spacing, road minimum point spacing, road tree
+  speeds, start date, daylight, walk and ox speed, ageing rate, milling and debug linger, world seed, standard log
+  length, navigation cell size and max slope, road sample spacing, road minimum point spacing, road tree
   clearance, and the area values (curve flattening, slope grid, overlap tolerance, spatial index cell). Defined but
-  read by nothing yet: walk and ox speed, trunk length range, starting oxen, rest-day switch (see `tuning.md`). Food,
+  read by nothing yet: trunk length range, starting oxen, rest-day switch, Sunday meal, minimum sleep (see `tuning.md`). Food,
   market, construction and population numbers are not in code yet. The Sim never hard-codes these.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
@@ -161,8 +166,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   order; edges are inclusive. Items are stored in every cell their bounds touch. Used only by `AreaRegistry` (building-area bounds).
   `PolygonOverlap.Overlaps` is the tolerance overlap test (decision 0012).
 - `Assets/Sim/Roads/` (`LordsLegacy.Sim.Roads`, decision 0013):
-  - Types: `RoadTypes` (code-built list; `road.dirt_path`: 2.5 m, 15% max grade) of `RoadTypeDef`. The speed
-    multiplier is stored but nothing reads it.
+  - Types: `RoadTypes` (code-built list; `road.dirt_path`: 2.5 m, 15% max grade, 1.25× speed) of `RoadTypeDef`.
+    `NavGrid` reads the speed multiplier (MOV-08).
   - Sampling: `ICurveSampler` with one implementation, `CatmullRomSampler` (centripetal; samples each span evenly,
     about 1 m apart, and hits every control point). `ControlPointFilter.Clean` applies RD-02. `CurveKind` has one value.
   - `RoadNetwork` (`SimWorld.Roads`) holds `RoadNode`s (position, attached segment ids) and `RoadSegment`s (immutable:
@@ -179,7 +184,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     none the output is the plain Catmull-Rom. When the first/last point is a `JoinNode` on a node with exactly one
     (non-loop, non-ignored) segment, `RoadValidator` re-samples with that segment's outward end direction (Hermite span
     at the pinned end) and reports it as `RoadPreview.StartTangent/EndTangent`. `DrawRoad` stores them on the new
-    first/last `RoadSegment` (`StartTangent`/`EndTangent`); the old segment is untouched. T, X and 2+-segment nodes get none.
+    first/last `RoadSegment` (`StartTangent`/`EndTangent`, decision 0029); the old segment is untouched. T, X and 2+-segment nodes get none.
   - `RoadCutter` (internal) cuts a new road's samples and control points at its junctions.
 - `Assets/Sim/Commands/` (`LordsLegacy.Sim.Commands`, decision 0011): `ISimCommand` (`Validate` must not mutate;
   `Apply` runs only after an accepted `Validate`), `CommandResult` (immutable: Accepted with created, removed and
@@ -266,7 +271,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `Start` builds `SimTuning` and the road/area catalogs from it once (edits apply on the next Play); when null it uses
   the code defaults. Unity code reads types from `World.RoadTypes`/`World.AreaTypes`, never the static lists.
   `LordsLegacy/Config/Create default SimConfig` creates the asset (idempotent, never overwrites).
-  `Initialize(SimTuning, MapData)`; if not initialised, `Start` reads `StreamingAssets/Maps/testmap.lsmap` (`TryLoadMap`
+  `Initialize(SimTuning, MapData)` (catalogs from the config) or `Initialize(SimTuning, MapData, RoadTypeCatalog, AreaTypeCatalog)`; if not initialised, `Start` reads `StreamingAssets/Maps/testmap.lsmap` (`TryLoadMap`
   logs an error naming the path and the bake menu item if missing). `Update` calls `Tick(Time.deltaTime)` when
   `AutoUpdate`. `Tick` runs `World.Step(Pacer.Advance(..))`, or resets the pacer while paused. Views read
   `World`, `Pacer`, `TickFraction` and `Stats`. Views send commands only through `Execute(ISimCommand)`,
@@ -320,7 +325,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   - `RoadTool` (id `road`, registers itself in `OnEnable`) holds only draft points. It calls `RoadValidator` for the preview
     and `SimHost.Execute` for `DrawRoad` and `DeleteRoadSegment`. Holds no road rules. Rules: roads.md; input: ui.md.
   - `Tools/Shared/`: `PressTracker` (click, drag, double-click; 4 px drag threshold, 6 px double-click radius; time passed
-    in), `SnapPicker` (best candidate by kind order within a pixel limit), `ToolHitTester` (draft point hits).
+    in), `SnapPicker` (best candidate by kind order within a pixel limit), `SnapMarkers` (`SnapMarkerBuilder`: corner, road-side dot and area-edge dot markers, AR-22), `ToolHitTester` (draft point hits).
   - `AreaTool` (ids `test-area`, `test-work-area`): draft points with a parallel edge list. A click on an edge inserts a point
     (max 8), dragging an edge's middle handle makes it Bent through the cursor, double-clicking the handle straightens it.
     With `ViewSettings.Snapping` on, points snap (SnapPicker order: area vertex, road side line via `RoadSegment.SideLine`, area
