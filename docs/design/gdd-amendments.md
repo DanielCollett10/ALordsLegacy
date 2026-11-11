@@ -37,13 +37,14 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | ID | Rule | Tag |
 | --- | --- | --- |
 | TIME-A1 | **Target pace:** one game year takes about 2–6 real hours of normal play (mixing 4–8× for building, 16–32× for waiting, 1× for watching) | DECIDED |
-| TIME-A2 | A game day lasts **15 real minutes at 1×** (clock runs 96× real time), replacing TIME-02's 45 minutes. Year = 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×, 2.9 h at 32×. Set by one tuning value, `RealMinutesPerGameDayAt1x`, so other day lengths can be tried without code changes | DECIDED (value PLACEHOLDER) |
+| TIME-A2 | A game day lasts **30 real minutes at 1×** (clock runs 48× real time; changed from 15 on 10/11/2026 so walks cost fewer game hours, `movement.md` MOV-20), replacing TIME-02's 45 minutes. Year = 182 h at 1×, 22.8 h at 8×, 11.4 h at 16×, 5.7 h at 32×. Set by one tuning value, `RealMinutesPerGameDayAt1x`. Walk and ox speeds per game minute must change with it (MOV-21) | DECIDED (value PLACEHOLDER) |
 | TIME-A3 | Speeds: pause, 1×, 2×, 4×, 8×, 16×, 32× (replaces TIME-03). Walking still looks like real walking speed at 1× | DECIDED |
 | TIME-A4 | Consequence, accepted: fewer trips fit into a game day, so local work distances (work areas, hauls) are kept short and production and food are tuned per day with that in mind. Long distances between villages are deliberate (WORLD-A1) | DECIDED |
 | TIME-A5 | **Seasonal daylight:** sunrise and sunset follow the calendar, about 8 h of daylight in midwinter and 16 h in midsummer (southern-England-like). Families work from sunrise to sunset, with a meal break. Night length varies to match | DECIDED |
 | TIME-A6 | **Steady light** toggle in the top bar: freezes the on-screen lighting at daytime. It is visual only; the Sim's day, night and schedules are unchanged | DECIDED |
 | TIME-A7 | Combat (later) must feel good at 1–4×; the pace will be retuned when combat exists | DECIDED |
-| TIME-A8 | At 1× walking always looks real. The start camp sits at the forest edge. **Citizens eat once a week, on Sunday evening at home**; there is no meal in the working day (replaces TIME-05's daily meal at home, FOOD-02's walk and FOOD-A9's daily eating). Full rules: `people.md` | DECIDED |
+| TIME-A8 | At 1× walking always looks real. The start camp sits at the forest edge. **Citizens eat once a week, on Sunday evening at home**: the Sunday working day is shorter and the meal itself is not simulated. There is no meal in the working day (replaces TIME-05's daily meal at home, FOOD-02's walk and FOOD-A9's daily eating). Commutes happen outside daylight. Full rules: `people.md` | DECIDED |
+| ROAD-10-A | Dirt path speed multiplier is **1.25×** (was 1.5), with the walk animation sped up to match (`movement.md` MOV-09) | DECIDED (value PLACEHOLDER) |
 
 ## Visuals (ART)
 
@@ -58,7 +59,7 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | --- | --- | --- |
 | WORLD-A1 | The full world targets about **25×25 km**, bigger than Manor Lords, so distance matters. Villages may sit several km apart. Crossing the whole world on foot takes about 20 game days (5 real hours at 1×) | DECIDED (size PLACEHOLDER) |
 | WORLD-A1b | Not all of the world has to be buildable. Two candidates, undecided: (a) everything is buildable except a hard border where enemy forces enter the map; (b) lord- or king-granted **Regions** (GDD section 12) that unlock land. Nothing in the MVPs depends on this | OPEN |
-| WORLD-A1c | Scale check, at current tuning (walk 0.87 m per game minute): one game hour of walking ≈ 52 m, a quarter day ≈ 310 m, a half day ≈ 630 m, a full day ≈ 1.25 km. So "a day's walk" in this game is short in metres; long distances are long in game days | NOTE |
+| WORLD-A1c | Scale check, at current tuning (walk 1.74 m per game minute, since the 30-minute day): one game hour of walking ≈ 104 m, a quarter day ≈ 625 m, a half day ≈ 1.25 km, a full day ≈ 2.5 km. Crossing a 25 km world ≈ 10 game days. Long distances are long in game days | NOTE |
 | WORLD-A2 | The test map generator's size is a setting: 2×2 km for MVP-0 to MVP-1, 6×6 km for scale tests once the MVPs are playable, then a **25×25 km world-scale stress test (map size × 10,000 citizens) after the final MVP** | DECIDED |
 | WORLD-A3 | Technical consequences, accepted: a floating origin is required (PLT-06, over 8 km); terrain and height data must be tiled with coarser resolution where nobody builds (decision 0003); long trips must use roads and a coarse route search, not a fine grid across the whole world (NAV-09) | DECIDED |
 

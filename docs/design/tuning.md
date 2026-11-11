@@ -10,12 +10,14 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 | Value | Default | Unit | Rule |
 | --- | --- | --- | --- |
 | Sim tick | 1 | game minute | CLK-01, decision 0004 |
-| RealMinutesPerGameDayAt1x | 15 | real minutes | TIME-A2 |
+| RealMinutesPerGameDayAt1x | 30 (was 15) | real minutes | TIME-A2, MOV-20 |
 | Speeds | 1, 2, 4, 8, 16, 32 | × | TIME-A3 |
 | DaysPerYear | 365 | days | TIME-01 |
 | Start | 1 Mar, Year 1, 06:00, Monday | | gdd-amendments Time |
 | Min / max daylight | 8 / 16 | game hours | TIME-A5 |
-| Rest day | Sunday, on | switch | FOOD-A4 |
+| Rest day | Sunday, **off** until a church exists (was on) | switch | FOOD-A4, FOOD-A4b, PPL-21 |
+| Sunday meal (shorter Sunday work) | 120 | game minutes taken off the end of Sunday's working day | PPL-21 |
+| Minimum sleep | 6 | game hours at home per night | PPL-26 |
 | MaxTicksPerFrame | 8 | ticks | CLK-05 (above this the game slows down instead of skipping) |
 
 > Implementation note (MaxTicksPerFrame, CLK-05): `TickPacer.Advance` returns the cap and drops the excess
@@ -29,16 +31,16 @@ Calendar: DayOfYear counts from 1 Jan (1 Jan = day 1, so 1 Mar = day 60). The ye
 goes up on **1 January**, so Year 1 is a short first year (1 Mar – 31 Dec) and Year 2 starts
 on 1 Jan. No leap years.
 
-Derived: clock runs 96× real time at 1×. A year is 91 h at 1×, 11.4 h at 8×, 5.7 h at 16×,
-2.9 h at 32×. At 32× the Sim runs about 51 ticks per real second.
+Derived: the clock runs 48× real time at 1×. A year is 182 h at 1×, 22.8 h at 8×, 11.4 h at 16× and
+5.7 h at 32×. At 32× the Sim runs about 26 ticks per real second.
 
 ## Movement
 
 | Value | Default | Unit | Rule |
 | --- | --- | --- | --- |
-| Walk speed | 0.87 | m per game minute (= 5 km/h on screen at 1×) | TIME-04, decision 0004 |
-| Ox speed | 0.52 | m per game minute (= 3 km/h on screen at 1×) | TIME-04 |
-| Road speed multiplier | 1.5 (under review, MOV-09) | × | ROAD-10 |
+| Walk speed | 1.74 (was 0.87) | m per game minute (= 5 km/h on screen at 1× with the 30-minute day) | TIME-04, MOV-21, decision 0004 |
+| Ox speed | 1.04 (was 0.52) | m per game minute (= 3 km/h on screen at 1×) | TIME-04, MOV-21 |
+| Road speed multiplier (dirt path) | 1.25 (was 1.5) | × (walk animation sped up to match) | ROAD-10-A, MOV-09 |
 | Max walkable slope | 30 | degrees (slope never slows walking) | MOV-01, MOV-02 |
 | Nav grid cell | 2 | m | decision 0022 |
 | Milling radius / stay | 25 / 20–90 | m from camp fire / game minutes | PPL-31 |
@@ -46,12 +48,12 @@ Derived: clock runs 96× real time at 1×. A year is 91 h at 1×, 11.4 h at 8×,
 | Meals every | 7 | days (Sunday evening, at home) | PPL-21, PPL-23 |
 | Camp footprint | 24 × 16 | m | CMP-02 |
 
-> Implementation note (Walk and ox speed, TIME-04): `SimTuning` holds both values, but no Sim system moves anyone yet.
-> The road multiplier is stored on the dirt path type (`RoadTypeDef.SpeedMultiplier` = 1.5), but no movement reads it.
+> Implementation note: the code still holds the old defaults (15-minute day, 0.87 / 0.52, road 1.5, rest day on).
+> The M7 task "Pace change" updates `SimTuning`, `RoadTypes` and `SimConfig.asset` together.
 
-Derived (walking, off-road): 52 m per game hour; quarter day ≈ 310 m; half day ≈ 630 m;
-full day ≈ 1.25 km. Crossing a 25 km world ≈ 20 game days. If walk speed or day length
-changes, recompute these and the market table below.
+Derived (walking, off-road): 104 m per game hour, a quarter day ≈ 625 m, a half day ≈ 1.25 km,
+a full day ≈ 2.5 km. Crossing a 25 km world ≈ 10 game days. A 300 m commute ≈ 2.9 h (2.3 h on a road).
+If walk speed or day length changes, recompute these numbers and the tables below.
 
 ## Roads and areas
 
@@ -115,7 +117,7 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 
 | Value | Default | Unit | Rule |
 | --- | --- | --- | --- |
-| Market range | 630 | m walking distance (≈ ½ day) | MKT-06 |
+| Market range | 630 | m walking distance (≈ ¼ day since the 30-minute day; was ½ day; owner may revisit) | MKT-06 |
 | Stall cost | 1 log (later 2 planks) | | MKT-03 |
 | Hand carry per trip (no container) | 10 | items | MKT-03e |
 | Load / unload time per trip | 10 | game minutes | PROPOSED |
@@ -127,9 +129,12 @@ With today's defaults (2 adults, 10 items, about 2 rations per item, 16 h summer
 
 | Store to market | Trips per adult per day | Feeds about |
 | --- | --- | --- |
-| 100 m | ~4 | 150 people |
-| 300 m | ~1–2 | 50 people |
-| 600 m | ~1 | 25 people |
+| 100 m | ~7–8 | 300 people |
+| 300 m | ~2–3 | 100 people |
+| 600 m | ~1–2 | 55 people |
+
+(Recomputed for walking at 1.74 m per game minute. People still eat the same rations per week; PPL-22 only
+changes *when* they eat.)
 
 Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise items per trip.
 
@@ -153,5 +158,6 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 > scatter actually uses). Tree density (493 per hectare) and the seed are editor constants in `ForestScatter`, not in
 > `SimTuning`. Owner to decide where these belong.
 
-Woodcutting check: trees 100 m from the log storage → ox round trip about 6.4 game hours
-→ about 2 trips per summer day → about 8 logs per ox per day.
+Woodcutting check (ox 1.04 m per game minute): trees 100 m from the log storage → ox round trip about
+3.2 game hours of walking, plus loading → about 4 trips per 16 h summer day → about 16 logs per ox per day
+(before fetching the ox from its stand).

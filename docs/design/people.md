@@ -22,7 +22,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | --- | --- | --- |
 | PPL-01 | At 1× a walking citizen always looks like a person walking at a real pace (TIME-A3). Distance is a cost the player manages | DECIDED |
 | PPL-02 | The start camp sits at the forest edge, so a first woodcutting operation can be placed close to camp and trees (WORLD-06) | DECIDED |
-| PPL-03 | The owner wants a 300 m commute to cost noticeably less than "most of a day" without people looking wrong at 1×. How: see the open question in `movement.md` (day length, walk pace, walking outside daylight) | OPEN |
+| PPL-03 | To shorten commutes without anyone looking faster at 1×: (A) a game day lasts **30 real minutes at 1×** (TIME-A2 changed), which doubles walk speed per game minute at the same on-screen pace, and (C) **people commute outside daylight** (PPL-25). A 300 m walk is now about 2.9 game hours, and it no longer comes out of working daylight | DECIDED (owner 10/11/2026) |
 | PPL-06 | Workers sleep at home (the camp while Homeless). They do not lodge at the workplace | DECIDED (for now) |
 
 ## The week (DECIDED, owner 10/11/2026)
@@ -34,10 +34,13 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 | ID | Rule | Tag |
 | --- | --- | --- |
 | PPL-20 | Working days run from sunrise to sunset (TIME-A5), with **no meal break**. Replaces TIME-05's daily meal at home and FOOD-02's walk home | DECIDED |
-| PPL-21 | **Sunday:** everyone works as on any other day (no church yet, so no rest day, FOOD-A4b) and eats **at home in the evening**, when they come back at sunset. No extra trip | DECIDED (evening timing PROPOSED) |
+| PPL-21 | **Sunday:** everyone works (no church yet, so no rest day, FOOD-A4b), but the working day is **shorter**. Workers stop `SundayMealMinutes` (120) early and walk home. The weekly meal is **not simulated as an action**: the time is simply taken off the Sunday working day, and the food is consumed at home that evening (MVP-2). Batching the week's eating into one evening frees the other six days for work | DECIDED (minutes PLACEHOLDER) |
 | PPL-22 | The weekly meal consumes a week of need at once (MVP-2, food system). Replaces FOOD-A9's daily eating. The Sunday allotment and fetching trip (FOOD-A6, FOOD-A7) are unchanged and come with markets | DECIDED |
 | PPL-23 | Meal frequency is a tuning value (`MealsEveryDays` = 7) | PLACEHOLDER |
-| PPL-24 | Night (sunset to sunrise): citizens walk home and sleep there. A task that isn't finished at sunset is **suspended**: it keeps its progress and reservations and resumes the next morning (TSK-15, TSK-16) | DECIDED |
+| PPL-24 | Night: citizens walk home and sleep there. A task that isn't finished when the citizen stops work is **paused**: it keeps its progress and reservations, and the citizen goes back to it and continues the next morning (TSK-15, TSK-16) | DECIDED |
+| PPL-25 | **Commuting happens outside daylight.** A worker leaves home early enough to reach the workplace (or the task's first target) at sunrise, works until sunset, then walks home in the dark. The commute time comes from the route's travel time, worked out when they set off | DECIDED |
+| PPL-26 | Minimum sleep: `MinSleepHours` (6) at home each night. If the commute would cut sleep below that, the worker sets off later and starts work after sunrise. This is how a far workplace still costs daylight, mostly in summer when nights are short | PLACEHOLDER (lead's default) |
+| PPL-27 | In M7 there is no work, so citizens follow the milling routine (PPL-31). PPL-25/26 and the Sunday rule (PPL-21) start with work in M8 | DECIDED |
 
 ## When there is nothing to do
 
@@ -57,4 +60,4 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 | PPL-42 | Later, some build steps (upgrades, certain buildings) need an **artisan builder**. Odd-jobbers still deliver materials to those sites but never take the artisan steps. This is a per-step eligibility in data (decision 0005), not a special case in code | DECIDED |
 | PPL-43 | An odd-jobber with no odd job mills about (PPL-30) | DECIDED |
 | PPL-44 | Heavy steps (POP-A3: construction, leading oxen) are for 14+ only, so children don't do odd jobs in MVP-1 | DECIDED |
-| PPL-45 | A family assigned to a workplace whose work has stopped (storage full, no trees) does **not** fall back to odd jobs; it mills about | OPEN (lead's default; owner to confirm) |
+| PPL-45 | Once a family is assigned, it does only its workplace's tasks plus its own burgage extension if it has one (non-artisan: allotment garden, orchard and so on, from MVP-2 and later). If that work stops (storage full, no trees), it **mills about**. It never falls back to odd jobs | DECIDED |
