@@ -414,6 +414,12 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     Cursor (AR-20, T-164): every pointer move shows a 0.6 m `CursorMarker` sphere at the (snapped) ground point, green when
     snapped, hidden over UI and on deactivate. The ghost (AR-21, `AreaRenderer.ShowGhost`) is built but off behind
     `AreaTool.GhostEnabled` (default false) until polished.
+  - `ModuleTool` (id `module`, T-279, WC-03/04): holds the operation id and a queue of module types. A ghost (`TerrainDrape.Fill`,
+    green/red) follows the cursor; Q/E rotate 15° (Shift 1°). With `ViewSettings.Snapping` on, `Tools/Shared/ModuleSnap` (pure,
+    presentation only, decision 0017) snaps a side flush to an area edge within `SnapDistancePx` and turns to it (3 mm inset).
+    `ModulePlacement.Preview` judges the ghost (red + refusal text in the panel); click or Confirm sends `PlaceModule`; right-click on a
+    module of the operation sends `RemoveModule`. Panel buttons (`ToolPanelView.SetActions`/`ActionClicked`): Add hut (only if none),
+    Add log storage, Add oxen stand. The tool stays active after the queue empties; Esc/Cancel ends it.
 - Build bar (`BuildBarView`, `Assets/Game/UI/BuildBar/`, UXML/USS): non-focusable buttons built from `ToolEntry.Defaults()`
   (Road, Test area and Test work area enabled; the rest greyed, tooltip "Coming later"). Raises `ToolClicked`.
 - Tool panel (`ToolPanelView`, `Assets/Game/UI/ToolPanel/`, UXML/USS): status line, hint line, Cancel/Confirm.
