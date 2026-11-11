@@ -272,6 +272,15 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(panel, "_host", host);
             SetRef(panel, "_agents", agents);
             SetRef(panel, "_controller", controller);
+            var path = new GameObject("DebugPathOverlay").AddComponent<DebugPathOverlay>();
+            SetRef(path, "_host", host);
+            SetRef(path, "_agents", agents);
+            var send = new GameObject("DebugSendController").AddComponent<DebugSendController>();
+            SetRef(send, "_host", host);
+            SetRef(send, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(send, "_agents", agents);
+            SetRef(send, "_controller", controller);
+            SetRef(send, "_panel", panel);
         }
 
         /// <summary>Adds the debug overlay UIDocument and view, wired to SimHost and the GroundPicker.</summary>

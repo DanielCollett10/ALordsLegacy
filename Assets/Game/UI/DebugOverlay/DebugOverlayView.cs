@@ -51,6 +51,14 @@ namespace LordsLegacy.Game
         public const string AreaTypeName = "debug-area-type";
         /// <summary>Label element names (area under the cursor).</summary>
         public const string AreaM2Name = "debug-area-m2";
+        /// <summary>Label element name (citizen count, T-264).</summary>
+        public const string CitizenCountName = "debug-citizen-count";
+        /// <summary>Label element name (nav cell indices under the cursor).</summary>
+        public const string NavCellName = "debug-nav-cell";
+        /// <summary>Label element name (nav cell blocked flag).</summary>
+        public const string NavBlockedName = "debug-nav-blocked";
+        /// <summary>Label element name (nav cell speed multiplier).</summary>
+        public const string NavMultName = "debug-nav-mult";
         private const string RootName = "debug-overlay";
 
         [SerializeField] private GroundPicker _picker;
@@ -64,6 +72,7 @@ namespace LordsLegacy.Game
         private Label _fps, _count, _tickMs, _tps, _treeId, _trunk, _logs;
         private Label _roadNodes, _roadSegments, _roadNetworks, _segId, _segEnds, _segReach;
         private Label _areaCount, _areaName, _areaType, _areaM2;
+        private Label _citizenCount, _navCell, _navBlocked, _navMult;
         private float _fpsSmoothed;
 
         /// <summary>When true, Update toggles on F3, measures FPS and picks under the mouse. Tests set false.</summary>
@@ -113,6 +122,28 @@ namespace LordsLegacy.Game
             _roadSegments.text = "Road segments " + roads.SegmentCount.ToString(c);
             _roadNetworks.text = "Road networks " + roads.ComponentCount.ToString(c);
             if (_areaCount != null) _areaCount.text = "Areas " + host.World.Areas.Count.ToString(c);
+            if (_citizenCount != null) _citizenCount.text = "Citizens " + host.World.People.CitizenCount.ToString(c);
+        }
+
+        private void ShowNav(SimHost host, GroundSample g)
+        {
+            if (_navCell == null) return;
+            if (!g.HasValue)
+            {
+                _navCell.text = "Nav cell -- --"; _navBlocked.text = "Nav blocked --"; _navMult.text = "Nav speed x--";
+                return;
+            }
+            var c = CultureInfo.InvariantCulture;
+            var nav = host.World.Nav;
+            int ix = nav.CellX(g.X), iz = nav.CellZ(g.Z);
+            if (!nav.InGrid(ix, iz))
+            {
+                _navCell.text = "Nav cell off grid"; _navBlocked.text = "Nav blocked --"; _navMult.text = "Nav speed x--";
+                return;
+            }
+            _navCell.text = "Nav cell " + ix.ToString(c) + " " + iz.ToString(c);
+            _navBlocked.text = "Nav blocked " + (nav.IsBlocked(ix, iz) ? "yes" : "no");
+            _navMult.text = "Nav speed x" + nav.SpeedMultiplier(ix, iz).ToString("F2", c);
         }
 
         /// <summary>Finds the tree nearest the ground under a screen position and shows it. Clears the tree labels if none.</summary>
@@ -121,8 +152,9 @@ namespace LordsLegacy.Game
             var picker = _picker != null ? _picker : (_picker = FindFirstObjectByType<GroundPicker>());
             var host = ResolveHost();
             if (picker == null || host == null || !host.IsInitialized
-                || !picker.TryPickScreen(screenPos, out var g)) { ShowTree(null); ShowSegment(null, null); ShowArea(null); return; }
+                || !picker.TryPickScreen(screenPos, out var g)) { ShowTree(null); ShowSegment(null, null); ShowArea(null); if (host != null && host.IsInitialized) ShowNav(host, default); return; }
             InspectRoad(host, g);
+            ShowNav(host, g);
             ShowArea(FindAreaAt(host, g));
             TreeRecord best = null;
             double bestD = double.MaxValue;
@@ -221,6 +253,10 @@ namespace LordsLegacy.Game
             _areaName = root.Q<Label>(AreaNameName);
             _areaType = root.Q<Label>(AreaTypeName);
             _areaM2 = root.Q<Label>(AreaM2Name);
+            _citizenCount = root.Q<Label>(CitizenCountName);
+            _navCell = root.Q<Label>(NavCellName);
+            _navBlocked = root.Q<Label>(NavBlockedName);
+            _navMult = root.Q<Label>(NavMultName);
             SetVisible(Visible);
         }
 
@@ -232,7 +268,7 @@ namespace LordsLegacy.Game
             box.style.right = 12;
             foreach (var n in new[] { FpsName, TreeCountName, TickMsName, TpsName, TreeIdName, TreeTrunkName, TreeLogsName,
                 RoadNodesName, RoadSegmentsName, RoadNetworksName, SegIdName, SegEndsName, SegReachName,
-                AreaCountName, AreaNameName, AreaTypeName, AreaM2Name })
+                AreaCountName, AreaNameName, AreaTypeName, AreaM2Name, CitizenCountName, NavCellName, NavBlockedName, NavMultName })
                 box.Add(new Label(n) { name = n });
             root.Add(box);
         }

@@ -19,7 +19,8 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _name, _age, _family, _activity;
+        private Label _name, _age, _family, _activity, _message;
+        private string _pendingMessage = "";
         private Button _close;
         private bool _subscribed;
 
@@ -37,6 +38,18 @@ namespace LordsLegacy.Game
 
         /// <summary>Activity line text.</summary>
         public string ActivityText => _activity?.text ?? "";
+
+        /// <summary>Debug message line text (send-to refusal, T-264); empty when none.</summary>
+        public string MessageText => _message?.text ?? "";
+
+        /// <summary>Shows a message line in the panel (empty hides it). Cleared when the selection changes.</summary>
+        public void ShowMessage(string text)
+        {
+            _pendingMessage = text ?? "";
+            if (_message == null) return;
+            _message.text = _pendingMessage;
+            _message.style.display = _pendingMessage.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
+        }
 
         /// <summary>The panel element, for layout checks.</summary>
         public VisualElement PanelElement => _panel;
@@ -136,13 +149,19 @@ namespace LordsLegacy.Game
         {
             var agents = Agents();
             if (agents == null || _subscribed) return;
-            agents.SelectionChanged += Refresh;
+            agents.SelectionChanged += OnSelectionChanged;
             _subscribed = true;
+        }
+
+        private void OnSelectionChanged()
+        {
+            ShowMessage("");
+            Refresh();
         }
 
         private void Unsubscribe()
         {
-            if (_agents != null && _subscribed) _agents.SelectionChanged -= Refresh;
+            if (_agents != null && _subscribed) _agents.SelectionChanged -= OnSelectionChanged;
             _subscribed = false;
         }
 
@@ -174,8 +193,12 @@ namespace LordsLegacy.Game
             _age = MakeLabel("citizen-age", 12, false);
             _family = MakeLabel("citizen-family", 12, false);
             _activity = MakeLabel("citizen-activity", 12, false);
+            _message = MakeLabel("citizen-message", 12, false);
+            _message.style.color = new Color(1f, 0.55f, 0.45f);
+            _message.style.display = DisplayStyle.None;
 
-            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_activity); _panel.Add(_close);
+            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_activity); _panel.Add(_message); _panel.Add(_close);
+            ShowMessage(_pendingMessage);
             holder.Add(_panel);
             root.Add(holder);
             UiFocusRules.Apply(root);
