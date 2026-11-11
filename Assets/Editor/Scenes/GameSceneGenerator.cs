@@ -75,8 +75,7 @@ namespace LordsLegacy.EditorTools.Scenes
             var go = new GameObject("SimHost");
             var host = go.AddComponent<SimHost>();
             SetRef(host, "_config", SimConfigGenerator.EnsureAsset());
-            var layout = AssetDatabase.LoadAssetAtPath<StartLayoutConfig>(StartLayoutGenerator.AssetPath);
-            if (layout != null) SetRef(host, "_startLayout", layout);
+            SetRef(host, "_startLayout", Load<StartLayoutConfig>(StartLayoutGenerator.AssetPath));
             return go;
         }
 

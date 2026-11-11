@@ -141,6 +141,41 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM7PeopleWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var host = Object.FindFirstObjectByType<SimHost>();
+            Assert.IsNotNull(host, "SimHost missing.");
+            Assert.IsNotNull(host.StartLayout, "SimHost has no StartLayout wired.");
+
+            var people = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.PeopleRenderer>();
+            Assert.IsNotNull(people, "PeopleRenderer missing.");
+            AssertNoNullRefs(people);
+            var camp = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.CampRenderer>();
+            Assert.IsNotNull(camp, "CampRenderer missing.");
+            AssertNoNullRefs(camp);
+
+            var citizenPanel = Object.FindFirstObjectByType<CitizenPanelView>();
+            Assert.IsNotNull(citizenPanel, "CitizenPanelView missing.");
+            AssertNoNullRefs(citizenPanel);
+            Assert.IsNotNull(citizenPanel.GetComponent<UnityEngine.UIElements.UIDocument>(), "CitizenPanel has no UIDocument.");
+
+            var agents = Object.FindFirstObjectByType<AgentPicker>();
+            Assert.IsNotNull(agents, "AgentPicker missing.");
+            AssertNoNullRefs(agents);
+
+            var send = Object.FindFirstObjectByType<DebugSendController>();
+            Assert.IsNotNull(send, "DebugSendController missing.");
+            AssertNoNullRefs(send);
+
+            Assert.Greater(host.World.People.CitizenCount, 0, "Start layout produced no people.");
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneInitialisesSimFromBakedMap()
         {
             var load = SceneManager.LoadSceneAsync("Game");
