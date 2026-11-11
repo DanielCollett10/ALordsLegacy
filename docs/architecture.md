@@ -36,7 +36,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     dispatch → steps → movement → operations** (the phase meanings are documented in `SimSystems.cs`). A new system
     goes in the block of its phase. `Step(n)` runs n ticks; each tick advances `Tick` by one, then runs every system's
     `Step` in list order. A paused world runs no systems on `Step`. `Execute` still notifies systems while paused,
-    because commands work while paused. Rejected commands notify nobody. The list is empty until subsystems register.
+    because commands work while paused. Rejected commands notify nobody.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
     Registered today: `NavSyncSystem` (sync), `RoutineSystem` (routine), `MovementSystem` and `DebugSendSystem` (movement).
     Dispatch, steps and operations are empty.
