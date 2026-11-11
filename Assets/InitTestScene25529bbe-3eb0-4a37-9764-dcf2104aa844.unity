@@ -1,0 +1,285 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!29 &1
+OcclusionCullingSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_OcclusionBakeSettings:
+    smallestOccluder: 5
+    smallestHole: 0.25
+    backfaceThreshold: 100
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionCullingData: {fileID: 0}
+--- !u!104 &2
+RenderSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 10
+  m_Fog: 0
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogMode: 3
+  m_FogDensity: 0.01
+  m_LinearFogStart: 0
+  m_LinearFogEnd: 300
+  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
+  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 0
+  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_HaloStrength: 0.5
+  m_FlareStrength: 1
+  m_FlareFadeSpeed: 3
+  m_HaloTexture: {fileID: 0}
+  m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
+  m_DefaultReflectionMode: 0
+  m_DefaultReflectionResolution: 128
+  m_ReflectionBounces: 1
+  m_ReflectionIntensity: 1
+  m_CustomReflection: {fileID: 0}
+  m_Sun: {fileID: 0}
+  m_UseRadianceAmbientProbe: 0
+--- !u!157 &3
+LightmapSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
+  m_GISettings:
+    serializedVersion: 2
+    m_BounceScale: 1
+    m_IndirectOutputScale: 1
+    m_AlbedoBoost: 1
+    m_EnvironmentLightingMode: 0
+    m_EnableBakedLightmaps: 1
+    m_EnableRealtimeLightmaps: 0
+  m_LightmapEditorSettings:
+    serializedVersion: 12
+    m_Resolution: 2
+    m_BakeResolution: 40
+    m_AtlasSize: 1024
+    m_AO: 0
+    m_AOMaxDistance: 1
+    m_CompAOExponent: 1
+    m_CompAOExponentDirect: 0
+    m_ExtractAmbientOcclusion: 0
+    m_Padding: 2
+    m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
+    m_TextureCompression: 1
+    m_ReflectionCompression: 2
+    m_MixedBakeMode: 2
+    m_BakeBackend: 2
+    m_PVRSampling: 1
+    m_PVRDirectSampleCount: 32
+    m_PVRSampleCount: 512
+    m_PVRBounces: 2
+    m_PVREnvironmentSampleCount: 256
+    m_PVREnvironmentReferencePointCount: 2048
+    m_PVRFilteringMode: 1
+    m_PVRDenoiserTypeDirect: 1
+    m_PVRDenoiserTypeIndirect: 1
+    m_PVRDenoiserTypeAO: 1
+    m_PVRFilterTypeDirect: 0
+    m_PVRFilterTypeIndirect: 0
+    m_PVRFilterTypeAO: 0
+    m_PVREnvironmentMIS: 1
+    m_PVRCulling: 1
+    m_PVRFilteringGaussRadiusDirect: 1
+    m_PVRFilteringGaussRadiusIndirect: 1
+    m_PVRFilteringGaussRadiusAO: 1
+    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+    m_PVRFilteringAtrousPositionSigmaIndirect: 2
+    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
+  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
+  m_LightingSettings: {fileID: 0}
+--- !u!196 &4
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 3
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666667
+    manualTileSize: 0
+    tileSize: 256
+    buildHeightMesh: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
+    debug:
+      m_Flags: 0
+  m_NavMeshData: {fileID: 0}
+--- !u!1 &878015224
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 878015226}
+  - component: {fileID: 878015225}
+  m_Layer: 0
+  m_Name: Code-based tests runner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &878015225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 878015224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 102e512f651ee834f951a2516c1ea3b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.TestRunner::UnityEngine.TestTools.TestRunner.PlaymodeTestsController
+  m_AssembliesWithTests:
+  - LordsLegacy.Tests.PlayMode
+  - Unity.InputSystem.TestFramework
+  - UnityEngine.TestRunner
+  testStartedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  testFinishedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  runStartedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  runFinishedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  settings:
+    filters:
+    - testMode: 4
+      assemblyNames: []
+      groupNames: []
+      categoryNames: []
+      testNames:
+      - LordsLegacy.Tests.PlayMode.AreaCursorGhostTests
+      - LordsLegacy.Tests.PlayMode.AreaPlacementTests
+      - LordsLegacy.Tests.PlayMode.AreaRendererTests
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.AreaCornersAndEdgeDotsShow
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.BackspaceRemovesLastPoint
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.BendingAnEdgeIntoAnHourglassIsRefused
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.BothEndsOnNeighbourCurveHugItExactly
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.BuildBarEnablesBothAreaEntries
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.BuildBarEnablesWoodcutterEntry
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.CancelButtonCancelsDraft
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ClickingFourPointsInCrossingOrderIsReorderedIntoAValidShape
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ClickOnEdgeInsertsPointThereUpToMax
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ClickOnPointOneClosesRatherThanDrags
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ClosingEdgeBecomesNearRoadOnClose
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.CrossingDraftWithBentEdgeHasNoFillAndACrossPerCrossing
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.CrossingOrderAllStraightIsReorderedIntoSimpleShape
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DoubleClickClosesFromFourPointsAddingOnePoint
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DoubleClickingNearRoadHandleStraightensAndDraggingBendsIt
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DoubleClickWithThreePointsDoesNotClose
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DraggingAPointIntoAnHourglassIsReordered
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DraggingFarEndBeyondReachBecomesStraight
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DraggingHandleBendsEdgeThroughCursorAndDoubleClickStraightens
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DraggingPointPastRoadPointKeepsEdgesStraight
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.DragMovesVertexWithoutClosingOrAdding
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.EdgeBeyond10mIsStraightNotPartialFollow
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.EdgeNearNeighbourAreaCurveBecomesNearAreaAndFollowsIt
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.EdgeWithin10mOfSnappedRoadSideIsNearRoadAndFollowsTheCurve
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.EscapeCancelsThenSecondEscapeLeavesTool
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.FourPointsConfirmCreatesAreaAndClearsDraft
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.InsertingAPointThatWouldCrossIsFixedOrRefused
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.InvalidReasonShownAndConfirmBlocked
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.MaxPointsStopsAtEight
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ModuleToolShowsPanelAndClickPlacesHutThenLogStorageThenReturnsToNoTool
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.NearRoadEdgeThatWouldDoubleBackIsStraight
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.NearRoadEightMetresStillFormsAndEndsOnBothPoints
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.PanelHiddenWhileIdleShownOnFirstPointHiddenOnEscapeAndBackspace
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.PlotClippingRoadEndIsFittedAroundRoadAndConfirms
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.RightClickDeletesAreaOfThisKindOnlyWhenNoDraft
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.RightClickOnVertexRemovesItButEmptyGroundCancels
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.RightDragDoesNotDeleteAnArea
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.RightDragDoesNothing
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.RoadDotsShowNearTheCursorAndNotFarAndDoNotMove
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.RoadThroughDraftStatusCrossesRoadAndConfirmDisabled
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.Screenshot6EdgeFromFarPointToSnappedPointIsStraight
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.Screenshot7DraftFittedAroundFollowsRoadNeighbourConfirms
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.SnapOrderIsCornerThenRoadDotThenAreaDot
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.SnappedVerticesOnSameRoadSideMakeEdgeFollowRoad
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.SnappingOffGivesNoNearRoadEdge
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.SnappingOffNothingSnapsAndNoEdgeFollowsRoad
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.SnapsToAreaVertexWithinSnapDistance
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.SphereFollowsCursorWhilePanelHidden
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.TerracedPlotSnappedToNeighbourConfirms
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ThreePointsCannotBeConfirmedOrClosed
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.ValidDraftFollowingARoadFillsItsWholeOutline
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.WoodcutterCancelDraftReturnsToNoTool
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.WoodcutterConfirmHandsOverToModuleToolHutThenLogStorage
+      - LordsLegacy.Tests.PlayMode.AreaToolTests.WorkAreaToolDrawsAndDeletesWorkAreas
+      - LordsLegacy.Tests.PlayMode.CameraRigTests
+      - LordsLegacy.Tests.PlayMode.CitizenPanelTests
+      - LordsLegacy.Tests.PlayMode.CursorMarkerTests
+      - LordsLegacy.Tests.PlayMode.DebugOverlayTests
+      - LordsLegacy.Tests.PlayMode.DebugSendTests
+      - LordsLegacy.Tests.PlayMode.GameSceneTests
+      - LordsLegacy.Tests.PlayMode.GroundOverlayTests
+      - LordsLegacy.Tests.PlayMode.GroundPickerTests
+      - LordsLegacy.Tests.PlayMode.PeopleRendererTests
+      - LordsLegacy.Tests.PlayMode.RoadRendererTests
+      - LordsLegacy.Tests.PlayMode.RoadToolCursorTests
+      - LordsLegacy.Tests.PlayMode.RoadToolTests
+      - LordsLegacy.Tests.PlayMode.SimConfigHostTests
+      - LordsLegacy.Tests.PlayMode.SimHostTests
+      - LordsLegacy.Tests.PlayMode.SmokeTests
+      - LordsLegacy.Tests.PlayMode.SnappingToggleTests
+      - LordsLegacy.Tests.PlayMode.SunLightControllerTests
+      - LordsLegacy.Tests.PlayMode.ToolControllerTests
+      - LordsLegacy.Tests.PlayMode.ToolPanelTests
+      - LordsLegacy.Tests.PlayMode.TopBarTests
+      - LordsLegacy.Tests.PlayMode.TreeRendererTests
+      synchronousOnly: 0
+    sceneBased: 0
+    originalScene: 
+    bootstrapScene: 
+    orderedTestNames: []
+    featureFlags:
+      fileCleanUpCheck: 0
+      requiresSplashScreen: 0
+      strictDomainReload: 0
+      disableNestedEnumeratorBugfix: 0
+    retryCount: 0
+    repeatCount: 0
+    automated: 0
+    randomOrderSeed: 0
+--- !u!4 &878015226
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 878015224}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 878015226}
