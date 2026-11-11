@@ -118,6 +118,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     into the nearest same-owner pile within 1 m. `TotalOf(item)`, per-location counts, `Version`, and `Audit()` (null =
     consistent; compares location sums with the produced journal). `Items.Log` is `item.log` (category Log). Reserve,
     transfer, carriers come in M9.
+  - **Processes (T-272, TMB-01/02, TSK-14, MVP-1-12):** `Assets/Sim/Processes/` (`LordsLegacy.Sim.Processes`) holds
+    `ProcessDef` (id, ordered `StageDef`s), `StageDef` (id, minutes, per-item, heavy, enabled, animation key) and
+    `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` returns the enabled
+    stages with a disabled stage's time added to the next enabled one (trailing ones to the last enabled), so the total
+    is the same either way. Data only; not yet used by the task board.
   - **Start layout (T-253, CMP-01..07):** `StartLayout` (`Assets/Sim/Start/`) is pure data: camp centre/rotation, fire,
     stockpile, ox stand and tent spots relative to the camp (rotated with it), trunk road control points, families with
     citizens, ox count. `StartLayoutApplier.Apply(world, layout)` adds the camp footprint (clearing trees under it), draws
