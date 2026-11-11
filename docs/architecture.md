@@ -73,7 +73,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     no route from where the citizen stands → `NotAllowed` "No route", non-finite point → `InvalidArgument`). While it is set,
     `RoutineSystem` skips the citizen and drops its routine state. `DebugSendSystem` (movement slot, after
     `MovementSystem`) sets the linger on arrival (`DebugLingerMinutes`, 30), then clears `DebugSend` so the routine starts
-    afresh (by day it mills, at night it walks home). A walk that fails mid-way ends the send at once. Works while paused. No Unity control calls `SendCitizenTo` yet.
+    afresh (by day it mills, at night it walks home). A walk that fails mid-way ends the send at once. Works while paused. Unity calls it only from `DebugSendController` (Editor and development builds).
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
@@ -326,8 +326,10 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     `Register(tool)`, `Toggle(id)` (second click deactivates; switching cancels and deactivates the old tool),
     `HandleEscape()` (tool first, deactivate only if it returns false), `IsPointerOverUi` / `IsPointerOverUiAt(screenPos)`. It sets
     `CameraRig.ToolActive`; the rig then refuses left/right mouse (`AcceptsMouseButton`), middle/scroll/keys/edge pan unchanged.
-  - `RoadTool` (id `road`, registers itself in `OnEnable`) holds only draft points. It calls `RoadValidator` for the preview
-    and `SimHost.Execute` for `DrawRoad` and `DeleteRoadSegment`. Holds no road rules. Rules: roads.md; input: ui.md.
+  - `RoadTool` (id `road`, registers itself in `OnEnable`) holds view state only: the draft points and any node drag. It calls
+    `RoadValidator` for the preview and `RoadValidator.PreviewMove` for a node drag, `PlacementRules.CanPlaceRoadPoint` (asked
+    after snapping), and `SimHost.Execute` for `DrawRoad`, `DeleteRoadSegment` and `MoveRoadNode` (left-drag a confirmed node,
+    RD-17). Holds no road rules. Rules: roads.md; input: ui.md.
   - `Tools/Shared/`: `PressTracker` (click, drag, double-click; 4 px drag threshold, 6 px double-click radius; time passed
     in), `SnapPicker` (best candidate by kind order within a pixel limit), `SnapMarkers` (`SnapMarkerBuilder`: corner, road-side dot and area-edge dot markers, AR-22), `ToolHitTester` (draft point hits).
   - `AreaTool` (ids `test-area`, `test-work-area`): draft points with a parallel edge list. A click on an edge inserts a point

@@ -17,3 +17,5 @@ while it walks or lingers.
 works while paused and takes effect on the next tick. Other future overrides (work, dispatch) can reuse the same
 pattern by checking their own state in the routine. A debug-only build gate (PPL-33 "not in player builds") is not
 in the Sim; the Unity layer must hide the command.
+
+Update (T-264): `DebugSendController` (Unity) does this. It is active only in the Editor and development builds.

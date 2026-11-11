@@ -53,8 +53,12 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 | PPL-32 | Children under working age always mill about near home (POP-11) | DECIDED |
 | PPL-33 | Debug only: a **send to** action moves one selected citizen to a clicked point, to test movement. After arriving they stay 30 game minutes, then go back to their routine. Not in player builds | DECIDED |
 
-> Implementation note (PPL-33): the Sim side exists (`SendCitizenTo` command and `DebugSendSystem`, decision 0026), but no
-> Unity control calls it yet, so the action can't be used in the game. The "not in player builds" gate is therefore not built.
+> Implementation note (PPL-33): built. `DebugSendController` sends `SendCitizenTo` on a right click with a citizen selected,
+> and only in the Editor and development builds (`Debug.isDebugBuild`), so the "not in player builds" gate is in the Unity layer
+> (decision 0026).
+>
+> Implementation note (PPL-30, PPL-32): in M7 every citizen, children included, mills around the camp fire (PPL-31), not near
+> home. No children-only rule is coded. Owner to decide whether children should stay near their home tent.
 
 ## Odd jobs (unassigned families)
 
