@@ -106,27 +106,33 @@ namespace LordsLegacy.Sim.People
         private Plan PlanFor(SimWorld world, Citizen c, long key, Window w)
         {
             if (_plans.TryGetValue(c.Id, out Plan p) && p.KeyDayStart == key) return p;
-            long commute = (long)Math.Ceiling(CommuteMinutes(world, c));
+            // A plan for a future morning starts from the family home (where the worker sleeps), not from where they
+            // stand now (usually still at the tree at end of work).
+            bool futureMorning = key != DayStart(world);
+            long commute = (long)Math.Ceiling(CommuteMinutes(world, c, futureMorning));
             Window prev = WindowOf(world, key - TicksPerDay);
             long ideal = w.Sunrise - commute;
             long minDepart = prev.End + commute + (long)Math.Round(world.Tuning.MinSleepHours * 60.0);
             long depart = Math.Max(ideal, minDepart);
             // Already up and about (e.g. milling when the task came in): no reason to wait.
-            if (c.Activity != Activity.Sleeping) depart = Math.Min(depart, Math.Max(world.Tick, w.Sunrise));
+            if (!futureMorning && c.Activity != Activity.Sleeping) depart = Math.Min(depart, Math.Max(world.Tick, w.Sunrise));
             p = new Plan { KeyDayStart = key, Depart = depart };
             _plans[c.Id] = p;
             return p;
         }
 
-        private static double CommuteMinutes(SimWorld world, Citizen c)
+        private static double CommuteMinutes(SimWorld world, Citizen c, bool fromHome)
         {
+            double ox = c.X, oz = c.Z;
+            Family fam = world.People.FindFamily(c.FamilyId);
+            if (fromHome && fam != null) { ox = fam.HomeX; oz = fam.HomeZ; }
             TaskRecord task = null;
             foreach (TaskRecord t in world.Tasks.ByAssignee(c.Id)) { task = t; break; }
             if (task == null || !task.Target.HasValue || !world.Trees.TryGet(task.Target.Value, out var tree)) return 0;
             double walk = Math.Max(1e-9, world.Tuning.WalkSpeedMPerGameMinute);
-            PathResult r = GridPathfinder.Find(world.Nav, new PathPoint(c.X, c.Z), new PathPoint(tree.X, tree.Z));
+            PathResult r = GridPathfinder.Find(world.Nav, new PathPoint(ox, oz), new PathPoint(tree.X, tree.Z));
             if (r.Ok) return r.TravelMinutes / walk;
-            double dx = tree.X - c.X, dz = tree.Z - c.Z;
+            double dx = tree.X - ox, dz = tree.Z - oz;
             return Math.Sqrt(dx * dx + dz * dz) / walk;
         }
     }

@@ -80,6 +80,39 @@ namespace LordsLegacy.Sim.Tests
         }
 
         [Test]
+        public void Winter_SecondAndThirdMornings_AlsoArriveAtSunrise()
+        {
+            var w = NewWorld(12, 21, 9, Weekday.Monday, 150, 50);
+            Citizen c = AddSleeper(w, 50, 50, 7);
+            c.Activity = Activity.MillingAbout;
+            w.Tasks.Create(Fell(30000), 7, new TreeId(1));
+            for (int day = 0; day < 2; day++)
+            {
+                StepUntil(w, () => MinuteOfDay(w) == 0 && c.Activity == Activity.Sleeping);
+                StepUntil(w, () => c.Activity == Activity.Walking);
+                Assert.That(MinuteOfDay(w), Is.EqualTo(480 - 58).Within(4), "leaves about an hour before sunrise");
+                StepUntil(w, () => c.Activity == Activity.Working);
+                Assert.That(MinuteOfDay(w), Is.EqualTo(480).Within(4), "arrives at sunrise");
+            }
+        }
+
+        [Test]
+        public void Summer_SecondMorning_LongCommuteStillKeepsMinimumSleep()
+        {
+            var w = NewWorld(6, 21, 22, Weekday.Monday, 190, 190);
+            Citizen c = AddSleeper(w, 10, 10, 7);
+            w.Tasks.Create(Fell(30000), 7, new TreeId(1));
+            StepUntil(w, () => c.Activity == Activity.Working);
+            StepUntil(w, () => MinuteOfDay(w) == 0 && c.Activity == Activity.Sleeping);
+            long end = w.WorkDay.WindowOf(w, WorkDay.DayStart(w) - 1440).End; // sunset that evening
+            StepUntil(w, () => c.Activity == Activity.Walking);
+            long slept = w.Tick - (end + 147);
+            Assert.That(slept, Is.InRange(360 - 3, 360 + 4), "six hours at home, no more");
+            StepUntil(w, () => c.Activity == Activity.Working);
+            Assert.Greater(MinuteOfDay(w), 4 * 60 + 10, "works after sunrise");
+        }
+
+        [Test]
         public void Summer_ShortCommute_StillArrivesAtSunrise()
         {
             var w = NewWorld(6, 21, 22, Weekday.Monday, 60, 10);
