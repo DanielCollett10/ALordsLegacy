@@ -26,6 +26,18 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   catalog-less `SideLine`/`CorridorPolygon` overloads (`[Obsolete]`) remain only for the Unity layer until it migrates.
   **One tick = one game minute.** `Step(n)` advances `Tick` by n and does nothing while `Paused`; `Pause()` and
   `Resume()` set it. `Now` is the `GameTime` for the current tick. The Sim has no notion of real seconds.
+  - **Partial convention (T-249):** `SimWorld` is `partial`. Each subsystem adds its state and helpers in
+    `Assets/Sim/Core/SimWorld.<Area>.cs` (e.g. `SimWorld.Economy.cs`), so tasks do not all edit `SimWorld.cs`.
+    Per-tick logic does not go into `Step` directly; it is an `ISimSystem`.
+  - **Systems and fixed order (T-249, CLK-07):** `ISimSystem` has `Step(world)` (once per tick) and
+    `OnCommandApplied(world, result)` (after an accepted command, from `Execute`). `Assets/Sim/Core/SimSystems.cs`
+    holds the one ordered list (`SimSystems.CreateDefault()`), no reflection and no static mutable state. The world copies
+    the list at construction, so the order is fixed for that world. Phase order, earliest first: **sync → routine →
+    dispatch → steps → movement → operations** (the phase meanings are documented in `SimSystems.cs`). A new system
+    goes in the block of its phase. `Step(n)` runs n ticks; each tick advances `Tick` by one, then runs every system's
+    `Step` in list order. A paused world runs no systems on `Step`. `Execute` still notifies systems while paused,
+    because commands work while paused. Rejected commands notify nobody. The list is empty until subsystems register.
+    `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
 - `Assets/Sim/Placement/` (`LordsLegacy.Sim.Placement`, placement.md PL-01..05, PL-07): `PlacementRules.CanPlaceAreaVertex(world,
   areaTypeId, point)` and `CanPlaceRoadPoint(world, point)` answer whether one (already snapped) point may be placed. They
   return a `PlacementResult` (`Ok`, or `Reason` = `InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`; `Text` for the UI).
