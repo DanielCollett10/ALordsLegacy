@@ -354,7 +354,13 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   end nodes and reachable segment count. Also shows the area count (`AreaRegistry.Count`) and the area under the cursor
   (building area first, then work area, via `AreaRegistry.FindAt` on the ground point): name, type name and m² from the
   flattened polygon (`debug-area-count`, `debug-area-name`, `debug-area-type`, `debug-area-m2`; "Area --" when none).
-  Read-only; one named label per value (`debug-*`, `debug-road-*`, `debug-seg-*`).
+  Read-only; one named label per value (`debug-*`, `debug-road-*`, `debug-seg-*`). T-264 adds `debug-citizen-count` and the
+  nav cell under the cursor (`debug-nav-cell`, `debug-nav-blocked`, `debug-nav-mult`, from `World.Nav`).
+- Debug send-to (T-264, PPL-33, `Assets/Game/Debugging/`): `DebugSendController` (Editor and development builds only,
+  `DebugAvailable`): right click on the ground with a citizen selected and no tool active sends `SendCitizenTo` via
+  `SimHost.Execute`; a refusal shows in `CitizenPanelView` (`citizen-message`, cleared on selection change).
+  `DebugPathOverlay` drapes the selected citizen's remaining path (`TerrainDrape.Ribbon`, `GroundOverlay`). Both are
+  created by `GameSceneGenerator.CreateAgentSelection`.
 - Visuals (`LordsLegacy.Game.Visuals`, `Assets/Game/Visuals/`): every drawn thing gets its mesh and materials from a
   `VisualDefinition` asset referenced by string id (e.g. `visual.tree.generic`, `visual.road.dirt_path`). Sim data holds
   only the id (decision 0009). `VisualRegistry.asset` maps ids to definitions: `TryGet(id, out def)` for lookup,

@@ -17,5 +17,9 @@
         <ui:Label name="debug-area-name" text="Area --" />
         <ui:Label name="debug-area-type" text="Type --" />
         <ui:Label name="debug-area-m2" text="Area -- m²" />
+        <ui:Label name="debug-citizen-count" text="Citizens --" />
+        <ui:Label name="debug-nav-cell" text="Nav cell -- --" />
+        <ui:Label name="debug-nav-blocked" text="Nav blocked --" />
+        <ui:Label name="debug-nav-mult" text="Nav speed x--" />
     </ui:VisualElement>
 </ui:UXML>
