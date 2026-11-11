@@ -24,7 +24,7 @@ namespace LordsLegacy.Game
             public string id;
             [Tooltip("RD-04 full road width, metres")] [Range(0.5f, 12f)] public float widthM = 2.5f;
             [Tooltip("RD-05 max grade %, rise over run per 1 m step")] [Range(1f, 100f)] public float maxGradePercent = 15f;
-            [Tooltip("RD-04 walking speed multiplier on this road")] [Range(0.5f, 5f)] public float speedMultiplier = 1.5f;
+            [Tooltip("ROAD-10-A walking speed multiplier on this road (decision 0023)")] [Range(0.5f, 5f)] public float speedMultiplier = 1.25f;
             [Tooltip("Id the view uses to pick the look of this road")] public string visualId;
 
             /// <summary>Builds the Sim definition.</summary>
@@ -55,7 +55,7 @@ namespace LordsLegacy.Game
         }
 
         [Header("Time")]
-        [Tooltip("TIME-A2 real minutes per game day at 1x")] [Range(1f, 120f)] public float realMinutesPerGameDayAt1x = 15f;
+        [Tooltip("TIME-A2 real minutes per game day at 1x (30 = the 30-minute day, decision 0023)")] [Range(1f, 120f)] public float realMinutesPerGameDayAt1x = 30f;
         [Tooltip("TIME-A3 selectable speed multipliers")] public int[] speeds = { 1, 2, 4, 8, 16, 32 };
         [Tooltip("CLK-05 most ticks per frame")] [Range(1, 64)] public int maxTicksPerFrame = 8;
         [Tooltip("Start month (no rule ID)")] [Range(1, 12)] public int startMonth = 3;
@@ -66,11 +66,13 @@ namespace LordsLegacy.Game
         [Tooltip("TIME-01 days per game year; must match the calendar (365)")] [Range(365, 365)] public int daysPerYear = 365;
         [Tooltip("TIME-A5 shortest daylight, hours")] [Range(0f, 24f)] public float minDaylightHours = 8f;
         [Tooltip("TIME-A5 longest daylight, hours")] [Range(0f, 24f)] public float maxDaylightHours = 16f;
-        [Tooltip("FOOD-A4 Sunday is a rest day")] public bool restDayEnabled = true;
+        [Tooltip("FOOD-A4 Sunday is a rest day (off until a church exists)")] public bool restDayEnabled = false;
+        [Tooltip("PPL-21 minutes a Sunday meal takes off the end of Sunday's working day")] [Range(0, 720)] public int sundayMealMinutes = 120;
 
         [Header("Movement")]
-        [Tooltip("TIME-04 walking speed, metres per game minute")] [Range(0.1f, 10f)] public float walkSpeedMPerGameMinute = 0.87f;
-        [Tooltip("TIME-04 ox speed, metres per game minute")] [Range(0.1f, 10f)] public float oxSpeedMPerGameMinute = 0.52f;
+        [Tooltip("MOV-20 walking speed, metres per game minute (1.74 = 5 km/h on screen at 1x)")] [Range(0.1f, 10f)] public float walkSpeedMPerGameMinute = 1.74f;
+        [Tooltip("MOV-21 ox speed, metres per game minute (1.04 = 3 km/h on screen at 1x)")] [Range(0.1f, 10f)] public float oxSpeedMPerGameMinute = 1.04f;
+        [Tooltip("PPL-26 shortest sleep a citizen takes each night, game hours")] [Range(0f, 24f)] public float minSleepHours = 6f;
 
         [Header("Timber and oxen")]
         [Tooltip("TMB-04 standard log length, metres")] [Range(1f, 10f)] public float standardLogLengthM = 4f;
@@ -102,7 +104,7 @@ namespace LordsLegacy.Game
             StartMonth = startMonth, StartDay = startDay, StartHour = startHour, StartMinute = startMinute,
             StartWeekday = startWeekday, DaysPerYear = daysPerYear,
             MinDaylightHours = D(minDaylightHours), MaxDaylightHours = D(maxDaylightHours),
-            RestDayEnabled = restDayEnabled,
+            RestDayEnabled = restDayEnabled, SundayMealMinutes = sundayMealMinutes, MinSleepHours = D(minSleepHours),
             WalkSpeedMPerGameMinute = D(walkSpeedMPerGameMinute), OxSpeedMPerGameMinute = D(oxSpeedMPerGameMinute),
             StandardLogLengthM = D(standardLogLengthM), TrunkLengthMinM = D(trunkLengthMinM),
             TrunkLengthMaxM = D(trunkLengthMaxM), StartingOxen = startingOxen,
@@ -128,15 +130,17 @@ namespace LordsLegacy.Game
             return new AreaTypeCatalog(defs);
         }
 
-        /// <summary>Resets every value to the code defaults.</summary>
+        /// <summary>
+        /// Resets every value to the code defaults. Not named Reset(): Unity calls Reset() on every new
+        /// ScriptableObject, and this method creates one, which would recurse forever. Field initialisers
+        /// already give the defaults on creation, so no Reset() hook is needed.
+        /// </summary>
         public void ResetToDefaults()
         {
             var fresh = CreateInstance<SimConfig>();
             JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(fresh), this);
             DestroyImmediate(fresh);
         }
-
-        private void Reset() => ResetToDefaults();
 
         /// <summary>Code-default road types as editable config.</summary>
         public static List<RoadTypeConfig> DefaultRoadTypes()

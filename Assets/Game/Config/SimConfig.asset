@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f211cd006fc53442aebd9563c5b9b45, type: 3}
   m_Name: SimConfig
   m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.SimConfig
-  realMinutesPerGameDayAt1x: 15
+  realMinutesPerGameDayAt1x: 30
   speeds: 010000000200000004000000080000001000000020000000
   maxTicksPerFrame: 8
   startMonth: 3
@@ -23,9 +23,11 @@ MonoBehaviour:
   daysPerYear: 365
   minDaylightHours: 8
   maxDaylightHours: 16
-  restDayEnabled: 1
-  walkSpeedMPerGameMinute: 0.87
-  oxSpeedMPerGameMinute: 0.52
+  restDayEnabled: 0
+  sundayMealMinutes: 120
+  walkSpeedMPerGameMinute: 1.74
+  oxSpeedMPerGameMinute: 1.04
+  minSleepHours: 6
   standardLogLengthM: 4
   trunkLengthMinM: 12
   trunkLengthMaxM: 20
@@ -41,7 +43,7 @@ MonoBehaviour:
   - id: road.dirt_path
     widthM: 2.5
     maxGradePercent: 15
-    speedMultiplier: 1.5
+    speedMultiplier: 1.25
     visualId: visual.road.dirt_path
   areaTypes:
   - id: area.test
