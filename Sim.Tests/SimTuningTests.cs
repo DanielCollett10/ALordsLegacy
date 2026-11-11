@@ -10,7 +10,7 @@ namespace LordsLegacy.Sim.Tests
         public void Defaults_MatchTuningDoc()
         {
             var t = new SimTuning();
-            Assert.AreEqual(15, t.RealMinutesPerGameDayAt1x);
+            Assert.AreEqual(30, t.RealMinutesPerGameDayAt1x);
             CollectionAssert.AreEqual(new[] { 1, 2, 4, 8, 16, 32 }, t.Speeds);
             Assert.AreEqual(8, t.MaxTicksPerFrame);
             Assert.AreEqual(3, t.StartMonth);
@@ -21,9 +21,11 @@ namespace LordsLegacy.Sim.Tests
             Assert.AreEqual(365, t.DaysPerYear);
             Assert.AreEqual(8, t.MinDaylightHours);
             Assert.AreEqual(16, t.MaxDaylightHours);
-            Assert.IsTrue(t.RestDayEnabled);
-            Assert.AreEqual(0.87, t.WalkSpeedMPerGameMinute, 1e-9);
-            Assert.AreEqual(0.52, t.OxSpeedMPerGameMinute, 1e-9);
+            Assert.IsFalse(t.RestDayEnabled);
+            Assert.AreEqual(1.74, t.WalkSpeedMPerGameMinute, 1e-9);
+            Assert.AreEqual(1.04, t.OxSpeedMPerGameMinute, 1e-9);
+            Assert.AreEqual(120, t.SundayMealMinutes);
+            Assert.AreEqual(6, t.MinSleepHours, 1e-9);
             Assert.AreEqual(4, t.StandardLogLengthM);
             Assert.AreEqual(12, t.TrunkLengthMinM);
             Assert.AreEqual(20, t.TrunkLengthMaxM);
@@ -48,16 +50,16 @@ namespace LordsLegacy.Sim.Tests
         public void GameMinutesPerRealSecondAt1x_IsDerivedFromDayLength()
         {
             var t = new SimTuning();
-            Assert.AreEqual(1.6, t.GameMinutesPerRealSecondAt1x, 1e-9);
+            Assert.AreEqual(1440.0 / (t.RealMinutesPerGameDayAt1x * 60.0), t.GameMinutesPerRealSecondAt1x, 1e-9);
 
-            t.RealMinutesPerGameDayAt1x = 30;
-            Assert.AreEqual(0.8, t.GameMinutesPerRealSecondAt1x, 1e-9);
+            t.RealMinutesPerGameDayAt1x = 15;
+            Assert.AreEqual(1.6, t.GameMinutesPerRealSecondAt1x, 1e-9);
         }
 
         [Test]
         public void DefaultWalkAndOxSpeeds_MatchOnScreenSpeedsAt1x()
         {
-            // Decision 0004: 5 km/h and 3 km/h on screen at 1x, converted at 1.6 game minutes per real second.
+            // Decision 0004: 5 km/h and 3 km/h on screen at 1x, converted at the default game minutes per real second.
             var t = new SimTuning();
             double walkMPerRealSecond = 5000.0 / 3600.0;
             double oxMPerRealSecond = 3000.0 / 3600.0;

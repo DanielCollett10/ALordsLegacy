@@ -69,12 +69,16 @@ namespace LordsLegacy.Sim.Tests
         [Test]
         public void Advance_DefaultTuning_CarriesFractionAtOneX()
         {
-            // 1.6 game minutes per real second at 1x (15-minute day).
-            var pacer = new TickPacer(new SimTuning());
-            Assert.AreEqual(1, pacer.Advance(1.0));
-            Assert.AreEqual(0.6, pacer.Fraction, 1e-9);
-            Assert.AreEqual(2, pacer.Advance(1.0)); // 0.6 + 1.6 = 2.2
-            Assert.AreEqual(0.2, pacer.Fraction, 1e-9);
+            // Expected values come from the tuning's rate, so a day-length change does not break this test.
+            var t = new SimTuning();
+            double rate = t.GameMinutesPerRealSecondAt1x;
+            var pacer = new TickPacer(t);
+            int first = (int)Math.Floor(rate);
+            Assert.AreEqual(first, pacer.Advance(1.0));
+            Assert.AreEqual(rate - first, pacer.Fraction, 1e-9);
+            // Second second: total due is 2 × rate; ticks already taken are subtracted.
+            Assert.AreEqual((int)Math.Floor(2 * rate) - first, pacer.Advance(1.0));
+            Assert.AreEqual(2 * rate - Math.Floor(2 * rate), pacer.Fraction, 1e-9);
         }
 
         [Test]
@@ -92,10 +96,12 @@ namespace LordsLegacy.Sim.Tests
         [Test]
         public void Advance_ManySmallFrames_ConserveTotalTicks()
         {
-            var pacer = new TickPacer(new SimTuning()); // 1.6 ticks per real second
+            var t = new SimTuning();
+            var pacer = new TickPacer(t);
             long ticks = 0;
             for (int i = 0; i < 1000; i++) ticks += pacer.Advance(0.1); // 100 real seconds
-            Assert.That(ticks, Is.EqualTo(160).Or.EqualTo(159));
+            long expected = (long)Math.Floor(100 * t.GameMinutesPerRealSecondAt1x);
+            Assert.That(ticks, Is.EqualTo(expected).Or.EqualTo(expected - 1));
             Assert.That(pacer.Fraction, Is.GreaterThanOrEqualTo(0).And.LessThan(1));
         }
 
@@ -113,10 +119,13 @@ namespace LordsLegacy.Sim.Tests
         [Test]
         public void Advance_ZeroSeconds_ReturnsZero_AndKeepsFraction()
         {
-            var pacer = new TickPacer(new SimTuning());
+            var t = new SimTuning();
+            var pacer = new TickPacer(t);
             pacer.Advance(1.0);
+            double carried = pacer.Fraction;
             Assert.AreEqual(0, pacer.Advance(0));
-            Assert.AreEqual(0.6, pacer.Fraction, 1e-9);
+            Assert.AreEqual(carried, pacer.Fraction, 1e-9);
+            Assert.AreEqual(t.GameMinutesPerRealSecondAt1x - Math.Floor(t.GameMinutesPerRealSecondAt1x), carried, 1e-9);
         }
 
         [Test]
@@ -151,8 +160,8 @@ namespace LordsLegacy.Sim.Tests
         [Test]
         public void Cap_ReturnsMaxTicks_SetsSlowedDown_AndDropsExcess()
         {
-            var pacer = new TickPacer(new SimTuning()); // cap 8, 1.6 ticks per real second at 1x
-            Assert.AreEqual(8, pacer.Advance(10)); // 16 due
+            var pacer = new TickPacer(new SimTuning()); // cap 8; far more than 8 ticks due at 1x
+            Assert.AreEqual(8, pacer.Advance(100));
             Assert.IsTrue(pacer.SlowedDown);
             Assert.AreEqual(0, pacer.Fraction);
 
@@ -165,7 +174,7 @@ namespace LordsLegacy.Sim.Tests
         public void Cap_AtHighSpeed_SlowsDown()
         {
             var pacer = new TickPacer(new SimTuning());
-            pacer.SetSpeed(5); // 32x = 51.2 ticks per real second
+            pacer.SetSpeed(5); // 32x: well above the cap of 8 ticks per real second
             Assert.AreEqual(8, pacer.Advance(1.0));
             Assert.IsTrue(pacer.SlowedDown);
         }

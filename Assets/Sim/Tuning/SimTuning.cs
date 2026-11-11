@@ -15,7 +15,7 @@ namespace LordsLegacy.Sim.Tuning
         /// Only the Unity tick pacer reads this directly; the Sim uses
         /// <see cref="GameMinutesPerRealSecondAt1x"/>.
         /// </summary>
-        public double RealMinutesPerGameDayAt1x { get; set; } = 15;
+        public double RealMinutesPerGameDayAt1x { get; set; } = 30;
 
         /// <summary>
         /// Selectable game speed multipliers, in order. Unit: × (multiplier of 1×). Rule: TIME-A3.
@@ -78,18 +78,31 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>
         /// Whether Sunday is a rest day. Unit: switch (true = on). Rule: FOOD-A4.
         /// </summary>
-        public bool RestDayEnabled { get; set; } = true;
+        public bool RestDayEnabled { get; set; } = false;
 
         /// <summary>
-        /// Walking speed off-road. Unit: metres per game minute (5 km/h on screen at 1×). Rule: TIME-04,
-        /// decision 0004.
+        /// Minutes a Sunday meal takes on a rest day. Unit: game minutes. Rule: PPL-21 (decision 0023).
+        /// Not read by the Sim yet; defined here so the value lives in one place.
         /// </summary>
-        public double WalkSpeedMPerGameMinute { get; set; } = 0.87;
+        public int SundayMealMinutes { get; set; } = 120;
 
         /// <summary>
-        /// Ox speed. Unit: metres per game minute (3 km/h on screen at 1×). Rule: TIME-04, decision 0004.
+        /// Shortest sleep a citizen takes each night. Unit: game hours. Rule: PPL-26 (decision 0023).
+        /// Not read by the Sim yet; defined here so the value lives in one place.
         /// </summary>
-        public double OxSpeedMPerGameMinute { get; set; } = 0.52;
+        public double MinSleepHours { get; set; } = 6;
+
+        /// <summary>
+        /// Walking speed off-road. Unit: metres per game minute (5 km/h on screen at 1× with the 30-minute
+        /// day). Rule: MOV-20 (decision 0023).
+        /// </summary>
+        public double WalkSpeedMPerGameMinute { get; set; } = 1.74;
+
+        /// <summary>
+        /// Ox speed. Unit: metres per game minute (3 km/h on screen at 1× with the 30-minute day).
+        /// Rule: MOV-21 (decision 0023).
+        /// </summary>
+        public double OxSpeedMPerGameMinute { get; set; } = 1.04;
 
         /// <summary>
         /// Length of one standard log. Unit: metres. Rule: TMB-04.
@@ -161,7 +174,7 @@ namespace LordsLegacy.Sim.Tuning
 
         /// <summary>
         /// Game minutes that pass per real second at 1× speed. Unit: game minutes per real second.
-        /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 1.6 at the default of 15.
+        /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 0.8 at the default of 30.
         /// Rule: decision 0004.
         /// </summary>
         public double GameMinutesPerRealSecondAt1x =>
