@@ -105,6 +105,23 @@ namespace LordsLegacy.Sim.Tuning
         public double OxSpeedMPerGameMinute { get; set; } = 1.04;
 
         /// <summary>
+        /// Milling spots are picked within this distance of the camp fire. Unit: metres. Rule: PPL-31.
+        /// </summary>
+        public double MillRadiusM { get; set; } = 25;
+
+        /// <summary>Shortest stay at a milling spot. Unit: game minutes. Rule: PPL-31.</summary>
+        public int MillStayMinMinutes { get; set; } = 20;
+
+        /// <summary>Longest stay at a milling spot. Unit: game minutes. Rule: PPL-31.</summary>
+        public int MillStayMaxMinutes { get; set; } = 90;
+
+        /// <summary>
+        /// Longest random delay after sunrise before a sleeper gets up, so people do not move in step.
+        /// Unit: game minutes. Rule: PPL-31 ("start times are spread").
+        /// </summary>
+        public int WakeStaggerMaxMinutes { get; set; } = 30;
+
+        /// <summary>
         /// Length of one standard log. Unit: metres. Rule: TMB-04.
         /// </summary>
         public double StandardLogLengthM { get; set; } = 4;
