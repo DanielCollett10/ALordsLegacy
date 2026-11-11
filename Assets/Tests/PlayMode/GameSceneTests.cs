@@ -71,11 +71,12 @@ namespace LordsLegacy.Tests.PlayMode
             {
                 Assert.IsNotNull(doc.panelSettings, doc.name + " has no PanelSettings.");
                 // GroundReadoutView clones its UXML from its own _visualTree field, so its UIDocument has none.
-                if (doc.name != "GroundReadout") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                // CitizenPanelView builds its panel in code (T-263).
+                if (doc.name != "GroundReadout" && doc.name != "CitizenPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "BuildBar", "DebugOverlay", "GroundReadout", "ToolPanel", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GroundReadout", "ToolPanel", "TopBar" }, names);
         }
 
         [UnityTest]

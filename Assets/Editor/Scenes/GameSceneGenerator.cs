@@ -45,6 +45,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateRoadTool(host);
             CreateAreaTools(host);
             CreateGroundReadout();
+            CreateAgentSelection(host);
             CreateDebugOverlay(host);
             CreateSunController(host, light, topBar);
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
@@ -253,6 +254,24 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/GroundReadout/GroundReadout.uxml"));
             SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/GroundReadout/GroundReadout.uss"));
             return go;
+        }
+
+        /// <summary>Adds the AgentPicker, the selection ring and the citizen info panel (T-263).</summary>
+        public static void CreateAgentSelection(SimHost host)
+        {
+            var controller = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>();
+            var agents = new GameObject("AgentPicker").AddComponent<AgentPicker>();
+            SetRef(agents, "_host", host);
+            SetRef(agents, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(agents, "_controller", controller);
+            var ring = new GameObject("SelectionRing").AddComponent<SelectionRing>();
+            SetRef(ring, "_host", host);
+            SetRef(ring, "_agents", agents);
+            var panelGo = CreateUiDocument("CitizenPanel", null);
+            var panel = panelGo.AddComponent<CitizenPanelView>();
+            SetRef(panel, "_host", host);
+            SetRef(panel, "_agents", agents);
+            SetRef(panel, "_controller", controller);
         }
 
         /// <summary>Adds the debug overlay UIDocument and view, wired to SimHost and the GroundPicker.</summary>
