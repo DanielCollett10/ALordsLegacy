@@ -35,6 +35,7 @@ namespace LordsLegacy.Sim.Core
                 // sync
                 new LordsLegacy.Sim.Navigation.NavSyncSystem(),
                 // routine
+                new LordsLegacy.Sim.People.RoutineSystem(),
                 // dispatch
                 // steps
                 // movement

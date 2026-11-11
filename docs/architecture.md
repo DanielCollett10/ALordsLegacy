@@ -59,6 +59,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `SimSystems`) advances it by walk/ox speed × the multiplier of the cell under the agent each tick. When `Nav.Version`
     changes, agents on blocked cells move to the nearest walkable point and unfinished orders re-plan from where the agent
     stands. Finished orders stay on the agent until their owner clears them. `Activity` is not touched.
+  - **Daily routine (T-259, PPL-24/27/30..32):** `RoutineSystem` (`Assets/Sim/People/`, routine slot, before movement)
+    keeps a per-citizen state (Asleep / Milling / GoingHome) and only issues `MoveOrder`s. At `Daylight` sunrise plus a
+    seeded 0–`WakeStaggerMaxMinutes` delay a sleeper mills: walk to a seeded walkable point within `MillRadiusM` of
+    `Camp.Fire` (family home if no camp), stay `MillStayMinMinutes`–`MillStayMaxMinutes`, repeat. At sunset citizens walk
+    home and become Sleeping on arrival. Oxen stay Waiting. A citizen with an order set by someone else is skipped until
+    that order finishes, so later phases (work, debug send) can take over. Milling shows as `MillingAbout` (walking
+    to a spot included); only the trip home is `Walking`.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
