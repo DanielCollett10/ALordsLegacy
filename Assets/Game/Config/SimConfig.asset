@@ -70,3 +70,27 @@ MonoBehaviour:
     clearsTrees: 0
     blocksRoads: 0
     nearRoadReachM: 10
+  - id: area.woodcutting
+    namePrefix: Woodcutter
+    kind: 0
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 150
+    maxAreaM2: 5000
+    limitSlope: 1
+    maxSlopeDegrees: 10
+    clearsTrees: 1
+    blocksRoads: 1
+    nearRoadReachM: 10
+  - id: area.work_woodcutting
+    namePrefix: Woodcutting work area
+    kind: 1
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 40000
+    limitSlope: 0
+    maxSlopeDegrees: 10
+    clearsTrees: 0
+    blocksRoads: 0
+    nearRoadReachM: 10
