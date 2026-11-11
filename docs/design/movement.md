@@ -31,6 +31,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default. OPEN = not decided.
 | MOV-15 | Walking advances every tick by speed × the multiplier of the ground underneath. On screen, positions are smoothed between ticks (CLK-02) | DECIDED |
 | MOV-16 | A led ox and its handler walk together at ox speed (MVP-1) | DECIDED |
 
+> Implementation note (MOV-13): M7 has no tasks, so a failed walk home ends the trip where the citizen stands and they fall
+> asleep there (`RoutineSystem`). A failed milling walk just waits out its stay. The task cancel is M8. Owner to confirm.
+
 ## Distance and pace (DECIDED, owner 10/11/2026: levers A + C)
 
 On-screen speed at 1× = walk speed (m per game minute) × game minutes per real second. Both have to move
