@@ -38,6 +38,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `Step` in list order. A paused world runs no systems on `Step`. `Execute` still notifies systems while paused,
     because commands work while paused. Rejected commands notify nobody. The list is empty until subsystems register.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
+  - **People (T-251, PPL-10..14):** `SimWorld.People` (`Assets/Sim/People/Population.cs`, partial in `SimWorld.People.cs`)
+    holds `Family`, `Citizen` and `Ox` records by explicit int id, iterated in id order. Ids are never reused after
+    removal. `Version` bumps on add/remove. `Citizen.AgeYears(nowTick, SimTuning.AgeingRate)` implements POP-27.
   - **Random (T-250, CLK-07):** `SimWorld.Random` (`Assets/Sim/Core/SimRandom.cs`, partial in `SimWorld.Random.cs`) is the
     world's one deterministic source, never null. It is a PCG-XSH-RR 64/32 written in Sim code (no `System.Random`). It is
     seeded from `SimTuning.WorldSeed` (default 12345). `NextInt(min, max)` is max-exclusive and unbiased, `NextDouble()` is in

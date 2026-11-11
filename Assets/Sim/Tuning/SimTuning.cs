@@ -56,6 +56,11 @@ namespace LordsLegacy.Sim.Tuning
         public Weekday StartWeekday { get; set; } = Weekday.Monday;
 
         /// <summary>
+        /// How fast citizens age compared with the calendar. Unit: × calendar rate. Rule: POP-27 (PLACEHOLDER).
+        /// </summary>
+        public double AgeingRate { get; set; } = 2;
+
+        /// <summary>
         /// Days in one game year. Unit: days. Rule: TIME-01. Must match the calendar's month table (365).
         /// </summary>
         public int DaysPerYear { get; set; } = 365;
