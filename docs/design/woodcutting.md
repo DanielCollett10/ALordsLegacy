@@ -50,7 +50,8 @@ nobody stands idle.
 | --- | --- | --- |
 | WC-30 | Oxen are a settlement-wide pool (CON-11). The building's **Oxen tab** can **assign** an ox to it. An assigned ox serves only that building until it's unassigned or the building is removed | DECIDED |
 | WC-31 | An assigned ox rests at its building's oxen stand if it has one, otherwise beside the log storage. Assigning an ox doesn't need a stand | DECIDED (rest spot PROPOSED) |
-| WC-32 | A pool ox goes back after a haul to the nearest free oxen stand (the camp stand or any operation's empty stand) | DECIDED |
+| WC-32 | A pool ox goes back after a haul to the nearest free oxen stand (the camp stand or any operation's empty stand). If every operation stand is taken it goes to the **camp stand, which has no ox limit** | DECIDED |
+| WC-37 | The **camp stockpile never counts** towards an operation's storage or *Storage full*. Only the operation's own log storage modules make up its pool (INV-02). Keeping stores separate matters later, when storage yards hold building materials and never logs (INV-A4) | DECIDED |
 | WC-33 | Leading an ox: the handler walks to the ox, they walk together at ox speed (MOV-16), load up to 4 logs at the tree (WCO-07), drag them to the log storage with free space nearest the tree (WCO-08), and unload | DECIDED |
 | WC-34 | No ox can be had and logs are waiting → *Waiting for ox* (WCO-06) | DECIDED |
 | WC-35 | **Haul cut short at sunset:** if a haul is still under way at the end of the working day, the handler **unloads the logs where they are** (a new ground pile at that spot, INV-11), takes the ox back to its stand, then walks home. The next day a new Haul picks the pile up from there. Unloading takes the normal unload time | DECIDED |
