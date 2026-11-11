@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
@@ -14,10 +15,17 @@ namespace LordsLegacy.Sim.Core
     /// Root of the simulation. Owns the clock and, later, all game state.
     /// Pure C#: no UnityEngine. One tick is one game minute. The Unity layer calls
     /// <see cref="Step"/> and reads state to render it.
+    /// <para>
+    /// Partial by convention (T-249): the core state and behaviour live in this file. Each subsystem adds its state
+    /// and helpers in <c>Assets/Sim/Core/SimWorld.&lt;Area&gt;.cs</c> so tasks do not all edit this file. Its
+    /// per-tick logic is an <see cref="ISimSystem"/> listed in <see cref="SimSystems"/>, not code added to
+    /// <see cref="Step"/>.
+    /// </para>
     /// </summary>
-    public sealed class SimWorld
+    public sealed partial class SimWorld
     {
         private readonly GameCalendar _calendar;
+        private readonly ISimSystem[] _systems;
 
         /// <summary>The tuning this world was built from.</summary>
         public SimTuning Tuning { get; }
@@ -60,22 +68,27 @@ namespace LordsLegacy.Sim.Core
         /// definitions.
         /// </summary>
         public static SimWorld FromMapData(MapData map, SimTuning tuning, RoadTypeCatalog roadTypes = null,
-            AreaTypeCatalog areaTypes = null)
+            AreaTypeCatalog areaTypes = null, IEnumerable<ISimSystem> systems = null)
         {
             if (map == null) throw new ArgumentNullException(nameof(map));
             var trees = new TreeRegistry();
             foreach (var t in map.Trees) trees.Add(t.Id, t.X, t.Z, t.TrunkLengthM);
-            return new SimWorld(tuning, map.Heights, trees, roadTypes, areaTypes);
+            return new SimWorld(tuning, map.Heights, trees, roadTypes, areaTypes, systems);
         }
 
-        /// <summary>Creates a world with flat terrain and no trees. Null catalogs mean the default definitions.</summary>
-        public SimWorld(SimTuning tuning, RoadTypeCatalog roadTypes = null, AreaTypeCatalog areaTypes = null)
-            : this(tuning, new FlatHeightField(), new TreeRegistry(), roadTypes, areaTypes)
+        /// <summary>
+        /// Creates a world with flat terrain and no trees. Null catalogs mean the default definitions.
+        /// Null <paramref name="systems"/> means <see cref="SimSystems.CreateDefault"/>; a list given here runs in the
+        /// order given (tests use this).
+        /// </summary>
+        public SimWorld(SimTuning tuning, RoadTypeCatalog roadTypes = null, AreaTypeCatalog areaTypes = null,
+            IEnumerable<ISimSystem> systems = null)
+            : this(tuning, new FlatHeightField(), new TreeRegistry(), roadTypes, areaTypes, systems)
         {
         }
 
         private SimWorld(SimTuning tuning, IHeightField terrain, TreeRegistry trees, RoadTypeCatalog roadTypes,
-            AreaTypeCatalog areaTypes)
+            AreaTypeCatalog areaTypes, IEnumerable<ISimSystem> systems)
         {
             Tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
             Terrain = terrain;
@@ -85,6 +98,8 @@ namespace LordsLegacy.Sim.Core
             Areas = new AreaRegistry(tuning.SpatialIndexCellM, AreaTypes);
             _calendar = new GameCalendar(tuning.StartMonth, tuning.StartDay, tuning.StartHour,
                 tuning.StartMinute, tuning.StartWeekday, tuning.DaysPerYear);
+            // Copy the list so the run order is fixed for the life of this world.
+            _systems = new List<ISimSystem>(systems ?? SimSystems.CreateDefault()).ToArray();
         }
 
         /// <summary>Pause the simulation. Safe to call when already paused.</summary>
@@ -93,19 +108,28 @@ namespace LordsLegacy.Sim.Core
         /// <summary>Resume the simulation. Safe to call when not paused.</summary>
         public void Resume() => Paused = false;
 
-        /// <summary>Advance the simulation by <paramref name="ticks"/> game minutes; nothing while paused.</summary>
+        /// <summary>
+        /// Advance the simulation by <paramref name="ticks"/> game minutes; nothing while paused. Each tick first
+        /// advances <see cref="Tick"/> by one, then runs every system's <see cref="ISimSystem.Step"/> in
+        /// <see cref="SimSystems"/> order. With no systems this only advances <see cref="Tick"/>.
+        /// </summary>
         public void Step(int ticks = 1)
         {
             if (ticks < 0) throw new ArgumentOutOfRangeException(nameof(ticks));
             if (Paused) return;
-            Tick += ticks;
+            for (int i = 0; i < ticks; i++)
+            {
+                Tick++;
+                for (int s = 0; s < _systems.Length; s++) _systems[s].Step(this);
+            }
         }
 
         /// <summary>
         /// Runs a player command now: <see cref="ISimCommand.Validate"/>, then
         /// <see cref="ISimCommand.Apply"/> only if accepted. Works while paused and never changes
         /// <see cref="Tick"/>. Every call is appended to <see cref="CommandLog"/> with the current tick.
-        /// A rejected command changes nothing. Decision 0011.
+        /// A rejected command changes nothing. After an accepted command, every system's
+        /// <see cref="ISimSystem.OnCommandApplied"/> runs in <see cref="SimSystems"/> order. Decision 0011.
         /// </summary>
         /// <param name="command">The command to run. Must not be null.</param>
         /// <returns>The accepted or rejected result. Never null.</returns>
@@ -118,6 +142,10 @@ namespace LordsLegacy.Sim.Core
             if (result.IsRejected) return result;
             result = command.Apply(this);
             if (result == null) throw new InvalidOperationException("Apply returned null for " + command.GetType().Name);
+            if (result.IsAccepted)
+            {
+                for (int s = 0; s < _systems.Length; s++) _systems[s].OnCommandApplied(this, result);
+            }
             return result;
         }
     }
