@@ -219,6 +219,7 @@ namespace LordsLegacy.EditorTools.Scenes
             {
                 new[] { "TestAreaTool", LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Sim.Areas.AreaTypes.TestId },
                 new[] { "TestWorkAreaTool", LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, LordsLegacy.Sim.Areas.AreaTypes.TestWorkId },
+                new[] { "WoodcutterAreaTool", "woodcutter", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
             };
             GameObject last = null;
             foreach (var d in defs)
@@ -234,6 +235,7 @@ namespace LordsLegacy.EditorTools.Scenes
                 SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
                 SetRef(tool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             }
+            new GameObject("ModuleTool").AddComponent<LordsLegacy.Game.Tools.ModuleTool>();
             return last;
         }
 

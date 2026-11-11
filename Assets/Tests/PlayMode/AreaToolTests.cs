@@ -1099,6 +1099,51 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _host.World.Areas.Count, "A plot split by a road is never designated.");
         }
 
+        [UnityTest]
+        public IEnumerator WoodcutterConfirmHandsOverToModuleToolHutThenLogStorage()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            var module = _toolGo.AddComponent<ModuleTool>();
+            _controller.Register(module);
+            Click(40, 40); Click(80, 40); Click(80, 80); Click(40, 80);
+            Assert.IsTrue(_panel.IsConfirmEnabled, _panel.Status);
+            _panel.ClickConfirm();
+
+            Assert.AreEqual(1, _host.World.Areas.Count);
+            Assert.AreEqual(1, _host.World.Operations.Count);
+            var op = System.Linq.Enumerable.First(_host.World.Operations.All);
+            Assert.AreSame(module, _controller.ActiveTool);
+            Assert.IsTrue(module.IsActive);
+            Assert.AreEqual(op.Id, module.OperationId);
+            CollectionAssert.AreEqual(new[] { LordsLegacy.Sim.Footprints.ModuleTypes.WoodcuttingHutId,
+                LordsLegacy.Sim.Footprints.ModuleTypes.LogStorageId }, module.Queue);
+            Assert.IsFalse(_tool.IsActive);
+        }
+
+        [UnityTest]
+        public IEnumerator WoodcutterCancelDraftReturnsToNoTool()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            Click(40, 40); Click(80, 40);
+            Assert.IsTrue(_tool.HasDraft);
+            _panel.ClickCancel();
+            Assert.IsNull(_controller.ActiveTool);
+            Assert.AreEqual(0, _host.World.Areas.Count);
+
+            _controller.Toggle("woodcutter");
+            Click(40, 40);
+            Assert.IsTrue(_controller.HandleEscape());
+            Assert.IsNull(_controller.ActiveTool);
+        }
+
+        [Test]
+        public void BuildBarEnablesWoodcutterEntry()
+        {
+            foreach (var e in ToolEntry.Defaults())
+                if (e.Id == "woodcutter") { Assert.IsTrue(e.Enabled); return; }
+            Assert.Fail("no woodcutter entry");
+        }
+
         [Test]
         public void BuildBarEnablesBothAreaEntries()
         {

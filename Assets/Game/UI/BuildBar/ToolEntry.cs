@@ -26,7 +26,7 @@ namespace LordsLegacy.Game
                 new ToolEntry("road", "Road", true),
                 new ToolEntry("test-area", "Test area", true),
                 new ToolEntry("test-work-area", "Test work area", true),
-                new ToolEntry("woodcutting", "Woodcutting", false, "Coming later"),
+                new ToolEntry("woodcutter", "Woodcutter", true, "Draw the woodcutter's area, then place its modules"),
                 new ToolEntry("storage-yard", "Storage yard", false, "Coming later"),
                 new ToolEntry("house", "House", false, "Coming later"),
                 new ToolEntry("granary", "Granary", false, "Coming later"),

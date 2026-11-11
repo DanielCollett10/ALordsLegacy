@@ -74,6 +74,19 @@ namespace LordsLegacy.Game.Tools
             Refresh();
         }
 
+        /// <summary>
+        /// Area-to-module hand-off (WC-01): after an operation's area is designated, switches to the module tool for that
+        /// operation with the given module types queued in order. Does nothing if no module tool is registered.
+        /// </summary>
+        public bool BeginModulePlacement(int operationId, IEnumerable<string> moduleTypeIds)
+        {
+            if (!_tools.TryGetValue(ModuleTool.ToolId, out var t) || !(t is ModuleTool module)) return false;
+            Deselect();
+            module.Begin(operationId, moduleTypeIds);
+            Toggle(ModuleTool.ToolId);
+            return true;
+        }
+
         /// <summary>Cancels and deactivates the active tool, if any.</summary>
         public void Deselect()
         {
