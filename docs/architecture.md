@@ -74,6 +74,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `RoutineSystem` skips the citizen and drops its routine state. `DebugSendSystem` (movement slot, after
     `MovementSystem`) sets the linger on arrival (`DebugLingerMinutes`, 30), then clears `DebugSend` so the routine starts
     afresh (by day it mills, at night it walks home). A walk that fails mid-way ends the send at once. Works while paused. Unity calls it only from `DebugSendController` (Editor and development builds).
+  - **Task board (T-274, TSK-01..06, decision 0005):** `SimWorld.Tasks` (`Assets/Sim/Tasks/`, partial in
+    `SimWorld.Tasks.cs`, never null) is a `TaskBoard` of `TaskRecord`s built from `TaskDef`s (id, explicit `TaskStep`
+    list of MoveTo / Work(duration) each with a heavy flag, `EligibilityPolicy`, `RequiredResource`). State machine
+    Open → Assigned → Active → Done, or Cancelled; illegal transitions return false. A task reserves trees in
+    `Trees` using its own id as owner; `Cancel` and completion release them. Queries `ByOwner`, `ByAssignee`,
+    `InState`; `Version` bumps on change. No dispatcher yet.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
