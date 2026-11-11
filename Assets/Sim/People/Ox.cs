@@ -1,7 +1,7 @@
 namespace LordsLegacy.Sim.People
 {
     /// <summary>One ox (PPL-13): a record with a home stand point, position, facing and activity.</summary>
-    public sealed class Ox
+    public sealed class Ox : IMovable
     {
         /// <summary>Creates an ox record. Use <see cref="Population.AddOx"/>.</summary>
         public Ox(int id, string name, double homeX, double homeZ, double facingRad = 0,
@@ -13,6 +13,8 @@ namespace LordsLegacy.Sim.People
             HomeZ = homeZ;
             X = homeX;
             Z = homeZ;
+            PreviousX = homeX;
+            PreviousZ = homeZ;
             FacingRad = facingRad;
             Activity = activity;
         }
@@ -40,5 +42,17 @@ namespace LordsLegacy.Sim.People
 
         /// <summary>Current activity.</summary>
         public Activity Activity { get; set; }
+
+        /// <inheritdoc />
+        public double PreviousX { get; set; }
+
+        /// <inheritdoc />
+        public double PreviousZ { get; set; }
+
+        /// <inheritdoc />
+        public double CurrentMultiplier { get; set; } = 1.0;
+
+        /// <inheritdoc />
+        public MoveOrder Move { get; set; }
     }
 }

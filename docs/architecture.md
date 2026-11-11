@@ -53,6 +53,12 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     multipliers; heuristic ÷ top multiplier; ties by f, h, cell index). Blocked ends snap to the nearest walkable
     centre within 20 m. Result `PathResult` (`Ok`, `Points` in metres, `TravelMinutes` at 1 m/min) is smoothed over
     straight lines crossing only equal-multiplier walkable cells.
+  - **Movement (T-258, MOV-12/14/15):** `Citizen` and `Ox` implement `IMovable` (position, `FacingRad`,
+    `PreviousX/Z`, `CurrentMultiplier`, `Move`). `Move` is a `MoveOrder` (target, `Path`, `SegmentIndex`, `ProgressM`,
+    `Status` Pending/Moving/Done/Failed, `FailReason`); the dispatcher sets it, `MovementSystem` (movement slot in
+    `SimSystems`) advances it by walk/ox speed × the multiplier of the cell under the agent each tick. When `Nav.Version`
+    changes, agents on blocked cells move to the nearest walkable point and unfinished orders re-plan from where the agent
+    stands. Finished orders stay on the agent until their owner clears them. `Activity` is not touched.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).

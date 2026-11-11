@@ -38,6 +38,7 @@ namespace LordsLegacy.Sim.Core
                 // dispatch
                 // steps
                 // movement
+                new LordsLegacy.Sim.Navigation.MovementSystem(),
                 // operations
             };
         }

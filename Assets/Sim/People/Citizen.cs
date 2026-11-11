@@ -3,7 +3,7 @@ using System;
 namespace LordsLegacy.Sim.People
 {
     /// <summary>One citizen (PPL-10, PPL-14). Position and facing are mutable; the rest is fixed at creation.</summary>
-    public sealed class Citizen
+    public sealed class Citizen : IMovable
     {
         /// <summary>Game minutes (ticks) in one calendar year: 365 days of 1440 minutes.</summary>
         public const long TicksPerYear = 365L * 24 * 60;
@@ -19,6 +19,8 @@ namespace LordsLegacy.Sim.People
             FamilyId = familyId;
             X = x;
             Z = z;
+            PreviousX = x;
+            PreviousZ = z;
             FacingRad = facingRad;
             Activity = activity;
         }
@@ -49,6 +51,18 @@ namespace LordsLegacy.Sim.People
 
         /// <summary>Current activity.</summary>
         public Activity Activity { get; set; }
+
+        /// <inheritdoc />
+        public double PreviousX { get; set; }
+
+        /// <inheritdoc />
+        public double PreviousZ { get; set; }
+
+        /// <inheritdoc />
+        public double CurrentMultiplier { get; set; } = 1.0;
+
+        /// <inheritdoc />
+        public MoveOrder Move { get; set; }
 
         /// <summary>
         /// Age in years at tick <paramref name="nowTick"/>: calendar time since birth times

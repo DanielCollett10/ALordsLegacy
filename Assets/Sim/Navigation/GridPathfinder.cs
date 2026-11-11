@@ -49,6 +49,20 @@ namespace LordsLegacy.Sim.Navigation
             return cells == null ? PathResult.NoRoute() : Build(nav, cells, start, goal);
         }
 
+        /// <summary>
+        /// Nearest walkable cell centre to a point (within <see cref="SnapRadiusM"/>). Returns the point itself when its
+        /// cell is already walkable; false when nothing walkable is in range (MOV-12).
+        /// </summary>
+        public static bool TryNearestWalkable(NavGrid nav, PathPoint p, out PathPoint result)
+        {
+            result = p;
+            if (nav == null) throw new ArgumentNullException(nameof(nav));
+            if (Snap(nav, p, out int cx, out int cz)) return true;
+            if (cx < 0) return false;
+            result = new PathPoint(nav.CentreX(cx), nav.CentreZ(cz));
+            return true;
+        }
+
         // Finds the cell for a point. Returns true if the point's own cell is walkable; otherwise snaps to the
         // nearest walkable centre in range (cx = -1 when none).
         private static bool Snap(NavGrid nav, PathPoint p, out int cx, out int cz)
