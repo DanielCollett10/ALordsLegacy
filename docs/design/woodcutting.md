@@ -12,7 +12,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | WC-01 | The player draws a **woodcutting building area** (the area tool, building kind) and places modules inside it | DECIDED |
 | WC-02 | Modules are **fixed rectangles** (footprints, `movement.md`): hut **6 × 4 m**, log storage **8 × 6 m**, oxen stand **3 × 3 m**. Reshaping them comes later | DECIDED (sizes PLACEHOLDER) |
 | WC-03 | A module must sit **fully inside** its building area and must not overlap another module | DECIDED |
-| WC-04 | Placing a module: it follows the cursor and can be rotated freely. With snapping on, an edge snaps flush to the nearest area edge (and turns to match it) when within the snap distance. Placement shows red with a reason when it's invalid | DECIDED |
+| WC-04 | Placing a module: it follows the cursor and can be rotated freely with **Q/E** (15° steps, Shift for 1°; the camera no longer uses Q/E). With snapping on, an edge snaps flush to the nearest area edge (and turns to match it) when within the snap distance. Placement shows red with a reason when it's invalid | DECIDED |
 | WC-05 | Hut: exactly 1, mandatory. Log storage: at least 1, 20 logs each (INV-A3). Oxen stand: optional, holds 1 ox | DECIDED |
 | WC-06 | Blocking: the hut blocks movement. Log storage and the oxen stand don't (people and oxen walk onto them to unload and tie up) | DECIDED |
 | WC-07 | **M8: placed modules are built instantly** (placeholder). Real construction by odd-jobbers comes in M9 | DECIDED |
@@ -74,7 +74,9 @@ A 4-log tree takes about 3 game hours, or about 3¾ real minutes at 1×.
 
 - **M8 Woodcutters fell trees:** the woodcutting area, placing modules (built instantly), assigning families, the
   work schedule, felling and bucking into log piles on the ground, stumps, and the operation panel.
-- **M9 Oxen haul logs:** the inventory ledger, the camp stockpile, ox leading, storage stacks, the Oxen tab and
+  M8 has ledger part 1 (create and count logs in ground piles). Until oxen exist, felling stops at 20 logs on the
+  ground (*Storage full*, WC-25). The owner may change this later.
+- **M9 Oxen haul logs:** ledger part 2 (reserve, transfer, carriers, storage), the camp stockpile, ox leading, storage stacks, the Oxen tab and
   oxen stand, *Waiting for ox*, *Storage full*, and a second storage raising capacity to 40.
 - **M10 Build it first:** construction by odd-jobbers (`people.md` PPL-40..44). Completes MVP-1.
 
