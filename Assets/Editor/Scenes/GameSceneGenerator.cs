@@ -150,6 +150,8 @@ namespace LordsLegacy.EditorTools.Scenes
             var people = new GameObject("PeopleRenderer").AddComponent<LordsLegacy.Game.Visuals.PeopleRenderer>();
             SetRef(people, "host", host);
             SetRef(people, "registry", registry);
+            var modules = new GameObject("ModuleRenderer").AddComponent<LordsLegacy.Game.Visuals.ModuleRenderer>();
+            SetRef(modules, "host", host);
             var camp = new GameObject("CampRenderer").AddComponent<LordsLegacy.Game.Visuals.CampRenderer>();
             SetRef(camp, "host", host);
             SetRef(camp, "registry", registry);

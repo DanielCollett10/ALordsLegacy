@@ -134,6 +134,9 @@ namespace LordsLegacy.Tests.PlayMode
             CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter" }, ids);
             var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
             Assert.IsNotNull(moduleTool, "ModuleTool missing.");
+            var moduleRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();
+            Assert.IsNotNull(moduleRenderer, "ModuleRenderer missing.");
+            AssertNoNullRefs(moduleRenderer);
             AssertNoNullRefs(moduleTool);
 
             // The overlay's area labels are in the UXML the generator wires (T-116).

@@ -1134,7 +1134,14 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsTrue(_panel.IsShown);
             StringAssert.Contains("hut", _panel.Status);
 
+            var drawn = new GameObject("ModuleRenderer").AddComponent<LordsLegacy.Game.Visuals.ModuleRenderer>();
+            drawn.Configure(_host);
+            drawn.Refresh();
+            Assert.AreEqual(0, drawn.BoxCount);
+
             module.ClickAt(Screen(55, 60));
+            drawn.Refresh();
+            Assert.AreEqual(1, drawn.BoxCount, "A placed module must be drawn.");
             Assert.AreEqual(1, module.Queue.Count, _panel.Status);
             Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.LogStorageId, module.Queue[0]);
             StringAssert.Contains("log storage", _panel.Status);
@@ -1142,6 +1149,9 @@ namespace LordsLegacy.Tests.PlayMode
             module.ClickAt(Screen(70, 60));
             Assert.IsNull(_controller.ActiveTool, _panel.Status);
             Assert.IsFalse(_panel.IsShown);
+            drawn.Refresh();
+            Assert.AreEqual(2, drawn.BoxCount);
+            Object.Destroy(drawn.gameObject);
         }
 
         [UnityTest]
