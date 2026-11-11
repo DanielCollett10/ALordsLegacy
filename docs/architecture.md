@@ -17,7 +17,7 @@ the section it belongs to; the section headings below are fixed and keep this or
 _Owner: the task that changes the Sim core. Other tasks do not edit this section._
 
 - `Assets/Sim/Core/SimWorld.cs` (`LordsLegacy.Sim.Core`) is the root and owns all game state: the tick clock, pause,
-  `Terrain` (`IHeightField`), `Trees` (`TreeRegistry`), `Roads` (`RoadNetwork`), `Areas` (`AreaRegistry`) and `CommandLog`. All are
+  `Terrain` (`IHeightField`), `Trees` (`TreeRegistry`), `Roads` (`RoadNetwork`), `Areas` (`AreaRegistry`), `Operations` (`OperationRegistry`) and `CommandLog`. All are
   never null. Build it with `new SimWorld(tuning)` (flat ground, no trees) or `SimWorld.FromMapData(map, tuning)`.
   Both take optional `RoadTypeCatalog` / `AreaTypeCatalog` arguments (decision 0019); the world exposes them as
   `RoadTypes` and `AreaTypes` (never null; null arguments give the static default definitions in `RoadTypes.All` /
@@ -84,6 +84,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     holds `OperationTypeDef` (ids of the building and work area types, hut, log storage, optional oxen stand, family
     slots, default work radius) and `OperationTypes` (static, `Woodcutting`, `Find`, `All`). Definitions only; the
     woodcutting area types live in `AreaTypes` (`area.woodcutting` Building, `area.work_woodcutting` Work). Not yet on the world catalogs.
+  - **Operations (T-268, WC-05/15/25):** `SimWorld.Operations` (`OperationRegistry`, partial in `SimWorld.Operations.cs`,
+    never null) holds `Operation` records (id, type, area id, module footprint ids, family ids, ox ids, optional work
+    area id, paused flag); every change bumps `Version`. `DesignateArea` of a building area type that has an operation
+    type creates one; `DeleteArea` removes it and its module footprints (ledger locations are not cleaned up).
+    `OperationStatus.Of(world, op)` is computed, never stored: Working or the first of Paused, MissingHut,
+    MissingStorage, NoWorkers (no member aged 14+), NoTrees (`TreeRegistry.AnyStandingIn` on the work polygon or the
+    default circle round the hut), StorageFull. `OperationStatus.LogLoad` is the single place the storage-full sum
+    lives (own ground piles plus own storages, against total storage capacity).
   - **Inventory ledger part 1 (T-273, INV-01/11, LED-01/03/09):** `SimWorld.Inventory` (`Assets/Sim/Inventory/`, partial in
     `SimWorld.Inventory.cs`) is a `Ledger` of `LedgerLocation`s (`GroundPile` at a point with optional owner operation id,
     or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
