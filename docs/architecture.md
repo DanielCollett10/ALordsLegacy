@@ -96,6 +96,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     cancelled. `StepRunnerSystem` runs Active tasks in id order: MoveTo issues a `MoveOrder` to the tree and waits (Walking);
     Work adds one progress tick per tick (Working). Target gone, no assignee or a Failed move cancels the task and frees
     the worker. `RoutineSystem` ignores busy citizens and resumes when the task ends.
+  - **Working day (T-277, PPL-21/24..26/45):** `SimWorld.WorkDay` (`Assets/Sim/People/WorkDay.cs`) plans shifts for adult
+    members of families with a `WorkplaceId`; everyone else is always "on shift" (M7 routine). Work ends at sunset
+    (Sunday: minus `SundayMealMinutes`). Depart tick = max(sunrise − commute, previous work end + commute +
+    `MinSleepHours`), commute = path travel time to the task's target tree, planned once per morning per citizen
+    (a worker already awake leaves at once). `DispatchSystem.IsIdle` lets sleeping assigned workers take tasks at night.
+    Off shift, `StepRunnerSystem` skips the worker's Active task (progress and reservations kept) and `RoutineSystem`
+    walks the worker home to sleep; on shift the step runner resumes (a task paused mid-Work first walks back to the
+    tree). Assigned workers with no task mill about near their family home.
   - **Footprints (T-252, MOV-03/04):** `SimWorld.Footprints` (`Assets/Sim/Footprints/`, partial in `SimWorld.Footprints.cs`)
     holds `Footprint` records (oriented rectangle: CCW `Polygon`, `AccessPoint` 1 m outside the front edge at local -Z)
     of a `FootprintTypeDef` (size, `BlocksMovement`, `ClearsTrees`; `footprint.camp` is 24x16 m, walkable, clears trees).
