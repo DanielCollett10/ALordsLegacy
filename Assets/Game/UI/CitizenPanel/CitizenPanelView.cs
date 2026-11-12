@@ -90,11 +90,14 @@ namespace LordsLegacy.Game
                 var ox = world.People.FindOx(sel.Id);
                 if (ox == null) { _panel.style.display = DisplayStyle.None; return; }
                 _name.text = ox.Name;
-                _age.text = ""; _family.text = ""; _workplace.text = ""; _task.text = "";
+                _age.text = ""; _family.text = "";
                 _age.style.display = DisplayStyle.None;
                 _family.style.display = DisplayStyle.None;
-                _workplace.style.display = DisplayStyle.None;
-                _task.style.display = DisplayStyle.None;
+                // T-294: an ox shows its owner building and what it carries (reusing the work / task lines).
+                _workplace.text = "Owner: " + OxText.Owner(world, ox);
+                _task.text = "Carrying: " + OxText.Carrying(world, ox);
+                _workplace.style.display = DisplayStyle.Flex;
+                _task.style.display = DisplayStyle.Flex;
                 _activity.text = "Doing: " + ActivityName(ox.Activity);
             }
             else

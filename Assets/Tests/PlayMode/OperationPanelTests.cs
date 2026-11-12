@@ -167,7 +167,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual("Status: No workers", _view.StatusText);
             StringAssert.Contains("Hut", _view.ModulesText);
             StringAssert.Contains("Log storage", _view.ModulesText);
-            Assert.AreEqual("Logs on the ground: 0", _view.LogsText);
+            Assert.AreEqual("Logs waiting at tree sites: 0", _view.LogsText);
             var region = OperationStatus.WorkRegion(_host.World, _op);
             Assert.AreEqual("Standing trees in work area: " + _host.World.Trees.CountStandingIn(region), _view.TreesText);
             Assert.AreEqual(2, OperationTypes.Find(_op.TypeId).FamilySlots);
@@ -252,20 +252,56 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator OxenTabAndStockRowsArePresentButDisabled()
+        public IEnumerator AssignOxThroughTheOxenTab_ListsItAndStockLineMatchesLedger()
         {
+            var w = _host.World;
+            w.People.AddOx(1, "Bess", 70, 70);
+            w.People.AddOx(2, "Daisy", 71, 70);
+            // 28 logs in the storage, 4 of them reserved.
+            var store = w.Inventory.GetOrAddStorage(2, ModuleTypes.LogStorage);
+            w.Inventory.Produce(store, LordsLegacy.Sim.Inventory.Items.Log, 18);
+            Assert.AreNotEqual(0, w.Inventory.ReserveStock(store, LordsLegacy.Sim.Inventory.Items.Log, 4, 999));
             yield return OpenPanel();
-            var oxen = _view.Find<Button>("oxen-tab");
-            Assert.IsNotNull(oxen);
-            Assert.IsFalse(oxen.enabledSelf);
-            StringAssert.Contains("Coming in M9", oxen.text);
-            foreach (string name in new[] { "stock-row-pool", "stock-row-camp" })
-            {
-                var row = _view.Find<Label>(name);
-                Assert.IsNotNull(row, name);
-                Assert.IsFalse(row.enabledSelf, name);
-                StringAssert.Contains("Coming in M9", row.text);
-            }
+
+            var pool = w.OperationPool(_op.Id, LordsLegacy.Sim.Inventory.Items.Log);
+            Assert.AreEqual(18, pool.Total);
+            Assert.AreEqual(4, pool.Reserved);
+            Assert.AreEqual(
+                "Log stock: " + pool.Total + " / " + pool.Reserved + " / " + pool.Available + " of " + pool.Capacity
+                + " (total / reserved / available of capacity)", _view.StockLineText);
+
+            _view.ClickOxenTab();
+            yield return null;
+            Assert.IsNotNull(_view.Find<Button>("assign-ox-1"), "free ox has Assign");
+            Assert.IsNotNull(_view.Find<Button>("assign-ox-2"));
+            Assert.IsNull(_view.Find<Button>("remove-ox-1"));
+
+            _view.ClickAssignOx(1);
+            yield return null;
+            CollectionAssert.AreEqual(new[] { 1 }, _op.OxIds);
+            Assert.IsNotNull(_view.Find<Button>("remove-ox-1"), "assigned ox has Remove");
+            Assert.IsNull(_view.Find<Button>("assign-ox-1"));
+            Assert.IsNotNull(_view.Find<Button>("assign-ox-2"));
+            StringAssert.Contains("Free", _view.Find<Label>("oxen-assigned-label-1").text);
+
+            _view.ClickRemoveOx(1);
+            yield return null;
+            Assert.AreEqual(0, _op.OxIds.Count);
+            Assert.IsNotNull(_view.Find<Button>("assign-ox-1"));
+        }
+
+        [UnityTest]
+        public IEnumerator HaulWaitingForAnOx_ShowsWaitingForOxStatus()
+        {
+            var w = _host.World;
+            w.Execute(new AssignFamily(_op.Id, 1));
+            w.Trees.Add(new LordsLegacy.Sim.Forestry.TreeId(9001), 105f, 105f, 15.0);
+            var task = w.Tasks.Create(new LordsLegacy.Sim.Tasks.TaskDef("task.test_ox",
+                new[] { LordsLegacy.Sim.Tasks.TaskStep.MoveTo() }, LordsLegacy.Sim.Tasks.EligibilityPolicy.AssignedFamilyOnly,
+                LordsLegacy.Sim.Tasks.RequiredResource.Ox), _op.Id);
+            Assert.IsTrue(task.IsWaitingForOx);
+            yield return OpenPanel();
+            StringAssert.Contains("Waiting for ox", _view.StatusText);
         }
 
         [UnityTest]

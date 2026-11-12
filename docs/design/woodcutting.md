@@ -117,9 +117,9 @@ Selecting the hut or its area opens the panel (GDD section 9 inspector):
 - Pause / Resume;
 - the inactive cause (*Missing hut*, *No workers*, *No trees*, *Storage full*, *Waiting for ox*, *Paused*).
 
-> Implementation note (operation panel, M8): built with the family slots, worker tasks, ground logs, standing trees, work
-> area and Pause / Resume. The Oxen tab and the pool rows are shown disabled, "Coming in M9". *Waiting for ox* is not
-> a status yet (no oxen in M8). The status causes in code are Paused, Missing hut, Missing storage, No workers, No trees, Storage full.
+> Implementation note (operation panel, M9, T-294): the Oxen tab and the stock line (total / reserved / available of
+> capacity) are live, and *Waiting for ox* is reported. Earlier (M8) note: built with the family slots, worker tasks, ground logs, standing trees, work
+> area and Pause / Resume. The status causes in code are Paused, Missing hut, Missing storage, No workers, No trees, Storage full.
 > *Missing storage* is not in the list above.
 
 > Implementation note (WC-25, M8): felling stops when logs on the ground plus in storage reach the total log capacity of
