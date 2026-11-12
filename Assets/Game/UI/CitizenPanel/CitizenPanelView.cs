@@ -1,5 +1,6 @@
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Sim.People;
+using LordsLegacy.Sim.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -19,7 +20,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _name, _age, _family, _activity, _message;
+        private Label _name, _age, _family, _activity, _workplace, _task, _message;
         private string _pendingMessage = "";
         private Button _close;
         private bool _subscribed;
@@ -38,6 +39,12 @@ namespace LordsLegacy.Game
 
         /// <summary>Activity line text.</summary>
         public string ActivityText => _activity?.text ?? "";
+
+        /// <summary>Workplace line text, e.g. "Work: Woodcutter 1" (empty for an ox).</summary>
+        public string WorkplaceText => _workplace?.text ?? "";
+
+        /// <summary>Task line text, e.g. "Task: Felling (Buck 2/4)" (empty for an ox).</summary>
+        public string TaskText => _task?.text ?? "";
 
         /// <summary>Debug message line text (send-to refusal, T-264); empty when none.</summary>
         public string MessageText => _message?.text ?? "";
@@ -83,9 +90,11 @@ namespace LordsLegacy.Game
                 var ox = world.People.FindOx(sel.Id);
                 if (ox == null) { _panel.style.display = DisplayStyle.None; return; }
                 _name.text = ox.Name;
-                _age.text = ""; _family.text = "";
+                _age.text = ""; _family.text = ""; _workplace.text = ""; _task.text = "";
                 _age.style.display = DisplayStyle.None;
                 _family.style.display = DisplayStyle.None;
+                _workplace.style.display = DisplayStyle.None;
+                _task.style.display = DisplayStyle.None;
                 _activity.text = "Doing: " + ActivityName(ox.Activity);
             }
             else
@@ -99,6 +108,10 @@ namespace LordsLegacy.Game
                 _family.text = "Family: " + (family != null ? family.Surname : "none");
                 _age.style.display = DisplayStyle.Flex;
                 _family.style.display = DisplayStyle.Flex;
+                _workplace.text = "Work: " + CitizenTaskText.Workplace(world, c);
+                _task.text = "Task: " + CitizenTaskText.Task(world, c);
+                _workplace.style.display = DisplayStyle.Flex;
+                _task.style.display = DisplayStyle.Flex;
                 _activity.text = "Doing: " + ActivityName(c.Activity);
             }
             _panel.style.display = DisplayStyle.Flex;
@@ -193,11 +206,14 @@ namespace LordsLegacy.Game
             _age = MakeLabel("citizen-age", 12, false);
             _family = MakeLabel("citizen-family", 12, false);
             _activity = MakeLabel("citizen-activity", 12, false);
+            _workplace = MakeLabel("citizen-workplace", 12, false);
+            _task = MakeLabel("citizen-task", 12, false);
             _message = MakeLabel("citizen-message", 12, false);
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
-            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_activity); _panel.Add(_message); _panel.Add(_close);
+            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_activity);
+            _panel.Add(_workplace); _panel.Add(_task); _panel.Add(_message); _panel.Add(_close);
             ShowMessage(_pendingMessage);
             holder.Add(_panel);
             root.Add(holder);

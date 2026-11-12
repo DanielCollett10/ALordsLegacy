@@ -1,7 +1,10 @@
 using System.Collections;
 using LordsLegacy.Game;
+using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
+using LordsLegacy.Sim.Tasks;
 using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
@@ -172,6 +175,37 @@ namespace LordsLegacy.Tests.PlayMode
             _agents.Clear();
             yield return null;
             Assert.IsFalse(ring.IsShown);
+        }
+
+        [UnityTest]
+        public IEnumerator FellingWorkerShowsWorkplaceAndTask()
+        {
+            var w = _host.World;
+            var op = w.Operations.Create(OperationTypes.WoodcuttingId, 7);
+            w.People.FindFamily(1).WorkplaceId = op.Id;
+            var def = new TaskDef(WoodcuttingSystem.FellTaskId, new[]
+            {
+                TaskStep.MoveTo(),
+                TaskStep.Work(10, true, "stage.fell"),
+                TaskStep.Work(10, true, "stage.buck"),
+                TaskStep.Work(10, true, "stage.buck"),
+                TaskStep.Work(10, true, "stage.buck"),
+                TaskStep.Work(10, true, "stage.buck"),
+            }, EligibilityPolicy.AssignedFamilyOnly);
+            var t = w.Tasks.Create(def, op.Id, new TreeId(1));
+            w.Tasks.Assign(t.Id, 1);
+            w.Tasks.Start(t.Id);
+            // Past MoveTo and the fell step: the second buck step (2 of 4) is current.
+            w.Tasks.CompleteStep(t.Id);
+            w.Tasks.CompleteStep(t.Id);
+            w.Tasks.CompleteStep(t.Id);
+            w.People.FindCitizen(1).Activity = Activity.Working;
+            yield return null;
+            _agents.ClickAt(ScreenOf(100, 100));
+            yield return null;
+            Assert.AreEqual("Work: Woodcutter " + op.Id, _view.WorkplaceText);
+            Assert.AreEqual("Task: Felling (Buck 2/4)", _view.TaskText);
+            Assert.AreEqual(DisplayStyle.Flex, _uiGo.GetComponent<UIDocument>().rootVisualElement.Q<Label>("citizen-task").style.display.value);
         }
     }
 }
