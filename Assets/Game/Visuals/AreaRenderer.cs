@@ -43,6 +43,7 @@ namespace LordsLegacy.Game.Visuals
         [SerializeField] private SimHost host;
 
         private readonly Dictionary<int, GameObject> _areas = new Dictionary<int, GameObject>();
+        private readonly HashSet<int> _workIds = new HashSet<int>();
         private int _builtVersion = -1;
         private Material _material;
         private GameObject _previewObject;
@@ -54,6 +55,23 @@ namespace LordsLegacy.Game.Visuals
         /// <summary>The mesh built for an area id, or null when none.</summary>
         public Mesh GetAreaMesh(int areaId) =>
             _areas.TryGetValue(areaId, out var go) ? go.GetComponent<MeshFilter>().sharedMesh : null;
+
+        /// <summary>
+        /// Work areas whose outline is drawn (T-282). Work areas are built like any other area but stay hidden unless
+        /// their id is in this set; <see cref="WorkAreaRenderer"/> keeps it to the work area of the open operation panel.
+        /// Call <see cref="ApplyWorkAreaVisibility"/> after changing it.
+        /// </summary>
+        public HashSet<int> ShownWorkAreaIds { get; } = new HashSet<int>();
+
+        /// <summary>True when the area's outline object exists and is active.</summary>
+        public bool IsAreaShown(int areaId) => _areas.TryGetValue(areaId, out var go) && go.activeSelf;
+
+        /// <summary>Shows or hides each work area object according to <see cref="ShownWorkAreaIds"/>. Building areas are not affected.</summary>
+        public void ApplyWorkAreaVisibility()
+        {
+            foreach (var kv in _areas)
+                kv.Value.SetActive(!_workIds.Contains(kv.Key) || ShownWorkAreaIds.Contains(kv.Key));
+        }
 
         /// <summary>The draft mesh, or null while no preview is shown.</summary>
         public Mesh PreviewMesh => _previewObject != null && _previewObject.activeSelf ? _previewMesh : null;
@@ -79,13 +97,14 @@ namespace LordsLegacy.Game.Visuals
             foreach (var a in areas.All) live.Add(a.Id);
             var gone = new List<int>();
             foreach (var id in _areas.Keys) if (!live.Contains(id)) gone.Add(id);
-            foreach (var id in gone) { Discard(_areas[id]); _areas.Remove(id); }
+            foreach (var id in gone) { Discard(_areas[id]); _areas.Remove(id); _workIds.Remove(id); }
 
             foreach (var a in areas.All)
             {
                 if (_areas.ContainsKey(a.Id)) continue; // records are immutable, ids never reused
                 var type = host.World.AreaTypes.Find(a.TypeId);
                 bool work = type != null && type.Kind == AreaKind.Work;
+                if (work) _workIds.Add(a.Id);
                 var b = new DrapeMesh();
                 AddFill(b, a.Polygon, work ? WorkFill : BuildingFill, HeightOffsetM);
                 AddOutline(b, a.Polygon, true, OutlineWidthM, work ? WorkOutline : BuildingOutline, HeightOffsetM + 0.01f, work);
@@ -97,6 +116,7 @@ namespace LordsLegacy.Game.Visuals
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 mr.receiveShadows = false;
                 _areas[a.Id] = go;
+                go.SetActive(!work || ShownWorkAreaIds.Contains(a.Id));
             }
         }
 

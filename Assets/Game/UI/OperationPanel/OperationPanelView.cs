@@ -8,6 +8,7 @@ using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tasks;
+using LordsLegacy.Game.Visuals;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -321,6 +322,10 @@ namespace LordsLegacy.Game
             Build();
             Subscribe();
             Refresh();
+            // The work area drawn while this panel is open (T-282). Added here so the scene file does not change.
+            var work = GetComponent<WorkAreaRenderer>();
+            if (work == null) work = gameObject.AddComponent<WorkAreaRenderer>();
+            work.Configure(Host(), Agents(), this);
         }
 
         private void OnDisable() => Unsubscribe();

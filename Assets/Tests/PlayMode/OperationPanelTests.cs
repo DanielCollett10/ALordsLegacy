@@ -2,6 +2,7 @@ using System.Collections;
 using LordsLegacy.Game;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Game.Tools.Shared;
+using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Footprints;
@@ -321,6 +322,79 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsTrue(_op.WorkAreaId.HasValue, "SetWorkArea sent on confirm");
             Assert.AreEqual(AreaTypes.WoodcuttingWorkId, _host.World.Areas.Get(_op.WorkAreaId.Value).TypeId);
             Assert.IsNull(_controller.ActiveTool);
+        }
+
+        [UnityTest]
+        public IEnumerator DefaultWorkCircleIsShownOnlyWhileThePanelIsOpen()
+        {
+            var areaGo = new GameObject("TestAreaRenderer");
+            var areas = areaGo.AddComponent<AreaRenderer>();
+            areas.Configure(_host);
+            try
+            {
+                yield return null;
+                var work = _uiGo.GetComponent<WorkAreaRenderer>();
+                Assert.IsNotNull(work, "The panel adds the work area renderer.");
+                Assert.IsFalse(work.IsCircleShown, "Hidden before the panel opens.");
+
+                yield return OpenPanel();
+                yield return null;
+                Assert.IsTrue(work.IsCircleShown, "Shown while the panel is open.");
+                Assert.AreEqual(_op.Id, work.ShownOperationId);
+                var mesh = work.GetComponentInChildren<MeshFilter>().sharedMesh;
+                float radius = (float)OperationTypes.Find(_op.TypeId).DefaultWorkRadiusM;
+                Assert.AreEqual(2f * radius, mesh.bounds.size.x, 1.5f, "Circle of DefaultWorkRadiusM round the hut.");
+                Assert.AreEqual(100f, mesh.bounds.center.x, 0.5f);
+                Assert.AreEqual(100f, mesh.bounds.center.z, 0.5f);
+
+                _view.ClickClose();
+                yield return null;
+                Assert.IsFalse(_view.IsShown);
+                Assert.IsFalse(work.IsCircleShown, "Closing the panel hides the circle.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(areaGo);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator OtherWorkAreasStayHiddenAndLinkedOneShowsOnlyWhilePanelIsOpen()
+        {
+            var areaGo = new GameObject("TestAreaRenderer");
+            var areas = areaGo.AddComponent<AreaRenderer>();
+            areas.Configure(_host);
+            try
+            {
+                var linked = _host.Execute(new DesignateArea(
+                    AreaShape.Straight(new[] { M(140, 140), M(160, 140), M(160, 160), M(140, 160) }), AreaTypes.WoodcuttingWorkId));
+                Assert.IsTrue(linked.IsAccepted, linked.Text);
+                int linkedId = (int)linked.Created[0];
+                Assert.IsTrue(_host.Execute(new SetWorkArea(_op.Id, linkedId)).IsAccepted);
+                var other = _host.Execute(new DesignateArea(
+                    AreaShape.Straight(new[] { M(20, 20), M(40, 20), M(40, 40), M(20, 40) }), AreaTypes.WoodcuttingWorkId));
+                Assert.IsTrue(other.IsAccepted, other.Text);
+                int otherId = (int)other.Created[0];
+                areas.Sync();
+                yield return null;
+
+                Assert.IsFalse(areas.IsAreaShown(linkedId), "Closed panel: linked work area hidden.");
+                Assert.IsFalse(areas.IsAreaShown(otherId), "Closed panel: other work area hidden.");
+
+                yield return OpenPanel();
+                yield return null;
+                Assert.IsTrue(areas.IsAreaShown(linkedId), "Open panel: the operation's work area is drawn.");
+                Assert.IsFalse(areas.IsAreaShown(otherId), "Open panel: unrelated work areas stay hidden.");
+                Assert.IsFalse(_uiGo.GetComponent<WorkAreaRenderer>().IsCircleShown, "A linked work area replaces the default circle.");
+
+                _view.ClickClose();
+                yield return null;
+                Assert.IsFalse(areas.IsAreaShown(linkedId), "Closing hides the linked work area again.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(areaGo);
+            }
         }
     }
 }
