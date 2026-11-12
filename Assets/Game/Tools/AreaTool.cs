@@ -69,6 +69,22 @@ namespace LordsLegacy.Game.Tools
         private PointMm _hover;
         private bool _hasHover, _hoverSnapped, _lastSnapped, _dragging;
 
+        private int? _workAreaFor;
+
+        /// <summary>Operation the next confirmed area is linked to with <see cref="SetWorkArea"/>, or null for a plain area.</summary>
+        public int? WorkAreaFor { get => _workAreaFor; set => _workAreaFor = value; }
+
+        /// <summary>Result of the last <see cref="SetWorkArea"/> sent on confirm, or null.</summary>
+        public CommandResult LastLinkResult { get; private set; }
+
+        /// <summary>Returns the pending <see cref="LastLinkResult"/> and clears it, so a view shows each result once.</summary>
+        public CommandResult TakeLinkResult()
+        {
+            var r = LastLinkResult;
+            LastLinkResult = null;
+            return r;
+        }
+
         /// <inheritdoc />
         public string Id => _toolId;
 
@@ -131,6 +147,7 @@ namespace LordsLegacy.Game.Tools
         public void Deactivate()
         {
             _active = false;
+            _workAreaFor = null;
             _hasHover = false;
             ShowSnapMarkers(default);
             Unsubscribe();
@@ -145,7 +162,7 @@ namespace LordsLegacy.Game.Tools
         {
             if (!HasDraft) return false;
             ClearDraft();
-            return !StartsOperation; // operation areas: false lets the controller deselect, so Esc returns to no tool
+            return !(StartsOperation || _workAreaFor.HasValue); // operation areas: false lets the controller deselect, so Esc returns to no tool
         }
 
         /// <summary>A mouse button went down at a screen position (pixels).</summary>
@@ -284,6 +301,15 @@ namespace LordsLegacy.Game.Tools
             if (result.IsAccepted)
             {
                 ClearDraft();
+                if (_workAreaFor.HasValue && result.Created.Length > 0)
+                {
+                    // Operation panel "Draw work area": link the new area to the operation, then leave the tool.
+                    int opId = _workAreaFor.Value;
+                    var link = _host.Execute(new SetWorkArea(opId, (int)result.Created[0]));
+                    LastLinkResult = link;
+                    if (_controller != null && _controller.ActiveTool == (ITool)this) _controller.Deselect();
+                    return;
+                }
                 HandOffToModules(result);
                 return;
             }
@@ -309,7 +335,7 @@ namespace LordsLegacy.Game.Tools
         private void CancelDraft()
         {
             ClearDraft();
-            if (StartsOperation && _controller != null && _controller.ActiveTool == (ITool)this) _controller.Deselect();
+            if ((StartsOperation || _workAreaFor.HasValue) && _controller != null && _controller.ActiveTool == (ITool)this) _controller.Deselect();
         }
 
         /// <summary>Backspace: removes the last placed point. The draft is cleared when no point is left.</summary>

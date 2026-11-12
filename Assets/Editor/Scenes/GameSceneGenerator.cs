@@ -225,6 +225,7 @@ namespace LordsLegacy.EditorTools.Scenes
             {
                 new[] { "TestAreaTool", LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Sim.Areas.AreaTypes.TestId },
                 new[] { "TestWorkAreaTool", LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, LordsLegacy.Sim.Areas.AreaTypes.TestWorkId },
+                new[] { "WoodcutterWorkAreaTool", "woodcutter-work", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingWorkId },
                 new[] { "WoodcutterAreaTool", "woodcutter", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
             };
             GameObject last = null;
@@ -284,6 +285,11 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(panel, "_host", host);
             SetRef(panel, "_agents", agents);
             SetRef(panel, "_controller", controller);
+            var opGo = CreateUiDocument("OperationPanel", null);
+            var opPanel = opGo.AddComponent<OperationPanelView>();
+            SetRef(opPanel, "_host", host);
+            SetRef(opPanel, "_agents", agents);
+            SetRef(opPanel, "_controller", controller);
             var path = new GameObject("DebugPathOverlay").AddComponent<DebugPathOverlay>();
             SetRef(path, "_host", host);
             SetRef(path, "_agents", agents);

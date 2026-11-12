@@ -353,6 +353,13 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   Menu `LordsLegacy/Map/Generate Start Layout` (`StartLayoutGenerator`) writes `Assets/Maps/TestMap/StartLayout.asset`
   (flat spot at most 5 degrees west of the forest edge, 50+ trees within 50 m, north-south trunk road past the camp; idempotent).
   `GameSceneGenerator.CreateSimHost` wires the asset into SimHost and fails if the asset is missing.
+- Operation panel and selection order (T-281, `Assets/Game/UI/OperationPanel/`): `AgentPicker` has one pick order with no tool
+  active: citizen/ox within the pick radius, else a module under the cursor, else the building area, else a linked work area
+  (`TryPickOperation`). Modules and areas select an *operation* (`HasOperation`/`SelectedOperationId`), which opens
+  `OperationPanelView` (UIDocument built in code). It shows status cause, modules, 2 family slots (Assign list of unassigned
+  families, Remove), worker tasks, ground logs, `CountStandingIn` trees, Pause/Resume, Draw work area
+  (`ToolController.BeginWorkAreaDraw` → `AreaTool.WorkAreaFor`, confirm sends `SetWorkArea`) and Use default. Oxen tab and
+  stock rows are disabled ("Coming in M9"). All actions go through `SimHost.Execute`; refusals show their text.
 - Picking and citizen panel (T-263, `Assets/Game/Picking/`, `Assets/Game/UI/CitizenPanel/`): `AgentPicker` turns a left click
   (no tool active, not over UI) into a selected citizen or ox by screen-space distance to the interpolated positions; it only
   reads the Sim. `SelectionRing` marks the selection. `CitizenPanelView` (a UIDocument built in code, no UXML) shows name,
