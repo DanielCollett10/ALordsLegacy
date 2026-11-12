@@ -78,6 +78,7 @@ namespace LordsLegacy.Sim.Operations
         {
             int load = Math.Max(1, world.Tuning.OxLoadLogs);
             double walk = Math.Max(1e-9, world.Tuning.WalkSpeedMPerGameMinute);
+            double oxSpeed = Math.Max(1e-9, world.Tuning.OxSpeedMPerGameMinute);
             var pool = new OxPool(world);
             foreach (TaskRecord fell in world.Tasks.ByOwner(op.Id))
             {
@@ -92,7 +93,7 @@ namespace LordsLegacy.Sim.Operations
                 Citizen worker = FreeWorkerNearest(world, op, ox);
                 if (worker == null) continue;
                 double toOx = Dist(worker.X, worker.Z, ox.X, ox.Z) / walk;
-                double toTree = Dist(ox.X, ox.Z, tree.X, tree.Z) / walk;
+                double toTree = Dist(ox.X, ox.Z, tree.X, tree.Z) / oxSpeed; // led, so at the ox's pace
                 if (FellMinutesLeft(world, fell) > toOx + toTree) continue;
 
                 LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(tree.X, tree.Z), op.Id);
