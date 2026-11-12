@@ -5,6 +5,7 @@ using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Inventory;
 
 namespace LordsLegacy.Sim.Start
 {
@@ -13,7 +14,8 @@ namespace LordsLegacy.Sim.Start
     {
         /// <summary>
         /// Adds the camp footprint (removing trees under it), draws the trunk road through
-        /// <see cref="DrawRoad"/>, adds families (home = tent spot), citizens at home and oxen at the stand.
+        /// <see cref="DrawRoad"/>, adds the camp stockpile (a ledger Stockpile at the stockpile spot, filled with
+        /// <see cref="StartLayout.Stock"/>), adds families (home = tent spot), citizens at home and oxen at the stand.
         /// Throws <see cref="InvalidOperationException"/> with the refusal text if the road is refused.
         /// </summary>
         public static void Apply(SimWorld world, StartLayout layout)
@@ -32,8 +34,13 @@ namespace LordsLegacy.Sim.Start
                 if (r.IsRejected) throw new InvalidOperationException("Trunk road refused: " + r.Text);
             }
 
-            world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), ToWorld(layout, layout.Stockpile),
-                ToWorld(layout, layout.OxStand));
+            PointMm stockpileSpot = ToWorld(layout, layout.Stockpile);
+            LedgerLocation stockpile = world.Inventory.AddStockpile(stockpileSpot);
+            foreach (StartStock s in layout.Stock)
+                if (s.Count > 0) world.Inventory.Produce(stockpile, s.Item, s.Count);
+
+            world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), stockpileSpot,
+                ToWorld(layout, layout.OxStand), stockpile);
 
             int famId = 1, citId = 1;
             foreach (StartFamily f in layout.Families)
