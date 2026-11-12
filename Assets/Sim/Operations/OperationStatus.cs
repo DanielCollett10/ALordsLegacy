@@ -118,7 +118,7 @@ namespace LordsLegacy.Sim.Operations
             return null;
         }
 
-        private static List<Footprint> StorageModules(SimWorld world, Operation op)
+        internal static List<Footprint> StorageModules(SimWorld world, Operation op)
         {
             var list = new List<Footprint>();
             OperationTypeDef type = OperationTypes.Find(op.TypeId);

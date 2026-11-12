@@ -141,8 +141,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `SimWorld.Inventory.cs`) is a `Ledger` of `LedgerLocation`s (`GroundPile` at a point with optional owner operation id,
     or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
     into the nearest same-owner pile within 1 m. `TotalOf(item)`, per-location counts, `Version`, and `Audit()` (null =
-    consistent; compares location sums with the produced journal). `Items.Log` is `item.log` (category Log). Reserve,
-    transfer, carriers come in M9.
+    consistent; compares location sums with the produced journal). `Items.Log` is `item.log` (category Log).
+  - **Inventory ledger part 2 (T-286, LED-02..06, INV-02/05, WC-37):** locations add `Carrier` (`AddCarrier(cap)`, an ox) and
+    `Stockpile` (`AddStockpile()`, unlimited). `Storage` capacity comes from the module type (`GetOrAddStorage(id, type)`);
+    `Produce` throws past capacity. Per location/item: total, `ReservedOf`, `IncomingOf`, `AvailableOf` (= total − reserved),
+    `FreeSpace` (= capacity − total − incoming). `ReserveStock` / `ReserveCapacity(loc, item, n, owner)` return a reservation
+    id (0 = refused); `Release(id)`; `CancelOwner(owner)`. `Transfer(from, to, item, n, owner?)` is atomic (false and no change
+    on failure) and consumes the matching stock/capacity reservations. `SimWorld.OperationPool(opId, item)` sums the operation's
+    own storage modules only. `Audit()` also checks reservations and capacity.
   - **Processes (T-272, TMB-01/02, TSK-14, MVP-1-12):** `Assets/Sim/Processes/` (`LordsLegacy.Sim.Processes`) holds
     `ProcessDef` (id, ordered `StageDef`s), `StageDef` (id, minutes, per-item, heavy, enabled, animation key) and
     `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` returns the enabled
