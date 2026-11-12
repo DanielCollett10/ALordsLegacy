@@ -66,9 +66,12 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.Carrier, default, null, 0, capacity));
         }
 
-        /// <summary>Adds a stockpile, which has no capacity limit (INV-10).</summary>
-        public LedgerLocation AddStockpile() =>
-            Add(new LedgerLocation(_nextId++, LocationKind.Stockpile, default, null, 0));
+        /// <summary>Adds a stockpile with no position and no capacity limit (INV-10).</summary>
+        public LedgerLocation AddStockpile() => AddStockpile(default);
+
+        /// <summary>Adds a stockpile at a point (the camp stockpile spot, CON-08), with no capacity limit (INV-10).</summary>
+        public LedgerLocation AddStockpile(PointMm position) =>
+            Add(new LedgerLocation(_nextId++, LocationKind.Stockpile, position, null, 0));
 
         /// <summary>
         /// Returns the ground pile for a point: the nearest existing pile with the same owner within 1 m

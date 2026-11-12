@@ -162,6 +162,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     adds families (home = tent spot), citizens at home and oxen at the stand. `SimWorld.Camp` (`CampInfo`,
     `SimWorld.Start.cs`) exposes the footprint id and world-space fire, stockpile and stand points; null until applied.
     The oxen count comes from the layout (`OxCount`), not `SimTuning.StartingOxen`. Decision 0027.
+    T-287 (CON-08, INV-10, WC-37): `StartLayout.Stock` (`StartStock` list, default 20 `item.log`) is produced into a ledger
+    `Stockpile` location at the stockpile point; `SimWorld.Camp.StockpileLocation` exposes it. A stockpile is not a storage
+    module, so no operation pool counts it.
   - **Random (T-250, CLK-07):** `SimWorld.Random` (`Assets/Sim/Core/SimRandom.cs`, partial in `SimWorld.Random.cs`) is the
     world's one deterministic source, never null. It is a PCG-XSH-RR 64/32 written in Sim code (no `System.Random`). It is
     seeded from `SimTuning.WorldSeed` (default 12345). `NextInt(min, max)` is max-exclusive and unbiased, `NextDouble()` is in

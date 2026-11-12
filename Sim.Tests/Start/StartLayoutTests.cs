@@ -1,8 +1,12 @@
 using System;
 using System.Linq;
+using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Start;
 using LordsLegacy.Sim.Tuning;
@@ -119,6 +123,81 @@ namespace LordsLegacy.Sim.Tests
             var w = Ramp();
             StartLayoutApplier.Apply(w, Layout());
             Assert.Throws<InvalidOperationException>(() => StartLayoutApplier.Apply(w, Layout()));
+        }
+
+        [Test]
+        public void Start_Has20LogsInCampStockpile()
+        {
+            var w = Ramp();
+            StartLayoutApplier.Apply(w, Layout());
+            LedgerLocation sp = w.Camp.StockpileLocation;
+            Assert.IsNotNull(sp);
+            Assert.AreEqual(LocationKind.Stockpile, sp.Kind);
+            Assert.AreEqual(20, sp.CountOf(Items.Log.Id));
+            Assert.AreEqual(20, w.Inventory.TotalOf(Items.Log));
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        [Test]
+        public void Start_StockpileLocationSitsAtStockpilePoint()
+        {
+            var w = Ramp();
+            StartLayoutApplier.Apply(w, Layout(90));
+            Assert.AreEqual(w.Camp.Stockpile, w.Camp.StockpileLocation.Position);
+            Assert.AreEqual(P(100000, 106000), w.Camp.StockpileLocation.Position);
+        }
+
+        [Test]
+        public void Start_LogsNotCountedInAnyOperationPool()
+        {
+            var w = Ramp();
+            StartLayoutApplier.Apply(w, Layout());
+            CommandResult r = w.Execute(new DesignateArea(
+                AreaShape.Straight(new[] { P(20000, 20000), P(40000, 20000), P(40000, 40000), P(20000, 40000) }),
+                AreaTypes.WoodcuttingId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+            Operation op = w.Operations.FindByArea((int)r.Created[0]);
+            Assert.AreEqual(20, w.Inventory.TotalOf(Items.Log));
+            OperationPool pool = w.OperationPool(op.Id, Items.Log);
+            Assert.AreEqual(0, pool.Total);
+            Assert.AreEqual(0, pool.Reserved);
+            Assert.AreEqual(0, pool.Available);
+            Assert.AreEqual(0, pool.Incoming);
+        }
+
+        [Test]
+        public void Start_CustomStockReplacesDefault()
+        {
+            var w = Ramp();
+            var layout = new StartLayout(P(100000, 100000), 0, P(0, 0), P(6000, 0), P(-6000, 0), new PointMm[0],
+                new StartFamily[0], 0, LordsLegacy.Sim.Roads.RoadTypes.DirtPathId, new[] { new StartStock(Items.Log, 7) });
+            StartLayoutApplier.Apply(w, layout);
+            Assert.AreEqual(7, w.Camp.StockpileLocation.CountOf(Items.Log.Id));
+        }
+
+        [Test]
+        public void Start_EmptyStockStillHasStockpileWithNoLogs()
+        {
+            var w = Ramp();
+            var layout = new StartLayout(P(100000, 100000), 0, P(0, 0), P(6000, 0), P(-6000, 0), new PointMm[0],
+                new StartFamily[0], 0, LordsLegacy.Sim.Roads.RoadTypes.DirtPathId, new StartStock[0]);
+            StartLayoutApplier.Apply(w, layout);
+            Assert.IsNotNull(w.Camp.StockpileLocation);
+            Assert.AreEqual(0, w.Inventory.TotalOf(Items.Log));
+        }
+
+        [Test]
+        public void Stock_NegativeCount_Throws()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StartStock(Items.Log, -1));
+        }
+
+        [Test]
+        public void DefaultLayout_Stock_IsTwentyLogs()
+        {
+            Assert.AreEqual(1, StartLayout.DefaultStock.Count);
+            Assert.AreEqual("item.log", StartLayout.DefaultStock[0].Item.Id);
+            Assert.AreEqual(20, StartLayout.DefaultStock[0].Count);
         }
     }
 }
