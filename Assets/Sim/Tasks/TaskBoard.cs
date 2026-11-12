@@ -132,6 +132,17 @@ namespace LordsLegacy.Sim.Tasks
             return true;
         }
 
+        /// <summary>Sets the ox a live task uses. <paramref name="assignedToOwner"/> says whether the ox is assigned to the
+        /// owner operation (if it later stops being so, the task cancels). False if unknown or finished.</summary>
+        public bool SetOx(int taskId, int oxId, bool assignedToOwner)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.OxId = oxId; t.OxWasAssigned = assignedToOwner;
+            Version++;
+            return true;
+        }
+
         /// <summary>Cancels a live task and releases its reservations (TSK-05). Clears the assignee.
         /// False if the task is unknown or already Done/Cancelled.</summary>
         public bool Cancel(int taskId)

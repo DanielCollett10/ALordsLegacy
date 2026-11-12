@@ -69,6 +69,9 @@ namespace LordsLegacy.Sim.People
         /// <inheritdoc />
         public MoveOrder Move { get; set; }
 
+        /// <inheritdoc />
+        public FollowLink Follow { get; set; }
+
         /// <summary>
         /// Age in years at tick <paramref name="nowTick"/>: calendar time since birth times
         /// <paramref name="ageingRate"/> (POP-27, <c>SimTuning.AgeingRate</c>, default 2×). Never below 0.
