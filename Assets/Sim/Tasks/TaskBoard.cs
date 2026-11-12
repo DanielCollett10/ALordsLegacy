@@ -143,6 +143,26 @@ namespace LordsLegacy.Sim.Tasks
             return true;
         }
 
+        /// <summary>Sets or clears (null) the Fell task an early-fetch haul waits for. False if unknown or finished.</summary>
+        public bool SetAwaiting(int taskId, int? awaitedTaskId)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.AwaitsTaskId = awaitedTaskId;
+            Version++;
+            return true;
+        }
+
+        /// <summary>Marks a live task as winding down at sunset. False if unknown or finished.</summary>
+        public bool SetWindingDown(int taskId)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.WindingDown = true;
+            Version++;
+            return true;
+        }
+
         /// <summary>Cancels a live task and releases its reservations (TSK-05). Clears the assignee.
         /// False if the task is unknown or already Done/Cancelled.</summary>
         public bool Cancel(int taskId)

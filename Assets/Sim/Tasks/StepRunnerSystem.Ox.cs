@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Geometry;
@@ -22,6 +23,56 @@ namespace LordsLegacy.Sim.Tasks
         // Last known ox position and carrier per task, so a removed ox can still drop its load.
         private readonly Dictionary<int, OxTrack> _oxTrack = new Dictionary<int, OxTrack>();
         private readonly Dictionary<int, RestTarget> _rest = new Dictionary<int, RestTarget>();
+
+        // Hauls ending their day at sunset (WC-35) and the unload minutes spent so far.
+        private readonly Dictionary<int, int> _drop = new Dictionary<int, int>();
+
+        // End of work for a haul that is still fetching, leading to the pile, loading or leading to storage: unload where
+        // it stands (unload time applies), lead the ox to its rest spot, release the reservations, cancel the task. The
+        // worker is then free and the routine walks them home. Returns true when it handled the task this tick.
+        private bool TryWindDown(SimWorld world, TaskRecord t, Citizen c, Ox ox)
+        {
+            if (t.Def.Id != HaulSystem.HaulTaskId || ox == null) return false;
+            if (!t.WindingDown)
+            {
+                StepKind k = t.Def.Steps[t.CurrentStep].Kind;
+                if (k != StepKind.FetchOx && k != StepKind.LeadTo && k != StepKind.LoadOx) return false;
+                if (world.Tick < world.WorkDay.WindowOf(world, WorkDay.DayStart(world)).End) return false; // not yet today's end
+                world.Tasks.SetWindingDown(t.Id);
+                _orders.Remove(t.Id);
+                c.Move = null;
+            }
+            if (ox.Follow == null || !ReferenceEquals(ox.Follow.Leader, c))
+            {
+                Fail(world, t, c); // ox not collected yet: let it go, nothing to drop
+                return true;
+            }
+            LedgerLocation carrier = world.OxCarrier(ox);
+            int carried = carrier.CountOf(Items.Log.Id);
+            if (carried > 0)
+            {
+                c.Activity = Activity.Working;
+                _drop.TryGetValue(t.Id, out int done);
+                _drop[t.Id] = ++done;
+                if (done < Math.Max(1, world.Tuning.OxUnloadMinutes)) return true;
+                LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(ox.X, ox.Z), t.OwnerOperationId);
+                world.Inventory.Transfer(carrier, pile, Items.Log, carried);
+            }
+            StepOxWalk(world, t, c, ox, TaskStep.ReturnOx());
+            return true;
+        }
+
+        private void EndWindDown(SimWorld world, TaskRecord t, Citizen c)
+        {
+            _drop.Remove(t.Id);
+            _rest.Remove(t.Id);
+            _oxTrack.Remove(t.Id);
+            _orders.Remove(t.Id);
+            world.Inventory.CancelOwner(t.Id); // reservations on the old pile and in storage
+            world.Tasks.Cancel(t.Id);
+            c.Move = null;
+            c.Activity = Activity.MillingAbout;
+        }
 
         // False when the task must cancel: ox removed, or its operation assignment changed.
         private bool CheckOx(SimWorld world, TaskRecord t, Citizen c, out Ox ox)
@@ -84,7 +135,8 @@ namespace LordsLegacy.Sim.Tasks
                 ox.Z = r.Spot.ZMetres;
                 ox.State = OxState.Resting(r.Spot.X, r.Spot.Z, r.StandId);
             }
-            Advance(world, t, c);
+            if (t.WindingDown) EndWindDown(world, t, c);
+            else Advance(world, t, c);
         }
 
         private static bool TransferLogs(SimWorld world, TaskRecord t, Ox ox, TaskStep step)

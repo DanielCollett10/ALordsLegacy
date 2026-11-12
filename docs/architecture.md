@@ -158,6 +158,15 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     has an ox, to the idle eligible worker nearest the ox (a worker mid-tree is busy); a haul with no ox waits, so felling
     comes first. `OperationStatus.Reported` gives `WaitingForOx` while a haul waits for an ox; `Of` (which gates felling)
     is unchanged. `HaulSystem` also releases ledger reservations and Reserved oxen of haul tasks cancelled elsewhere.
+  - **Early fetch and sunset (T-291, WC-23/35):** `HaulSystem.Early.cs` opens a haul for an Active Fell task whose tree
+    yields a full load once `FellMinutesLeft` ≤ the nearest idle worker's walk to the ox + the ox's led walk to the tree
+    (ox speed). That haul (`TaskRecord.AwaitsTaskId` = the fell task) reserves ox and storage room at once, waits at the
+    pile before LoadOx, and reserves the pile's stock when the fell task is Done (cancelled fell → cancelled haul). At
+    the end of work (`WorkDay` window end) a haul still in FetchOx/LeadTo/LoadOx is wound down by the step runner
+    (`TaskRecord.WindingDown`; `RoutineSystem` leaves the worker alone meanwhile): the carried logs are unloaded where the
+    ox stands after `OxUnloadMinutes` into a new operation-owned ground pile, the ox is led to its rest spot, all the
+    task's reservations are released and the task is Cancelled; the worker then walks home. `DispatchSystem` hands out no
+    ox task between the end of work and midnight. Next morning `OpenTasks` opens a normal haul for the dropped pile.
   - **Processes (T-272, TMB-01/02, TSK-14, MVP-1-12):** `Assets/Sim/Processes/` (`LordsLegacy.Sim.Processes`) holds
     `ProcessDef` (id, ordered `StageDef`s), `StageDef` (id, minutes, per-item, heavy, enabled, animation key) and
     `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` returns the enabled

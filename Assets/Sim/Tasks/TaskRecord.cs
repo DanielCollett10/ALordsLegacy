@@ -30,6 +30,12 @@ namespace LordsLegacy.Sim.Tasks
         public int? OxId { get; internal set; }
         /// <summary>True if the ox was assigned to the owner operation when the task took it.</summary>
         public bool OxWasAssigned { get; internal set; }
+        /// <summary>For an early-fetch haul (T-291, WC-23): the Fell task whose logs it will carry. The haul waits at
+        /// the pile (before LoadOx) until that task is Done; null otherwise.</summary>
+        public int? AwaitsTaskId { get; internal set; }
+        /// <summary>True while a haul is ending its day at sunset (T-291, WC-35): the step runner owns the worker until the
+        /// ox is back at its rest spot, so the routine does not send them home yet.</summary>
+        public bool WindingDown { get; internal set; }
         /// <summary>True while the task needs an ox, has none reserved and is still Open (TSK-09, WCO-06).</summary>
         public bool IsWaitingForOx => State == TaskState.Open && Def.Required == RequiredResource.Ox && !OxId.HasValue;
         /// <summary>Trees this task holds reserved. Released on cancel or completion.</summary>

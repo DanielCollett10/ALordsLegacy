@@ -21,7 +21,7 @@ namespace LordsLegacy.Sim.Operations
     /// it out, so felling comes first. Steps: FetchOx, LeadTo pile, LoadOx, LeadTo storage, UnloadOx, ReturnOx.
     /// Also releases the reservations and ox of haul tasks that were cancelled from outside the step runner.
     /// </summary>
-    public sealed class HaulSystem : ISimSystem
+    public sealed partial class HaulSystem : ISimSystem
     {
         /// <summary>Id of the Haul task definition.</summary>
         public const string HaulTaskId = "task.haul_logs";
@@ -38,6 +38,8 @@ namespace LordsLegacy.Sim.Operations
             {
                 if (op.TypeId != OperationTypes.WoodcuttingId) continue;
                 if (!CanHaul(world, op)) continue;
+                ResolveAwaiting(world, op);
+                OpenEarly(world, op);
                 OpenTasks(world, op);
                 AttachOxen(world, op);
             }
@@ -112,8 +114,14 @@ namespace LordsLegacy.Sim.Operations
             return region != null && world.Trees.AnyStandingIn(region);
         }
 
-        private static bool TryCreate(SimWorld world, Operation op, LedgerLocation pile, int n)
+        // awaiting: id of the Fell task still producing this pile's logs (early fetch); stock is reserved once it is Done.
+        private static bool TryCreate(SimWorld world, Operation op, LedgerLocation pile, int n) =>
+            TryCreate(world, op, pile, n, null, out _);
+
+        private static bool TryCreate(SimWorld world, Operation op, LedgerLocation pile, int n, int? awaiting,
+            out TaskRecord created)
         {
+            created = null;
             Footprint store = ChooseStorage(world, op, pile, n, out int count);
             if (store == null) return false;
             LedgerLocation dest = world.Inventory.GetOrAddStorage(store.Id, store.Type);
@@ -129,13 +137,15 @@ namespace LordsLegacy.Sim.Operations
             }, EligibilityPolicy.AssignedFamilyOnly, RequiredResource.Ox);
 
             TaskRecord task = world.Tasks.Create(def, op.Id, null, HaulPriority);
-            if (world.Inventory.ReserveStock(pile, Items.Log, count, task.Id) == 0 ||
+            if ((!awaiting.HasValue && world.Inventory.ReserveStock(pile, Items.Log, count, task.Id) == 0) ||
                 world.Inventory.ReserveCapacity(dest, Items.Log, count, task.Id) == 0)
             {
                 world.Inventory.CancelOwner(task.Id);
                 world.Tasks.Cancel(task.Id);
                 return false;
             }
+            if (awaiting.HasValue) world.Tasks.SetAwaiting(task.Id, awaiting);
+            created = task;
             return true;
         }
 

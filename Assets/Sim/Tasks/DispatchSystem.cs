@@ -96,6 +96,8 @@ namespace LordsLegacy.Sim.Tasks
         // Ox tasks (WC-21/22): only once an ox is reserved; the free eligible worker nearest the ox takes it (ties: lowest id).
         private static void AssignOxTasks(SimWorld world, List<Citizen> citizens, bool helpers)
         {
+            // After the end of work no haul starts: it would only be dropped again at once (T-291, WC-35).
+            if (world.Tick >= world.WorkDay.WindowOf(world, WorkDay.DayStart(world)).End) return;
             foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
             {
                 if (t.Def.Required != RequiredResource.Ox || !t.OxId.HasValue) continue;
