@@ -19,24 +19,26 @@ namespace LordsLegacy.Game
     /// Operation panel (woodcutting.md "Operation panel", WCO-10). Opens when <see cref="AgentPicker"/> selects an
     /// operation (its hut or other module, its building area or its work area). Shows modules, the status cause, two
     /// family slots with Assign / Remove, each worker's current task, logs on the ground and standing trees left in the
-    /// work area, Pause / Resume, Draw work area and Use default. The Oxen tab and stock rows are shown disabled
-    /// ("Coming in M9"). Every action goes through <see cref="SimHost.Execute"/>; a refusal shows its text. Reads the Sim
+    /// work area, Pause / Resume, Draw work area and Use default. The Oxen tab lists assigned and free oxen
+    /// with their state (Remove / Assign) and the stock line shows total / reserved / available of capacity (T-294). Every action goes through <see cref="SimHost.Execute"/>; a refusal shows its text. Reads the Sim
     /// and holds no rules. Built in code; never takes keyboard focus (UiFocusRules).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class OperationPanelView : MonoBehaviour
     {
-        /// <summary>Label on the disabled Oxen tab and stock rows.</summary>
-        public const string ComingInM9 = "Coming in M9";
-
         [SerializeField] private SimHost _host;
         [SerializeField] private AgentPicker _agents;
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel, _familyBox, _pickerBox;
-        private Label _title, _status, _modules, _workers, _logs, _trees, _workArea, _message;
-        private Button _pause, _close;
-        private string _signature = "";
+        private VisualElement _oxenBox;
+        private Label _title, _status, _modules, _workers, _logs, _trees, _workArea, _message, _stock;
+        private Button _pause, _close, _oxenTab;
+        private string _signature = "", _oxenSignature = "";
+        private bool _oxenOpen;
+
+        /// <summary>Stock line, e.g. "Log stock: 28 / 4 / 24 of 40 (...)".</summary>
+        public string StockLineText => _stock?.text ?? "";
         private bool _pickerOpen;
         private bool _subscribed;
 
@@ -172,11 +174,13 @@ namespace LordsLegacy.Game
             var def = OperationTypes.Find(op.TypeId);
 
             _title.text = "Woodcutter " + op.Id;
-            _status.text = "Status: " + StateText(OperationStatus.Of(world, op));
+            _status.text = "Status: " + StateText(OperationStatus.Reported(world, op));
             _modules.text = ModuleText(world, op);
             RebuildFamilies(world, op, def);
             _workers.text = WorkerText(world, op);
-            _logs.text = "Logs on the ground: " + GroundLogs(world, op);
+            _logs.text = "Logs waiting at tree sites: " + GroundLogs(world, op);
+            _stock.text = StockText(world, op);
+            RebuildOxen(world, op);
             var region = OperationStatus.WorkRegion(world, op);
             _trees.text = "Standing trees in work area: " + (region == null ? 0 : world.Trees.CountStandingIn(region));
             _workArea.text = op.WorkAreaId.HasValue ? "Work area: drawn (area " + op.WorkAreaId.Value + ")"
@@ -191,6 +195,91 @@ namespace LordsLegacy.Game
             _pickerOpen = false;
         }
 
+        // Oxen tab: assigned oxen (state + Remove) and free pool oxen (state + Assign). Rebuilt when the rows or states change.
+        private void RebuildOxen(Sim.Core.SimWorld world, Operation op)
+        {
+            _oxenTab.text = _oxenOpen ? "Oxen (hide)" : "Oxen (" + op.OxIds.Count + ")";
+            _oxenBox.style.display = _oxenOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            var sb = new StringBuilder();
+            sb.Append(op.Id).Append('|').Append(_oxenOpen);
+            if (_oxenOpen)
+            {
+                foreach (var ox in world.People.Oxen)
+                {
+                    var owner = world.Operations.FindOxOwner(ox.Id);
+                    if (owner == null || owner.Id == op.Id)
+                        sb.Append(',').Append(ox.Id).Append(owner == null ? 'f' : 'a').Append(OxText.State(world, ox));
+                }
+            }
+            string sig = sb.ToString();
+            if (sig == _oxenSignature) return;
+            _oxenSignature = sig;
+            _oxenBox.Clear();
+            if (!_oxenOpen) return;
+            _oxenBox.Add(MakeLabel("oxen-assigned-heading", 12, "Assigned oxen"));
+            int assigned = 0, free = 0;
+            foreach (var ox in world.People.Oxen)
+            {
+                if (world.Operations.FindOxOwner(ox.Id)?.Id != op.Id) continue;
+                assigned++;
+                int oxId = ox.Id;
+                var row = new VisualElement { name = "oxen-assigned-" + oxId };
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.Add(MakeLabel("oxen-assigned-label-" + oxId, 12, ox.Name + ": " + OxText.State(world, ox)));
+                var remove = new Button { name = "remove-ox-" + oxId, text = "Remove" };
+                remove.clicked += () => ClickRemoveOx(oxId);
+                row.Add(remove);
+                _oxenBox.Add(row);
+            }
+            if (assigned == 0) _oxenBox.Add(MakeLabel("oxen-assigned-none", 12, "None assigned"));
+            _oxenBox.Add(MakeLabel("oxen-pool-heading", 12, "Free oxen in the pool"));
+            foreach (var ox in world.People.Oxen)
+            {
+                if (world.Operations.FindOxOwner(ox.Id) != null) continue;
+                free++;
+                int oxId = ox.Id;
+                var row = new VisualElement { name = "oxen-free-" + oxId };
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.Add(MakeLabel("oxen-free-label-" + oxId, 12, ox.Name + ": " + OxText.State(world, ox)));
+                var assign = new Button { name = "assign-ox-" + oxId, text = "Assign" };
+                assign.clicked += () => ClickAssignOx(oxId);
+                row.Add(assign);
+                _oxenBox.Add(row);
+            }
+            if (free == 0) _oxenBox.Add(MakeLabel("oxen-free-none", 12, "No free oxen"));
+            UiFocusRules.Apply(_oxenBox);
+        }
+
+        /// <summary>The Oxen tab button: shows or hides the oxen lists.</summary>
+        public void ClickOxenTab()
+        {
+            _oxenOpen = !_oxenOpen;
+            Refresh();
+        }
+
+        /// <summary>A free ox's Assign button: sends AssignOx.</summary>
+        public void ClickAssignOx(int oxId)
+        {
+            int? op = OperationId();
+            if (op.HasValue) Run(new AssignOx(op.Value, oxId));
+        }
+
+        /// <summary>An assigned ox's Remove button: sends UnassignOx.</summary>
+        public void ClickRemoveOx(int oxId)
+        {
+            int? op = OperationId();
+            if (op.HasValue) Run(new UnassignOx(op.Value, oxId));
+        }
+
+        private static string StockText(Sim.Core.SimWorld world, Operation op)
+        {
+            var pool = world.OperationPool(op.Id, Items.Log);
+            return "Log stock: " + pool.Total + " / " + pool.Reserved + " / " + pool.Available + " of " + pool.Capacity
+                + " (total / reserved / available of capacity)";
+        }
+
         private static string StateText(OperationState s)
         {
             switch (s)
@@ -202,6 +291,7 @@ namespace LordsLegacy.Game
                 case OperationState.NoWorkers: return "No workers";
                 case OperationState.NoTrees: return "No trees";
                 case OperationState.StorageFull: return "Storage full";
+                case OperationState.WaitingForOx: return "Waiting for ox";
                 default: return s.ToString();
             }
         }
@@ -399,7 +489,7 @@ namespace LordsLegacy.Game
         private void OnSelectionChanged()
         {
             _pickerOpen = false;
-            _signature = "";
+            _signature = ""; _oxenSignature = "";
             SetMessage("");
             Refresh();
         }
@@ -409,7 +499,7 @@ namespace LordsLegacy.Game
             var root = GetComponent<UIDocument>().rootVisualElement;
             if (root == null) return;
             root.Clear();
-            _signature = "";
+            _signature = ""; _oxenSignature = "";
             var holder = new VisualElement { name = "operation-panel-root", pickingMode = PickingMode.Ignore };
             holder.style.position = Position.Absolute;
             holder.style.right = 12; holder.style.bottom = 90;
@@ -452,15 +542,13 @@ namespace LordsLegacy.Game
             _pause = new Button { name = "pause-resume", text = "Pause" };
             _pause.clicked += ClickPauseResume;
 
-            var oxen = new Button { name = "oxen-tab", text = "Oxen · " + ComingInM9 };
-            oxen.SetEnabled(false);
+            _oxenTab = new Button { name = "oxen-tab", text = "Oxen" };
+            _oxenTab.clicked += ClickOxenTab;
+            _oxenBox = new VisualElement { name = "oxen-box" };
+            _oxenBox.style.display = DisplayStyle.None;
+            _stock = MakeLabel("stock-line", 12, "");
             var stock = new VisualElement { name = "stock-rows" };
-            foreach (string[] row in new[] { new[] { "stock-row-pool", "Log pool (total / reserved / available)" }, new[] { "stock-row-camp", "Camp stockpile" } })
-            {
-                var l = MakeLabel(row[0], 12, row[1] + " · " + ComingInM9);
-                l.SetEnabled(false);
-                stock.Add(l);
-            }
+            stock.Add(_stock);
 
             _message = MakeLabel("operation-message", 12, "");
             _message.style.color = new Color(1f, 0.55f, 0.45f);
@@ -471,7 +559,7 @@ namespace LordsLegacy.Game
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(MakeLabel("operation-workers-heading", 12, "Workers"));
             _panel.Add(_workers); _panel.Add(_logs); _panel.Add(_trees); _panel.Add(_workArea);
-            _panel.Add(areaRow); _panel.Add(_pause); _panel.Add(oxen); _panel.Add(stock);
+            _panel.Add(areaRow); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
             _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);
