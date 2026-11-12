@@ -27,11 +27,19 @@ namespace LordsLegacy.Tests.PlayMode
         private RoadTool _tool;
         private ToolController _controller;
         private Camera _cam;
+        private RenderTexture _viewport;
         private float _time;
+
+        /// <summary>Fixed test viewport (pixels). The Game view size varies (Test Runner, player window), so the test
+        /// camera renders into this texture; pixel tolerances (RoadSnapDistancePx etc.) then mean the same everywhere.</summary>
+        private const int ViewportWidth = 748;
+        private const int ViewportHeight = 421;
 
         [TearDown]
         public void TearDown()
         {
+            if (_cam != null) _cam.targetTexture = null;
+            if (_viewport != null) { _viewport.Release(); Object.Destroy(_viewport); _viewport = null; }
             foreach (var go in new[] { _hostGo, _rendererGo, _panelGo, _toolGo, _camGo, _groundGo })
                 if (go != null) Object.Destroy(go);
             if (_panelSettings != null) Object.Destroy(_panelSettings);
@@ -47,7 +55,9 @@ namespace LordsLegacy.Tests.PlayMode
             _camGo = new GameObject("TestCam");
             _cam = _camGo.AddComponent<Camera>();
             _cam.orthographic = true;
-            _cam.orthographicSize = 60f;
+            _cam.orthographicSize = 60f; // 120 m tall view: 60 m from the road is ~210 px at ViewportHeight
+            _viewport = new RenderTexture(ViewportWidth, ViewportHeight, 16);
+            _cam.targetTexture = _viewport; // fixed pixel size, independent of the Game view
             _camGo.transform.position = new Vector3(100f, 50f, 100f);
             _camGo.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 
@@ -329,6 +339,9 @@ namespace LordsLegacy.Tests.PlayMode
             DrawExisting(40, 100, 120, 100);
             _tool.PointerMove(Screen(80, 100));
             Assert.AreEqual(2, _renderer.NodeHandleCount);
+            // The far cursor point must sit well outside the road snap tolerance at this fixed viewport.
+            float px = (Screen(80, 160) - Screen(80, 100)).magnitude;
+            Assert.Greater(px, 3f * new ViewSettings().RoadSnapDistancePx, "Far point must be clearly outside the pixel tolerance.");
             _tool.PointerMove(Screen(80, 160));
             Assert.AreEqual(0, _renderer.NodeHandleCount, "No handles away from a road.");
         }
