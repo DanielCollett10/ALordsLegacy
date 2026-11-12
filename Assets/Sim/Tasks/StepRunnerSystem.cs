@@ -46,6 +46,7 @@ namespace LordsLegacy.Sim.Tasks
             if (t.OxId.HasValue && !CheckOx(world, t, c, out ox)) { Fail(world, t, c); return; }
             if (!world.WorkDay.OnShift(world, c))
             {
+                if (TryWindDown(world, t, c, ox)) return; // haul under way at sunset (WC-35)
                 // Night, or not yet time to leave (PPL-24): keep progress and reservations; the routine walks the worker home.
                 _orders.Remove(t.Id);
                 if (t.Def.Steps[t.CurrentStep].Kind == StepKind.Work) _returning.Add(t.Id);
@@ -61,6 +62,14 @@ namespace LordsLegacy.Sim.Tasks
             }
 
             TaskStep step = t.Def.Steps[t.CurrentStep];
+            if (t.AwaitsTaskId.HasValue && step.Kind == StepKind.LoadOx)
+            {
+                // Early-fetch haul at the pile: wait for the tree to come down (WC-23).
+                TaskRecord fell = world.Tasks.Get(t.AwaitsTaskId.Value);
+                if (fell == null || fell.State == TaskState.Cancelled) Fail(world, t, c);
+                else c.Activity = Activity.MillingAbout; // Done: HaulSystem reserves the stock this tick or next
+                return;
+            }
             switch (step.Kind)
             {
                 case StepKind.MoveTo: StepMove(world, t, c, true); break;
@@ -129,6 +138,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             _orders.Remove(t.Id);
             _returning.Remove(t.Id);
+            _drop.Remove(t.Id);
             ReleaseOx(world, t, c);
             world.Tasks.Cancel(t.Id);
             if (c != null)

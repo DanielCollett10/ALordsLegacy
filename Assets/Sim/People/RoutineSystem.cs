@@ -59,6 +59,13 @@ namespace LordsLegacy.Sim.People
         {
         }
 
+        // A haul ending its day at sunset keeps its worker until the ox is back (T-291, WC-35).
+        private static bool IsWindingDown(SimWorld world, Citizen c)
+        {
+            foreach (var t in world.Tasks.ByAssignee(c.Id)) if (t.WindingDown) return true;
+            return false;
+        }
+
         private bool IsDay(GameTime t)
         {
             SunTimes sun = _daylight.For(t.DayOfYear);
@@ -73,7 +80,7 @@ namespace LordsLegacy.Sim.People
             // A citizen holding a task belongs to the step runner; the routine starts afresh afterwards.
             if (world.Tasks.IsBusy(c.Id))
             {
-                if (world.WorkDay.OnShift(world, c)) { _states.Remove(c.Id); return; }
+                if (world.WorkDay.OnShift(world, c) || IsWindingDown(world, c)) { _states.Remove(c.Id); return; }
                 StepPausedWorker(world, c); // PPL-24: night, or not yet time to leave
                 return;
             }
