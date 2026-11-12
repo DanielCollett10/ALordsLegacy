@@ -5,6 +5,7 @@ using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.People;
+using LordsLegacy.Sim.Tasks;
 
 namespace LordsLegacy.Sim.Operations
 {
@@ -68,18 +69,54 @@ namespace LordsLegacy.Sim.Operations
             return false;
         }
 
-        /// <summary>Logs in ground piles produced by this operation plus logs in its storage modules (WC-25).</summary>
+        /// <summary>
+        /// The logs this operation is responsible for (WC-25, WC-37): logs in its ground piles, in its storage modules
+        /// and on the carriers of its oxen, plus room promised to logs that are not yet anywhere physical. Room reserved
+        /// for a haul whose logs are already in a pile or on a carrier is not counted again: the reserved incoming room
+        /// is counted only where it exceeds the logs held in those places (<c>incoming − reserved pile stock − carried</c>).
+        /// This is the one place the log sum lives; felling and <see cref="IsStorageFull"/> use it.
+        /// </summary>
         public static int LogLoad(SimWorld world, Operation op)
         {
             var storageIds = new HashSet<int>();
             foreach (var f in StorageModules(world, op)) storageIds.Add(f.Id);
-            int load = 0;
+            int piles = 0, pileReserved = 0, stored = 0, incoming = 0;
             foreach (var l in world.Inventory.Locations)
             {
-                if (l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id) load += l.CountOf(Items.Log.Id);
-                else if (l.Kind == LocationKind.Storage && storageIds.Contains(l.ModuleId)) load += l.CountOf(Items.Log.Id);
+                if (l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id)
+                {
+                    piles += l.CountOf(Items.Log.Id);
+                    pileReserved += l.ReservedOf(Items.Log.Id);
+                }
+                else if (l.Kind == LocationKind.Storage && storageIds.Contains(l.ModuleId))
+                {
+                    stored += l.CountOf(Items.Log.Id);
+                    incoming += l.IncomingOf(Items.Log.Id);
+                }
             }
-            return load;
+            int carried = 0;
+            foreach (var c in CarrierLocations(world, op)) carried += c.CountOf(Items.Log.Id);
+            int unbacked = System.Math.Max(0, incoming - pileReserved - carried);
+            return piles + stored + carried + unbacked;
+        }
+
+        /// <summary>
+        /// The carrier locations of the oxen this operation uses: its assigned oxen and any ox held by one of its
+        /// unfinished or recent tasks. Oxen without a carrier yet are skipped.
+        /// </summary>
+        internal static List<LedgerLocation> CarrierLocations(SimWorld world, Operation op)
+        {
+            var oxIds = new HashSet<int>(op.OxIds);
+            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
+                if (t.OxId.HasValue) oxIds.Add(t.OxId.Value);
+            var list = new List<LedgerLocation>();
+            foreach (int oxId in oxIds)
+            {
+                Ox ox = world.People.FindOx(oxId);
+                LedgerLocation c = ox != null && ox.CarrierId != 0 ? world.Inventory.Get(ox.CarrierId) : null;
+                if (c != null) list.Add(c);
+            }
+            return list;
         }
 
         /// <summary>Total log capacity of the operation's storage modules.</summary>

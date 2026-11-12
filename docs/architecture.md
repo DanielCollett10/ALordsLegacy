@@ -123,6 +123,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     MissingStorage, NoWorkers (no member aged 14+), NoTrees (`TreeRegistry.AnyStandingIn` on the work polygon or the
     default circle round the hut), StorageFull. `OperationStatus.LogLoad` is the single place the storage-full sum
     lives (own ground piles plus own storages, against total storage capacity).
+    **T-292 (WC-25, WC-37, MVP-1-08/10/11):** `LogLoad` now also counts logs on the operation's ox carriers (assigned oxen
+    and oxen of its tasks) and reserved incoming room, but only the part not already backed by logs in piles or on carriers
+    (`incoming − reserved pile stock − carried`, floored at 0), so a haul is never counted twice. Felling stops at capacity and
+    restarts when logs leave storage or a second storage raises capacity (to 40). A wind-down that drops logs releases the
+    haul's room at once.
   - **Module placement (T-269, WC-03/04/07/08):** `ModulePlacement.Preview(world, operationId, moduleTypeId, centre,
     rotationDeg)` (`Assets/Sim/Operations/`, pure) returns a `ModulePlacementResult` (`Ok`, `Refusal`: UnknownOperation,
     OutsideArea, OverlapsModule, NotAllowedType, TooMany, plus `Text`). Fully inside = footprint area missing from the
