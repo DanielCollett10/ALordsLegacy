@@ -191,6 +191,37 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM8WoodcuttingWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var host = Object.FindFirstObjectByType<SimHost>();
+            Assert.IsNotNull(host, "SimHost missing.");
+
+            var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
+            Assert.IsNotNull(moduleTool, "ModuleTool missing.");
+            AssertNoNullRefs(moduleTool);
+            var modules = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();
+            Assert.IsNotNull(modules, "ModuleRenderer missing.");
+            AssertNoNullRefs(modules);
+            var piles = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.LogPileRenderer>();
+            Assert.IsNotNull(piles, "LogPileRenderer missing.");
+            AssertNoNullRefs(piles);
+
+            var opPanel = Object.FindFirstObjectByType<OperationPanelView>();
+            Assert.IsNotNull(opPanel, "OperationPanelView missing.");
+            AssertNoNullRefs(opPanel);
+            Assert.IsNotNull(opPanel.GetComponent<UnityEngine.UIElements.UIDocument>(), "OperationPanel has no UIDocument.");
+
+            // The work area overlay is added to the panel object by OperationPanelView when it starts (T-282).
+            yield return null;
+            Assert.IsNotNull(opPanel.GetComponent<LordsLegacy.Game.Visuals.WorkAreaRenderer>(), "Work area overlay missing.");
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneInitialisesSimFromBakedMap()
         {
             var load = SceneManager.LoadSceneAsync("Game");

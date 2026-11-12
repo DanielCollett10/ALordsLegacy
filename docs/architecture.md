@@ -499,6 +499,13 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   `PeopleRenderer` and `CampRenderer` (`CreatePeopleRenderers`, -> SimHost, `VisualRegistry.asset`); `CreateAgentSelection` adds
   `AgentPicker` (-> SimHost, picker, ToolController), `SelectionRing`, UIDocument `CitizenPanel` (`CitizenPanelView`, no UXML),
   `DebugPathOverlay` and `DebugSendController`.
+- M8 pieces (T-284, wired by `GameSceneGenerator`): `CreateAreaTools` adds `ModuleTool` (-> SimHost, picker, ToolPanel, TopBar,
+  ToolController) next to the four `AreaTool`s (test, test-work, woodcutter, woodcutter-work); `CreatePeopleRenderers` adds
+  `ModuleRenderer` and `LogPileRenderer` (-> SimHost, `VisualRegistry.asset`); `CreateAgentSelection` adds UIDocument
+  `OperationPanel` (`OperationPanelView`, built in code, -> SimHost, AgentPicker, ToolController). The work area overlay
+  (`WorkAreaRenderer`) is added to that object by `OperationPanelView.OnEnable`, so it is not a scene object of its own.
+  Sim side: Operations, Tasks, Inventory and Processes are described under Simulation core; Unity side under Unity layer.
+  `GameSceneTests.GameSceneHasM8WoodcuttingWired` checks these pieces and their references.
 - `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
   menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
   and `SceneYamlNormalizer` gives its objects stable fileIDs, so two runs give the same file. Serialized references are wired in code.
