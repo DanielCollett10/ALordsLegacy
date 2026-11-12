@@ -62,8 +62,19 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>Unassigns a family. False if unknown op or not assigned.</summary>
         public bool UnassignFamily(int operationId, int familyId) => Drop(operationId, o => o.FamilyIdList, familyId);
 
-        /// <summary>Assigns an ox. False if unknown op or already assigned.</summary>
-        public bool AssignOx(int operationId, int oxId) => Add(operationId, o => o.OxIdList, oxId);
+        /// <summary>Assigns an ox (WC-30). False if unknown op, or the ox is already assigned to any operation.</summary>
+        public bool AssignOx(int operationId, int oxId)
+        {
+            if (FindOxOwner(oxId) != null) return false;
+            return Add(operationId, o => o.OxIdList, oxId);
+        }
+
+        /// <summary>The operation this ox is assigned to, or null if it is in the shared pool.</summary>
+        public Operation FindOxOwner(int oxId)
+        {
+            foreach (var o in _byId.Values) if (o.OxIdList.Contains(oxId)) return o;
+            return null;
+        }
 
         /// <summary>Unassigns an ox. False if unknown op or not assigned.</summary>
         public bool UnassignOx(int operationId, int oxId) => Drop(operationId, o => o.OxIdList, oxId);

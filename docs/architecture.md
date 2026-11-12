@@ -299,6 +299,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   after "overlaps road": a corridor overlapping a building area by more than `OverlapToleranceM2` is refused with
   `RoadRefusal.CrossesArea` ("crosses <name>", `RoadPreview.CrossedAreaName`; `DrawRoad` rejects as `Conflict`).
   Work areas are not in the building index so never block roads. With no areas the road checks are unchanged.
+- Ox pool (T-288): `Ox.State` (`OxState`: Free, Reserved(task), Led(citizen), Resting(spot, stand id)).
+  `OperationRegistry.AssignOx` refuses an ox assigned to any operation (`FindOxOwner`). `OxPool(world)` has
+  `FindFor(opId, from)` (assigned first, then nearest free pool ox), stand `Occupancy`/`HasRoom` (module stand holds
+  `OxCapacity` = 1; camp stand unlimited) and `RestSpot`/`Rest` (WC-31/32).
 - Not built yet: oxen hauling and ledger reserve/transfer (M9), construction and odd jobs (M10), food, markets,
   economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps); only `task.fell_tree` is defined so far.
 
