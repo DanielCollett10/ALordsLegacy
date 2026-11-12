@@ -25,8 +25,8 @@ namespace LordsLegacy.Tests.PlayMode
         [TearDown]
         public void TearDown()
         {
-            if (_rendererGo != null) Object.Destroy(_rendererGo);
-            if (_hostGo != null) Object.Destroy(_hostGo);
+            if (_rendererGo != null) Object.DestroyImmediate(_rendererGo);
+            if (_hostGo != null) Object.DestroyImmediate(_hostGo);
         }
 
         private void Setup(MapData map)

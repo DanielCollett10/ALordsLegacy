@@ -335,6 +335,7 @@ namespace LordsLegacy.Tests.PlayMode
                 yield return null;
                 var work = _uiGo.GetComponent<WorkAreaRenderer>();
                 Assert.IsNotNull(work, "The panel adds the work area renderer.");
+                work.UseAreaRenderer(areas);
                 Assert.IsFalse(work.IsCircleShown, "Hidden before the panel opens.");
 
                 yield return OpenPanel();
@@ -375,6 +376,8 @@ namespace LordsLegacy.Tests.PlayMode
                     AreaShape.Straight(new[] { M(20, 20), M(40, 20), M(40, 40), M(20, 40) }), AreaTypes.WoodcuttingWorkId));
                 Assert.IsTrue(other.IsAccepted, other.Text);
                 int otherId = (int)other.Created[0];
+                // Hand this test's renderer to the work area renderer so it does not pick up a stale one from the scene.
+                _uiGo.GetComponent<WorkAreaRenderer>().UseAreaRenderer(areas);
                 areas.Sync();
                 yield return null;
 
