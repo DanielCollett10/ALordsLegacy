@@ -57,6 +57,9 @@ namespace LordsLegacy.Sim.Tasks
                 if (done < Math.Max(1, world.Tuning.OxUnloadMinutes)) return true;
                 LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(ox.X, ox.Z), t.OwnerOperationId);
                 world.Inventory.Transfer(carrier, pile, Items.Log, carried);
+                // The logs are on the ground now, so the storage room this haul reserved for them is no longer needed.
+                // Releasing it here keeps LogLoad from counting these logs twice while the ox walks back (WC-25).
+                world.Inventory.CancelOwner(t.Id);
             }
             StepOxWalk(world, t, c, ox, TaskStep.ReturnOx());
             return true;
