@@ -52,12 +52,17 @@ namespace LordsLegacy.Sim.Operations
             TreeRegion region = OperationStatus.WorkRegion(world, op);
             if (hut == null || region == null) return;
 
+            // A fell task that an early haul awaits already has its logs counted as reserved room in LogLoad.
+            var awaited = new HashSet<int>();
+            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
+                if (t.AwaitsTaskId.HasValue) awaited.Add(t.AwaitsTaskId.Value);
+
             int open = 0, pendingLogs = 0;
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
             {
                 if (t.IsFinished || t.Def.Id != FellTaskId) continue;
                 if (t.State == TaskState.Open) open++;
-                pendingLogs += YieldOf(world, t);
+                if (!awaited.Contains(t.Id)) pendingLogs += YieldOf(world, t);
             }
 
             int wanted = CountIdleWorkers(world, op) - open;
