@@ -9,6 +9,9 @@ wireframes come later. UI Toolkit only. The UI reads Sim state and sends command
 | --- | --- | --- |
 | UIB-01 | A row of buttons centred along the bottom edge, one per placeable thing, built from a list of **tool entries** (id, label, enabled) rather than hard-coded in the UXML (UI-01) | DECIDED |
 | UIB-02 | M3 entries: **Road** (enabled), **Test area** (enabled from M4), **Test work area** (enabled from M4). Future entries (Woodcutting, Storage yard, House, Granary) show greyed with a dashed border and the tooltip "Coming later" | DECIDED |
+
+> Implementation note (UIB-02, M8): **Woodcutter** is enabled (`ToolEntry.Defaults`, tooltip "Draw the woodcutter's area, then
+> place its modules"). Storage yard, House and Granary are still greyed "Coming later".
 | UIB-03 | Clicking a button activates its tool and highlights the button. Clicking the active button again, or Escape with nothing in progress, deactivates it. Only one tool is active at a time | DECIDED |
 | UIB-04 | Switching tools discards any unconfirmed draft | DECIDED |
 | UIB-06 | **Escape** goes to the active tool first. If the tool has a draft, it cancels the draft and Escape stops there. Only when the tool reports it is idle does the ToolController deactivate the tool | DECIDED |
