@@ -268,6 +268,33 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator RefusedSetWorkAreaOnConfirmShowsItsTextInThePanel()
+        {
+            _toolGo = new GameObject("WorkAreaTool");
+            var tool = _toolGo.AddComponent<AreaTool>();
+            tool.Configure("woodcutter-work", AreaTypes.WoodcuttingWorkId, _host, _ground, null, null, _controller);
+            tool.SetViewSettings(new ViewSettings { Snapping = false });
+            _controller.Register(tool);
+            yield return OpenPanel();
+
+            _view.ClickDrawWorkArea();
+            tool.WorkAreaFor = 999; // no such operation: the Sim refuses SetWorkArea
+            float t = 10f;
+            foreach (var p in new[] { ScreenOf(60, 120), ScreenOf(100, 120), ScreenOf(100, 160), ScreenOf(60, 160) })
+            {
+                tool.PointerDown(PressButton.Left, p);
+                tool.PointerUp(PressButton.Left, p, t);
+                t += 5f;
+            }
+            tool.Confirm();
+            Assert.IsTrue(tool.LastLinkResult.IsRejected);
+            yield return null;
+            Assert.AreEqual("no operation 999", _view.MessageText);
+            Assert.IsNull(tool.LastLinkResult, "shown once, then cleared");
+            Assert.IsFalse(_op.WorkAreaId.HasValue);
+        }
+
+        [UnityTest]
         public IEnumerator DrawWorkAreaStartsToolAndConfirmSendsSetWorkArea()
         {
             _toolGo = new GameObject("WorkAreaTool");

@@ -77,6 +77,14 @@ namespace LordsLegacy.Game.Tools
         /// <summary>Result of the last <see cref="SetWorkArea"/> sent on confirm, or null.</summary>
         public CommandResult LastLinkResult { get; private set; }
 
+        /// <summary>Returns the pending <see cref="LastLinkResult"/> and clears it, so a view shows each result once.</summary>
+        public CommandResult TakeLinkResult()
+        {
+            var r = LastLinkResult;
+            LastLinkResult = null;
+            return r;
+        }
+
         /// <inheritdoc />
         public string Id => _toolId;
 

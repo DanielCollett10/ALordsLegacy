@@ -331,12 +331,25 @@ namespace LordsLegacy.Game
             var doc = GetComponent<UIDocument>();
             if (_panel == null || _panel.panel == null || (doc.rootVisualElement != null && _panel.panel != doc.rootVisualElement.panel))
                 Build();
+            ShowWorkAreaRefusals();
             Refresh();
             var kb = Keyboard.current;
             if (kb != null && kb.escapeKey.wasPressedThisFrame && IsShown)
             {
                 var c = Controller();
                 if (c == null || c.ActiveTool == null) ClickClose();
+            }
+        }
+
+        // A SetWorkArea sent by the area tool on confirm can be refused; show its text like any panel action.
+        private void ShowWorkAreaRefusals()
+        {
+            if (!IsShown) return;
+            foreach (var tool in FindObjectsByType<AreaTool>(FindObjectsSortMode.None))
+            {
+                if (tool.LastLinkResult == null) continue;
+                var r = tool.TakeLinkResult();
+                if (r.IsRejected) SetMessage(string.IsNullOrEmpty(r.Text) ? r.Reason.ToString() : r.Text);
             }
         }
 
