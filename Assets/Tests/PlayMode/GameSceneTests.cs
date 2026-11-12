@@ -222,6 +222,36 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM9HaulingWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var host = Object.FindFirstObjectByType<SimHost>();
+            Assert.IsNotNull(host, "SimHost missing.");
+
+            // Oxen are drawn by PeopleRenderer; the logs they lead and the storage stacks by LogPileRenderer (T-293).
+            var people = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.PeopleRenderer>();
+            Assert.IsNotNull(people, "PeopleRenderer missing.");
+            AssertNoNullRefs(people);
+            var piles = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.LogPileRenderer>();
+            Assert.IsNotNull(piles, "LogPileRenderer missing.");
+            AssertNoNullRefs(piles);
+
+            // The Oxen tab lives in the operation panel (T-294).
+            var opPanel = Object.FindFirstObjectByType<OperationPanelView>();
+            Assert.IsNotNull(opPanel, "OperationPanelView missing.");
+            AssertNoNullRefs(opPanel);
+            Assert.IsNotNull(opPanel.GetComponent<UnityEngine.UIElements.UIDocument>(), "OperationPanel has no UIDocument.");
+
+            var agents = Object.FindFirstObjectByType<AgentPicker>();
+            Assert.IsNotNull(agents, "AgentPicker missing.");
+            AssertNoNullRefs(agents);
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneInitialisesSimFromBakedMap()
         {
             var load = SceneManager.LoadSceneAsync("Game");
