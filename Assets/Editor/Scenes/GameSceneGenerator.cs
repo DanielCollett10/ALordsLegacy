@@ -241,6 +241,7 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(moduleTool, "_host", host);
             SetRef(moduleTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
             SetRef(moduleTool, "_panel", panel);
+            SetRef(moduleTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             SetRef(moduleTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             return last;
         }

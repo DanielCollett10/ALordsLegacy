@@ -19,3 +19,4 @@
 .tool-panel__button { min-width: 90px; margin-left: 8px; color: rgb(240, 230, 210); background-color: rgb(70, 58, 44); }
 .tool-panel__button--confirm { background-color: rgb(190, 140, 50); color: rgb(20, 14, 8); }
 .tool-panel__button:disabled { opacity: 0.4; }
+.tool-panel__actions { flex-direction: row; margin-left: 8px; }

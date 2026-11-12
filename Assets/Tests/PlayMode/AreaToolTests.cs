@@ -1147,11 +1147,104 @@ namespace LordsLegacy.Tests.PlayMode
             StringAssert.Contains("log storage", _panel.Status);
 
             module.ClickAt(Screen(70, 60));
-            Assert.IsNull(_controller.ActiveTool, _panel.Status);
-            Assert.IsFalse(_panel.IsShown);
+            // T-279: the tool stays active after the queue so oxen stands, more storage and removal stay reachable; Esc ends it.
+            Assert.AreSame(module, _controller.ActiveTool, _panel.Status);
+            StringAssert.Contains("All modules placed", _panel.Status);
             drawn.Refresh();
             Assert.AreEqual(2, drawn.BoxCount);
+            Assert.IsTrue(_controller.HandleEscape());
+            Assert.IsNull(_controller.ActiveTool);
+            Assert.IsFalse(_panel.IsShown);
             Object.Destroy(drawn.gameObject);
+        }
+
+        private ModuleTool SetupModuleTool(out int opId)
+        {
+            var module = _toolGo.AddComponent<ModuleTool>();
+            module.Configure(_host, Object.FindFirstObjectByType<GroundPicker>(), _panel, _controller);
+            module.SetViewSettings(new ViewSettings());
+            _controller.Register(module);
+            Click(40, 40); Click(80, 40); Click(80, 80); Click(40, 80);
+            _panel.ClickConfirm();
+            opId = module.OperationId;
+            return module;
+        }
+
+        [UnityTest]
+        public IEnumerator ModuleToolPlacesHutInsideAreaAndRefusesOutsideWithReason()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            var module = SetupModuleTool(out int opId);
+            module.HoverAt(Screen(30, 60));
+            Assert.IsTrue(module.GhostVisible);
+            Assert.IsTrue(module.GhostIsRed, "outside the area the ghost is red");
+            StringAssert.Contains("inside the area", _panel.Status);
+
+            module.ClickAt(Screen(30, 60));
+            Assert.AreEqual(0, _host.World.Operations.Get(opId).ModuleIds.Count, "refused outside");
+            StringAssert.Contains("Rejected", _panel.Status);
+
+            module.ClickAt(Screen(60, 60));
+            Assert.AreEqual(1, _host.World.Operations.Get(opId).ModuleIds.Count, _panel.Status);
+            Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.LogStorageId, module.Queue[0]);
+        }
+
+        [UnityTest]
+        public IEnumerator ModuleToolSnapsFlushToAreaEdgeAndTurnsToIt()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            var module = SetupModuleTool(out _);
+            module.Rotate(10);
+            module.HoverAt(Screen(42.5f, 60)); // hut is 6 x 4; its 6 m side runs along the left edge when turned a quarter
+            Assert.IsTrue(module.GhostSnapped);
+            Assert.IsFalse(module.GhostIsRed, module.GhostPreview?.Text);
+            Assert.AreEqual(0.0, LordsLegacy.Game.Tools.Shared.ModuleSnap.Normalize(module.GhostRotation + 1e-9) % 90.0, 1e-6, "turned to the edge");
+            // A quarter-turn-free hut (rotation 0 or 180) has its 3 m half width against the left edge: centre 3 m in.
+            Assert.AreEqual(43.0, module.GhostCentre.XMetres, 0.01);
+
+            _host.World.Pause();
+            module.Rotate(0);
+            module.SetViewSettings(new ViewSettings { Snapping = false });
+            module.HoverAt(Screen(42.5f, 60));
+            Assert.IsFalse(module.GhostSnapped, "snapping off: no snap");
+            Assert.AreEqual(10.0, module.GhostRotation, 1e-6);
+        }
+
+        [UnityTest]
+        public IEnumerator ModuleToolRotateStepsAndRightClickRemovesModule()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            var module = SetupModuleTool(out int opId);
+            module.SetViewSettings(new ViewSettings { Snapping = false });
+            module.Rotate(ModuleTool.RotateStepDeg);
+            module.Rotate(ModuleTool.FineRotateStepDeg);
+            Assert.AreEqual(16.0, module.Rotation, 1e-9);
+            module.Rotate(-ModuleTool.RotateStepDeg * 2);
+            Assert.AreEqual(346.0, module.Rotation, 1e-9);
+
+            module.Rotate(-346);
+            module.ClickAt(Screen(60, 60));
+            Assert.AreEqual(1, _host.World.Footprints.Count);
+            Assert.IsFalse(module.RemoveAt(Screen(45, 45)), "nothing there");
+            Assert.IsTrue(module.RemoveAt(Screen(60, 60)));
+            Assert.AreEqual(0, _host.World.Footprints.Count);
+            Assert.AreEqual(0, _host.World.Operations.Get(opId).ModuleIds.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator ModuleToolPanelButtonsAddOxenStandAndLogStorage()
+        {
+            yield return Setup("woodcutter", AreaTypes.WoodcuttingId);
+            var module = SetupModuleTool(out int opId);
+            module.SetViewSettings(new ViewSettings { Snapping = false });
+            CollectionAssert.Contains(_panel.ActionNames, ModuleTool.ActionAddOxenStand);
+            CollectionAssert.Contains(_panel.ActionNames, ModuleTool.ActionAddLogStorage);
+            _panel.ClickAction(ModuleTool.ActionAddOxenStand);
+            Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.OxenStandId, module.Queue[0]);
+            module.ClickAt(Screen(70, 70));
+            Assert.AreEqual(1, _host.World.Operations.Get(opId).ModuleIds.Count, _panel.Status);
+            _panel.ClickAction(ModuleTool.ActionAddLogStorage);
+            Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.LogStorageId, module.Queue[0]);
         }
 
         [UnityTest]
