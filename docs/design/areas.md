@@ -99,6 +99,14 @@ vertex can't go inside another building area or a road; a work-area vertex can g
 - **Tree clearing:** every tree whose trunk lies inside a confirmed building area is removed, yielding nothing
   (BLD-10-A). Work areas never clear trees or land.
 - Test work areas are always visible in M4. Hiding them until their building's panel is open (WORK-04) arrives with real buildings.
+
+> Implementation note (woodcutting area kinds, WC-01, WC-10): M8 adds `area.woodcutting` (Building, 4–8 points, **150–5,000 m²**,
+> 10° max slope, clears trees, blocks roads) and `area.work_woodcutting` (Work, 100–40,000 m²). The 150 m² minimum is in code
+> only and no design doc gives it, so the owner should confirm it.
+
+> Implementation note (work area visibility, T-282): every work area is now hidden unless its operation's panel is open
+> (`AreaRenderer.ShownWorkAreaIds`, kept by `WorkAreaRenderer`). That includes the test work area, so the "always visible
+> in M4" line above no longer holds. Owner to decide whether test work areas should show again.
 - Area names: "Test area 1", "Test area 2"… numbered per type, never reused in a session.
 
 ## Snapping (shared toggle, see `roads.md`)

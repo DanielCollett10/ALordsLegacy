@@ -27,8 +27,8 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 
 > Implementation note (Rest day, FOOD-A4): `SimTuning.RestDayEnabled` exists (default off, as above), but no Sim system reads it yet.
 >
-> Implementation note (Sunday meal PPL-21, Minimum sleep PPL-26): `SimTuning.SundayMealMinutes` and `MinSleepHours` exist, but no
-> Sim code reads them yet (M8 work rules).
+> Implementation note (Sunday meal PPL-21, Minimum sleep PPL-26): read by `WorkDay` (T-277, M8). Sunday work ends early by
+> `SundayMealMinutes`; the commute keeps `MinSleepHours` of sleep at home.
 
 Calendar: DayOfYear counts from 1 Jan (1 Jan = day 1, so 1 Mar = day 60). The year number
 goes up on **1 January**, so Year 1 is a short first year (1 Mar – 31 Dec) and Year 2 starts

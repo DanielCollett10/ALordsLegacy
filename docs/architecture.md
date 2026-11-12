@@ -40,7 +40,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
     Registered today: `NavSyncSystem` (sync), `RoutineSystem` (routine), `MovementSystem` and `DebugSendSystem` (movement).
     `DispatchSystem` (dispatch) and `StepRunnerSystem` (steps) are registered too (T-275). `WoodcuttingSystem` is the
-    one operations-phase system (T-276, WC-10..15/25, TMB-05/07): for each Working woodcutting operation it keeps one Open
+    one operations-phase system (T-276, WC-10..15/25, TMB-05/07; decision 0031): for each Working woodcutting operation it keeps one Open
     `task.fell_tree` per idle adult worker of the assigned families, targeting the nearest standing unreserved tree to the
     hut access point inside `OperationStatus.WorkRegion`, reserved at creation. Steps = MoveTo + `ProcessDefs.Timber`
     effective stages (`TaskStep.StageId` carries the stage). `FellingOutcome` (called by `StepRunnerSystem` after each
@@ -112,8 +112,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     T-267) holds the woodcutting module types: hut 6×4 (blocks), log storage 8×6 (20 logs), oxen stand 3×3 (1 ox).
   - **Operation types (T-267, woodcutting.md WC-01..WC-11):** `Assets/Sim/Operations/` (`LordsLegacy.Sim.Operations`)
     holds `OperationTypeDef` (ids of the building and work area types, hut, log storage, optional oxen stand, family
-    slots, default work radius) and `OperationTypes` (static, `Woodcutting`, `Find`, `All`). Definitions only; the
-    woodcutting area types live in `AreaTypes` (`area.woodcutting` Building, `area.work_woodcutting` Work). Not yet on the world catalogs.
+    slots, default work radius) and `OperationTypes` (`Woodcutting`, `Find`, `FindByBuildingArea`, `All`). Static lookups,
+    not on the world catalogs (decision 0019 says they should be; open question for the human). The woodcutting area
+    types live in `AreaTypes`.
   - **Operations (T-268, WC-05/15/25):** `SimWorld.Operations` (`OperationRegistry`, partial in `SimWorld.Operations.cs`,
     never null) holds `Operation` records (id, type, area id, module footprint ids, family ids, ox ids, optional work
     area id, paused flag); every change bumps `Version`. `DesignateArea` of a building area type that has an operation
@@ -136,7 +137,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `PauseOperation`, `ResumeOperation`, `SetWorkArea` (area must be the type's work area type) and `UseDefaultWorkArea`
     are in `OperationSettings.cs`. `DeleteArea` resets any operation linked to the deleted work area to the default.
     Nothing assigns automatically.
-  - **Inventory ledger part 1 (T-273, INV-01/11, LED-01/03/09):** `SimWorld.Inventory` (`Assets/Sim/Inventory/`, partial in
+  - **Inventory ledger part 1 (T-273, INV-01/11, LED-01/03/09; decision 0032):** `SimWorld.Inventory` (`Assets/Sim/Inventory/`, partial in
     `SimWorld.Inventory.cs`) is a `Ledger` of `LedgerLocation`s (`GroundPile` at a point with optional owner operation id,
     or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
     into the nearest same-owner pile within 1 m. `TotalOf(item)`, per-location counts, `Version`, and `Audit()` (null =
@@ -146,7 +147,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `ProcessDef` (id, ordered `StageDef`s), `StageDef` (id, minutes, per-item, heavy, enabled, animation key) and
     `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` returns the enabled
     stages with a disabled stage's time added to the next enabled one (trailing ones to the last enabled), so the total
-    is the same either way. Data only; not yet used by the task board.
+    is the same either way. `WoodcuttingSystem` turns the effective stages into a fell task's steps and `FellingOutcome`
+    matches the fell stage id. Static lookup, like `OperationTypes`.
   - **Start layout (T-253, CMP-01..07):** `StartLayout` (`Assets/Sim/Start/`) is pure data: camp centre/rotation, fire,
     stockpile, ox stand and tent spots relative to the camp (rotated with it), trunk road control points, families with
     citizens, ox count. `StartLayoutApplier.Apply(world, layout)` adds the camp footprint (clearing trees under it), draws
@@ -176,8 +178,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the balancing numbers. Read by code today: pace,
   speeds, start date, daylight, walk and ox speed, ageing rate, milling and debug linger, world seed, standard log
   length, navigation cell size and max slope, road sample spacing, road minimum point spacing, road tree
-  clearance, and the area values (curve flattening, slope grid, overlap tolerance, spatial index cell). Defined but
-  read by nothing yet: trunk length range, starting oxen, rest-day switch, Sunday meal, minimum sleep (see `tuning.md`). Food,
+  clearance, the area values (curve flattening, slope grid, overlap tolerance, spatial index cell), and Sunday meal and
+  minimum sleep (`WorkDay`, T-277). Defined but read by nothing yet: trunk length range, starting oxen, rest-day switch
+  (see `tuning.md`). Food,
   market, construction and population numbers are not in code yet. The Sim never hard-codes these.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
@@ -190,7 +193,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `TreeClearing` (static) removes the trees under a polygon (`RemoveInPolygon`) or within a distance of a polyline
   (`RemoveNearPolyline`), using geo-1 on trunk positions rounded to mm; both return the removed ids sorted.
 - `Assets/Sim/Areas/` (`LordsLegacy.Sim.Areas`, decision 0014): `AreaTypeDef`/`AreaTypes` (`area.test` Building,
-  `area.test_work` Work; limits per `tuning.md`), `AreaShape` (vertices plus one `AreaEdge` per vertex: Straight,
+  `area.test_work` Work; limits per `tuning.md`; M8 adds `area.woodcutting` Building 150–5,000 m² and `area.work_woodcutting`
+  Work), `AreaShape` (vertices plus one `AreaEdge` per vertex: Straight,
   Bent with an on-curve handle, FollowsRoad and NearRoad (AR-24), both with segment id and `RoadSide`) and
   `AreaFlattener.Flatten(shape, roads)`,
   which gives a CCW `PointMm` polygon: bent edges are quadratics sampled every `CurveFlattenSpacingM`, road edges copy
@@ -286,8 +290,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   after "overlaps road": a corridor overlapping a building area by more than `OverlapToleranceM2` is refused with
   `RoadRefusal.CrossesArea` ("crosses <name>", `RoadPreview.CrossedAreaName`; `DrawRoad` rejects as `Conflict`).
   Work areas are not in the building index so never block roads. With no areas the road checks are unchanged.
-- Not built yet: tasks, buildings, economy, saving (pathing and citizens exist; see People and Navigation above). Decision 0005 (task types as data)
-  describes future work with no code.
+- Not built yet: oxen hauling and ledger reserve/transfer (M9), construction and odd jobs (M10), food, markets,
+  economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps); only `task.fell_tree` is defined so far.
 
 ## Map pipeline
 
@@ -433,7 +437,7 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
     module of the operation sends `RemoveModule`. Panel buttons (`ToolPanelView.SetActions`/`ActionClicked`): Add hut (only if none),
     Add log storage, Add oxen stand. The tool stays active after the queue empties; Esc/Cancel ends it.
 - Build bar (`BuildBarView`, `Assets/Game/UI/BuildBar/`, UXML/USS): non-focusable buttons built from `ToolEntry.Defaults()`
-  (Road, Test area and Test work area enabled; the rest greyed, tooltip "Coming later"). Raises `ToolClicked`.
+  (Road, Test area, Test work area and Woodcutter enabled; the rest greyed, tooltip "Coming later"). Raises `ToolClicked`.
 - Tool panel (`ToolPanelView`, `Assets/Game/UI/ToolPanel/`, UXML/USS): status line, hint line, Cancel/Confirm.
   `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Holds no tool rules. Placed in the Game
   scene by `GameSceneGenerator.CreateRoadTool`.
@@ -487,7 +491,11 @@ through `SimHost.Execute` (which also clears trees), and `AreaRenderer.Sync` see
 
 Start layout (camp and people): `SimHost.Initialize` builds the world from the map, then applies `StartLayoutConfig.ToLayout()`
 through `StartLayoutApplier` (camp footprint, trunk road via `Execute(DrawRoad)`, families, citizens, oxen). Each tick
-`SimSystems` runs nav sync, routine, movement, debug send. `PeopleRenderer` and `CampRenderer` read `World.People` and
+`SimSystems` runs its phases in order: nav sync, routine, dispatch, steps, movement (incl. debug send), operations.
+Felling (M8): `WoodcuttingSystem` opens a `task.fell_tree` per idle worker → `DispatchSystem` assigns it → `StepRunnerSystem`
+walks to the tree and runs each timber stage → `FellingOutcome` sets the tree Felled, then Stump, and drops the logs in an
+operation-owned ground pile (`LogPileRenderer` draws them). Modules: `ModuleTool` → `ModulePlacement.Preview` (ghost) →
+`PlaceModule` through `SimHost.Execute`; built at once (WC-07). `PeopleRenderer` and `CampRenderer` read `World.People` and
 `World.Camp` and lerp by `TickFraction`. A click goes `AgentPicker` → selection → `CitizenPanelView`; a debug right click
 goes `DebugSendController` → `SimHost.Execute(SendCitizenTo)` → `Citizen.DebugSend` → `RoutineSystem` skips it, `MovementSystem` walks it.
 
