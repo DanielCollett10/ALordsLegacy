@@ -119,6 +119,40 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 100071}
+  - {fileID: 100068}
+  - {fileID: 100042}
+  - {fileID: 100028}
+  - {fileID: 100092}
+  - {fileID: 100056}
+  - {fileID: 100046}
+  - {fileID: 100039}
+  - {fileID: 100011}
+  - {fileID: 100032}
+  - {fileID: 100088}
+  - {fileID: 100007}
+  - {fileID: 100081}
+  - {fileID: 100059}
+  - {fileID: 100084}
+  - {fileID: 100062}
+  - {fileID: 100004}
+  - {fileID: 100075}
+  - {fileID: 100078}
+  - {fileID: 100098}
+  - {fileID: 100095}
+  - {fileID: 100049}
+  - {fileID: 100035}
+  - {fileID: 100001}
+  - {fileID: 100065}
+  - {fileID: 100014}
+  - {fileID: 100052}
+  - {fileID: 100022}
+  - {fileID: 100025}
+  - {fileID: 100018}
 --- !u!1 &100000
 GameObject:
   m_ObjectHideFlags: 0
@@ -1895,131 +1929,3 @@ MonoBehaviour:
   _panel: {fileID: 100086}
   _controller: {fileID: 100082}
   _topBar: {fileID: 100090}
---- !u!1 &916052638
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 916052641}
-  - component: {fileID: 916052640}
-  - component: {fileID: 916052639}
-  m_Layer: 0
-  m_Name: TestMapTerrain
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
---- !u!154 &916052639
-TerrainCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 916052638}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_TerrainData: {fileID: 15600000, guid: 45a1001e5ba9ca44d85897d59adfc478, type: 2}
-  m_EnableTreeColliders: 1
---- !u!218 &916052640
-Terrain:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 916052638}
-  m_Enabled: 1
-  serializedVersion: 6
-  m_TerrainData: {fileID: 15600000, guid: 45a1001e5ba9ca44d85897d59adfc478, type: 2}
-  m_TreeDistance: 5000
-  m_TreeBillboardDistance: 50
-  m_TreeCrossFadeLength: 5
-  m_TreeMaximumFullLODCount: 50
-  m_DetailObjectDistance: 80
-  m_DetailObjectDensity: 1
-  m_HeightmapPixelError: 1
-  m_SplatMapDistance: 1000
-  m_HeightmapMinimumLODSimplification: 0
-  m_HeightmapMaximumLOD: 0
-  m_ShadowCastingMode: 2
-  m_DrawHeightmap: 1
-  m_DrawInstanced: 0
-  m_DrawTreesAndFoliage: 1
-  m_StaticShadowCaster: 0
-  m_IgnoreQualitySettings: 0
-  m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 10652, guid: 0000000000000000f000000000000000, type: 0}
-  m_BakeLightProbesForTrees: 1
-  m_PreserveTreePrototypeLayers: 0
-  m_DeringLightProbesForTrees: 1
-  m_ReceiveGI: 1
-  m_ScaleInLightmap: 0.0125
-  m_LightmapParameters: {fileID: 15203, guid: 0000000000000000f000000000000000, type: 0}
-  m_GroupingID: 0
-  m_RenderingLayerMask: 1
-  m_AllowAutoConnect: 1
-  m_EnableHeightmapRayTracing: 1
-  m_EnableTreesAndDetailsRayTracing: 0
-  m_TreeMotionVectorModeOverride: 3
---- !u!4 &916052641
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 916052638}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1660057539 &9223372036854775807
-SceneRoots:
-  m_ObjectHideFlags: 0
-  m_Roots:
-  - {fileID: 100071}
-  - {fileID: 100068}
-  - {fileID: 100042}
-  - {fileID: 100028}
-  - {fileID: 100092}
-  - {fileID: 100056}
-  - {fileID: 100046}
-  - {fileID: 100039}
-  - {fileID: 100011}
-  - {fileID: 100032}
-  - {fileID: 100088}
-  - {fileID: 100007}
-  - {fileID: 100081}
-  - {fileID: 100059}
-  - {fileID: 100084}
-  - {fileID: 100062}
-  - {fileID: 100004}
-  - {fileID: 100075}
-  - {fileID: 100078}
-  - {fileID: 100098}
-  - {fileID: 100095}
-  - {fileID: 100049}
-  - {fileID: 100035}
-  - {fileID: 100001}
-  - {fileID: 100065}
-  - {fileID: 100014}
-  - {fileID: 100052}
-  - {fileID: 100022}
-  - {fileID: 100025}
-  - {fileID: 100018}
-  - {fileID: 916052641}

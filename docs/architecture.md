@@ -336,7 +336,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `TaskRecord.OxId` is set by `TaskBoard.SetOx`. `StepRunnerSystem` (partial, `StepRunnerSystem.Ox.cs`) cancels the task if
   the ox is removed or its operation assignment changed, dropping the carrier's logs as an operation-owned ground pile
   where the ox stood and setting the ox `Free`. Tuning: `OxLoadLogs` 4, `OxLoadMinutes` 10, `OxUnloadMinutes` 10.
-- Not built yet: oxen hauling tasks (Haul task creation, reservations, Waiting for ox / Storage full) (M9), construction and odd jobs (M10), food, markets,
+- Not built yet: construction and odd jobs (M10), food, markets,
   economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps); only `task.fell_tree` is defined so far.
 
 ## Map pipeline
@@ -566,6 +566,11 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   (`WorkAreaRenderer`) is added to that object by `OperationPanelView.OnEnable`, so it is not a scene object of its own.
   Sim side: Operations, Tasks, Inventory and Processes are described under Simulation core; Unity side under Unity layer.
   `GameSceneTests.GameSceneHasM8WoodcuttingWired` checks these pieces and their references.
+- M9 pieces (T-295, hauling): no new components. The hauling visuals and UI are the existing pieces wired by
+  `GameSceneGenerator`: `PeopleRenderer` draws the oxen (led with their logs at the interpolated ox position, follow
+  movement from `MovementSystem.Attach`), `LogPileRenderer` draws the logs carried and stacked in storages and the camp
+  stockpile, and `OperationPanel` (`OperationPanelView`) carries the Oxen tab and stock line. The scene is regenerated
+  with the same menu step. `GameSceneTests.GameSceneHasM9HaulingWired` checks these pieces and their references.
 - `Assets/Scenes/Game.unity` is written by `GameSceneGenerator` (Assets/Editor/Scenes). **To regenerate the scene run the
   menu item `LordsLegacy/Scenes/Generate Game scene`**, then commit the result. It rebuilds from an empty scene each run,
   and `SceneYamlNormalizer` gives its objects stable fileIDs, so two runs give the same file. Serialized references are wired in code.
