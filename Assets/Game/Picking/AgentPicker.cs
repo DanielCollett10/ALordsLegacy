@@ -1,5 +1,8 @@
 using System;
 using LordsLegacy.Game.Tools;
+using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.People;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -24,6 +27,7 @@ namespace LordsLegacy.Game
 
         private bool _hasSelection;
         private AgentRef _selected;
+        private int? _operationId;
 
         /// <summary>Raised when the selection changes (select, clear).</summary>
         public event Action SelectionChanged;
@@ -55,12 +59,63 @@ namespace LordsLegacy.Game
             SelectionChanged?.Invoke();
         }
 
-        /// <summary>Clears the selection.</summary>
+        /// <summary>Clears the agent selection (the operation selection is separate: <see cref="ClearOperation"/>).</summary>
         public void Clear()
         {
             if (!_hasSelection) return;
             _hasSelection = false;
             SelectionChanged?.Invoke();
+        }
+
+        /// <summary>True when an operation is selected (through its hut, another module, or its area).</summary>
+        public bool HasOperation => _operationId.HasValue;
+
+        /// <summary>Id of the selected operation (only meaningful when <see cref="HasOperation"/>).</summary>
+        public int SelectedOperationId => _operationId ?? -1;
+
+        /// <summary>Selects an operation and clears any agent selection. Unknown ids clear the operation selection.</summary>
+        public void SelectOperation(int operationId)
+        {
+            var host = Host();
+            bool exists = host != null && host.IsInitialized && host.World.Operations.Get(operationId) != null;
+            if (!exists) { ClearOperation(); return; }
+            bool changed = _hasSelection || _operationId != operationId;
+            _hasSelection = false;
+            _operationId = operationId;
+            if (changed) SelectionChanged?.Invoke();
+        }
+
+        /// <summary>Clears the operation selection.</summary>
+        public void ClearOperation()
+        {
+            if (!_operationId.HasValue) return;
+            _operationId = null;
+            SelectionChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// The operation a click at the ground point would select, in order: a module under the point, then the building
+        /// area, then a linked work area. Returns false when none applies.
+        /// </summary>
+        public static bool TryPickOperation(SimWorld world, PointMm ground, out int operationId)
+        {
+            operationId = 0;
+            var fp = world.Footprints.FindAt(ground);
+            if (fp != null)
+                foreach (var op in world.Operations.All)
+                    foreach (int id in op.ModuleIds)
+                        if (id == fp.Id) { operationId = op.Id; return true; }
+            var building = world.Areas.FindAt(ground, AreaKind.Building);
+            if (building != null)
+            {
+                var op = world.Operations.FindByArea(building.Id);
+                if (op != null) { operationId = op.Id; return true; }
+            }
+            var work = world.Areas.FindAt(ground, AreaKind.Work);
+            if (work != null)
+                foreach (var op in world.Operations.All)
+                    if (op.WorkAreaId == work.Id) { operationId = op.Id; return true; }
+            return false;
         }
 
         /// <summary>
@@ -102,8 +157,24 @@ namespace LordsLegacy.Game
         {
             if (_controller == null) _controller = FindFirstObjectByType<ToolController>();
             if (_controller != null && (_controller.ActiveTool != null || _controller.IsPointerOverUiAt(screenPos))) return false;
-            if (TryPick(screenPos, out var agent)) Select(agent);
-            else Clear();
+            var host = Host();
+            if (TryPick(screenPos, out var agent))
+            {
+                _operationId = null;
+                Select(agent);
+            }
+            else if (host != null && host.IsInitialized && Picker() != null
+                && Picker().TryPickScreen(screenPos, out var ground) && ground.HasValue
+                && TryPickOperation(host.World, PointMm.FromMetres(ground.X, ground.Z), out int opId))
+            {
+                Clear();
+                SelectOperation(opId);
+            }
+            else
+            {
+                Clear();
+                ClearOperation();
+            }
             return true;
         }
 
@@ -115,6 +186,8 @@ namespace LordsLegacy.Game
                 var p = host.World.People;
                 if ((_selected.IsOx ? (object)p.FindOx(_selected.Id) : p.FindCitizen(_selected.Id)) == null) Clear();
             }
+            if (_operationId.HasValue && host != null && host.IsInitialized && host.World.Operations.Get(_operationId.Value) == null)
+                ClearOperation();
             if (!ReadMouse) return;
             var mouse = Mouse.current;
             if (mouse != null && mouse.leftButton.wasPressedThisFrame) ClickAt(mouse.position.ReadValue());

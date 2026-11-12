@@ -72,11 +72,12 @@ namespace LordsLegacy.Tests.PlayMode
                 Assert.IsNotNull(doc.panelSettings, doc.name + " has no PanelSettings.");
                 // GroundReadoutView clones its UXML from its own _visualTree field, so its UIDocument has none.
                 // CitizenPanelView builds its panel in code (T-263).
-                if (doc.name != "GroundReadout" && doc.name != "CitizenPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                // OperationPanelView builds its panel in code too (T-281).
+                if (doc.name != "GroundReadout" && doc.name != "CitizenPanel" && doc.name != "OperationPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GroundReadout", "ToolPanel", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GroundReadout", "OperationPanel", "ToolPanel", "TopBar" }, names);
         }
 
         [UnityTest]
@@ -111,7 +112,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(areaRenderer, "AreaRenderer missing.");
             AssertNoNullRefs(areaRenderer);
             var areaTools = Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None);
-            Assert.AreEqual(3, areaTools.Length, "Test area, Test work area and Woodcutter tools expected.");
+            Assert.AreEqual(4, areaTools.Length, "Test area, Test work area, Woodcutter work area and Woodcutter tools expected.");
             foreach (var t in areaTools) AssertNoNullRefs(t);
         }
 
@@ -131,7 +132,7 @@ namespace LordsLegacy.Tests.PlayMode
             foreach (var t in Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None))
                 ids.Add(t.Id);
             ids.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter" }, ids);
+            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter", "woodcutter-work" }, ids);
             var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
             Assert.IsNotNull(moduleTool, "ModuleTool missing.");
             var moduleRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();
@@ -172,6 +173,11 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(citizenPanel, "CitizenPanelView missing.");
             AssertNoNullRefs(citizenPanel);
             Assert.IsNotNull(citizenPanel.GetComponent<UnityEngine.UIElements.UIDocument>(), "CitizenPanel has no UIDocument.");
+
+            var opPanel = Object.FindFirstObjectByType<OperationPanelView>();
+            Assert.IsNotNull(opPanel, "OperationPanelView missing.");
+            AssertNoNullRefs(opPanel);
+            Assert.IsNotNull(opPanel.GetComponent<UnityEngine.UIElements.UIDocument>(), "OperationPanel has no UIDocument.");
 
             var agents = Object.FindFirstObjectByType<AgentPicker>();
             Assert.IsNotNull(agents, "AgentPicker missing.");

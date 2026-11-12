@@ -87,6 +87,22 @@ namespace LordsLegacy.Game.Tools
             return true;
         }
 
+        /// <summary>
+        /// Operation panel "Draw work area" (WC-12): activates the area tool for the given area type with the operation set,
+        /// so confirming sends SetWorkArea. Returns false if no area tool is registered for that type.
+        /// </summary>
+        public bool BeginWorkAreaDraw(int operationId, string workAreaTypeId)
+        {
+            AreaTool found = null;
+            foreach (var t in _tools.Values)
+                if (t is AreaTool a && a.TypeId == workAreaTypeId) { found = a; break; }
+            if (found == null) return false;
+            Deselect();
+            Toggle(found.Id);
+            found.WorkAreaFor = operationId;
+            return true;
+        }
+
         /// <summary>Cancels and deactivates the active tool, if any.</summary>
         public void Deselect()
         {
