@@ -23,5 +23,21 @@ namespace LordsLegacy.Sim.People
 
         /// <summary>The walk order, or null.</summary>
         MoveOrder Move { get; set; }
+
+        /// <summary>Set while this agent follows a leader (MOV-16); null otherwise. Use <c>MovementSystem.Attach</c>.</summary>
+        FollowLink Follow { get; set; }
+    }
+
+    /// <summary>A follower's tie to its leader: placed <see cref="OffsetM"/> behind the leader's facing (MOV-16).</summary>
+    public sealed class FollowLink
+    {
+        /// <summary>Creates a link.</summary>
+        public FollowLink(IMovable leader, double offsetM) { Leader = leader; OffsetM = offsetM; }
+
+        /// <summary>The agent being followed.</summary>
+        public IMovable Leader { get; }
+
+        /// <summary>Distance behind the leader in metres.</summary>
+        public double OffsetM { get; }
     }
 }

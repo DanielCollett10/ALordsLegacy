@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.People;
@@ -28,8 +29,78 @@ namespace LordsLegacy.Sim.Navigation
             bool navChanged = nav.Version != _seenNavVersion;
             _seenNavVersion = nav.Version;
 
-            foreach (Citizen c in world.People.Citizens) StepAgent(world, c, world.Tuning.WalkSpeedMPerGameMinute, navChanged);
-            foreach (Ox o in world.People.Oxen) StepAgent(world, o, world.Tuning.OxSpeedMPerGameMinute, navChanged);
+            double walk = world.Tuning.WalkSpeedMPerGameMinute, oxSpeed = world.Tuning.OxSpeedMPerGameMinute;
+
+            // Leaders with followers move at the slowest pair speed (MOV-16).
+            Dictionary<IMovable, double> pair = null;
+            foreach (Citizen c in world.People.Citizens) NotePair(ref pair, c, walk);
+            foreach (Ox o in world.People.Oxen) NotePair(ref pair, o, oxSpeed);
+
+            foreach (Citizen c in world.People.Citizens) StepAgent(world, c, SpeedOf(pair, c, walk), navChanged);
+            foreach (Ox o in world.People.Oxen) StepAgent(world, o, SpeedOf(pair, o, oxSpeed), navChanged);
+
+            if (pair == null) return;
+            foreach (Citizen c in world.People.Citizens) PlaceFollower(nav, c);
+            foreach (Ox o in world.People.Oxen) PlaceFollower(nav, o);
+        }
+
+        /// <summary>Default distance a follower trails its leader, in metres (MOV-16).</summary>
+        public const double DefaultFollowOffsetM = 1.5;
+
+        /// <summary>
+        /// Ties <paramref name="follower"/> to <paramref name="leader"/> (MOV-16). While attached the leader moves at
+        /// min(own speed, follower speed) × the cell multiplier, and the follower is placed <paramref name="offsetM"/>
+        /// behind the leader along the leader's facing (clamped to a walkable cell) with the same facing. Any move order
+        /// on the follower is dropped.
+        /// </summary>
+        public static void Attach(IMovable follower, IMovable leader, double offsetM = DefaultFollowOffsetM)
+        {
+            if (follower == null) throw new ArgumentNullException(nameof(follower));
+            if (leader == null) throw new ArgumentNullException(nameof(leader));
+            if (ReferenceEquals(follower, leader)) throw new ArgumentException("An agent cannot follow itself.");
+            if (offsetM < 0 || double.IsNaN(offsetM) || double.IsInfinity(offsetM))
+                throw new ArgumentOutOfRangeException(nameof(offsetM));
+            follower.Move = null;
+            follower.Follow = new FollowLink(leader, offsetM);
+        }
+
+        /// <summary>Ends a follow tie; the follower stays where it is. Does nothing if not attached.</summary>
+        public static void Detach(IMovable follower)
+        {
+            if (follower == null) throw new ArgumentNullException(nameof(follower));
+            follower.Follow = null;
+        }
+
+        private static void NotePair(ref Dictionary<IMovable, double> pair, IMovable follower, double followerSpeed)
+        {
+            if (follower.Follow == null) return;
+            if (pair == null) pair = new Dictionary<IMovable, double>();
+            IMovable leader = follower.Follow.Leader;
+            if (!pair.TryGetValue(leader, out double s) || followerSpeed < s) pair[leader] = followerSpeed;
+        }
+
+        private static double SpeedOf(Dictionary<IMovable, double> pair, IMovable a, double own)
+        {
+            return pair != null && pair.TryGetValue(a, out double s) ? Math.Min(own, s) : own;
+        }
+
+        private static void PlaceFollower(NavGrid nav, IMovable f)
+        {
+            FollowLink link = f.Follow;
+            if (link == null) return;
+            IMovable l = link.Leader;
+            double sin = Math.Sin(l.FacingRad), cos = Math.Cos(l.FacingRad);
+            double x = l.X, z = l.Z;
+            for (int i = 0; i < 4; i++)
+            {
+                double d = link.OffsetM * (1.0 - i * 0.25); // 100%, 75%, 50%, 25%, else on the leader
+                double px = l.X - d * sin, pz = l.Z - d * cos;
+                if (!nav.IsBlocked(nav.CellX(px), nav.CellZ(pz))) { x = px; z = pz; break; }
+            }
+            f.X = x;
+            f.Z = z;
+            f.FacingRad = l.FacingRad;
+            f.CurrentMultiplier = nav.SpeedMultiplier(nav.CellX(x), nav.CellZ(z));
         }
 
         /// <inheritdoc />
@@ -50,6 +121,8 @@ namespace LordsLegacy.Sim.Navigation
             a.PreviousX = a.X;
             a.PreviousZ = a.Z;
             a.CurrentMultiplier = nav.SpeedMultiplier(nav.CellX(a.X), nav.CellZ(a.Z));
+
+            if (a.Follow != null) return; // placed behind its leader after everyone has moved
 
             MoveOrder order = a.Move;
             if (order == null || order.IsFinished) return;

@@ -303,7 +303,17 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `OperationRegistry.AssignOx` refuses an ox assigned to any operation (`FindOxOwner`). `OxPool(world)` has
   `FindFor(opId, from)` (assigned first, then nearest free pool ox), stand `Occupancy`/`HasRoom` (module stand holds
   `OxCapacity` = 1; camp stand unlimited) and `RestSpot`/`Rest` (WC-31/32).
-- Not built yet: oxen hauling and ledger reserve/transfer (M9), construction and odd jobs (M10), food, markets,
+- Ox steps and follow movement (T-289, MOV-16, WCO-06): `MovementSystem.Attach(follower, leader, offsetM = 1.5)` /
+  `Detach(follower)` (static; the tie is `IMovable.Follow`, a `FollowLink`). While attached the leader moves at
+  min(own, follower speed) × its cell multiplier; after all agents have moved the follower is placed `offsetM` behind
+  the leader's facing (shrunk to 75/50/25 % then onto the leader if the cell is blocked or off the map) with the
+  leader's facing. New `StepKind`s with `TaskStep` factories: `FetchOx` (walk to the ox, Attach, ox `Led`), `LeadTo(point)`
+  (the handler's `MoveOrder`), `LoadOx(loc, n, ticks)` / `UnloadOx(loc, n, ticks)` (Work, then `Ledger.Transfer` between the
+  location and `world.OxCarrier(ox)`, owner = task id), `ReturnOx` (lead to `OxPool.RestSpot`, Detach, ox `Resting`).
+  `TaskRecord.OxId` is set by `TaskBoard.SetOx`. `StepRunnerSystem` (partial, `StepRunnerSystem.Ox.cs`) cancels the task if
+  the ox is removed or its operation assignment changed, dropping the carrier's logs as an operation-owned ground pile
+  where the ox stood and setting the ox `Free`. Tuning: `OxLoadLogs` 4, `OxLoadMinutes` 10, `OxUnloadMinutes` 10.
+- Not built yet: oxen hauling tasks (Haul task creation, reservations, Waiting for ox / Storage full) (M9), construction and odd jobs (M10), food, markets,
   economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps); only `task.fell_tree` is defined so far.
 
 ## Map pipeline

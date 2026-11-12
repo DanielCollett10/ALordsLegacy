@@ -26,6 +26,10 @@ namespace LordsLegacy.Sim.Tasks
         public int CurrentStep { get; internal set; }
         /// <summary>Ticks of progress in the current step.</summary>
         public int StepProgress { get; internal set; }
+        /// <summary>The ox this task uses (T-289), or null.</summary>
+        public int? OxId { get; internal set; }
+        /// <summary>True if the ox was assigned to the owner operation when the task took it.</summary>
+        public bool OxWasAssigned { get; internal set; }
         /// <summary>Trees this task holds reserved. Released on cancel or completion.</summary>
         public IReadOnlyList<TreeId> Reservations => _reservations;
 

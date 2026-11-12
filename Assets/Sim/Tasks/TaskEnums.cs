@@ -26,7 +26,17 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Walk to the task target.</summary>
         MoveTo,
         /// <summary>Work in place for a number of ticks.</summary>
-        Work
+        Work,
+        /// <summary>Walk to the task's reserved ox and take it by the halter (ox becomes Led). T-289.</summary>
+        FetchOx,
+        /// <summary>Walk to a point, leading the ox, which follows (MOV-16).</summary>
+        LeadTo,
+        /// <summary>Work for load minutes, then move logs from a pile or store onto the ox's carrier.</summary>
+        LoadOx,
+        /// <summary>Work for unload minutes, then move logs from the ox's carrier to a ledger location.</summary>
+        UnloadOx,
+        /// <summary>Lead the ox to its rest spot and let go.</summary>
+        ReturnOx
     }
 
     /// <summary>Lifecycle of a task: Open, Assigned, Active, Done, or Cancelled from any live state.</summary>

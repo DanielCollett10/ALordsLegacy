@@ -57,5 +57,11 @@ namespace LordsLegacy.Sim.People
 
         /// <inheritdoc />
         public MoveOrder Move { get; set; }
+
+        /// <inheritdoc />
+        public FollowLink Follow { get; set; }
+
+        /// <summary>Ledger id of this ox's carrier location (T-289); 0 until first needed.</summary>
+        public int CarrierId { get; set; }
     }
 }

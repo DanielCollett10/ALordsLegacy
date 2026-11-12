@@ -20,7 +20,7 @@ namespace LordsLegacy.Sim.Tasks
     /// (No route). A failed step cancels the task, which releases its reservations, and frees the worker. Holds the
     /// orders it issued, so each world needs its own instance.
     /// </summary>
-    public sealed class StepRunnerSystem : ISimSystem
+    public sealed partial class StepRunnerSystem : ISimSystem
     {
         private readonly Dictionary<int, MoveOrder> _orders = new Dictionary<int, MoveOrder>();
         // Tasks paused mid-Work: the worker must walk back to the tree before work continues.
@@ -42,6 +42,8 @@ namespace LordsLegacy.Sim.Tasks
         {
             Citizen c = t.AssigneeId.HasValue ? world.People.FindCitizen(t.AssigneeId.Value) : null;
             if (c == null) { Fail(world, t, null); return; }
+            Ox ox = null;
+            if (t.OxId.HasValue && !CheckOx(world, t, c, out ox)) { Fail(world, t, c); return; }
             if (!world.WorkDay.OnShift(world, c))
             {
                 // Night, or not yet time to leave (PPL-24): keep progress and reservations; the routine walks the worker home.
@@ -59,9 +61,17 @@ namespace LordsLegacy.Sim.Tasks
             }
 
             TaskStep step = t.Def.Steps[t.CurrentStep];
-            if (step.Kind == StepKind.MoveTo) StepMove(world, t, c, true);
-            else if (_returning.Contains(t.Id)) StepMove(world, t, c, false); // back to the tree after a night
-            else StepWork(world, t, c, step);
+            switch (step.Kind)
+            {
+                case StepKind.MoveTo: StepMove(world, t, c, true); break;
+                case StepKind.FetchOx:
+                case StepKind.LeadTo:
+                case StepKind.ReturnOx: StepOxWalk(world, t, c, ox, step); break;
+                default:
+                    if (_returning.Contains(t.Id)) StepMove(world, t, c, false); // back to the tree after a night
+                    else StepWork(world, t, c, ox, step);
+                    break;
+            }
         }
 
         private void StepMove(SimWorld world, TaskRecord t, Citizen c, bool advance)
@@ -89,11 +99,17 @@ namespace LordsLegacy.Sim.Tasks
             }
         }
 
-        private void StepWork(SimWorld world, TaskRecord t, Citizen c, TaskStep step)
+        private void StepWork(SimWorld world, TaskRecord t, Citizen c, Ox ox, TaskStep step)
         {
             c.Activity = Activity.Working;
             world.Tasks.AddProgress(t.Id, 1);
-            if (t.StepProgress >= step.DurationTicks) Advance(world, t, c);
+            if (t.StepProgress < step.DurationTicks) return;
+            if ((step.Kind == StepKind.LoadOx || step.Kind == StepKind.UnloadOx) && !TransferLogs(world, t, ox, step))
+            {
+                Fail(world, t, c);
+                return;
+            }
+            Advance(world, t, c);
         }
 
         private void Advance(SimWorld world, TaskRecord t, Citizen c)
@@ -101,13 +117,19 @@ namespace LordsLegacy.Sim.Tasks
             TaskStep done = t.Def.Steps[t.CurrentStep];
             world.Tasks.CompleteStep(t.Id);
             FellingOutcome.OnStepCompleted(world, t, done);
-            if (t.State == TaskState.Done) c.Activity = Activity.MillingAbout;
+            if (t.State == TaskState.Done)
+            {
+                c.Activity = Activity.MillingAbout;
+                _oxTrack.Remove(t.Id);
+                _rest.Remove(t.Id);
+            }
         }
 
         private void Fail(SimWorld world, TaskRecord t, Citizen c)
         {
             _orders.Remove(t.Id);
             _returning.Remove(t.Id);
+            ReleaseOx(world, t, c);
             world.Tasks.Cancel(t.Id);
             if (c != null)
             {

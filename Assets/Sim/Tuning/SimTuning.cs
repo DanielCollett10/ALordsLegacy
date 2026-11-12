@@ -104,6 +104,15 @@ namespace LordsLegacy.Sim.Tuning
         /// </summary>
         public double OxSpeedMPerGameMinute { get; set; } = 1.04;
 
+        /// <summary>Most logs an ox carries per trip. Unit: logs. Rule: WCO-07.</summary>
+        public int OxLoadLogs { get; set; } = 4;
+
+        /// <summary>Time to load an ox. Unit: game minutes. Rule: woodcutting.md (tuning.md).</summary>
+        public int OxLoadMinutes { get; set; } = 10;
+
+        /// <summary>Time to unload an ox. Unit: game minutes. Rule: woodcutting.md (tuning.md).</summary>
+        public int OxUnloadMinutes { get; set; } = 10;
+
         /// <summary>
         /// Milling spots are picked within this distance of the camp fire. Unit: metres. Rule: PPL-31.
         /// </summary>

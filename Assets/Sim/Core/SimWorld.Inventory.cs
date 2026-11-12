@@ -10,6 +10,19 @@ namespace LordsLegacy.Sim.Core
         /// <summary>The item ledger. Never null; empty at start.</summary>
         public Ledger Inventory { get; } = new Ledger();
 
+        /// <summary>The ox's ledger carrier, created on first use with capacity <c>SimTuning.OxLoadLogs</c>.</summary>
+        public LedgerLocation OxCarrier(People.Ox ox)
+        {
+            if (ox == null) throw new System.ArgumentNullException(nameof(ox));
+            LedgerLocation l = ox.CarrierId != 0 ? Inventory.Get(ox.CarrierId) : null;
+            if (l == null)
+            {
+                l = Inventory.AddCarrier(Tuning.OxLoadLogs);
+                ox.CarrierId = l.Id;
+            }
+            return l;
+        }
+
         /// <summary>
         /// The operation pool (WC-37): the sum of one item over the operation's storage modules only. Ground piles,
         /// carriers and other operations' storage are excluded. Unknown operation gives an empty pool.
