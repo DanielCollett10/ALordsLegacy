@@ -25,6 +25,8 @@ namespace LordsLegacy.Sim.Operations
         NoTrees = 5,
         /// <summary>Logs held by the operation fill its storage (WC-25).</summary>
         StorageFull = 6,
+        /// <summary>Logs wait for an ox and none is free (only from <see cref="OperationStatus.Reported"/>; felling continues).</summary>
+        WaitingForOx = 7,
     }
 
     /// <summary>Computes operation status from world state. Nothing here is stored (GDD section 5).</summary>
@@ -44,6 +46,26 @@ namespace LordsLegacy.Sim.Operations
             if (region == null || !world.Trees.AnyStandingIn(region)) return OperationState.NoTrees;
             if (IsStorageFull(world, op)) return OperationState.StorageFull;
             return OperationState.Working;
+        }
+
+        /// <summary>
+        /// The status to show: <see cref="Of"/>, except that a Working operation with a Haul task still waiting for an
+        /// ox reports <see cref="OperationState.WaitingForOx"/> (WCO-06, TSK-09). Felling carries on either way, so
+        /// the woodcutting system gates on <see cref="Of"/>, not on this.
+        /// </summary>
+        public static OperationState Reported(SimWorld world, Operation op)
+        {
+            OperationState s = Of(world, op);
+            if (s != OperationState.Working && s != OperationState.StorageFull) return s;
+            return IsWaitingForOx(world, op) ? OperationState.WaitingForOx : s;
+        }
+
+        /// <summary>True when any unfinished task of the operation needs an ox and has none.</summary>
+        public static bool IsWaitingForOx(SimWorld world, Operation op)
+        {
+            foreach (var t in world.Tasks.ByOwner(op.Id))
+                if (t.IsWaitingForOx) return true;
+            return false;
         }
 
         /// <summary>Logs in ground piles produced by this operation plus logs in its storage modules (WC-25).</summary>

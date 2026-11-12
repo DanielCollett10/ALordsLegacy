@@ -53,6 +53,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             double walk = Math.Max(1e-9, world.Tuning.WalkSpeedMPerGameMinute);
             var citizens = new List<Citizen>(world.People.Citizens); // id order
+            AssignOxTasks(world, citizens, helpers);
             foreach (Citizen c in citizens)
             {
                 if (!IsIdle(world, c)) continue;
@@ -66,7 +67,7 @@ namespace LordsLegacy.Sim.Tasks
                 foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
                 {
                     if (!Eligible(t, f, helpers, adult)) continue;
-                    if (t.Def.Required == RequiredResource.Ox) continue;
+                    if (t.Def.Required == RequiredResource.Ox) continue; // handled by AssignOxTasks
                     double travel = 0;
                     if (t.Target.HasValue)
                     {
@@ -89,6 +90,33 @@ namespace LordsLegacy.Sim.Tasks
                 if (best.Target.HasValue && !world.Tasks.Reserve(best.Id, best.Target.Value)) continue;
                 if (!world.Tasks.Assign(best.Id, c.Id)) continue;
                 world.Tasks.Start(best.Id);
+            }
+        }
+
+        // Ox tasks (WC-21/22): only once an ox is reserved; the free eligible worker nearest the ox takes it (ties: lowest id).
+        private static void AssignOxTasks(SimWorld world, List<Citizen> citizens, bool helpers)
+        {
+            foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
+            {
+                if (t.Def.Required != RequiredResource.Ox || !t.OxId.HasValue) continue;
+                Ox ox = world.People.FindOx(t.OxId.Value);
+                if (ox == null) { world.Tasks.Cancel(t.Id); continue; }
+                Citizen best = null;
+                double bestD = double.MaxValue;
+                foreach (Citizen c in citizens)
+                {
+                    if (!IsIdle(world, c)) continue;
+                    Family f = world.People.FindFamily(c.FamilyId);
+                    if (f == null || helpers != !f.WorkplaceId.HasValue) continue;
+                    bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
+                    if (!Eligible(t, f, helpers, adult)) continue;
+                    double dx = ox.X - c.X, dz = ox.Z - c.Z;
+                    double d = dx * dx + dz * dz;
+                    if (d < bestD - 1e-9) { bestD = d; best = c; }
+                }
+                if (best == null) continue;
+                if (!world.Tasks.Assign(t.Id, best.Id)) continue;
+                world.Tasks.Start(t.Id);
             }
         }
 
