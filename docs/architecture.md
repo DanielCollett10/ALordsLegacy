@@ -149,6 +149,15 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     id (0 = refused); `Release(id)`; `CancelOwner(owner)`. `Transfer(from, to, item, n, owner?)` is atomic (false and no change
     on failure) and consumes the matching stock/capacity reservations. `SimWorld.OperationPool(opId, item)` sums the operation's
     own storage modules only. `Audit()` also checks reservations and capacity.
+  - **Haul tasks (T-290, WC-21..24/26, WCO-07/08, LED-05, TSK-09):** `HaulSystem` (`Assets/Sim/Operations/`, last in the
+    operations block) opens `task.haul_logs` (priority 1, `RequiredResource.Ox`) for each own ground pile holding ≥
+    `OxLoadLogs` unreserved logs, or fewer when no standing tree and no unfinished fell task remains. At creation it
+    reserves the pile's logs and room in the operation storage nearest the pile (one taking the whole load, else the
+    nearest with any room); each tick an Open haul without an ox asks `OxPool.FindFor` and sets the ox Reserved. Steps:
+    FetchOx, LeadTo pile, LoadOx, LeadTo storage, UnloadOx, ReturnOx. `DispatchSystem` hands an ox task out only once it
+    has an ox, to the idle eligible worker nearest the ox (a worker mid-tree is busy); a haul with no ox waits, so felling
+    comes first. `OperationStatus.Reported` gives `WaitingForOx` while a haul waits for an ox; `Of` (which gates felling)
+    is unchanged. `HaulSystem` also releases ledger reservations and Reserved oxen of haul tasks cancelled elsewhere.
   - **Processes (T-272, TMB-01/02, TSK-14, MVP-1-12):** `Assets/Sim/Processes/` (`LordsLegacy.Sim.Processes`) holds
     `ProcessDef` (id, ordered `StageDef`s), `StageDef` (id, minutes, per-item, heavy, enabled, animation key) and
     `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` returns the enabled

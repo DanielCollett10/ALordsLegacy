@@ -30,6 +30,8 @@ namespace LordsLegacy.Sim.Tasks
         public int? OxId { get; internal set; }
         /// <summary>True if the ox was assigned to the owner operation when the task took it.</summary>
         public bool OxWasAssigned { get; internal set; }
+        /// <summary>True while the task needs an ox, has none reserved and is still Open (TSK-09, WCO-06).</summary>
+        public bool IsWaitingForOx => State == TaskState.Open && Def.Required == RequiredResource.Ox && !OxId.HasValue;
         /// <summary>Trees this task holds reserved. Released on cancel or completion.</summary>
         public IReadOnlyList<TreeId> Reservations => _reservations;
 
