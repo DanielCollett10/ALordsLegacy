@@ -8,7 +8,7 @@ namespace LordsLegacy.Sim.Inventory
     /// The inventory ledger (spec section 7, part 1): exact, located records of items. Items enter only through
     /// <see cref="Produce"/>; <see cref="Audit"/> proves nothing changed any other way (LED-09).
     /// </summary>
-    public sealed class Ledger
+    public sealed partial class Ledger
     {
         /// <summary>Ground piles with the same owner within this distance (mm) merge (1 m).</summary>
         public const long PileMergeRadiusMm = 1000;
@@ -26,13 +26,49 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>Finds a location by id, or null.</summary>
         public LedgerLocation Get(int id) => _locations.TryGetValue(id, out var l) ? l : null;
 
-        /// <summary>Returns the storage location bound to a module, creating it if needed.</summary>
-        public LedgerLocation GetOrAddStorage(int moduleId)
+        /// <summary>Finds the storage location bound to a module, or null (never creates).</summary>
+        public LedgerLocation FindStorage(int moduleId)
         {
             foreach (var l in _locations.Values)
                 if (l.Kind == LocationKind.Storage && l.ModuleId == moduleId) return l;
-            return Add(new LedgerLocation(_nextId++, LocationKind.Storage, default, null, moduleId));
+            return null;
         }
+
+        /// <summary>Returns the storage location bound to a module, creating it if needed.</summary>
+        public LedgerLocation GetOrAddStorage(int moduleId) => GetOrAddStorage(moduleId, int.MaxValue);
+
+        /// <summary>
+        /// Returns the storage location bound to a module, creating it if needed. Capacity comes from the module
+        /// type (<see cref="Footprints.FootprintTypeDef.LogCapacity"/>) and is refreshed on every call.
+        /// </summary>
+        public LedgerLocation GetOrAddStorage(int moduleId, Footprints.FootprintTypeDef type)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            return GetOrAddStorage(moduleId, type.LogCapacity);
+        }
+
+        /// <summary>Returns the storage location bound to a module with an explicit capacity.</summary>
+        public LedgerLocation GetOrAddStorage(int moduleId, int capacity)
+        {
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.Storage && l.ModuleId == moduleId)
+                {
+                    if (l.Capacity != capacity && capacity != int.MaxValue) l.Capacity = capacity;
+                    return l;
+                }
+            return Add(new LedgerLocation(_nextId++, LocationKind.Storage, default, null, moduleId, capacity));
+        }
+
+        /// <summary>Adds a carrier (an ox) that can hold up to <paramref name="capacity"/> items.</summary>
+        public LedgerLocation AddCarrier(int capacity)
+        {
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Must be positive.");
+            return Add(new LedgerLocation(_nextId++, LocationKind.Carrier, default, null, 0, capacity));
+        }
+
+        /// <summary>Adds a stockpile, which has no capacity limit (INV-10).</summary>
+        public LedgerLocation AddStockpile() =>
+            Add(new LedgerLocation(_nextId++, LocationKind.Stockpile, default, null, 0));
 
         /// <summary>
         /// Returns the ground pile for a point: the nearest existing pile with the same owner within 1 m
@@ -58,6 +94,8 @@ namespace LordsLegacy.Sim.Inventory
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (n <= 0) throw new ArgumentOutOfRangeException(nameof(n), "Must be positive.");
             if (Get(location.Id) != location) throw new ArgumentException("Location is not in this ledger.", nameof(location));
+            if (location.Capacity != int.MaxValue && (long)location.Total + n > location.Capacity)
+                throw new InvalidOperationException("Location " + location.Id + " would exceed its capacity of " + location.Capacity + ".");
             location.Counts.TryGetValue(item.Id, out int have);
             location.Counts[item.Id] = checked(have + n);
             _produced.TryGetValue(item.Id, out int made);
@@ -98,6 +136,8 @@ namespace LordsLegacy.Sim.Inventory
                     seen.TryGetValue(kv.Key, out int s);
                     seen[kv.Key] = s + kv.Value;
                 }
+            string fault = AuditReservations();
+            if (fault != null) return fault;
             foreach (var kv in _produced)
             {
                 seen.TryGetValue(kv.Key, out int s);

@@ -10,6 +10,10 @@ namespace LordsLegacy.Sim.Inventory
         GroundPile = 0,
         /// <summary>A storage module.</summary>
         Storage = 1,
+        /// <summary>An ox carrying items (T-286).</summary>
+        Carrier = 2,
+        /// <summary>An unlimited store (INV-10).</summary>
+        Stockpile = 3,
     }
 
     /// <summary>One place that holds items. Counts are owned by the <see cref="Ledger"/>.</summary>
@@ -28,9 +32,38 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>Storage: the module id it is bound to. Ground piles: 0.</summary>
         public int ModuleId { get; }
 
-        internal LedgerLocation(int id, LocationKind kind, PointMm position, int? owner, int moduleId)
+        internal readonly SortedDictionary<string, int> ReservedCounts = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+        internal readonly SortedDictionary<string, int> IncomingCounts = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+
+        /// <summary>Most items (all kinds together) held here; <see cref="int.MaxValue"/> means no limit.</summary>
+        public int Capacity { get; internal set; }
+
+        internal LedgerLocation(int id, LocationKind kind, PointMm position, int? owner, int moduleId, int capacity = int.MaxValue)
         {
-            Id = id; Kind = kind; Position = position; OwnerOperationId = owner; ModuleId = moduleId;
+            Id = id; Kind = kind; Position = position; OwnerOperationId = owner; ModuleId = moduleId; Capacity = capacity;
+        }
+
+        /// <summary>Items of one kind promised to leave (reserved stock).</summary>
+        public int ReservedOf(string itemId) => ReservedCounts.TryGetValue(itemId, out int n) ? n : 0;
+
+        /// <summary>Items of one kind promised to arrive (reserved capacity).</summary>
+        public int IncomingOf(string itemId) => IncomingCounts.TryGetValue(itemId, out int n) ? n : 0;
+
+        /// <summary>Available stock = total − reserved.</summary>
+        public int AvailableOf(string itemId) => CountOf(itemId) - ReservedOf(itemId);
+
+        /// <summary>Incoming items of every kind.</summary>
+        public int IncomingTotal { get { int t = 0; foreach (var kv in IncomingCounts) t += kv.Value; return t; } }
+
+        /// <summary>Room left for new items: capacity − total − incoming (never negative).</summary>
+        public int FreeSpace
+        {
+            get
+            {
+                if (Capacity == int.MaxValue) return int.MaxValue;
+                long f = (long)Capacity - Total - IncomingTotal;
+                return f < 0 ? 0 : (int)f;
+            }
         }
 
         /// <summary>Total number of items of any kind here.</summary>
