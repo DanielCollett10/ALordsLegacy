@@ -24,6 +24,19 @@ namespace LordsLegacy.Game.Visuals
         /// <summary>Id of the tie post visual.</summary>
         public const string CampTiePost = "visual.camp.tiepost";
 
+        /// <summary>Id of the woodcutting hut module visual.</summary>
+        public const string ModuleHut = "visual.module.woodcutting_hut";
+        /// <summary>Id of the log storage module visual.</summary>
+        public const string ModuleLogStorage = "visual.module.log_storage";
+        /// <summary>Id of the oxen stand module visual.</summary>
+        public const string ModuleOxenStand = "visual.module.oxen_stand";
+        /// <summary>Id of the tree stump visual.</summary>
+        public const string TreeStump = "visual.tree.stump";
+        /// <summary>Id of the felled trunk visual.</summary>
+        public const string TreeFelled = "visual.tree.felled";
+        /// <summary>Id of the single log visual.</summary>
+        public const string ItemLog = "visual.item.log";
+
         /// <summary>Box size (x width, y height, z depth) in metres for a visual id; one metre cube if unknown.</summary>
         public static Vector3 Of(string id)
         {
@@ -36,6 +49,12 @@ namespace LordsLegacy.Game.Visuals
                 case CampFire: return new Vector3(0.8f, 0.4f, 0.8f);
                 case CampLogPile: return new Vector3(1.5f, 0.7f, 2.5f);
                 case CampTiePost: return new Vector3(0.2f, 1.5f, 0.2f);
+                case ModuleHut: return new Vector3(6f, 2.6f, 4f);
+                case ModuleLogStorage: return new Vector3(8f, 1.2f, 6f);
+                case ModuleOxenStand: return new Vector3(3f, 1f, 3f);
+                case TreeStump: return new Vector3(0.6f, 0.5f, 0.6f);
+                case TreeFelled: return new Vector3(0.6f, 1f, 0.6f); // y is stretched to the trunk length
+                case ItemLog: return new Vector3(0.35f, 1f, 0.35f);   // y is stretched to the log length
                 default: return Vector3.one;
             }
         }
