@@ -43,6 +43,9 @@ namespace LordsLegacy.Sim.People
         /// <summary>Current activity.</summary>
         public Activity Activity { get; set; }
 
+        /// <summary>Pool state (Free, Reserved, Led, Resting). Changed through <c>OxPool</c>.</summary>
+        public OxState State { get; set; } = OxState.Free;
+
         /// <inheritdoc />
         public double PreviousX { get; set; }
 
