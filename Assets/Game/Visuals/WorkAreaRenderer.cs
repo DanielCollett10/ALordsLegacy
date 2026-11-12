@@ -38,6 +38,15 @@ namespace LordsLegacy.Game.Visuals
             _host = host; _agents = agents; _panel = panel;
         }
 
+        /// <summary>
+        /// Sets the <see cref="AreaRenderer"/> this component drives. Without it the first one in the scene is used.
+        /// Call <see cref="Sync"/> afterwards to apply the visibility at once.
+        /// </summary>
+        public void UseAreaRenderer(AreaRenderer areas)
+        {
+            _areas = areas;
+        }
+
         private void Update() { Sync(); }
 
         private void OnDisable()
@@ -143,6 +152,7 @@ namespace LordsLegacy.Game.Visuals
             return _panel;
         }
 
+        // The AreaRenderer this component drives: the one given through Configure, else the first one in the scene.
         private AreaRenderer Areas()
         {
             if (_areas == null) _areas = FindFirstObjectByType<AreaRenderer>();

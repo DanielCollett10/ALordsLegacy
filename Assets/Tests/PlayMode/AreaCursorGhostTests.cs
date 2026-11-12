@@ -29,8 +29,8 @@ namespace LordsLegacy.Tests.PlayMode
         public void TearDown()
         {
             foreach (var go in new[] { _hostGo, _rendererGo, _panelGo, _toolGo, _camGo, _groundGo })
-                if (go != null) Object.Destroy(go);
-            if (_panelSettings != null) Object.Destroy(_panelSettings);
+                if (go != null) Object.DestroyImmediate(go);
+            if (_panelSettings != null) Object.DestroyImmediate(_panelSettings);
         }
 
         private IEnumerator Setup()
