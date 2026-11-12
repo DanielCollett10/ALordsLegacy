@@ -72,6 +72,12 @@ namespace LordsLegacy.EditorTools.Visuals
             (VisualSizes.CampFire, "Cylinder.fbx", new Color(0.9f, 0.4f, 0.1f), 1f),
             (VisualSizes.CampLogPile, "Cube.fbx", new Color(0.45f, 0.3f, 0.15f), 1f),
             (VisualSizes.CampTiePost, "Cylinder.fbx", new Color(0.35f, 0.25f, 0.15f), 1f),
+            (VisualSizes.ModuleHut, "Cube.fbx", new Color(0.45f, 0.28f, 0.14f), 1f),
+            (VisualSizes.ModuleLogStorage, "Cube.fbx", new Color(0.72f, 0.6f, 0.38f), 1f),
+            (VisualSizes.ModuleOxenStand, "Cube.fbx", new Color(0.55f, 0.45f, 0.3f), 1f),
+            (VisualSizes.TreeStump, "Cylinder.fbx", new Color(0.4f, 0.28f, 0.16f), 1f),
+            (VisualSizes.TreeFelled, "Cylinder.fbx", new Color(0.36f, 0.26f, 0.15f), 1f),
+            (VisualSizes.ItemLog, "Cylinder.fbx", new Color(0.5f, 0.34f, 0.18f), 1f),
         };
 
         private static void GeneratePeopleAndCamp(VisualRegistry registry)

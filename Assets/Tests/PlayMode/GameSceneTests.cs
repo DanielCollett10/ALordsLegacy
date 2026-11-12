@@ -137,6 +137,9 @@ namespace LordsLegacy.Tests.PlayMode
             var moduleRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();
             Assert.IsNotNull(moduleRenderer, "ModuleRenderer missing.");
             AssertNoNullRefs(moduleRenderer);
+            var logPileRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.LogPileRenderer>();
+            Assert.IsNotNull(logPileRenderer, "LogPileRenderer missing.");
+            AssertNoNullRefs(logPileRenderer);
             AssertNoNullRefs(moduleTool);
 
             // The overlay's area labels are in the UXML the generator wires (T-116).

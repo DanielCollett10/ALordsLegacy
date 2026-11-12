@@ -82,6 +82,8 @@ namespace LordsLegacy.Game.Visuals
             if (!_built) Build(true);
             else if (host.World.Trees.Version != _builtVersion) Build(false);
 
+            DrawDebris();
+
             var def = registry.Get(TreeVisualId);
             var mesh = def.Mesh;
             var mats = def.Materials;
@@ -123,6 +125,54 @@ namespace LordsLegacy.Game.Visuals
                     }
                 }
             }
+        }
+
+        /// <summary>Stump instances drawn (T-280).</summary>
+        public int StumpCount => _stumps.Count;
+
+        /// <summary>Felled trunk instances drawn (T-280).</summary>
+        public int FelledCount => _felled.Count;
+
+        // Stumps and felled trunks (few, so one list each, rebuilt when TreeRegistry.Version changes).
+        private readonly List<Matrix4x4> _stumps = new List<Matrix4x4>();
+        private readonly List<Matrix4x4> _felled = new List<Matrix4x4>();
+        private Bounds _debrisBounds;
+        private int _debrisVersion = -1;
+
+        private void DrawDebris()
+        {
+            var world = host.World;
+            registry.TryGet(VisualSizes.TreeStump, out var stumpDef);
+            registry.TryGet(VisualSizes.TreeFelled, out var felledDef);
+            if (world.Trees.Version != _debrisVersion)
+            {
+                _debrisVersion = world.Trees.Version;
+                _stumps.Clear(); _felled.Clear();
+                var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+                foreach (var t in world.Trees.Stumps)
+                {
+                    var p = new Vector3(t.X, world.Terrain.HeightAt(t.X, t.Z), t.Z);
+                    _stumps.Add(stumpDef != null ? VisualSizes.Place(stumpDef, VisualSizes.TreeStump, p, (t.Id.Value * 137.508f) % 360f)
+                        : Matrix4x4.TRS(p, Quaternion.identity, Vector3.one));
+                    min = Vector3.Min(min, p); max = Vector3.Max(max, p);
+                }
+                foreach (var t in world.Trees.Felled)
+                {
+                    float yaw = (t.Id.Value * 137.508f) % 360f;
+                    float len = Mathf.Max(0.5f, (float)t.TrunkLengthM);
+                    float d = VisualSizes.Of(VisualSizes.TreeFelled).x;
+                    var b = new Vector3(t.X, world.Terrain.HeightAt(t.X, t.Z), t.Z);
+                    var c = b + LyingPiece.Direction(yaw) * (len * 0.5f) + Vector3.up * (d * 0.5f);
+                    _felled.Add(felledDef != null ? LyingPiece.Place(felledDef, c, yaw, d, len)
+                        : Matrix4x4.TRS(c, Quaternion.identity, Vector3.one));
+                    min = Vector3.Min(min, b - Vector3.one * len); max = Vector3.Max(max, b + Vector3.one * len);
+                }
+                _debrisBounds = new Bounds();
+                if (_stumps.Count + _felled.Count > 0) _debrisBounds.SetMinMax(min - Vector3.one, max + Vector3.one * 2f);
+            }
+            InstancedDraw.Draw(stumpDef, _stumps, _debrisBounds);
+            InstancedDraw.Draw(felledDef, _felled, _debrisBounds);
         }
 
         /// <summary>

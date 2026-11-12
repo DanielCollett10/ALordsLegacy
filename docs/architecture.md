@@ -372,6 +372,11 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   `CampRenderer` draws tents (family homes), fire, log pile and tie post from `World.Camp`, rebuilding when
   `FootprintRegistry.Version`, the camp or the family count changes. Visuals `visual.citizen.adult|child`, `visual.ox`,
   `visual.camp.tent|fire|logpile|tiepost` are written by `PlaceholderVisualGenerator`; box sizes are in `VisualSizes`.
+- Woodcutting visuals (T-280): `ModuleRenderer` draws placed modules instanced from `visual.module.woodcutting_hut|log_storage|oxen_stand`
+  stretched to the footprint (rebuilt on `FootprintRegistry.Version`). `TreeRenderer` also draws `visual.tree.stump` and
+  `visual.tree.felled` (lying trunk) for `TreeRegistry.Stumps`/`Felled` (rebuilt on `TreeRegistry.Version`); they are not standing trees.
+  `LogPileRenderer` draws one `visual.item.log` per log in each ground pile, stacked 4 per layer (rebuilt on `Ledger.Version`);
+  logs in storage modules are not drawn. All are written by `PlaceholderVisualGenerator`; no colliders.
 - Roads (`RoadRenderer`, `Assets/Game/Visuals/`): one child GameObject with a mesh per `RoadSegment`, built from its
   samples, the type width and the Sim terrain height + 0.05 m. `Sync()` (every frame) rebuilds only when
   `RoadNetwork.Version` changes: new segments get meshes, removed ones are destroyed. `ShowPreview(RoadPreview, width)`
