@@ -19,7 +19,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | SV-10 | **Save** asks for a name, pre-filled with the game date (e.g. `Sun 14 Mar Year 1 08:40`). The player may change it. Confirm writes a new save; names don't have to be unique, and saving never overwrites another save | DECIDED (pre-fill PROPOSED) |
-| SV-11 | **Autosave every 30 real minutes** of play, counted while the Game scene runs and the menu is closed (paused time counts). The timer restarts after any save. Autosaves are named `Autosave`, and only the newest 3 are kept | DECIDED (interval owner; keep 3 PROPOSED) |
+| SV-11 | **Autosave every 30 real minutes** of play, counted while the Game scene runs and the menu is closed (paused time counts). The timer restarts after any save. There is **one autosave slot**, named `Autosave`, and each autosave overwrites it. It appears in the Load list like any other save, dated by its last write | DECIDED (owner 13/11/2026) |
+| SV-14 | **A save keeps the tuning it was started with** (SimConfig values and type catalogs), so a load continues exactly as it was saved. Editing SimConfig affects new games only. Possible later dev-only option: "load with current tuning", for balancing an existing save. Not in M11 | DECIDED (owner 13/11/2026, on lead advice) |
 | SV-12 | A save is taken between ticks, never mid-tick (SAV-02). The player sees a short "Saved" note | DECIDED |
 | SV-13 | Saves are files in the user's save folder (`Application.persistentDataPath/Saves/`). Each has a small header (name, real date and time created, game date, map id) that the list reads without loading the whole file | PROPOSED |
 

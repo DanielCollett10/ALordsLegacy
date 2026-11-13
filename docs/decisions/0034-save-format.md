@@ -12,7 +12,7 @@ private state, id counters that are never reused, in-flight move orders and rese
   state changes (removed, felled, stump, reservations). The map is found by id and hash (saving.md SV-30).
 - Everything else is saved exactly, including id/name counters, `SimRandom.State`, move orders with their paths,
   routine/work-day state, the ledger journal, and the tuning and type catalogs the world was created with, so a load
-  continues identically even if `SimConfig` was edited since. Applying new tuning to an old save is out of scope.
+  continues identically even if `SimConfig` was edited since. Applying new tuning to an old save is out of scope (saving.md SV-14).
 - `CommandLog` is not saved.
 - **Round-trip test (SAV-06):** `Write(Read(Write(w))) == Write(w)` byte for byte, and both worlds stepped for a game
   day must write identical bytes again. Every new Sim system must extend its section and these tests pass.
