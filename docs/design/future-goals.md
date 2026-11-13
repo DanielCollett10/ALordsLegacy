@@ -18,4 +18,10 @@ then **woodcutting** (MVP-1 loop), which needs walking. Reshaping (FG-05) and sa
 Update 11/11/2026: M7 People walk the land, then **M8 Woodcutters fell trees**, **M9 Oxen haul logs** and **M10
 Build it first** (which completes MVP-1). See `people.md`, `movement.md`, `camp.md` and `woodcutting.md`.
 
+Update 13/11/2026 (owner, after M9): **M10 Build it first** (`construction.md`), then **M11 Save and come back**
+(save/load before more systems are added), then MVP-2 split into **M12 Homes** (plots and houses first: small, and
+the schedule needs homes), **M13 Food on the table** (foraging, granary, larders, eating, hunger; the camp-site is
+the only market, FOOD-A10b), and **M14 Markets** (stall families, MKT-03..03f).
+**Markets wait until food has been played**: the full stall-family system is not built before M13 is signed off.
+
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).

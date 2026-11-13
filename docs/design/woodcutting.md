@@ -15,7 +15,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | WC-04 | Placing a module: it follows the cursor and can be rotated freely with **Q/E** (15° steps, Shift for 1°; the camera no longer uses Q/E). With snapping on, an edge snaps flush to the nearest area edge (and turns to match it) when within the snap distance. Placement shows red with a reason when it's invalid | DECIDED |
 | WC-05 | Hut: exactly 1, mandatory. Log storage: at least 1, 20 logs each (INV-A3). Oxen stand: optional, holds 1 ox | DECIDED |
 | WC-06 | Blocking: the hut blocks movement. Log storage and the oxen stand don't (people and oxen walk onto them to unload and tie up) | DECIDED |
-| WC-07 | **M8: placed modules are built instantly** (placeholder). Real construction by odd-jobbers comes in M9 | DECIDED |
+| WC-07 | **M8/M9: placed modules are built instantly** (placeholder). From M10 they are construction sites built by odd-jobbers: see `construction.md` (CN-01..43), which replaces this rule | DECIDED |
 | WC-08 | Trees under a placed module are removed and yield nothing (BLD-10-A) | DECIDED |
 
 ## Where they cut (work area)
