@@ -424,6 +424,9 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
   reservations of the rest), restored through `TreeRegistry.RestoreRemoved/RestoreTree`; the road network (nodes with
   their segment-id order, segments with control points, samples, tangents, and both id counters) restored through
   `RoadNetwork.RestoreBegin/RestoreNode/RestoreSegment`. Version counters are not saved. Areas are added in part 2.
+  `StructuresSection` (id 3, T-363) follows Land: footprints (type id, centre, rotation, id counter), `CampInfo`, operations
+  (all fields, id counter) and construction sites. It is read before the Ledger, so `CampInfo.StockpileLocationId` keeps the
+  ledger id and the Ledger section must re-attach `CampInfo.StockpileLocation` (and check site location ids) when it loads.
 - `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees. The map has no baked roads (RD-14, WORLD-08-A).
 - File format: little-endian binary, magic `LLMP`, int32 format version (`MapData.CurrentVersion` = 1), map id,
   height grid, then trees. Other versions are rejected.

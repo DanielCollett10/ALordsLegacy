@@ -37,6 +37,13 @@ namespace LordsLegacy.Sim.Footprints
         /// <summary>An id above every id ever added here, so ids of removed footprints are not reused.</summary>
         public int NextId() => _nextId;
 
+        /// <summary>Sets the id counter when loading a save (ids of removed footprints must not be reused).</summary>
+        internal void RestoreNextId(int nextId)
+        {
+            if (nextId < _nextId) throw new InvalidOperationException("Footprint id counter " + nextId + " is below an existing id.");
+            _nextId = nextId;
+        }
+
         /// <summary>Removes a footprint. Returns false (and leaves Version alone) if the id is unknown.</summary>
         public bool Remove(int id)
         {
