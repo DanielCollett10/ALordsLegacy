@@ -23,6 +23,9 @@ namespace LordsLegacy.Game
         /// <summary>The simulation. Null until initialised. Views must not write to it.</summary>
         public SimWorld World { get; private set; }
 
+        /// <summary>The map the world was built on (its id and content hash go into saves). Null until initialised.</summary>
+        public MapData Map { get; private set; }
+
         /// <summary>Real-time pacer. Null until initialised.</summary>
         public TickPacer Pacer { get; private set; }
 
@@ -59,6 +62,7 @@ namespace LordsLegacy.Game
         /// <summary>Creates the world and pacer with explicit type catalogs (null = code defaults).</summary>
         public void Initialize(SimTuning tuning, MapData map, RoadTypeCatalog roadTypes, AreaTypeCatalog areaTypes)
         {
+            Map = map;
             World = SimWorld.FromMapData(map, tuning, roadTypes, areaTypes);
             Pacer = new TickPacer(tuning);
             if (_startLayout != null) LordsLegacy.Sim.Start.StartLayoutApplier.Apply(World, _startLayout.ToLayout());
