@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
@@ -8,7 +9,8 @@ namespace LordsLegacy.Sim.Save.Sections
 {
     /// <summary>
     /// The Land save section (decision 0034). Part 1: trees (as changes against the map's trees) and the road
-    /// network. Areas are added by the next task, after roads, in this same section.
+    /// network. Part 2: areas (shape, flattened polygon, name, per-type name counters, id counter), after roads. The
+    /// area spatial grid is rebuilt by re-adding the records.
     /// </summary>
     public sealed class LandSection : ISaveSection
     {
@@ -23,6 +25,7 @@ namespace LordsLegacy.Sim.Save.Sections
         {
             WriteTrees(world.Trees, w);
             WriteRoads(world.Roads, w);
+            WriteAreas(world.Areas, w);
         }
 
         /// <inheritdoc />
@@ -30,6 +33,83 @@ namespace LordsLegacy.Sim.Save.Sections
         {
             ReadTrees(world.Trees, r);
             ReadRoads(world.Roads, r);
+            ReadAreas(world.Areas, r);
+        }
+
+        private static void WriteAreas(AreaRegistry areas, SaveWriter w)
+        {
+            w.WriteInt32(areas.NextIdValue);
+            var counters = areas.NameCountersSorted();
+            w.WriteInt32(counters.Count);
+            foreach (var c in counters) { w.WriteString(c.Key); w.WriteInt32(c.Value); }
+            w.WriteInt32(areas.Count);
+            foreach (AreaRecord a in areas.All)
+            {
+                w.WriteInt32(a.Id);
+                w.WriteString(a.TypeId);
+                w.WriteString(a.Name);
+                WritePoints(w, a.Shape.Vertices);
+                for (int i = 0; i < a.Shape.Edges.Count; i++)
+                {
+                    AreaEdge e = a.Shape.Edges[i];
+                    w.WriteInt32((int)e.Kind);
+                    WritePoint(w, e.Handle);
+                    w.WriteInt32(e.SegmentId);
+                    w.WriteInt32((int)e.Side);
+                }
+                WritePoints(w, a.Polygon);
+            }
+        }
+
+        private static void ReadAreas(AreaRegistry areas, SaveReader r)
+        {
+            int nextId = r.ReadInt32();
+            try
+            {
+                int counters = r.ReadCount(8);
+                for (int i = 0; i < counters; i++)
+                {
+                    string type = r.ReadString();
+                    areas.RestoreNameCounter(type, r.ReadInt32());
+                }
+                int count = r.ReadCount(24);
+                for (int i = 0; i < count; i++)
+                {
+                    int id = r.ReadInt32();
+                    string type = r.ReadString();
+                    string name = r.ReadString();
+                    PointMm[] verts = ReadPoints(r);
+                    var edges = new AreaEdge[verts.Length];
+                    for (int k = 0; k < edges.Length; k++)
+                    {
+                        int kind = r.ReadInt32();
+                        PointMm handle = ReadPoint(r);
+                        int seg = r.ReadInt32();
+                        int side = r.ReadInt32();
+                        if (kind < 0 || kind > (int)AreaEdgeKind.NearArea) throw new SaveFormatException("Bad area edge kind " + kind + ".");
+                        if (side < 0 || side > (int)RoadSide.Right) throw new SaveFormatException("Bad road side " + side + ".");
+                        edges[k] = MakeEdge((AreaEdgeKind)kind, handle, seg, (RoadSide)side);
+                    }
+                    PointMm[] poly = ReadPoints(r);
+                    if (poly.Length == 0) throw new SaveFormatException("Area " + id + " has no polygon.");
+                    areas.Add(new AreaRecord(id, type, name, new AreaShape(verts, edges), poly));
+                }
+                areas.RestoreNextId(nextId);
+            }
+            catch (System.InvalidOperationException e) { throw new SaveFormatException(e.Message); }
+            catch (System.ArgumentException e) { throw new SaveFormatException(e.Message); }
+        }
+
+        private static AreaEdge MakeEdge(AreaEdgeKind kind, PointMm handle, int seg, RoadSide side)
+        {
+            switch (kind)
+            {
+                case AreaEdgeKind.Bent: return AreaEdge.Bent(handle);
+                case AreaEdgeKind.FollowsRoad: return AreaEdge.FollowsRoad(seg, side);
+                case AreaEdgeKind.NearRoad: return AreaEdge.NearRoad(seg, side);
+                case AreaEdgeKind.NearArea: return AreaEdge.NearArea(seg);
+                default: return AreaEdge.Straight();
+            }
         }
 
         private static void WriteTrees(TreeRegistry trees, SaveWriter w)
