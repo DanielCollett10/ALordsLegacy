@@ -1,5 +1,7 @@
 # 0034: Save format, round-trip testing and loading by scene reload
 
+**Status:** planned for M11. Not implemented yet (no `Assets/Sim/Save/` code).
+
 **Context.** M11 adds save/load (`docs/design/saving.md`, tech spec SAV-01..06). The Sim has many registries with
 private state, id counters that are never reused, in-flight move orders and reservations.
 

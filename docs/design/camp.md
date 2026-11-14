@@ -15,5 +15,6 @@ MVP-1-01 where they disagree.
 | CMP-08 | The test map's layout is written by an editor script that finds a flat spot at the forest edge, so it can be regenerated with the map | PROPOSED |
 | CMP-09 | Placeholder look: a few tents, a fire, a log pile and a tie post | DECIDED |
 
-> Implementation note (CMP-06): the stockpile holds no items in code (no 20 logs at start). `StartLayout` says stockpile
-> contents arrive with M9, while CMP-06 says M8 (the inventory ledger). Owner to decide the milestone.
+> Implementation note (CMP-06, CMP-01): the start layout's `Stock` (default 20 `item.log`, T-287) is produced into a
+> ledger `Stockpile` location at the stockpile spot, with no capacity limit. It landed in M9, while CMP-06 says M8.
+> Owner to decide whether the milestone label should change. No operation storage counts it (WC-37).

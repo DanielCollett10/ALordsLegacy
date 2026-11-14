@@ -3,6 +3,9 @@
 M11 (Save and come back). Implements GDD SAVE-01/02 and tech spec SAV-01..06. Technical shape: decision 0034.
 Wins over the tech spec where they disagree.
 
+> Implementation note (status): not built yet. There is no save code in `Assets/Sim/` or `Assets/Game/`; the format is
+> planned in decision 0034.
+
 Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN = not decided.
 
 ## The Esc menu
