@@ -96,7 +96,7 @@ namespace LordsLegacy.Sim.Tests.Save
             var map = SyntheticMap.CreateRamp("a");
             var world = SimWorld.FromMapData(map, new SimTuning());
             var bytes = Save(world, map);
-            Assert.Throws<SaveFormatException>(() => SimSave.Read(bytes, SyntheticMap.CreateRamp("b")));
+            Assert.Throws<SaveMapMismatchException>(() => SimSave.Read(bytes, SyntheticMap.CreateRamp("b")));
         }
 
         [Test]

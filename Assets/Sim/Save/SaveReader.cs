@@ -76,6 +76,15 @@ namespace LordsLegacy.Sim.Save
             return true;
         }
 
+        /// <summary>Reads all bytes left in this reader (or section body) as an array.</summary>
+        public byte[] ReadRemaining()
+        {
+            var a = new byte[Remaining];
+            Buffer.BlockCopy(_data, _pos, a, 0, a.Length);
+            _pos = _end;
+            return a;
+        }
+
         /// <summary>Reads one byte.</summary>
         public byte ReadByte()
         {

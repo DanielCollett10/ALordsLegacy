@@ -28,6 +28,8 @@ private state, id counters that are never reused, in-flight move orders and rese
   pile, load and tree). The def's policy (eligibility, required resource) is not saved: `TaskDefCatalog` looks it up by
   def id, and an unknown id fails the load. A new task def id must be added to that catalog. The step runner's own
   runtime state (walk orders, ox tracks, rest targets) is not in this section.
+- **Map check (T-368):** `SimSave.Read` compares map id and content hash and throws `SaveMapMismatchException`
+  (message starts with the SV-30 text). `SaveDiff.FirstDifference(a, b)` names the first differing section id (0 = header).
 - **Round-trip test (SAV-06):** `Write(Read(Write(w))) == Write(w)` byte for byte, and both worlds stepped for a game
   day must write identical bytes again. Every new Sim system must extend its section and these tests pass.
 - **Unity loads by reloading the Game scene** with the save bytes handed to `SimHost`, so renderers always build

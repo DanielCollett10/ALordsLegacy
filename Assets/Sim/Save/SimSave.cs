@@ -51,8 +51,8 @@ namespace LordsLegacy.Sim.Save
         {
             if (map == null) throw new ArgumentNullException(nameof(map));
             var r = SaveReader.Open(bytes, out SaveHeader header);
-            if (header.MapId != map.MapId)
-                throw new SaveFormatException("Save was made on map '" + header.MapId + "', not '" + map.MapId + "'.");
+            if (header.MapId != map.MapId || header.MapContentHash != map.ContentHash)
+                throw new SaveMapMismatchException(header.MapId, header.MapContentHash, map.MapId, map.ContentHash);
             if (!r.NextSection(out int coreId, out SaveReader coreBody) || coreId != CoreSection.Id)
                 throw new SaveFormatException("Save has no Core section.");
             var world = SimWorld.ForRestore(map, CoreSection.Read(coreBody));
