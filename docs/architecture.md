@@ -398,7 +398,17 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   under way at the end of work is dropped as a site-owned pile where the ox stands, with its reservation moved to that
   pile; Build does not wind down. *Assignment gate:* `AssignFamily` refuses with "Hut not built yet" while the operation's
   hut is unbuilt (CN-04b); `OperationPanelView` disables its Assign button with the same text.
-- Not built yet: food, markets, economy, saving (decision 0034); on the construction side the 50% removal refund (CN-33),
+- **Save (decision 0034, `Assets/Sim/Save/`):** `SimSave.Write(world, name, createdRealTime, mapId, mapHash)` and
+  `SimSave.Read(bytes, map)`. Format: magic `LLSV`, int32 version (`SaveWriter.CurrentVersion` = 1), a header (name, real
+  time, tick, map id, map hash), then the Core section and the list sections, each as int32 id + int32 byte length.
+  Section ids and order (`SaveSections.CreateDefault()`): Core 1 (tick, pause, random state, tuning, road and area
+  catalogs), then Land 2, Structures 3, Ledger 4, Population 5, Movement 6, Tasks 7. Restore: read the header, refuse a
+  map id or hash mismatch (`SaveMapMismatchException`), read Core, build `SimWorld.ForRestore(map, core)` (no start
+  layout, no systems stepped), read each list section in order (a wrong id throws `SaveFormatException`), then a full
+  `Nav.Sync`. Write uses the same order. Not saved: `CommandLog`, `NavGrid` cells, speed, Unity-side state; per-section
+  detail is under Map pipeline. Any new Sim state goes into a section in the same task and must be covered by
+  `SimSaveRoundTripTests` (CLAUDE.md code rules).
+- Not built yet: food, markets, economy, the Unity save and load menu and autosave (saving.md SV-01, SV-10..SV-22); on the construction side the 50% removal refund (CN-33),
   artisan build steps (PPL-42), a walk-to-site step for builders, clearing trees as a job (BLD-10-C), and houses and the
   granary (MVP-2). Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps). Task defs so far:
   `task.fell_tree`, `task.haul_logs`, `task.deliver_materials`, `task.build`.

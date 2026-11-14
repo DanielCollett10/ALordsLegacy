@@ -29,6 +29,8 @@ touching the simulation.
 - Sim code: no static mutable state, no `DateTime.Now`, no `System.Random` without a seed.
   Time only advances through the Sim tick.
 - Every new Sim behaviour gets an NUnit test in `Sim.Tests/`.
+- New Sim state must be written in a save section and covered by the round-trip test in the same task
+  (decision 0034). A task that adds state without a save section is not done.
 - Prefer small files and small classes. Public API gets XML doc comments.
 - UI uses **UI Toolkit** (`.uxml` + `.uss`), not uGUI, so it can be written as text.
 - Prefabs and scenes: prefer an Editor script that generates them over hand-editing YAML.
