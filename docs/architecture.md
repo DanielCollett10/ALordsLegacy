@@ -167,6 +167,13 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     has an ox, to the idle eligible worker nearest the ox (a worker mid-tree is busy); a haul with no ox waits, so felling
     comes first. `OperationStatus.Reported` gives `WaitingForOx` while a haul waits for an ox; `Of` (which gates felling)
     is unchanged. `HaulSystem` also releases ledger reservations and Reserved oxen of haul tasks cancelled elsewhere.
+  - **Construction delivery (T-345, CN-20..23):** `ConstructionSystem` (`Assets/Sim/Operations/`, after `HaulSystem` in the
+    operations block) opens `task.deliver_materials` (`ConstructionTaskDefs.Deliver`, HelpersOnly) per site for logs still
+    held in the site's reservations: up to `OxLoadLogs` per task from one reserved source, at the site's priority. Opening a
+    task moves those logs from the site reservation (owner = footprint id) to a reservation owned by the task so the step
+    runner's `Transfer` consumes it. Open tasks ask `OxPool.FindFor(owning operation)` each tick. Cancelled tasks hand their
+    logs back (the system re-reserves a shortfall); tasks of a removed site are cancelled. The site becomes Building when its
+    first log is on site.
   - **Early fetch and sunset (T-291, WC-23/35):** `HaulSystem.Early.cs` opens a haul for an Active Fell task whose tree
     yields a full load once `FellMinutesLeft` ≤ the nearest idle worker's walk to the ox + the ox's led walk to the tree
     (ox speed). That haul (`TaskRecord.AwaitsTaskId` = the fell task) reserves ox and storage room at once, waits at the
