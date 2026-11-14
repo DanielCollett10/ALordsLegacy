@@ -42,12 +42,21 @@ namespace LordsLegacy.Sim.People
             public Window(long sunrise, long end) { Sunrise = sunrise; End = end; }
         }
 
-        /// <summary>True when the citizen belongs to a family with a workplace and is old enough to work.</summary>
+        /// <summary>
+        /// True when the work day applies: the citizen is working age and either belongs to a family with a workplace, or
+        /// is an odd-jobber (family without a workplace) who holds a construction task or could take an Open one
+        /// (T-346, CN-25). With no construction work odd-jobbers mill as before (CN-26).
+        /// </summary>
         public static bool AppliesTo(SimWorld world, Citizen c)
         {
             Family f = world.People.FindFamily(c.FamilyId);
-            return f != null && f.WorkplaceId.HasValue &&
-                   c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
+            if (f == null || c.AgeYears(world.Tick, world.Tuning.AgeingRate) < OperationStatus.WorkingAgeYears) return false;
+            if (f.WorkplaceId.HasValue) return true;
+            foreach (TaskRecord t in world.Tasks.ByAssignee(c.Id))
+                if (ConstructionTaskDefs.IsConstruction(t.Def.Id)) return true;
+            foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
+                if (ConstructionTaskDefs.IsConstruction(t.Def.Id)) return true;
+            return false;
         }
 
         /// <summary>Sunrise and end-of-work ticks for the day starting at <paramref name="dayStartTick"/> (midnight).</summary>

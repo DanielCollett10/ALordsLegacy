@@ -103,7 +103,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   - **Working day (T-277, PPL-21/24..26/45):** `SimWorld.WorkDay` (`Assets/Sim/People/WorkDay.cs`) plans shifts for adult
     members of families with a `WorkplaceId`; everyone else is always "on shift" (M7 routine). Work ends at sunset
     (Sunday: minus `SundayMealMinutes`). Depart tick = max(sunrise − commute, previous work end + commute +
-    `MinSleepHours`), commute = path travel time to the task's target tree, planned once per morning per citizen
+    `MinSleepHours`), commute = path travel time to the task's target tree (0 for target-less construction tasks),
+    planned once per morning per citizen. T-346: odd-jobbers (working-age, no workplace) are on the same day while a
+    construction task is held or Open (CN-25); `DispatchSystem` offers nothing to an off-shift odd-jobber; with no
+    construction work they mill as before (CN-26)
     (a worker already awake leaves at once). `DispatchSystem.IsIdle` lets sleeping assigned workers take tasks at night.
     Off shift, `StepRunnerSystem` skips the worker's Active task (progress and reservations kept) and `RoutineSystem`
     walks the worker home to sleep; on shift the step runner resumes (a task paused mid-Work first walks back to the
