@@ -431,6 +431,11 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
   journals and both id counters. Reserved/incoming totals are rebuilt from the reservations (`Ledger.Restore*`, internal, in
   `Ledger.Restore.cs`). On read it re-attaches the camp stockpile, checks site location ids and runs `Ledger.Audit`; a fault throws
   `SaveFormatException`.
+  T-366 `MovementSection` (id 6, after Population): per citizen/ox move order (target, path, segment index, progress, status,
+  fail reason, planned nav version), follow links (leader kind + id + offset), debug sends, `RoutineSystem` per-citizen state and
+  `WorkDay` plans. An order shared by `Move`, routine state and debug send is written once and stays one object. `NavGrid` cells are
+  not saved; only `Nav.Version` (restored via `NavGrid.RestoreVersion`, applied on the first sync) and `MovementSystem.SeenNavVersion`
+  are, so orders do not re-plan on the first step after a load. Systems are found with `SimWorld.FindSystem<T>()` (internal).
 - `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees. The map has no baked roads (RD-14, WORLD-08-A).
 - File format: little-endian binary, magic `LLMP`, int32 format version (`MapData.CurrentVersion` = 1), map id,
   height grid, then trees. Other versions are rejected.

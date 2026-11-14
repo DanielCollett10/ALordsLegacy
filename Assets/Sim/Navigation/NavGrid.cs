@@ -102,6 +102,7 @@ namespace LordsLegacy.Sim.Navigation
             if (_built && world.Roads.Version == _roadVersion && world.Footprints.Version == _footprintVersion) return;
 
             bool changed = false;
+            bool firstBuild = !_built;
             if (!_built)
             {
                 ComputeSlope(world.Terrain);
@@ -125,7 +126,20 @@ namespace LordsLegacy.Sim.Navigation
             }
             _roadVersion = world.Roads.Version;
             _footprintVersion = world.Footprints.Version;
-            if (changed) Version++;
+            if (firstBuild && _restoredVersion >= 0) Version = _restoredVersion;
+            else if (changed) Version++;
+        }
+
+        private int _restoredVersion = -1;
+
+        /// <summary>
+        /// Save restore only (T-366): makes <see cref="Version"/> equal the saved one, so move orders planned against it
+        /// stay valid. Applies at once if the grid is already built, otherwise on the first build. The grid itself is not saved.
+        /// </summary>
+        internal void RestoreVersion(int version)
+        {
+            if (_built) Version = version;
+            else _restoredVersion = version;
         }
 
         private void ComputeSlope(IHeightField terrain)

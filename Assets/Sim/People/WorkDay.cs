@@ -30,6 +30,22 @@ namespace LordsLegacy.Sim.People
             public long Depart;
         }
 
+        /// <summary>The cached plans as (citizen id, key day start, depart tick), ascending id. For the save (T-366).</summary>
+        internal List<(int Id, long KeyDayStart, long Depart)> ExportPlans()
+        {
+            var ids = new List<int>(_plans.Keys);
+            ids.Sort();
+            var list = new List<(int, long, long)>(ids.Count);
+            foreach (int id in ids) list.Add((id, _plans[id].KeyDayStart, _plans[id].Depart));
+            return list;
+        }
+
+        /// <summary>Sets one cached plan when loading a save.</summary>
+        internal void RestorePlan(int citizenId, long keyDayStart, long depart)
+        {
+            _plans[citizenId] = new Plan { KeyDayStart = keyDayStart, Depart = depart };
+        }
+
         /// <summary>First and last (exclusive) tick of work on one calendar day.</summary>
         public readonly struct Window
         {

@@ -59,6 +59,46 @@ namespace LordsLegacy.Sim.People
         {
         }
 
+        /// <summary>One citizen's routine state, as saved (T-366).</summary>
+        internal readonly struct Saved
+        {
+            public Saved(int citizenId, int phase, long wakeTick, long stayUntilTick, MoveOrder order)
+            {
+                CitizenId = citizenId; Phase = phase; WakeTick = wakeTick; StayUntilTick = stayUntilTick; Order = order;
+            }
+            public int CitizenId { get; }
+            public int Phase { get; }
+            public long WakeTick { get; }
+            public long StayUntilTick { get; }
+            public MoveOrder Order { get; }
+        }
+
+        /// <summary>Every citizen's routine state, ascending citizen id.</summary>
+        internal List<Saved> ExportStates()
+        {
+            var ids = new List<int>(_states.Keys);
+            ids.Sort();
+            var list = new List<Saved>(ids.Count);
+            foreach (int id in ids)
+            {
+                State s = _states[id];
+                list.Add(new Saved(id, (int)s.Phase, s.WakeTick, s.StayUntilTick, s.Order));
+            }
+            return list;
+        }
+
+        /// <summary>Highest valid phase number, for the reader to check.</summary>
+        internal const int MaxPhase = (int)Phase.GoingHome;
+
+        /// <summary>Sets one citizen's routine state when loading a save.</summary>
+        internal void RestoreState(Saved s)
+        {
+            _states[s.CitizenId] = new State
+            {
+                Phase = (Phase)s.Phase, WakeTick = s.WakeTick, StayUntilTick = s.StayUntilTick, Order = s.Order
+            };
+        }
+
         // A haul ending its day at sunset keeps its worker until the ox is back (T-291, WC-35).
         private static bool IsWindingDown(SimWorld world, Citizen c)
         {
