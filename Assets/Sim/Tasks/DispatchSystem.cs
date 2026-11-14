@@ -12,13 +12,15 @@ namespace LordsLegacy.Sim.Tasks
     /// <summary>
     /// Dispatch-phase system (TSK-07, TSK-08, PPL-44, PPL-45). Every <c>DispatchIntervalMinutes</c> (10) game minutes it
     /// matches idle workers to Open tasks, workers in id order. A worker takes the best eligible task: higher priority
-    /// first, then shorter travel (straight-line distance at walking speed), then lower task id. It reserves the task's
-    /// target tree, assigns and starts the task. The step runner does the rest.
+    /// first, then shorter travel, then lower task id. Travel is the straight-line distance at walking speed from the
+    /// worker to the job: the target tree for a fell task (TSK-07), the ox for a delivery (CN-31), the site for a
+    /// build (CN-31). It reserves the task's target tree, assigns and starts the task. The step runner does the rest.
     /// <para>
     /// Two passes: first workers of the family assigned to the task's owner operation, then helper families (no
     /// workplace). A family with a workplace never takes other work (PPL-45). Tasks with a heavy step need a worker aged
-    /// 14 or over (PPL-44). Tasks that require an ox are left open (no ox handling yet). A task whose target tree has
-    /// gone is cancelled (TSK-13). No state, so one instance per world is not required but is customary.
+    /// 14 or over (PPL-44). A task that requires an ox is offered only once it has one (WC-21/22), and not after the
+    /// end of work (T-291). A task whose target tree has gone, or whose ox has gone, is cancelled (TSK-13). No state,
+    /// so one instance per world is not required but is customary.
     /// </para>
     /// </summary>
     public sealed class DispatchSystem : ISimSystem
@@ -31,8 +33,10 @@ namespace LordsLegacy.Sim.Tasks
             if (world.Tick % interval != 0) return;
             if (world.Tasks.InState(TaskState.Open).Count == 0) return;
 
-            RunPass(world, helpers: false);
-            RunPass(world, helpers: true);
+            bool oxOpen = OxTasksOpen(world);
+            if (oxOpen) CancelTasksOfGoneOxen(world);
+            RunPass(world, helpers: false, oxOpen);
+            RunPass(world, helpers: true, oxOpen);
         }
 
         /// <inheritdoc />
@@ -50,11 +54,21 @@ namespace LordsLegacy.Sim.Tasks
             return c.Move == null || c.Move.IsFinished || c.Activity == Activity.MillingAbout;
         }
 
-        private static void RunPass(SimWorld world, bool helpers)
+        // Ox tasks are offered only before the end of work: after it no haul starts (T-291, WC-35).
+        private static bool OxTasksOpen(SimWorld world) =>
+            world.Tick < world.WorkDay.WindowOf(world, WorkDay.DayStart(world)).End;
+
+        // An ox task whose ox has gone is cancelled (TSK-13).
+        private static void CancelTasksOfGoneOxen(SimWorld world)
         {
-            double walk = Math.Max(1e-9, world.Tuning.WalkSpeedMPerGameMinute);
+            foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
+                if (t.Def.Required == RequiredResource.Ox && t.OxId.HasValue && world.People.FindOx(t.OxId.Value) == null)
+                    world.Tasks.Cancel(t.Id);
+        }
+
+        private static void RunPass(SimWorld world, bool helpers, bool oxOpen)
+        {
             var citizens = new List<Citizen>(world.People.Citizens); // id order
-            AssignOxTasks(world, citizens, helpers);
             foreach (Citizen c in citizens)
             {
                 if (!IsIdle(world, c)) continue;
@@ -70,26 +84,7 @@ namespace LordsLegacy.Sim.Tasks
                 foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
                 {
                     if (!Eligible(t, f, helpers, adult)) continue;
-                    if (t.Def.Required == RequiredResource.Ox) continue; // handled by AssignOxTasks
-                    double travel = 0;
-                    if (t.Target.HasValue)
-                    {
-                        if (!world.Trees.TryGet(t.Target.Value, out TreeRecord tree) || tree.State == TreeState.Stump)
-                        {
-                            world.Tasks.Cancel(t.Id); // TSK-13: target gone
-                            continue;
-                        }
-                        if (tree.ReservedBy.HasValue && tree.ReservedBy.Value != t.Id) continue;
-                        double dx = tree.X - c.X, dz = tree.Z - c.Z;
-                        travel = Math.Sqrt(dx * dx + dz * dz) / walk;
-                    }
-                    else if (t.SiteFootprintId.HasValue)
-                    {
-                        Footprint site = world.Footprints.Get(t.SiteFootprintId.Value);
-                        if (site == null) { world.Tasks.Cancel(t.Id); continue; }
-                        double dx = site.Centre.XMetres - c.X, dz = site.Centre.ZMetres - c.Z; // CN-31: nearest site
-                        travel = Math.Sqrt(dx * dx + dz * dz) / walk;
-                    }
+                    if (!TravelTo(world, t, c, helpers, oxOpen, out double travel)) continue;
                     if (best == null || t.Priority > best.Priority ||
                         (t.Priority == best.Priority && travel < bestTravel - 1e-9))
                     {
@@ -103,34 +98,77 @@ namespace LordsLegacy.Sim.Tasks
             }
         }
 
-        // Ox tasks (WC-21/22): only once an ox is reserved; the free eligible worker nearest the ox takes it (ties: lowest id).
-        private static void AssignOxTasks(SimWorld world, List<Citizen> citizens, bool helpers)
+        // Walking time (minutes) from the citizen to the job of an Open task, and whether the task can be offered to
+        // this citizen now. A fell task with a gone tree is cancelled here (TSK-13).
+        private static bool TravelTo(SimWorld world, TaskRecord t, Citizen c, bool helpers, bool oxOpen, out double travel)
         {
-            // After the end of work no haul starts: it would only be dropped again at once (T-291, WC-35).
-            if (world.Tick >= world.WorkDay.WindowOf(world, WorkDay.DayStart(world)).End) return;
-            foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
+            double walk = Math.Max(1e-9, world.Tuning.WalkSpeedMPerGameMinute);
+            travel = 0;
+            if (t.Def.Required == RequiredResource.Ox)
             {
-                if (t.Def.Required != RequiredResource.Ox || !t.OxId.HasValue) continue;
+                // WC-21/22: offered only once an ox is reserved, only before the end of work, and only to the free
+                // eligible worker nearest the ox (ties: lowest id).
+                if (!oxOpen || !t.OxId.HasValue) return false;
                 Ox ox = world.People.FindOx(t.OxId.Value);
-                if (ox == null) { world.Tasks.Cancel(t.Id); continue; }
-                Citizen best = null;
-                double bestD = double.MaxValue;
-                foreach (Citizen c in citizens)
-                {
-                    if (!IsIdle(world, c)) continue;
-                    Family f = world.People.FindFamily(c.FamilyId);
-                    if (f == null || helpers != !f.WorkplaceId.HasValue) continue;
-                    if (helpers && !world.WorkDay.OnShift(world, c)) continue;
-                    bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
-                    if (!Eligible(t, f, helpers, adult)) continue;
-                    double dx = ox.X - c.X, dz = ox.Z - c.Z;
-                    double d = dx * dx + dz * dz;
-                    if (d < bestD - 1e-9) { bestD = d; best = c; }
-                }
-                if (best == null) continue;
-                if (!world.Tasks.Assign(t.Id, best.Id)) continue;
-                world.Tasks.Start(t.Id);
+                if (ox == null) return false;
+                if (!IsNearestFreeToOx(world, t, c, helpers, ox)) return false;
+                travel = DistanceM(ox.X, ox.Z, c.X, c.Z) / walk;
+                return true;
             }
+            if (t.Target.HasValue)
+            {
+                if (!world.Trees.TryGet(t.Target.Value, out TreeRecord tree) || tree.State == TreeState.Stump)
+                {
+                    world.Tasks.Cancel(t.Id); // TSK-13: target gone
+                    return false;
+                }
+                if (tree.ReservedBy.HasValue && tree.ReservedBy.Value != t.Id) return false;
+                travel = DistanceM(tree.X, tree.Z, c.X, c.Z) / walk;
+                return true;
+            }
+            if (t.SiteFootprintId.HasValue)
+            {
+                Footprint site = world.Footprints.Get(t.SiteFootprintId.Value);
+                if (site == null) { world.Tasks.Cancel(t.Id); return false; }
+                travel = DistanceM(site.Centre.XMetres, site.Centre.ZMetres, c.X, c.Z) / walk; // CN-31: nearest site
+            }
+            return true;
+        }
+
+        // True when no other free, eligible worker of this pass stands nearer the ox than c (ties: lower id wins).
+        private static bool IsNearestFreeToOx(SimWorld world, TaskRecord t, Citizen c, bool helpers, Ox ox)
+        {
+            double mine = SquaredDistance(ox.X, ox.Z, c.X, c.Z);
+            foreach (Citizen other in world.People.Citizens)
+            {
+                if (other.Id == c.Id || !CanTake(world, other, t, helpers)) continue;
+                double theirs = SquaredDistance(ox.X, ox.Z, other.X, other.Z);
+                if (theirs < mine - 1e-9 || (theirs <= mine + 1e-9 && other.Id < c.Id)) return false;
+            }
+            return true;
+        }
+
+        // Free, in this pass, and eligible for the task (same checks as the worker loop).
+        private static bool CanTake(SimWorld world, Citizen c, TaskRecord t, bool helpers)
+        {
+            if (!IsIdle(world, c)) return false;
+            Family f = world.People.FindFamily(c.FamilyId);
+            if (f == null || helpers != !f.WorkplaceId.HasValue) return false;
+            if (helpers && !world.WorkDay.OnShift(world, c)) return false;
+            bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
+            return Eligible(t, f, helpers, adult);
+        }
+
+        private static double SquaredDistance(double ax, double az, double bx, double bz)
+        {
+            double dx = ax - bx, dz = az - bz;
+            return dx * dx + dz * dz;
+        }
+
+        private static double DistanceM(double ax, double az, double bx, double bz)
+        {
+            double dx = ax - bx, dz = az - bz;
+            return Math.Sqrt(dx * dx + dz * dz);
         }
 
         private static bool Eligible(TaskRecord t, Family f, bool helpers, bool adult)
