@@ -216,6 +216,7 @@ namespace LordsLegacy.Sim.Operations
                 TaskDef def = ConstructionTaskDefs.Deliver(pick, source.Id, drop, site.LedgerLocationId, n,
                     Math.Max(1, world.Tuning.OxLoadMinutes), Math.Max(1, world.Tuning.OxUnloadMinutes));
                 TaskRecord task = world.Tasks.Create(def, op.Id, null, priority, fp.Type.Id);
+                world.Tasks.SetSite(task.Id, fp.Id); // lets a priority change (CN-30) reach this task
                 if (world.Inventory.ReserveStock(source, Items.Log, n, task.Id) == 0)
                 {
                     world.Tasks.Cancel(task.Id);
