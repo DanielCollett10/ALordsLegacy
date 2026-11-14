@@ -21,6 +21,8 @@ namespace LordsLegacy.Sim.Construction
         public int LedgerLocationId { get; set; }
         /// <summary>Build progress, in worker-minutes.</summary>
         public int ProgressMinutes { get; set; }
+        /// <summary>Logs already used up by the build work (CN-23b); delivered, but no longer on site.</summary>
+        public int LogsConsumed { get; set; }
         /// <summary>Normal or High.</summary>
         public ConstructionPriority Priority { get; set; }
 

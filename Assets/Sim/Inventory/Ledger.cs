@@ -15,6 +15,7 @@ namespace LordsLegacy.Sim.Inventory
 
         private readonly SortedDictionary<int, LedgerLocation> _locations = new SortedDictionary<int, LedgerLocation>();
         private readonly SortedDictionary<string, int> _produced = new SortedDictionary<string, int>(StringComparer.Ordinal);
+        private readonly SortedDictionary<string, int> _consumed = new SortedDictionary<string, int>(StringComparer.Ordinal);
         private int _nextId = 1;
 
         /// <summary>Bumps on every change to the ledger.</summary>
@@ -118,6 +119,24 @@ namespace LordsLegacy.Sim.Inventory
             Version++;
         }
 
+        /// <summary>Total of one item id used up by <see cref="Consume"/> so far (the consumed journal).</summary>
+        public int ConsumedOf(string itemId) => _consumed.TryGetValue(itemId, out int n) ? n : 0;
+
+        /// <summary>
+        /// Uses up <paramref name="n"/> items at a location (construction, CN-23b) and records it in the consumed
+        /// journal. Only unreserved stock can be consumed. Returns false, changing nothing, when there is not enough.
+        /// </summary>
+        public bool Consume(LedgerLocation location, ItemDef item, int n)
+        {
+            Check(location, item, n);
+            if (Get(location.Id) != location || location.AvailableOf(item.Id) < n) return false;
+            int left = location.Counts[item.Id] - n;
+            if (left == 0) location.Counts.Remove(item.Id); else location.Counts[item.Id] = left;
+            _consumed[item.Id] = ConsumedOf(item.Id) + n;
+            Version++;
+            return true;
+        }
+
         /// <summary>Produces items on the ground, merging into a nearby same-owner pile. Returns the pile.</summary>
         public LedgerLocation ProduceOnGround(PointMm position, int? ownerOperationId, ItemDef item, int n)
         {
@@ -156,7 +175,8 @@ namespace LordsLegacy.Sim.Inventory
             foreach (var kv in _produced)
             {
                 seen.TryGetValue(kv.Key, out int s);
-                if (s != kv.Value) return kv.Key + ": locations hold " + s + " but operations produced " + kv.Value;
+                int expected = kv.Value - ConsumedOf(kv.Key);
+                if (s != expected) return kv.Key + ": locations hold " + s + " but operations produced " + kv.Value + " and " + ConsumedOf(kv.Key) + " were consumed";
             }
             foreach (var kv in seen)
                 if (!_produced.ContainsKey(kv.Key)) return kv.Key + ": locations hold " + kv.Value + " but none produced";
