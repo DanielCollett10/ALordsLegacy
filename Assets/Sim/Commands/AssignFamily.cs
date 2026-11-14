@@ -33,6 +33,13 @@ namespace LordsLegacy.Sim.Commands
             if (f.WorkplaceId != null)
                 return CommandResult.Rejected(CommandRejectCode.NotAllowed, "family already has a workplace");
             OperationTypeDef type = OperationTypes.Find(op.TypeId);
+            if (type != null)
+                foreach (int id in op.ModuleIds)
+                {
+                    var m = world.Footprints.Get(id);
+                    if (m != null && m.Type.Id == type.HutTypeId && !world.IsBuilt(id))
+                        return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Hut not built yet");
+                }
             int slots = type == null ? 0 : type.FamilySlots;
             if (op.FamilyIds.Count >= slots)
                 return CommandResult.Rejected(CommandRejectCode.NotAllowed, "no free family slot");

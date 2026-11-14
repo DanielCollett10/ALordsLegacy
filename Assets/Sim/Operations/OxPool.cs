@@ -80,12 +80,12 @@ namespace LordsLegacy.Sim.Operations
                 foreach (int id in owner.ModuleIds)
                 {
                     Footprint f = _world.Footprints.Get(id);
-                    if (f != null && f.Type.OxCapacity > 0 && HasRoom(f, ox)) { standId = f.Id; return f.Centre; }
+                    if (f != null && _world.IsBuilt(id) && f.Type.OxCapacity > 0 && HasRoom(f, ox)) { standId = f.Id; return f.Centre; }
                 }
                 foreach (int id in owner.ModuleIds)
                 {
                     Footprint f = _world.Footprints.Get(id);
-                    if (f != null && f.Type.LogCapacity > 0) return f.AccessPoint;
+                    if (f != null && _world.IsBuilt(id) && f.Type.LogCapacity > 0) return f.AccessPoint;
                 }
                 return CampStand(ox);
             }
@@ -99,7 +99,7 @@ namespace LordsLegacy.Sim.Operations
                 foreach (int id in op.ModuleIds)
                 {
                     Footprint f = _world.Footprints.Get(id);
-                    if (f == null || f.Type.OxCapacity <= 0 || !HasRoom(f, ox)) continue;
+                    if (f == null || !_world.IsBuilt(id) || f.Type.OxCapacity <= 0 || !HasRoom(f, ox)) continue;
                     double d = D2(f.Centre, here);
                     if (d < bestD) { bestD = d; best = f.Centre; standId = f.Id; found = true; }
                 }
