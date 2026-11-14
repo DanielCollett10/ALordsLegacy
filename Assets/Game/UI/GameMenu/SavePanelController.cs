@@ -104,6 +104,18 @@ namespace LordsLegacy.Game
             _nameField = new TextField("Name") { name = "save-name" };
             _confirm = new Button(() => Confirm()) { name = "save-confirm", text = "Confirm" };
             _note = new Label("") { name = "save-note" };
+            // Explicit light colours: the panel background is dark and default label text is not guaranteed to be readable.
+            var light = new Color(240f / 255f, 230f / 255f, 210f / 255f);
+            _nameField.labelElement.style.color = light;
+            _nameField.labelElement.style.minWidth = 50;
+            _nameField.style.color = light;
+            _nameField.style.marginBottom = 6;
+            _confirm.style.paddingTop = _confirm.style.paddingBottom = 6;
+            _note.style.color = new Color(150f / 255f, 230f / 255f, 150f / 255f);
+            _note.style.fontSize = 14;
+            _note.style.minHeight = 20;
+            _note.style.marginTop = 6;
+            _note.style.unityTextAlign = TextAnchor.MiddleCenter;
             content.Add(_nameField);
             content.Add(_confirm);
             content.Add(_note);
