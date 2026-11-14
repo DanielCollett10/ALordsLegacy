@@ -22,6 +22,15 @@ namespace LordsLegacy.Sim.Roads
             X = dx / len; Z = dz / len;
         }
 
+        private RoadTangent(double x, double z, bool alreadyUnit) { X = x; Z = z; }
+
+        /// <summary>Restore: rebuilds a tangent from saved components without renormalising, so the bits match exactly.</summary>
+        internal static RoadTangent FromSaved(double x, double z)
+        {
+            if (!(Math.Abs(x * x + z * z - 1.0) < 1e-6)) throw new InvalidOperationException("Saved tangent is not a unit vector.");
+            return new RoadTangent(x, z, true);
+        }
+
         /// <summary>The opposite direction.</summary>
         public RoadTangent Reversed() => new RoadTangent(-X, -Z);
 

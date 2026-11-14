@@ -419,7 +419,11 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
 - `Assets/Sim/Save/` (`LordsLegacy.Sim.Save`, decision 0034): `SaveWriter`/`SaveReader` (little-endian primitives, strings,
   counted arrays; magic `LLSV`, int32 version; sections are int32 id + int32 byte length, so `NextSection` can skip unknown
   ones), `SaveHeader` (name, caller-supplied int64 real time, tick, map id, map hash; `SaveReader.ReadHeaderOnly`) and
-  `SaveFormatException`. Format code only; the per-subsystem sections come in later tasks.
+  `SaveFormatException`. Sections live in `Save/Sections/` and are listed in `SaveSections.CreateDefault()`.
+- `LandSection` (id 2, part 1 of Land): trees as changes against the map's trees (removed ids; Felled/Stump state and
+  reservations of the rest), restored through `TreeRegistry.RestoreRemoved/RestoreTree`; the road network (nodes with
+  their segment-id order, segments with control points, samples, tangents, and both id counters) restored through
+  `RoadNetwork.RestoreBegin/RestoreNode/RestoreSegment`. Version counters are not saved. Areas are added in part 2.
 - `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees. The map has no baked roads (RD-14, WORLD-08-A).
 - File format: little-endian binary, magic `LLMP`, int32 format version (`MapData.CurrentVersion` = 1), map id,
   height grid, then trees. Other versions are rejected.
