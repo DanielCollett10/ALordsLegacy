@@ -16,6 +16,19 @@ namespace LordsLegacy.EditorTools.Scenes
         [MenuItem("LordsLegacy/Config/Create default SimConfig")]
         public static void CreateMenu() => EnsureAsset();
 
+        /// <summary>
+        /// Menu entry: regenerates the config asset from the code defaults (creating it if missing), so new fields
+        /// such as MaxBuildersPerSite and the module recipes appear on the asset. Overwrites any tuned values.
+        /// </summary>
+        [MenuItem("LordsLegacy/Config/Reset SimConfig to code defaults")]
+        public static void ResetMenu()
+        {
+            var cfg = EnsureAsset();
+            cfg.ResetToDefaults();
+            EditorUtility.SetDirty(cfg);
+            AssetDatabase.SaveAssets();
+        }
+
         /// <summary>Returns the config asset, creating it with code defaults if missing.</summary>
         public static SimConfig EnsureAsset()
         {

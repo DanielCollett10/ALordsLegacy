@@ -1,6 +1,7 @@
 using LordsLegacy.EditorTools.Scenes;
 using LordsLegacy.Game;
 using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
@@ -59,6 +60,32 @@ namespace LordsLegacy.Tests.EditMode
                 if (x is int[] xa) CollectionAssert.AreEqual((int[])y, xa, p.Name);
                 else if (x is double xd) Assert.AreEqual((double)y, xd, Eps, p.Name);
                 else Assert.AreEqual(y, x, p.Name);
+            }
+        }
+
+        [Test]
+        public void MaxBuildersPerSiteComesFromConfig()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                Assert.AreEqual(new SimTuning().MaxBuildersPerSite, cfg.BuildTuning().MaxBuildersPerSite);
+                cfg.maxBuildersPerSite = 2;
+                Assert.AreEqual(2, cfg.BuildTuning().MaxBuildersPerSite);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
+        public void AssetModuleRecipesEqualCodeDefaults()
+        {
+            var recipes = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath).BuildModuleRecipes();
+            Assert.AreEqual(ModuleTypes.All.Count, recipes.Count);
+            foreach (var d in ModuleTypes.All)
+            {
+                Assert.IsTrue(recipes.ContainsKey(d.Id), d.Id);
+                Assert.AreEqual(d.ConstructionRecipe.Logs, recipes[d.Id].Logs, d.Id);
+                Assert.AreEqual(d.ConstructionRecipe.BuildWorkerMinutes, recipes[d.Id].BuildWorkerMinutes, d.Id);
             }
         }
 
