@@ -40,7 +40,7 @@ namespace LordsLegacy.Sim.Operations
         public static OperationState Of(SimWorld world, Operation op)
         {
             if (op.Paused) return OperationState.Paused;
-            if (Hut(world, op) == null) return OperationState.MissingHut;
+            if (Hut(world, op) == null) return OperationState.MissingHut; if (op.HutBuilt == false) return OperationState.MissingHut;
             if (StorageModules(world, op).Count == 0) return OperationState.MissingStorage;
             if (!HasWorker(world, op)) return OperationState.NoWorkers;
             TreeRegion region = WorkRegion(world, op);
