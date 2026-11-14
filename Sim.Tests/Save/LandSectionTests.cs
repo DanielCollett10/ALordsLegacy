@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
@@ -164,6 +166,91 @@ namespace LordsLegacy.Sim.Tests.Save
             Assert.AreEqual(0, back.Roads.SegmentCount);
             var s = back.Roads.AddSegment("road.dirt_path", CurveKind.CatmullRomCentripetal, new[] { P(0, 0), P(1, 0) }, new[] { P(0, 0), P(1, 0) });
             Assert.AreEqual(1, s.Id);
+        }
+
+        private static AreaShape Square(double x, double z, double s) =>
+            AreaShape.Straight(new[] { P(x, z), P(x + s, z), P(x + s, z + s), P(x, z + s) });
+
+        [Test]
+        public void Areas_ShapesNamesCountersAndIds_RoundTrip()
+        {
+            var (w, map) = Make();
+            Assert.IsTrue(w.Execute(new DesignateArea(Square(50, 50, 20), AreaTypes.TestId)).IsAccepted);
+            var bent = new AreaShape(new[] { P(100, 50), P(120, 50), P(120, 70), P(100, 70) },
+                new[] { AreaEdge.Bent(P(110, 44)), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() });
+            var rb = w.Execute(new DesignateArea(bent, AreaTypes.TestId));
+            Assert.IsTrue(rb.IsAccepted, rb.Text);
+            Assert.IsTrue(w.Execute(new DesignateArea(Square(150, 50, 20), AreaTypes.TestWorkId)).IsAccepted);
+            Assert.IsTrue(w.Areas.Remove(2)); // gap in ids; counters must not reuse it
+
+            var back = RoundTrip(w, map);
+            Assert.AreEqual(w.Areas.Count, back.Areas.Count);
+            foreach (var a in w.Areas.All)
+            {
+                var b = back.Areas.Get(a.Id);
+                Assert.IsNotNull(b);
+                Assert.AreEqual(a.TypeId, b.TypeId);
+                Assert.AreEqual(a.Name, b.Name);
+                Assert.AreEqual(a.Polygon, b.Polygon);
+                Assert.AreEqual(a.Bounds, b.Bounds);
+                Assert.AreEqual(a.Shape.Vertices, b.Shape.Vertices);
+                for (int i = 0; i < a.Shape.Edges.Count; i++)
+                {
+                    Assert.AreEqual(a.Shape.Edges[i].Kind, b.Shape.Edges[i].Kind);
+                    Assert.AreEqual(a.Shape.Edges[i].Handle, b.Shape.Edges[i].Handle);
+                    Assert.AreEqual(a.Shape.Edges[i].SegmentId, b.Shape.Edges[i].SegmentId);
+                    Assert.AreEqual(a.Shape.Edges[i].Side, b.Shape.Edges[i].Side);
+                }
+            }
+
+            // Counters carry on identically.
+            var c1 = w.Execute(new DesignateArea(Square(50, 100, 20), AreaTypes.TestId));
+            var c2 = back.Execute(new DesignateArea(Square(50, 100, 20), AreaTypes.TestId));
+            Assert.IsTrue(c1.IsAccepted, c1.Text);
+            Assert.IsTrue(c2.IsAccepted, c2.Text);
+            Assert.AreEqual(w.Areas.All.Last().Id, back.Areas.All.Last().Id);
+            Assert.AreEqual(w.Areas.All.Last().Name, back.Areas.All.Last().Name);
+            StringAssert.EndsWith("3", back.Areas.All.Last().Name); // 3rd test-type area; removed names not reused
+        }
+
+        [Test]
+        public void Areas_Queries_GiveSameResults()
+        {
+            var (w, map) = Make();
+            w.Execute(new DesignateArea(Square(50, 50, 20), AreaTypes.TestId));
+            w.Execute(new DesignateArea(Square(100, 50, 20), AreaTypes.TestId));
+            w.Execute(new DesignateArea(Square(50, 100, 20), AreaTypes.TestWorkId));
+            var back = RoundTrip(w, map);
+
+            foreach (var kind in new[] { AreaKind.Building, AreaKind.Work })
+                foreach (var pt in new[] { P(60, 60), P(110, 60), P(60, 110), P(5, 5), P(70, 70) })
+                    Assert.AreEqual(w.Areas.FindAt(pt, kind)?.Id, back.Areas.FindAt(pt, kind)?.Id);
+
+            var bounds = new BoundsMm(P(40, 40), P(130, 80));
+            Assert.AreEqual(w.Areas.QueryOverlapCandidates(bounds).Select(a => a.Id),
+                            back.Areas.QueryOverlapCandidates(bounds).Select(a => a.Id));
+            Assert.IsNotEmpty(back.Areas.QueryOverlapCandidates(bounds));
+
+            foreach (var pt in new[] { P(49, 49), P(60, 49.5), P(95, 60), P(300, 300) })
+            {
+                var h1 = w.Areas.FindNearestSnap(pt, 5000);
+                var h2 = back.Areas.FindNearestSnap(pt, 5000);
+                Assert.AreEqual(h1.HasValue, h2.HasValue);
+                if (!h1.HasValue) continue;
+                Assert.AreEqual(h1.Value.Kind, h2.Value.Kind);
+                Assert.AreEqual(h1.Value.AreaId, h2.Value.AreaId);
+                Assert.AreEqual(h1.Value.Point, h2.Value.Point);
+            }
+        }
+
+        [Test]
+        public void Areas_Empty_RoundTrips()
+        {
+            var (w, map) = Make();
+            var back = RoundTrip(w, map);
+            Assert.AreEqual(0, back.Areas.Count);
+            Assert.IsTrue(back.Execute(new DesignateArea(Square(50, 50, 20), AreaTypes.TestId)).IsAccepted);
+            Assert.AreEqual(1, back.Areas.All.First().Id);
         }
 
         [Test]

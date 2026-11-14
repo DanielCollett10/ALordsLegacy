@@ -55,6 +55,32 @@ namespace LordsLegacy.Sim.Areas
             return type.NamePrefix + " " + n;
         }
 
+        /// <summary>The id the next area will get (for saving).</summary>
+        internal int NextIdValue => _nextId;
+
+        /// <summary>Per-type name counters in ascending type-id order (for saving).</summary>
+        internal List<KeyValuePair<string, int>> NameCountersSorted()
+        {
+            var list = new List<KeyValuePair<string, int>>(_nameCounters);
+            list.Sort((a, b) => string.CompareOrdinal(a.Key, b.Key));
+            return list;
+        }
+
+        /// <summary>Restores a name counter when loading a save.</summary>
+        internal void RestoreNameCounter(string typeId, int value)
+        {
+            if (typeId == null) throw new ArgumentNullException(nameof(typeId));
+            if (value < 0) throw new InvalidOperationException("Negative name counter.");
+            _nameCounters[typeId] = value;
+        }
+
+        /// <summary>Restores the id counter when loading a save. Call after adding the records.</summary>
+        internal void RestoreNextId(int nextId)
+        {
+            if (nextId < _nextId) throw new InvalidOperationException("Area id counter is behind existing ids.");
+            _nextId = nextId;
+        }
+
         /// <summary>Adds a record. Throws if its id is taken or its type is unknown.</summary>
         internal void Add(AreaRecord record)
         {
