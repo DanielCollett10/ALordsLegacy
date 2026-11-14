@@ -57,19 +57,21 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 > and only in the Editor and development builds (`Debug.isDebugBuild`), so the "not in player builds" gate is in the Unity layer
 > (decision 0026).
 >
-> Implementation note (PPL-30, PPL-32): in M7 every citizen, children included, mills around the camp fire (PPL-31), not near
-> home. No children-only rule is coded. Owner to decide whether children should stay near their home tent.
+> Implementation note (PPL-30, PPL-31, PPL-32): every unassigned citizen, children included, mills around the camp fire
+> (PPL-31), not near home. Assigned workers with no task mill around their family home instead (`RoutineSystem`, from M8).
+> No children-only rule is coded. Owner to decide whether children should stay near their home tent, and whether
+> assigned workers should mill at the fire too.
 
 ## Odd jobs (unassigned families)
 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | PPL-40 | Every working-age citizen of a family **not assigned** to a workplace does **odd jobs** (POP-04, TSK-A1, TSK-A2) | DECIDED |
-
-> Implementation note (PPL-40, PPL-41): not built (construction is M10). The only task today, `task.fell_tree`, is
-> assigned-family-only, so unassigned families mill about (PPL-43).
 | PPL-41 | MVP odd jobs: **construction only**: hauling materials to construction sites (Deliver) and doing the build work (Build) | DECIDED |
 | PPL-42 | Later, some build steps (upgrades, certain buildings) need an **artisan builder**. Odd-jobbers still deliver materials to those sites but never take the artisan steps. This is a per-step eligibility in data (decision 0005), not a special case in code | DECIDED |
 | PPL-43 | An odd-jobber with no odd job mills about (PPL-30) | DECIDED |
 | PPL-44 | Heavy steps (POP-A3: construction, leading oxen) are for 14+ only, so children don't do odd jobs in MVP-1 | DECIDED |
 | PPL-45 | Once a family is assigned, it does only its workplace's tasks plus its own burgage extension if it has one (non-artisan: allotment garden, orchard and so on, from MVP-2 and later). If that work stops (storage full, no trees), it **mills about**. It never falls back to odd jobs | DECIDED |
+
+> Implementation note (PPL-40, PPL-41, PPL-43): not built (construction is M10). The only task today, `task.fell_tree`, is
+> assigned-family-only, so unassigned families mill about (PPL-43). Haul tasks (`task.haul_logs`) are assigned-family-only too.

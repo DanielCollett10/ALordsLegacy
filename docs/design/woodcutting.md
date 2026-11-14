@@ -124,3 +124,7 @@ Selecting the hut or its area opens the panel (GDD section 9 inspector):
 
 > Implementation note (WC-25, M8): felling stops when logs on the ground plus in storage reach the total log capacity of
 > the operation's storage modules (20 per module). With no storage module the operation is *Missing storage*.
+>
+> Implementation note (WC-22, WC-24, M9): the code has no "previous handler" preference. A haul goes to the idle eligible
+> worker nearest the ox (`DispatchSystem`), so the worker who just left the ox may or may not get the next haul. A worker
+> mid-tree is busy, as WC-26 says. Owner to decide whether WC-24's alternation rule should be built.

@@ -38,9 +38,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     `Step` in list order. A paused world runs no systems on `Step`. `Execute` still notifies systems while paused,
     because commands work while paused. Rejected commands notify nobody.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
-    Registered today: `NavSyncSystem` (sync), `RoutineSystem` (routine), `MovementSystem` and `DebugSendSystem` (movement).
-    `DispatchSystem` (dispatch) and `StepRunnerSystem` (steps) are registered too (T-275). `WoodcuttingSystem` is the
-    one operations-phase system (T-276, WC-10..15/25, TMB-05/07; decision 0031): for each Working woodcutting operation it keeps one Open
+    Registered today, in run order: `NavSyncSystem` (sync), `RoutineSystem` (routine), `DispatchSystem` (dispatch),
+    `StepRunnerSystem` (steps), `MovementSystem` and `DebugSendSystem` (movement), `WoodcuttingSystem` and `HaulSystem`
+    (operations; `HaulSystem` is in the Haul tasks entry below). `WoodcuttingSystem` (T-276, WC-10..15/25, TMB-05/07; decision 0031): for each Working woodcutting operation it keeps one Open
     `task.fell_tree` per idle adult worker of the assigned families, targeting the nearest standing unreserved tree to the
     hut access point inside `OperationStatus.WorkRegion`, reserved at creation. Steps = MoveTo + `ProcessDefs.Timber`
     effective stages (`TaskStep.StageId` carries the stage). `FellingOutcome` (called by `StepRunnerSystem` after each
@@ -151,7 +151,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     or `Storage` bound to a module id). Items enter only via `Produce(location, item, n)` / `ProduceOnGround`, which merges
     into the nearest same-owner pile within 1 m. `TotalOf(item)`, per-location counts, `Version`, and `Audit()` (null =
     consistent; compares location sums with the produced journal). `Items.Log` is `item.log` (category Log).
-  - **Inventory ledger part 2 (T-286, LED-02..06, INV-02/05, WC-37):** locations add `Carrier` (`AddCarrier(cap)`, an ox) and
+  - **Inventory ledger part 2 (T-286, LED-02..06, INV-02/05, WC-37; decision 0035):** locations add `Carrier` (`AddCarrier(cap)`, an ox) and
     `Stockpile` (`AddStockpile()`, unlimited). `Storage` capacity comes from the module type (`GetOrAddStorage(id, type)`);
     `Produce` throws past capacity. Per location/item: total, `ReservedOf`, `IncomingOf`, `AvailableOf` (= total − reserved),
     `FreeSpace` (= capacity − total − incoming). `ReserveStock` / `ReserveCapacity(loc, item, n, owner)` return a reservation
@@ -330,7 +330,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `OperationRegistry.AssignOx` refuses an ox assigned to any operation (`FindOxOwner`). `OxPool(world)` has
   `FindFor(opId, from)` (assigned first, then nearest free pool ox), stand `Occupancy`/`HasRoom` (module stand holds
   `OxCapacity` = 1; camp stand unlimited) and `RestSpot`/`Rest` (WC-31/32).
-- Ox steps and follow movement (T-289, MOV-16, WCO-06): `MovementSystem.Attach(follower, leader, offsetM = 1.5)` /
+- Ox steps and follow movement (T-289, MOV-16, WCO-06; decision 0036): `MovementSystem.Attach(follower, leader, offsetM = 1.5)` /
   `Detach(follower)` (static; the tie is `IMovable.Follow`, a `FollowLink`). While attached the leader moves at
   min(own, follower speed) × its cell multiplier; after all agents have moved the follower is placed `offsetM` behind
   the leader's facing (shrunk to 75/50/25 % then onto the leader if the cell is blocked or off the map) with the
@@ -341,7 +341,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   the ox is removed or its operation assignment changed, dropping the carrier's logs as an operation-owned ground pile
   where the ox stood and setting the ox `Free`. Tuning: `OxLoadLogs` 4, `OxLoadMinutes` 10, `OxUnloadMinutes` 10.
 - Not built yet: construction and odd jobs (M10), food, markets,
-  economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps); only `task.fell_tree` is defined so far.
+  economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
 
 ## Map pipeline
 
@@ -452,6 +452,8 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   on Sim terrain; building areas solid, work areas dashed blue), built from the flattened polygon. Rebuilt when
   `AreaRegistry.Version` changes. `ShowPreview(AreaPreview, AreaShape)` draws the draft (vertex dots, edge handles,
   red when invalid); `HidePreview()` hides it. Colours are constants in the class, not `VisualDefinition`s. No colliders.
+- `InstancedDraw` (`Assets/Game/Visuals/`) is the shared `Graphics.RenderMeshInstanced` helper (batches of 1023), used by
+  `TreeRenderer`, `PeopleRenderer`, `ModuleRenderer`, `LogPileRenderer` and `CampRenderer`.
 - No DOTS/ECS code yet. Rendering is `Graphics.RenderMeshInstanced` and MonoBehaviours (decision 0002 is still provisional).
 - Sun and sky (`Assets/Game/Lighting/`): `SunLightModel` is pure maths (Sim `GameTime` + `Daylight` → elevation,
   azimuth, colour, intensity). `SunLightController` writes the result to the directional light and ambient in
