@@ -68,12 +68,39 @@ namespace LordsLegacy.Game
             if (_startLayout != null) LordsLegacy.Sim.Start.StartLayoutApplier.Apply(World, _startLayout.ToLayout());
         }
 
+        /// <summary>
+        /// Builds the world from save bytes instead of the start layout. The pacer is new, so speed is at its default (SV-21).
+        /// </summary>
+        public void InitializeFromSave(byte[] saveBytes, MapData map)
+        {
+            var world = LordsLegacy.Sim.Save.SimSave.Read(saveBytes, map);
+            Map = map;
+            World = world;
+            Pacer = new TickPacer(world.Tuning);
+        }
+
         private void Start()
         {
             if (IsInitialized) return;
+            // Take and clear first, so a failed load never repeats on the next scene load.
+            byte[] pending = PendingLoad.Take();
             string path = Path.Combine(Application.streamingAssetsPath, "Maps", DefaultMapFile);
             var map = TryLoadMap(path);
-            if (map != null) Initialize(_config != null ? _config.BuildTuning() : new SimTuning(), map);
+            if (map == null) return;
+            if (pending != null)
+            {
+                try
+                {
+                    InitializeFromSave(pending, map);
+                    return;
+                }
+                catch (System.Exception e)
+                {
+                    UnityEngine.Debug.LogError("SimHost: could not load the save, starting a new game: " + e.Message);
+                    World = null;
+                }
+            }
+            Initialize(_config != null ? _config.BuildTuning() : new SimTuning(), map);
         }
 
         /// <summary>Reads a map file; logs a clear error and returns null if missing or unreadable.</summary>
