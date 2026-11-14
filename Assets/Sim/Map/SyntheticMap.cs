@@ -59,6 +59,18 @@ namespace LordsLegacy.Sim.Map
             var h = new float[nodes * nodes];
             for (int iz = 0; iz < nodes; iz++)
                 for (int ix = 0; ix < nodes; ix++)
+                {
+                    h[iz * nodes + ix] = 0.1f * (ix * 2f);
+                }
+            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
+            var trees = new List<MapTree>();
+            return new MapData(mapId, grid, trees);
+        }
+        {
+            const int nodes = 101;
+            var h = new float[nodes * nodes];
+            for (int iz = 0; iz < nodes; iz++)
+                for (int ix = 0; ix < nodes; ix++)
                     h[iz * nodes + ix] = 0.1f * (ix * 2f);
             var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
             var trees = new[]
