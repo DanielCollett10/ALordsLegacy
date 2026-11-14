@@ -347,6 +347,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   progress minutes, priority); `world.IsBuilt(id)` is true when there is no record. `LocationKind.Site` ledger locations
   (`Ledger.GetOrAddSite/FindSite`, footprint id in `ModuleId`) are covered by `Ledger.Audit`. `SimTuning.MaxBuildersPerSite` 4.
   No system creates or advances sites yet.
+  T-341 (CN-11..13): `ConstructionSources.Available(world, item)` sums available stock over the camp stockpile, BUILT
+  operation log storage and unowned ground piles; `TryReserve(world, item, n, sitePoint, owner)` reserves nearest-first
+  (storage measured from its footprint centre), all or nothing, returning reservation ids or null.
 - Not built yet: construction systems and odd jobs (M10), food, markets,
   economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
 
