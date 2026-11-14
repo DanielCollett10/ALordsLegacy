@@ -2,6 +2,9 @@ namespace LordsLegacy.Sim.Footprints
 {
     /// <summary>Definition of one kind of fixed-rectangle thing (camp now; hut and modules later).</summary>
     public sealed class FootprintTypeDef
+{
+    public ConstructionRecipe ConstructionRecipe { get; set; }
+
     {
         /// <summary>Id of the camp footprint type.</summary>
         public const string CampId = "footprint.camp";
