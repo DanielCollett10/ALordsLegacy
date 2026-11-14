@@ -415,6 +415,11 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
 - `Assets/Sim/Map/` (`LordsLegacy.Sim.Map`): `MapData` (format version, map id, `HeightGrid`, `MapTree` list),
   `MapDataIO` (binary read/write via `System.IO`, from `byte[]` or `Stream`; unknown version, bad magic or
   truncation throw `MapDataFormatException`) and `SyntheticMap.CreateRamp()` (200x200 m test map, 5 trees, used by tests).
+- `MapData.ContentHash` (64-bit FNV-1a of the map file bytes) is set by `MapDataIO.Read`; saves store it in their header.
+- `Assets/Sim/Save/` (`LordsLegacy.Sim.Save`, decision 0034): `SaveWriter`/`SaveReader` (little-endian primitives, strings,
+  counted arrays; magic `LLSV`, int32 version; sections are int32 id + int32 byte length, so `NextSection` can skip unknown
+  ones), `SaveHeader` (name, caller-supplied int64 real time, tick, map id, map hash; `SaveReader.ReadHeaderOnly`) and
+  `SaveFormatException`. Format code only; the per-subsystem sections come in later tasks.
 - `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees. The map has no baked roads (RD-14, WORLD-08-A).
 - File format: little-endian binary, magic `LLMP`, int32 format version (`MapData.CurrentVersion` = 1), map id,
   height grid, then trees. Other versions are rejected.

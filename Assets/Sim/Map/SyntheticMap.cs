@@ -21,19 +21,6 @@ namespace LordsLegacy.Sim.Map
                     h[iz * nodes + ix] = d >= 12f ? 0f : 5f * (1f - d / 12f);
                 }
             var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
-            var trees = new List<MapTree>();
-            return new MapData(mapId, grid, trees);
-        }
-        {
-            const int nodes = 101;
-            var h = new float[nodes * nodes];
-            for (int iz = 0; iz < nodes; iz++)
-                for (int ix = 0; ix < nodes; ix++)
-                {
-                    float d = System.Math.Abs(ix * 2f - 60f);
-                    h[iz * nodes + ix] = d >= 12f ? 0f : 5f * (1f - d / 12f);
-                }
-            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
             return new MapData(mapId, grid, new MapTree[0]);
         }
 
@@ -42,66 +29,6 @@ namespace LordsLegacy.Sim.Map
         /// (so HeightAt(x, z) = 0.1 * x). Five trees with ids 1..5 and trunk length 8 + id metres.
         /// </summary>
         public static MapData CreateRamp(string mapId = "synthetic-ramp")
-        {
-            const int nodes = 101;
-            var h = new float[nodes * nodes];
-            for (int iz = 0; iz < nodes; iz++)
-                for (int ix = 0; ix < nodes; ix++)
-                {
-                    h[iz * nodes + ix] = 0.1f * (ix * 2f);
-                }
-            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
-            var trees = new List<MapTree>();
-            return new MapData(mapId, grid, trees);
-        }
-        {
-            const int nodes = 101;
-            var h = new float[nodes * nodes];
-            for (int iz = 0; iz < nodes; iz++)
-                for (int ix = 0; ix < nodes; ix++)
-                {
-                    h[iz * nodes + ix] = 0.1f * (ix * 2f);
-                }
-            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
-            var trees = new List<MapTree>();
-            return new MapData(mapId, grid, trees);
-        }
-        {
-            const int nodes = 101;
-            var h = new float[nodes * nodes];
-            for (int iz = 0; iz < nodes; iz++)
-                for (int ix = 0; ix < nodes; ix++)
-                {
-                    h[iz * nodes + ix] = 0.1f * (ix * 2f);
-                }
-            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
-            var trees = new List<MapTree>();
-            return new MapData(mapId, grid, trees);
-        }
-        {
-            const int nodes = 101;
-            var h = new float[nodes * nodes];
-            for (int iz = 0; iz < nodes; iz++)
-                for (int ix = 0; ix < nodes; ix++)
-                {
-                    h[iz * nodes + ix] = 0.1f * (ix * 2f);
-                }
-            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
-            var trees = new List<MapTree>();
-            return new MapData(mapId, grid, trees);
-        }
-        {
-            const int nodes = 101;
-            var h = new float[nodes * nodes];
-            for (int iz = 0; iz < nodes; iz++)
-                for (int ix = 0; ix < nodes; ix++)
-                {
-                    h[iz * nodes + ix] = 0.1f * (ix * 2f);
-                }
-            var grid = new HeightGrid(0f, 0f, 2f, nodes, nodes, h);
-            var trees = new List<MapTree>();
-            return new MapData(mapId, grid, trees);
-        }
         {
             const int nodes = 101;
             var h = new float[nodes * nodes];
