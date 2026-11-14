@@ -46,6 +46,7 @@ namespace LordsLegacy.Sim.Core
                 // operations
                 new LordsLegacy.Sim.Operations.WoodcuttingSystem(),
                 new LordsLegacy.Sim.Operations.HaulSystem(),
+                new LordsLegacy.Sim.Operations.ConstructionSystem(),
             };
         }
     }
