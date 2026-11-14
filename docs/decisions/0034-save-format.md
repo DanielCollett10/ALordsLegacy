@@ -14,6 +14,14 @@ private state, id counters that are never reused, in-flight move orders and rese
   routine/work-day state, the ledger journal, and the tuning and type catalogs the world was created with, so a load
   continues identically even if `SimConfig` was edited since. Applying new tuning to an old save is out of scope (saving.md SV-14).
 - `CommandLog` is not saved.
+- **Restore path:** `SimSave.Read` reads the header, then the Core section (tick, pause, random state, tuning,
+  catalogs), then builds the world with an internal `SimWorld.ForRestore(map, core)`: no start layout, no systems
+  stepped. Then it runs each section's `Read(world, reader)` in this **fixed order**: Land (trees, roads, areas) →
+  Structures (footprints, operations, construction sites) → Ledger → Population (families, citizens, oxen) →
+  Movement (move orders, follow links, routine, work day, debug send) → Tasks. Then a full `NavSync`. Each
+  registry exposes `internal` restore methods that set its records and id counters directly. `Write` uses the
+  same order. A new section is added at the end of this list unless it must come earlier, and that change is
+  recorded here.
 - **Round-trip test (SAV-06):** `Write(Read(Write(w))) == Write(w)` byte for byte, and both worlds stepped for a game
   day must write identical bytes again. Every new Sim system must extend its section and these tests pass.
 - **Unity loads by reloading the Game scene** with the save bytes handed to `SimHost`, so renderers always build

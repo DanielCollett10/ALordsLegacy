@@ -34,9 +34,10 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | CN-22 | Delivered logs sit on the site as a visible pile (one log per log, INV-06) | DECIDED |
 | CN-23 | **Build progresses as materials arrive.** Build work can start once the first log is on site. Progress is capped at the share delivered: cap = recipe minutes × (logs delivered so far ÷ logs needed). Several odd-jobbers may build one site at once (up to `MaxBuildersPerSite`, 4); progress is the sum of their worker-minutes. At the full recipe total the module is Built | DECIDED (owner 13/11/2026; 4 PLACEHOLDER) |
 | CN-23b | **Logs are used up as the work goes on:** each time progress passes one log's share (recipe minutes ÷ logs needed), one log leaves the site pile (consumed in the ledger). The pile shrinks as the scaffold grows | DECIDED (owner 13/11/2026) |
-| CN-23c | **Builders haul when they're blocked.** Builders and haulers are the same odd-jobbers. A builder who reaches the cap stops building and is free again, so the dispatcher can give them a Deliver (to this site or any other) instead of leaving them standing | DECIDED (owner 13/11/2026) |
+| CN-23c | **Builders haul when they're blocked.** Builders and haulers are the same odd-jobbers. A builder who reaches the cap stops building and is free again, so the dispatcher can give them a Deliver (to this site or any other) instead of leaving them standing. A Build task is only offered while the site has capped work left (cap − progress > 0), so a capped builder can't take Build again until more logs arrive | DECIDED (owner 13/11/2026; no-retake rule lead) |
 | CN-24 | Building is heavy work (POP-A3); a scaffold placeholder shows progress (CON-05) | DECIDED |
 | CN-25 | Odd-jobbers who have construction work keep the same **working day** as assigned workers: work sunrise to sunset, commute in the dark, short Sunday, minimum sleep (PPL-20..26). An unfinished Build pauses overnight and keeps its progress. A Deliver still under way at sunset is wound down like WC-35: logs dropped where the ox stands (still reserved for that site), ox returned, and the next day's Deliver picks them up from there | PROPOSED |
+| CN-25b | **How the dropped logs stay the site's:** the dropped logs go into a new ground pile **owned by the site** (owner = site footprint id). The Deliver's reservation on the carrier is released, and a new stock reservation for the same count is made on that pile for the site and added to the site's reservation list, in the same step, so the site's reserved total never changes. Site-owned piles are not sources for other sites (CN-11). Each morning `ConstructionSystem` opens Deliver tasks from the site's own piles before its other reserved sources. `Ledger.Audit` must pass before and after the drop | DECIDED (lead, from plan review) |
 | CN-26 | With no construction work, odd-jobbers mill about (PPL-43) | DECIDED |
 
 ## Which site first
@@ -50,7 +51,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| CN-32 | Removing an unbuilt site releases every undelivered reservation. Logs already on site, or on an ox mid-delivery, are dropped as an **unowned ground pile** at the site (CON-07). Unowned piles are construction sources (CN-11), so those logs get used again | PROPOSED |
+| CN-32 | Removing an unbuilt site releases every undelivered reservation. Logs already on site, or on an ox mid-delivery, are dropped as an **unowned ground pile** at the site (CON-07). Site-owned piles left by a sunset wind-down (CN-25b) become unowned too. Unowned piles are construction sources (CN-11), so those logs get used again | PROPOSED |
 | CN-33 | Removing a **built** module returns nothing in M10 (as today). The 50% refund (BLD-11) comes later | PROPOSED |
 
 ## What the player sees
