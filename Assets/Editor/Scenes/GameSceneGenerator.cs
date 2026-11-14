@@ -299,6 +299,8 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(menu, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/GameMenu/GameMenu.uss"));
             var savePanel = menuGo.AddComponent<SavePanelController>();
             SetRef(savePanel, "_host", host);
+            var loadPanel = menuGo.AddComponent<LoadPanelController>();
+            SetRef(loadPanel, "_host", host);
             var autosaveGo = CreateUiDocument("Autosave", null);
             var autosave = autosaveGo.AddComponent<LordsLegacy.Game.AutosaveController>();
             SetRef(autosave, "_host", host);
