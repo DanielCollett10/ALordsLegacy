@@ -11,7 +11,8 @@ allow that without rework.
 - Items enter only through `Produce` / `ProduceOnGround`. Ground piles with the same owner within 1 m merge.
   Each `Produce` also adds to a journal of totals made.
 - `Audit()` returns null when every location's counts sum to the journal and no count is negative. It is a debug check.
-- Removal and transfer do not exist yet. M9 adds them, and must extend `Audit` deliberately rather than bypass it.
+- Removal and transfer were added in M9 (T-286): `Transfer` and reservations live in `Ledger`, and `Audit` also checks
+  reservations and capacity. See 0035. Nothing may bypass `Audit`.
 
 **Consequences.** Save/load is a plain list of locations and counts. Operations read their own load from the ledger
 (`OperationStatus.LogLoad`). Deleting an area leaves its ledger locations in place (known gap). Any code that changes

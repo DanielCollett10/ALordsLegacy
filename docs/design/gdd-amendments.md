@@ -75,7 +75,8 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | INV-A6 | **Home**: a small General store (firewood, later weapons, MIL-12). No logs | DECIDED (later MVP) |
 | INV-A7 | The camp-site starting stockpile holds the starting logs and food (INV-10 unchanged) | DECIDED |
 
-> Implementation note (INV-A7): the start creates no stockpile items. The camp spot is only drawn (see `camp.md` CMP-06).
+> Implementation note (INV-A7): the start produces the layout's starting logs (20 by default) into the camp stockpile
+> location (T-287). Starting food is not in code yet (see `camp.md` CMP-06).
 | INV-A8 | Every production or gathering building has its own small output storage. Its workers never move output onwards; haulers do | DECIDED |
 | INV-A9 | Output from a work area goes to the building that owns the work area: woodcutting logs go to that operation's own log storage modules. Among several, the one with free capacity nearest the log pile is used | DECIDED (nearest PROPOSED) |
 | INV-A10 | Processing buildings (e.g. later sawmill) get inputs delivered by an ox and handler, work at the building, and store output locally until a hauler collects it | DECIDED |
