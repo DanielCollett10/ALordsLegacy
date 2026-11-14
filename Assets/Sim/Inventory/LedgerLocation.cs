@@ -14,6 +14,8 @@ namespace LordsLegacy.Sim.Inventory
         Carrier = 2,
         /// <summary>An unlimited store (INV-10).</summary>
         Stockpile = 3,
+        /// <summary>Materials delivered to a construction site; owner is the footprint id (decision 0032/0033).</summary>
+        Site = 4,
     }
 
     /// <summary>One place that holds items. Counts are owned by the <see cref="Ledger"/>.</summary>
@@ -29,7 +31,7 @@ namespace LordsLegacy.Sim.Inventory
         public PointMm Position { get; }
         /// <summary>Ground piles: owning operation id, or null. Storage: null.</summary>
         public int? OwnerOperationId { get; }
-        /// <summary>Storage: the module id it is bound to. Ground piles: 0.</summary>
+        /// <summary>Storage: the module id it is bound to. Site: the footprint id. Ground piles: 0.</summary>
         public int ModuleId { get; }
 
         internal readonly SortedDictionary<string, int> ReservedCounts = new SortedDictionary<string, int>(System.StringComparer.Ordinal);

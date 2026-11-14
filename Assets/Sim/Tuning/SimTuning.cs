@@ -107,6 +107,9 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Most logs an ox carries per trip. Unit: logs. Rule: WCO-07.</summary>
         public int OxLoadLogs { get; set; } = 4;
 
+        /// <summary>Most odd-jobbers building one construction site at once. Unit: people. Rule: CN-23 (PLACEHOLDER).</summary>
+        public int MaxBuildersPerSite { get; set; } = 4;
+
         /// <summary>Time to load an ox. Unit: game minutes. Rule: woodcutting.md (tuning.md).</summary>
         public int OxLoadMinutes { get; set; } = 10;
 

@@ -150,6 +150,7 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 | Standard log length | 4 | m | TMB-04 |
 | Usable trunk length | 12–20 | m (3–5 logs) | TMB-06 |
 | Ox load | 4 | logs per trip | WCO-07 |
+| Max builders per site | 4 | odd-jobbers building one site at once (`SimTuning.MaxBuildersPerSite`) | CN-23 |
 | Log storage | 20 | logs at minimum size | INV-A3 |
 | Woodcutting family slots | 2 | per hut | WCO |
 | Fell / Delimb (off) / Buck | 90 / 30 / 15 per log | game minutes (1 game min = 1.25 real s at 1×) | woodcutting.md, TMB-01 |

@@ -340,7 +340,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `TaskRecord.OxId` is set by `TaskBoard.SetOx`. `StepRunnerSystem` (partial, `StepRunnerSystem.Ox.cs`) cancels the task if
   the ox is removed or its operation assignment changed, dropping the carrier's logs as an operation-owned ground pile
   where the ox stood and setting the ox `Free`. Tuning: `OxLoadLogs` 4, `OxLoadMinutes` 10, `OxUnloadMinutes` 10.
-- Not built yet: construction and odd jobs (M10), food, markets,
+- Construction records (T-340, decision 0033): `FootprintTypeDef.ConstructionRecipe` (`Footprints/ConstructionRecipe.cs`:
+  item counts + build worker-minutes; hut 8 logs/960, oxen stand 1/60, log storage and camp `Empty` = built at placement).
+  `SimWorld.Construction` (`Construction/ConstructionRegistry.cs`, partial `SimWorld.Construction.cs`) holds one
+  `ConstructionSite` per unbuilt footprint id (state Delivering/Building, reservation ids, Site ledger location id,
+  progress minutes, priority); `world.IsBuilt(id)` is true when there is no record. `LocationKind.Site` ledger locations
+  (`Ledger.GetOrAddSite/FindSite`, footprint id in `ModuleId`) are covered by `Ledger.Audit`. `SimTuning.MaxBuildersPerSite` 4.
+  No system creates or advances sites yet.
+- Not built yet: construction systems and odd jobs (M10), food, markets,
   economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
 
 ## Map pipeline

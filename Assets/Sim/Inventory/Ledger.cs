@@ -66,6 +66,18 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.Carrier, default, null, 0, capacity));
         }
 
+        /// <summary>Finds the Site location of a footprint, or null (never creates).</summary>
+        public LedgerLocation FindSite(int footprintId)
+        {
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.Site && l.ModuleId == footprintId) return l;
+            return null;
+        }
+
+        /// <summary>Returns the Site location of a footprint (unlimited capacity), creating it if needed.</summary>
+        public LedgerLocation GetOrAddSite(int footprintId) =>
+            FindSite(footprintId) ?? Add(new LedgerLocation(_nextId++, LocationKind.Site, default, null, footprintId));
+
         /// <summary>Adds a stockpile with no position and no capacity limit (INV-10).</summary>
         public LedgerLocation AddStockpile() => AddStockpile(default);
 
