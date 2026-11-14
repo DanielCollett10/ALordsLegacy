@@ -350,6 +350,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   T-341 (CN-11..13): `ConstructionSources.Available(world, item)` sums available stock over the camp stockpile, BUILT
   operation log storage and unowned ground piles; `TryReserve(world, item, n, sitePoint, owner)` reserves nearest-first
   (storage measured from its footprint centre), all or nothing, returning reservation ids or null.
+  T-342 (CN-10, CN-12, CN-32..34): `ModulePlacement.Preview` refuses `NotEnoughMaterials` ("Not enough logs (have N, need M)");
+  `PlaceModule` with a non-empty recipe adds the footprint, a Delivering `ConstructionSite` and reservations (owner = footprint id)
+  in one Apply; empty recipe stays built. `RemoveModule` of a site releases its reservations and moves site-store and
+  site-owned pile logs to an unowned ground pile; removing a built storage with logs reserved for a site is refused.
 - Not built yet: construction systems and odd jobs (M10), food, markets,
   economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
 
