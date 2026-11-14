@@ -177,6 +177,14 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     runner's `Transfer` consumes it. Open tasks ask `OxPool.FindFor(owning operation)` each tick. Cancelled tasks hand their
     logs back (the system re-reserves a shortfall); tasks of a removed site are cancelled. The site becomes Building when its
     first log is on site.
+  - **Construction building (T-347, CN-23/23b/23c):** for a Building site `ConstructionSystem` keeps up to
+    `MaxBuildersPerSite` live `task.build` tasks (`TaskRecord.SiteFootprintId`), never more than the minutes left, and
+    cancels Open ones while cap − progress ≤ 0. `StepRunnerSystem.StepBuild` adds one minute per builder per tick via
+    `ConstructionProgress.Work` (cap = recipe minutes × delivered ÷ needed; delivered = on site + `ConstructionSite.LogsConsumed`);
+    each log share passed consumes one log with `Ledger.Consume` (consumed journal, `ConsumedOf`; `Audit` = produced −
+    consumed). A builder at the cap ends the task and is free for a Deliver; Build is not re-offered until more logs
+    arrive. At the full total the site record is removed (Built). Builders work where they stand (no walk-to-site step yet);
+    the dispatcher breaks ties by distance to the site. Read API: `ConstructionProgress.Of(world, footprintId)` (null when Built).
   - **Early fetch and sunset (T-291, WC-23/35):** `HaulSystem.Early.cs` opens a haul for an Active Fell task whose tree
     yields a full load once `FellMinutesLeft` ≤ the nearest idle worker's walk to the ox + the ox's led walk to the tree
     (ox speed). That haul (`TaskRecord.AwaitsTaskId` = the fell task) reserves ox and storage room at once, waits at the

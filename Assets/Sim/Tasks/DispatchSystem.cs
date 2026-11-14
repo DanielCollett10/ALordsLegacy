@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
@@ -80,6 +81,13 @@ namespace LordsLegacy.Sim.Tasks
                         }
                         if (tree.ReservedBy.HasValue && tree.ReservedBy.Value != t.Id) continue;
                         double dx = tree.X - c.X, dz = tree.Z - c.Z;
+                        travel = Math.Sqrt(dx * dx + dz * dz) / walk;
+                    }
+                    else if (t.SiteFootprintId.HasValue)
+                    {
+                        Footprint site = world.Footprints.Get(t.SiteFootprintId.Value);
+                        if (site == null) { world.Tasks.Cancel(t.Id); continue; }
+                        double dx = site.Centre.XMetres - c.X, dz = site.Centre.ZMetres - c.Z; // CN-31: nearest site
                         travel = Math.Sqrt(dx * dx + dz * dz) / walk;
                     }
                     if (best == null || t.Priority > best.Priority ||

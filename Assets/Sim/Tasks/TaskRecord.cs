@@ -30,6 +30,8 @@ namespace LordsLegacy.Sim.Tasks
         public string Subject { get; }
         /// <summary>The ox this task uses (T-289), or null.</summary>
         public int? OxId { get; internal set; }
+        /// <summary>For a build task (T-347): the footprint id of the site it builds; null otherwise.</summary>
+        public int? SiteFootprintId { get; internal set; }
         /// <summary>True if the ox was assigned to the owner operation when the task took it.</summary>
         public bool OxWasAssigned { get; internal set; }
         /// <summary>For an early-fetch haul (T-291, WC-23): the Fell task whose logs it will carry. The haul waits at

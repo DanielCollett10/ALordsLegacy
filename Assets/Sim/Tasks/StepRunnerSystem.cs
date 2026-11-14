@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
@@ -62,6 +64,7 @@ namespace LordsLegacy.Sim.Tasks
                 }
             }
 
+            if (t.Def.Id == ConstructionTaskDefs.BuildId && t.SiteFootprintId.HasValue) { StepBuild(world, t, c); return; }
             TaskStep step = t.Def.Steps[t.CurrentStep];
             if (t.AwaitsTaskId.HasValue && step.Kind == StepKind.LoadOx)
             {
@@ -120,6 +123,22 @@ namespace LordsLegacy.Sim.Tasks
                 return;
             }
             Advance(world, t, c);
+        }
+
+        // Build (T-347, CN-23/23c): one minute of the site's progress per tick. A builder at the cap, or at a site that is
+        // finished or gone, ends the task and is free again.
+        private void StepBuild(SimWorld world, TaskRecord t, Citizen c)
+        {
+            ConstructionSite site = t.SiteFootprintId.HasValue ? world.Construction.Get(t.SiteFootprintId.Value) : null;
+            Footprint fp = site == null ? null : world.Footprints.Get(site.FootprintId);
+            if (fp != null && ConstructionProgress.Work(world, site, fp.Type.ConstructionRecipe))
+            {
+                c.Activity = Activity.Working;
+                world.Tasks.AddProgress(t.Id, 1);
+                if (world.Construction.Get(site.FootprintId) != null &&
+                    ConstructionProgress.Remaining(world, site, fp.Type.ConstructionRecipe) > 0) return; // keep building
+            }
+            Advance(world, t, c); // capped, or the site just finished
         }
 
         private void Advance(SimWorld world, TaskRecord t, Citizen c)

@@ -110,11 +110,11 @@ namespace LordsLegacy.Sim.Tests.Operations
         {
             Ctx c = Build();
             bool sawFirstLog = false;
-            for (int i = 0; i < 3000 && c.W.Construction.Get(c.SiteId).State == ConstructionState.Delivering || i < 3000 && c.W.Inventory.Get(c.Site.LedgerLocationId).CountOf(Items.Log.Id) < 8; i++)
+            for (int i = 0; i < 3000 && c.W.Construction.Get(c.SiteId).State == ConstructionState.Delivering || i < 3000 && ConstructionProgress.Of(c.W, c.SiteId).LogsDelivered < 8; i++)
             {
                 c.W.Step(1);
                 Assert.IsNull(c.W.Inventory.Audit(), "tick " + i);
-                int onSite = c.W.Inventory.Get(c.Site.LedgerLocationId).CountOf(Items.Log.Id);
+                int onSite = ConstructionProgress.Of(c.W, c.SiteId).LogsDelivered; // incl. logs the builders used up (T-347)
                 if (onSite > 0)
                 {
                     sawFirstLog = true;
@@ -124,7 +124,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             }
             Assert.IsTrue(sawFirstLog);
             c.W.Step(200);
-            Assert.AreEqual(8, c.W.Inventory.Get(c.Site.LedgerLocationId).CountOf(Items.Log.Id));
+            Assert.AreEqual(8, ConstructionProgress.Of(c.W, c.SiteId).LogsDelivered);
             Assert.AreEqual(2, Delivers(c.W).Count(t => t.State == TaskState.Done));
             Assert.AreEqual(2, Delivers(c.W).Count);
             Assert.AreEqual(0, Reserved(c.W));

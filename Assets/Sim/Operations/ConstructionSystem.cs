@@ -29,6 +29,7 @@ namespace LordsLegacy.Sim.Operations
             if (world == null) throw new ArgumentNullException(nameof(world));
             if (world.Construction.Count == 0 && !AnyLiveDeliver(world)) return;
             Sweep(world);
+            SweepBuilds(world);
             foreach (ConstructionSite site in new List<ConstructionSite>(world.Construction.Sites))
             {
                 Footprint fp = world.Footprints.Get(site.FootprintId);
@@ -38,9 +39,11 @@ namespace LordsLegacy.Sim.Operations
                 if (loc == null) continue;
                 if (site.State == ConstructionState.Delivering && (logs == 0 || loc.CountOf(Items.Log.Id) > 0))
                     site.State = ConstructionState.Building; // CN-23
-                if (logs == 0) continue;
                 Operation op = OperationOf(world, site.FootprintId);
-                if (op == null) continue;
+                if (site.State == ConstructionState.Building && op != null &&
+                    !ConstructionProgress.TryFinish(world, site, fp.Type.ConstructionRecipe))
+                    ManageBuilders(world, site, fp, op);
+                if (logs == 0 || op == null) continue;
                 TopUp(world, site, fp, logs, loc);
                 OpenTasks(world, site, fp, op);
             }
@@ -55,8 +58,39 @@ namespace LordsLegacy.Sim.Operations
         private static bool AnyLiveDeliver(SimWorld world)
         {
             foreach (TaskRecord t in world.Tasks.All)
-                if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeliverId) return true;
+                if (!t.IsFinished && ConstructionTaskDefs.IsConstruction(t.Def.Id)) return true;
             return false;
+        }
+
+        // Build tasks (T-347, CN-23/23c): offered only while cap − progress > 0, up to MaxBuildersPerSite at once and never
+        // more than there are minutes left. Open ones are withdrawn when the site is capped.
+        private static void ManageBuilders(SimWorld world, ConstructionSite site, Footprint fp, Operation op)
+        {
+            int remaining = ConstructionProgress.Remaining(world, site, fp.Type.ConstructionRecipe);
+            int live = 0;
+            foreach (TaskRecord t in new List<TaskRecord>(world.Tasks.All))
+            {
+                if (t.IsFinished || t.Def.Id != ConstructionTaskDefs.BuildId || t.SiteFootprintId != site.FootprintId) continue;
+                if (remaining <= 0 && t.State == TaskState.Open) world.Tasks.Cancel(t.Id);
+                else live++;
+            }
+            int want = Math.Min(Math.Max(1, world.Tuning.MaxBuildersPerSite), remaining) - live;
+            TaskPriority priority = site.Priority == ConstructionPriority.High ? TaskPriority.High : TaskPriority.Normal;
+            for (int i = 0; i < want; i++)
+            {
+                TaskDef def = ConstructionTaskDefs.Build(Math.Max(1, fp.Type.ConstructionRecipe.BuildWorkerMinutes));
+                TaskRecord task = world.Tasks.Create(def, op.Id, null, priority, fp.Type.Id);
+                world.Tasks.SetSite(task.Id, fp.Id);
+            }
+        }
+
+        // Cancels live build tasks whose site is Built or gone.
+        private static void SweepBuilds(SimWorld world)
+        {
+            foreach (TaskRecord t in new List<TaskRecord>(world.Tasks.All))
+                if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.BuildId && t.SiteFootprintId.HasValue &&
+                    world.Construction.Get(t.SiteFootprintId.Value) == null)
+                    world.Tasks.Cancel(t.Id);
         }
 
         private static Operation OperationOf(SimWorld world, int footprintId)

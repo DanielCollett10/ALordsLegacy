@@ -145,6 +145,16 @@ namespace LordsLegacy.Sim.Tasks
             return true;
         }
 
+        /// <summary>Marks a live task as building the site of a footprint (T-347). False if unknown or finished.</summary>
+        public bool SetSite(int taskId, int footprintId)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.SiteFootprintId = footprintId;
+            Version++;
+            return true;
+        }
+
         /// <summary>Sets or clears (null) the Fell task an early-fetch haul waits for. False if unknown or finished.</summary>
         public bool SetAwaiting(int taskId, int? awaitedTaskId)
         {
