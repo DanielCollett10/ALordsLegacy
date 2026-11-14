@@ -11,6 +11,15 @@ namespace LordsLegacy.Sim.Tasks
         HelpersOnly
     }
 
+    /// <summary>How urgently the dispatcher hands a task out (CN-30). Set at creation; High is taken before Normal.</summary>
+    public enum TaskPriority
+    {
+        /// <summary>The default for every task.</summary>
+        Normal = 0,
+        /// <summary>Taken before any Normal task, whatever the distance.</summary>
+        High = 1
+    }
+
     /// <summary>A resource a task needs besides the worker.</summary>
     public enum RequiredResource
     {

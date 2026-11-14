@@ -16,8 +16,8 @@ namespace LordsLegacy.Sim.Tasks
         public int OwnerOperationId { get; }
         /// <summary>Target tree, or null when the task has no tree target.</summary>
         public TreeId? Target { get; }
-        /// <summary>Higher runs first.</summary>
-        public int Priority { get; }
+        /// <summary>Dispatch priority, fixed at creation. High tasks are handed out before Normal ones.</summary>
+        public TaskPriority Priority { get; }
         /// <summary>Lifecycle state.</summary>
         public TaskState State { get; internal set; }
         /// <summary>Assigned citizen id, or null.</summary>
@@ -26,6 +26,8 @@ namespace LordsLegacy.Sim.Tasks
         public int CurrentStep { get; internal set; }
         /// <summary>Ticks of progress in the current step.</summary>
         public int StepProgress { get; internal set; }
+        /// <summary>What the task is for, shown in the citizen panel: the module name for construction tasks, or null.</summary>
+        public string Subject { get; }
         /// <summary>The ox this task uses (T-289), or null.</summary>
         public int? OxId { get; internal set; }
         /// <summary>True if the ox was assigned to the owner operation when the task took it.</summary>
@@ -44,9 +46,11 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>True when Done or Cancelled.</summary>
         public bool IsFinished => State == TaskState.Done || State == TaskState.Cancelled;
 
-        internal TaskRecord(int id, TaskDef def, int ownerOperationId, TreeId? target, int priority)
+        internal TaskRecord(int id, TaskDef def, int ownerOperationId, TreeId? target, TaskPriority priority,
+            string subject)
         {
             Id = id; Def = def; OwnerOperationId = ownerOperationId; Target = target; Priority = priority;
+            Subject = subject;
         }
 
         internal void AddReservation(TreeId t) => _reservations.Add(t);

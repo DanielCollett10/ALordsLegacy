@@ -87,6 +87,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     Open → Assigned → Active → Done, or Cancelled; illegal transitions return false. A task reserves trees in
     `Trees` using its own id as owner; `Cancel` and completion release them. Queries `ByOwner`, `ByAssignee`,
     `InState`, `IsBusy(citizenId)` (holds an Assigned/Active task); `Version` bumps on change.
+    Each task has a `TaskPriority` (Normal default, High) fixed at creation, and an optional `Subject` (the module
+    name a construction task serves, for the citizen panel). Construction defs (T-344, CN-20/24) live in
+    `ConstructionTaskDefs`: `task.deliver_materials` (HelpersOnly, Ox, heavy load/unload) and `task.build`
+    (HelpersOnly, heavy Work, no walk step yet).
   - **Dispatcher and step runner (T-275, TSK-07/08/12/13, PPL-44/45, WC-26):** `DispatchSystem` runs when
     `Tick % SimTuning.DispatchIntervalMinutes (10) == 0`. Idle = awake, no debug send, no task (`IsBusy`), and not mid-walk
     unless milling. Pass 1: workers (id order) of the family whose `WorkplaceId` = task owner; pass 2: helper families

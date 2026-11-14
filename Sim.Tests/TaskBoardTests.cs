@@ -45,11 +45,27 @@ namespace LordsLegacy.Sim.Tests
         {
             var w = World();
             int v = w.Tasks.Version;
-            var t = w.Tasks.Create(Fell, 7, new TreeId(1), 5);
+            var t = w.Tasks.Create(Fell, 7, new TreeId(1), TaskPriority.High);
             Assert.AreEqual(TaskState.Open, t.State);
             Assert.IsNull(t.AssigneeId);
-            Assert.AreEqual(5, t.Priority);
+            Assert.AreEqual(TaskPriority.High, t.Priority);
             Assert.Greater(w.Tasks.Version, v);
+        }
+
+        [Test]
+        public void Create_WithoutPriority_IsNormal()
+        {
+            var w = World();
+            var t = w.Tasks.Create(Fell, 7, new TreeId(1));
+            Assert.AreEqual(TaskPriority.Normal, t.Priority, "existing tasks default to Normal");
+            Assert.AreEqual(TaskPriority.Normal, w.Tasks.Create(Fell, 7).Priority);
+        }
+
+        [Test]
+        public void TaskPriority_NormalIsTheZeroValue()
+        {
+            Assert.AreEqual(0, (int)TaskPriority.Normal);
+            Assert.Greater(TaskPriority.High, TaskPriority.Normal);
         }
 
         [Test]
