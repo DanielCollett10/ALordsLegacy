@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
@@ -32,7 +33,7 @@ namespace LordsLegacy.Sim.Tasks
         // worker is then free and the routine walks them home. Returns true when it handled the task this tick.
         private bool TryWindDown(SimWorld world, TaskRecord t, Citizen c, Ox ox)
         {
-            if (t.Def.Id != HaulSystem.HaulTaskId || ox == null) return false;
+            if ((t.Def.Id != HaulSystem.HaulTaskId && t.Def.Id != ConstructionTaskDefs.DeliverId) || ox == null) return false;
             if (!t.WindingDown)
             {
                 StepKind k = t.Def.Steps[t.CurrentStep].Kind;
@@ -55,14 +56,35 @@ namespace LordsLegacy.Sim.Tasks
                 _drop.TryGetValue(t.Id, out int done);
                 _drop[t.Id] = ++done;
                 if (done < Math.Max(1, world.Tuning.OxUnloadMinutes)) return true;
-                LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(ox.X, ox.Z), t.OwnerOperationId);
+                ConstructionSite site = t.Def.Id == ConstructionTaskDefs.DeliverId ? SiteOfDeliver(world, t) : null;
+                int? owner = site != null ? site.FootprintId : t.OwnerOperationId;
+                LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(ox.X, ox.Z), owner);
                 world.Inventory.Transfer(carrier, pile, Items.Log, carried);
                 // The logs are on the ground now, so the storage room this haul reserved for them is no longer needed.
                 // Releasing it here keeps LogLoad from counting these logs twice while the ox walks back (WC-25).
                 world.Inventory.CancelOwner(t.Id);
+                // CN-25b: a site's logs stay the site's. Reserve them on its own pile in the same step, so the site's
+                // reserved total does not change and the next morning's Deliver picks them up first.
+                if (site != null)
+                {
+                    int rid = world.Inventory.ReserveStock(pile, Items.Log, carried, site.FootprintId);
+                    if (rid != 0) site.ReservationIds.Add(rid);
+                }
             }
             StepOxWalk(world, t, c, ox, TaskStep.ReturnOx());
             return true;
+        }
+
+        // The construction site a Deliver unloads into, or null.
+        private static ConstructionSite SiteOfDeliver(SimWorld world, TaskRecord t)
+        {
+            foreach (TaskStep st in t.Def.Steps)
+            {
+                if (st.Kind != StepKind.UnloadOx) continue;
+                LedgerLocation l = world.Inventory.Get(st.LocationId);
+                return l == null || l.Kind != LocationKind.Site ? null : world.Construction.Get(l.ModuleId);
+            }
+            return null;
         }
 
         private void EndWindDown(SimWorld world, TaskRecord t, Citizen c)

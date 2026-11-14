@@ -194,6 +194,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     ox stands after `OxUnloadMinutes` into a new operation-owned ground pile, the ox is led to its rest spot, all the
     task's reservations are released and the task is Cancelled; the worker then walks home. `DispatchSystem` hands out no
     ox task between the end of work and midnight. Next morning `OpenTasks` opens a normal haul for the dropped pile.
+    T-348 (CN-25b): the same wind-down covers `task.deliver_materials`. The pile is owned by the site (ground pile
+    `OwnerOperationId` = site footprint id, so it is not a construction source), a stock reservation for the carried count
+    is made on it in the same step and added to `ConstructionSite.ReservationIds`; `ConstructionSystem.OpenTasks` takes
+    reservations on the site's own piles before its other ones. Footprint and operation ids share the owner field, so an
+    operation with the same id as a site would see the pile as its own (`RemoveModule` already guards this).
   - **Processes (T-272, TMB-01/02, TSK-14, MVP-1-12):** `Assets/Sim/Processes/` (`LordsLegacy.Sim.Processes`) holds
     `ProcessDef` (id, ordered `StageDef`s), `StageDef` (id, minutes, per-item, heavy, enabled, animation key) and
     `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` returns the enabled
