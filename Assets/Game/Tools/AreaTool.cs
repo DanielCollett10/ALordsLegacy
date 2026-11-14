@@ -168,7 +168,7 @@ namespace LordsLegacy.Game.Tools
         /// <summary>A mouse button went down at a screen position (pixels).</summary>
         public void PointerDown(PressButton button, Vector2 screenPos)
         {
-            if (!_active) return;
+            if (!_active || GameMenuState.IsOpen) return;
             if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) return;
             _press.Press(button, screenPos);
             _pressVertex = -1; _pressHandle = -1; _pressEdge = -1;
@@ -806,7 +806,7 @@ namespace LordsLegacy.Game.Tools
 
         private void Update()
         {
-            if (!_active) return;
+            if (!_active || GameMenuState.IsOpen) return;
             var mouse = Mouse.current;
             if (mouse != null)
             {

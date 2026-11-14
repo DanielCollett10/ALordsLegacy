@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="game-menu" class="game-menu">
+        <ui:VisualElement name="game-menu-main" class="game-menu__box">
+            <ui:Label class="game-menu__title" text="Menu" />
+            <ui:Button name="game-menu-resume" class="game-menu__button" text="Resume" />
+            <ui:Button name="game-menu-save" class="game-menu__button" text="Save" />
+            <ui:Button name="game-menu-load" class="game-menu__button" text="Load" />
+            <ui:Button name="game-menu-options" class="game-menu__button" text="Options" />
+            <ui:Button name="game-menu-quit" class="game-menu__button" text="Quit" />
+        </ui:VisualElement>
+        <ui:VisualElement name="game-menu-save-panel" class="game-menu__box">
+            <ui:Label class="game-menu__title" text="Save" />
+            <ui:VisualElement name="game-menu-save-content" class="game-menu__content" />
+            <ui:Button name="game-menu-save-back" class="game-menu__button" text="Back" />
+        </ui:VisualElement>
+        <ui:VisualElement name="game-menu-load-panel" class="game-menu__box">
+            <ui:Label class="game-menu__title" text="Load" />
+            <ui:VisualElement name="game-menu-load-content" class="game-menu__content" />
+            <ui:Button name="game-menu-load-back" class="game-menu__button" text="Back" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

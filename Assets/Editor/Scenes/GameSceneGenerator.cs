@@ -293,6 +293,10 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(opPanel, "_host", host);
             SetRef(opPanel, "_agents", agents);
             SetRef(opPanel, "_controller", controller);
+            var menuGo = CreateUiDocument("GameMenu", "Assets/Game/UI/GameMenu/GameMenu.uxml");
+            var menu = menuGo.AddComponent<GameMenuView>();
+            SetRef(menu, "_host", host);
+            SetRef(menu, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/GameMenu/GameMenu.uss"));
             var path = new GameObject("DebugPathOverlay").AddComponent<DebugPathOverlay>();
             SetRef(path, "_host", host);
             SetRef(path, "_agents", agents);

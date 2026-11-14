@@ -169,7 +169,7 @@ namespace LordsLegacy.Game.Tools
         /// <summary>A left click: places the next module where the ghost is. A refusal shows in the panel.</summary>
         public void ClickAt(Vector2 screenPos)
         {
-            if (!IsActive || _host == null || !_host.IsInitialized || _picker == null) return;
+            if (!IsActive || GameMenuState.IsOpen || _host == null || !_host.IsInitialized || _picker == null) return;
             if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) return;
             HoverAt(screenPos);
             PlaceAtGhost();
@@ -384,7 +384,7 @@ namespace LordsLegacy.Game.Tools
 
         private void Update()
         {
-            if (!IsActive) return;
+            if (!IsActive || GameMenuState.IsOpen) return;
             var kb = Keyboard.current;
             if (kb != null)
             {
