@@ -67,4 +67,8 @@ current state (0034's "planned / not implemented" status line is out of date).
   the catalog fails the load.
 - **Scene reload (SAVE-02, SV-22):** the Unity side is not built. The plan is to reload the Game scene with the save bytes
   handed to `SimHost`, so no renderer handles a world swap.
-- **Autosave (SV-11):** not built. It needs a Unity-side timer and the single `Autosave` slot.
+- **Autosave (SV-11, T-373):** `AutosaveController` (`Assets/Game/Saving/`, on its own UIDocument in the Game scene) keeps a
+  real-time count (`AutosaveTimer`, plain C#) that advances while a world is loaded and the Esc menu is closed; Sim pause still counts.
+  The interval is the serialized `_intervalMinutes` (default 30). At the interval it overwrites `Autosave.llsave` through
+  `SaveStore.WriteAutosave` and shows a "Saved" note for 2 s. Any manual save (`SavePanelController.Saved`) restarts the count.
+  The Load list shows the autosave like any other save, dated by its header time, which is its last write.
