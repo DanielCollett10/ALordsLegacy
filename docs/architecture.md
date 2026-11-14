@@ -383,8 +383,24 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   `PlaceModule` with a non-empty recipe adds the footprint, a Delivering `ConstructionSite` and reservations (owner = footprint id)
   in one Apply; empty recipe stays built. `RemoveModule` of a site releases its reservations and moves site-store and
   site-owned pile logs to an unowned ground pile; removing a built storage with logs reserved for a site is refused.
-- Not built yet: construction systems and odd jobs (M10), food, markets,
-  economy, saving. Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
+- **Construction (T-351 summary; decision 0033; rules in `docs/design/construction.md`):** a footprint type with a non-empty
+  `ConstructionRecipe` is placed as a site. `SimWorld.Construction` (`ConstructionRegistry`) holds one `ConstructionSite`
+  per unbuilt footprint, in state Delivering then Building; no record means Built (`world.IsBuilt`).
+  *Sources:* `ConstructionSources` covers the camp stockpile, Built log storage and unowned ground piles. `PlaceModule`
+  checks the recipe and reserves nearest-first in one Apply. Site-owned piles (left by a sunset wind-down) are not sources
+  for other sites. *Materials:* logs sit in a `LocationKind.Site` ledger location.
+  *System:* `ConstructionSystem` (operations phase) opens `task.deliver_materials` (ox, up to `OxLoadLogs` per trip) and
+  `task.build` (HelpersOnly, up to `MaxBuildersPerSite` at once, capped at recipe minutes × delivered ÷ needed).
+  *Progress API:* `ConstructionProgress.Of(world, footprintId)` gives state, logs delivered/needed and fraction, or null
+  when Built. *Priority:* `ConstructionPriority` Normal/High, set by the `SetSitePriority` command; the dispatcher
+  orders by priority, then travel. *Working day:* odd-jobbers with construction work follow `WorkDay`; off shift they
+  get nothing from `DispatchSystem`, and an unfinished Build keeps its progress overnight. *Wind-down:* a Deliver still
+  under way at the end of work is dropped as a site-owned pile where the ox stands, with its reservation moved to that
+  pile; Build does not wind down. *Assignment gate:* `AssignFamily` refuses with "Hut not built yet" while the operation's
+  hut is unbuilt (CN-04b). The Unity panel side of the gate is not built.
+- Not built yet: food, markets, economy, saving; on the construction side the Unity panel and scaffold (CN-40..43),
+  the 50% removal refund (CN-33), artisan build steps (PPL-42), clearing trees as a job (BLD-10-C), and houses and the
+  granary (MVP-2). Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
 
 ## Map pipeline
 
