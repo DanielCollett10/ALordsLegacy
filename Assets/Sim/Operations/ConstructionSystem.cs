@@ -166,10 +166,12 @@ namespace LordsLegacy.Sim.Operations
             return n;
         }
 
-        // Logs the site still needs from outside: recipe - on site - carried by live tasks that have not unloaded yet.
+        // Logs the site still needs from outside: recipe - delivered (on site + already consumed by progress, T-347) -
+        // carried by live tasks that have not unloaded yet. Consumed logs must count as delivered, or the site
+        // orders them again from the stock (T-350).
         private static int Outstanding(SimWorld world, ConstructionSite site, int recipeLogs, LedgerLocation loc)
         {
-            int n = recipeLogs - loc.CountOf(Items.Log.Id);
+            int n = recipeLogs - loc.CountOf(Items.Log.Id) - site.LogsConsumed;
             foreach (TaskRecord t in world.Tasks.All)
             {
                 if (t.IsFinished || t.Def.Id != ConstructionTaskDefs.DeliverId) continue;

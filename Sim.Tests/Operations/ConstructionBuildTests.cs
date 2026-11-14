@@ -308,6 +308,18 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
+        public void ConsumedLogs_CountAsDelivered_SoSpareStockIsNotOrderedForTheSite()
+        {
+            Ctx c = Make(1, 1);
+            c.W.Inventory.Produce(c.Pile, Items.Log, 3); // 3 spare logs beyond the hut's 8
+            Deliver(c, 8);
+            c.W.Step(200); // at least one log consumed (120 builder-minutes each)
+            Assert.Greater(c.W.Inventory.ConsumedOf(Items.Log.Id), 0);
+            Assert.AreEqual(3, c.Pile.Total, "the spare logs stay in the stockpile");
+            Assert.AreEqual(0, c.Pile.ReservedOf(Items.Log.Id), "no reservation for logs the site has already used");
+        }
+
+        [Test]
         public void RemovedSite_CancelsItsBuildTasks()
         {
             Ctx c = Make(0, 0);
