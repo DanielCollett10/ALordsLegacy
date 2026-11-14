@@ -28,6 +28,7 @@ MonoBehaviour:
   walkSpeedMPerGameMinute: 1.74
   oxSpeedMPerGameMinute: 1.04
   minSleepHours: 6
+  maxBuildersPerSite: 4
   standardLogLengthM: 4
   trunkLengthMinM: 12
   trunkLengthMaxM: 20
@@ -94,3 +95,13 @@ MonoBehaviour:
     clearsTrees: 0
     blocksRoads: 0
     nearRoadReachM: 10
+  moduleRecipes:
+  - moduleId: module.woodcutting_hut
+    logs: 8
+    buildWorkerMinutes: 960
+  - moduleId: module.log_storage
+    logs: 0
+    buildWorkerMinutes: 0
+  - moduleId: module.oxen_stand
+    logs: 1
+    buildWorkerMinutes: 60

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Tuning;
 using UnityEngine;
@@ -74,6 +75,9 @@ namespace LordsLegacy.Game
         [Tooltip("MOV-21 ox speed, metres per game minute (1.04 = 3 km/h on screen at 1x)")] [Range(0.1f, 10f)] public float oxSpeedMPerGameMinute = 1.04f;
         [Tooltip("PPL-26 shortest sleep a citizen takes each night, game hours")] [Range(0f, 24f)] public float minSleepHours = 6f;
 
+        [Header("Construction")]
+        [Tooltip("CN-23 most odd-jobbers building one site at once (PLACEHOLDER rule value)")] [Range(1, 16)] public int maxBuildersPerSite = 4;
+
         [Header("Timber and oxen")]
         [Tooltip("TMB-04 standard log length, metres")] [Range(1f, 10f)] public float standardLogLengthM = 4f;
         [Tooltip("TMB-06 shortest usable trunk, metres")] [Range(1f, 40f)] public float trunkLengthMinM = 12f;
@@ -89,11 +93,25 @@ namespace LordsLegacy.Game
         [Tooltip("AR-15 overlap tolerance, m2")] [Range(0f, 10f)] public float overlapToleranceM2 = 0.1f;
         [Tooltip("Decision 0012 spatial index cell size, metres")] [Range(4f, 256f)] public float spatialIndexCellM = 32f;
 
+        /// <summary>One module type's construction recipe (CN-02).</summary>
+        [Serializable]
+        public sealed class ModuleRecipeConfig
+        {
+            /// <summary>Module type id, e.g. module.woodcutting_hut.</summary>
+            public string moduleId;
+            [Tooltip("Logs taken from the stockpile to build")] [Range(0, 100)] public int logs;
+            [Tooltip("Build work, worker-minutes")] [Range(0, 100000)] public int buildWorkerMinutes;
+        }
+
         [Header("Road types (RD-04, RD-05)")]
         public List<RoadTypeConfig> roadTypes = DefaultRoadTypes();
 
         [Header("Area types (AR-02, AR-13, AR-14, AR-16, AR-24)")]
         public List<AreaTypeConfig> areaTypes = DefaultAreaTypes();
+
+        [Header("Module recipes (CN-02)")]
+        [Tooltip("Module construction recipes. NOT YET APPLIED: the Sim still reads ModuleTypes (code) until a module type catalog is wired.")]
+        public List<ModuleRecipeConfig> moduleRecipes = DefaultModuleRecipes();
 
         /// <summary>Builds a SimTuning from these values.</summary>
         public SimTuning BuildTuning() => new SimTuning
@@ -105,6 +123,7 @@ namespace LordsLegacy.Game
             StartWeekday = startWeekday, DaysPerYear = daysPerYear,
             MinDaylightHours = D(minDaylightHours), MaxDaylightHours = D(maxDaylightHours),
             RestDayEnabled = restDayEnabled, SundayMealMinutes = sundayMealMinutes, MinSleepHours = D(minSleepHours),
+            MaxBuildersPerSite = maxBuildersPerSite,
             WalkSpeedMPerGameMinute = D(walkSpeedMPerGameMinute), OxSpeedMPerGameMinute = D(oxSpeedMPerGameMinute),
             StandardLogLengthM = D(standardLogLengthM), TrunkLengthMinM = D(trunkLengthMinM),
             TrunkLengthMaxM = D(trunkLengthMaxM), StartingOxen = startingOxen,
@@ -128,6 +147,28 @@ namespace LordsLegacy.Game
             var defs = new List<AreaTypeDef>();
             if (areaTypes != null) foreach (var t in areaTypes) if (t != null && !string.IsNullOrEmpty(t.id)) defs.Add(t.ToDef());
             return new AreaTypeCatalog(defs);
+        }
+
+        /// <summary>Builds the module recipes from these values, keyed by module id (unused by the Sim until wired).</summary>
+        public Dictionary<string, ConstructionRecipe> BuildModuleRecipes()
+        {
+            var map = new Dictionary<string, ConstructionRecipe>();
+            if (moduleRecipes != null)
+                foreach (var r in moduleRecipes)
+                    if (r != null && !string.IsNullOrEmpty(r.moduleId)) map[r.moduleId] = new ConstructionRecipe(r.logs, r.buildWorkerMinutes);
+            return map;
+        }
+
+        /// <summary>Code-default module recipes as editable config.</summary>
+        public static List<ModuleRecipeConfig> DefaultModuleRecipes()
+        {
+            var list = new List<ModuleRecipeConfig>();
+            foreach (var d in ModuleTypes.All)
+                list.Add(new ModuleRecipeConfig
+                {
+                    moduleId = d.Id, logs = d.ConstructionRecipe.Logs, buildWorkerMinutes = d.ConstructionRecipe.BuildWorkerMinutes
+                });
+            return list;
         }
 
         /// <summary>
