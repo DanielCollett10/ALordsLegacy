@@ -145,6 +145,16 @@ namespace LordsLegacy.Sim.Tasks
             return true;
         }
 
+        /// <summary>Sets the dispatch priority of a live task (T-349). False if unknown or finished.</summary>
+        public bool SetPriority(int taskId, TaskPriority priority)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.Priority = priority;
+            Version++;
+            return true;
+        }
+
         /// <summary>Marks a live task as building the site of a footprint (T-347). False if unknown or finished.</summary>
         public bool SetSite(int taskId, int footprintId)
         {

@@ -16,8 +16,9 @@ namespace LordsLegacy.Sim.Tasks
         public int OwnerOperationId { get; }
         /// <summary>Target tree, or null when the task has no tree target.</summary>
         public TreeId? Target { get; }
-        /// <summary>Dispatch priority, fixed at creation. High tasks are handed out before Normal ones.</summary>
-        public TaskPriority Priority { get; }
+        /// <summary>Dispatch priority. High tasks are handed out before Normal ones. Set at creation; a construction
+        /// site's priority change (T-349, CN-30) is pushed here through <see cref="TaskBoard.SetPriority"/>.</summary>
+        public TaskPriority Priority { get; internal set; }
         /// <summary>Lifecycle state.</summary>
         public TaskState State { get; internal set; }
         /// <summary>Assigned citizen id, or null.</summary>
