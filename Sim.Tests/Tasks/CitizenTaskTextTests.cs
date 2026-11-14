@@ -2,6 +2,7 @@ using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Navigation;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tasks;
@@ -124,5 +125,51 @@ namespace LordsLegacy.Sim.Tests.Tasks
             Assert.IsFalse(w.WorkDay.OnShift(w, c), "precondition: 02:00 is outside the shift");
             Assert.AreEqual("Paused for the night", CitizenTaskText.Task(w, c));
         }
+
+        // An odd-job helper (a family with no workplace) at noon, working.
+        private static Citizen SetUpHelper(SimWorld w)
+        {
+            w.People.AddFamily(2, "Brook", 150, 50);
+            Citizen c = w.People.AddCitizen(2, "Cole", Sex.Male, AdultBirth, 2, 150, 50, 0, Activity.Working);
+            return c;
+        }
+
+        [Test]
+        public void DeliverTask_ShowsDeliveringLogsToTheModule()
+        {
+            var w = NewWorld(12);
+            Citizen c = SetUpHelper(w);
+            TaskRecord t = w.Tasks.Create(ConstructionDeliverDef(), 9, null, TaskPriority.Normal, "Hut");
+            w.Tasks.Assign(t.Id, c.Id);
+            w.Tasks.Start(t.Id);
+            Assert.AreEqual("Delivering logs to Hut", CitizenTaskText.Task(w, c));
+        }
+
+        [Test]
+        public void BuildTask_ShowsBuildingTheModule()
+        {
+            var w = NewWorld(12);
+            Citizen c = SetUpHelper(w);
+            TaskRecord t = w.Tasks.Create(ConstructionBuildDef(), 9, null, TaskPriority.Normal, "Hut");
+            w.Tasks.Assign(t.Id, c.Id);
+            w.Tasks.Start(t.Id);
+            Assert.AreEqual("Building Hut", CitizenTaskText.Task(w, c));
+        }
+
+        [Test]
+        public void ConstructionTask_WithNoModuleName_OmitsTheModule()
+        {
+            var w = NewWorld(12);
+            Citizen c = SetUpHelper(w);
+            TaskRecord t = w.Tasks.Create(ConstructionDeliverDef(), 9);
+            w.Tasks.Assign(t.Id, c.Id);
+            w.Tasks.Start(t.Id);
+            Assert.AreEqual("Delivering logs", CitizenTaskText.Task(w, c));
+        }
+
+        private static TaskDef ConstructionDeliverDef() =>
+            ConstructionTaskDefs.Deliver(new PathPoint(110, 50), 1, new PathPoint(150, 50), 2, 4, 10, 10);
+
+        private static TaskDef ConstructionBuildDef() => ConstructionTaskDefs.Build(30);
     }
 }

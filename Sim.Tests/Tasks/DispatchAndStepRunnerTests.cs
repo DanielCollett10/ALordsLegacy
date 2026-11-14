@@ -102,8 +102,8 @@ namespace LordsLegacy.Sim.Tests
         {
             var w = NewWorld((105f, 100f), (150f, 100f));
             AddWorker(w, 1, 1, 100, 100, workplace: 7);
-            var near = w.Tasks.Create(Light(), 7, new TreeId(1), priority: 0);
-            var far = w.Tasks.Create(Light(), 7, new TreeId(2), priority: 5);
+            var near = w.Tasks.Create(Light(), 7, new TreeId(1), priority: TaskPriority.Normal);
+            var far = w.Tasks.Create(Light(), 7, new TreeId(2), priority: TaskPriority.High);
             Run(w, 10);
             Assert.AreEqual(TaskState.Active, far.State);
             Assert.AreEqual(TaskState.Open, near.State);
@@ -214,7 +214,7 @@ namespace LordsLegacy.Sim.Tests
             var c = AddWorker(w, 1, 1, 100, 100, workplace: 7);
             var first = w.Tasks.Create(Light(workTicks: 60), 7, new TreeId(1));
             Run(w, 10);
-            var second = w.Tasks.Create(Light(), 7, new TreeId(2), priority: 99);
+            var second = w.Tasks.Create(Light(), 7, new TreeId(2), priority: TaskPriority.High);
             Run(w, 20); // two more dispatch ticks while the first is still being worked
             Assert.AreEqual(TaskState.Active, first.State);
             Assert.AreEqual(Activity.Working, c.Activity);
