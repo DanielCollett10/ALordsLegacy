@@ -87,7 +87,7 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     Open → Assigned → Active → Done, or Cancelled; illegal transitions return false. A task reserves trees in
     `Trees` using its own id as owner; `Cancel` and completion release them. Queries `ByOwner`, `ByAssignee`,
     `InState`, `IsBusy(citizenId)` (holds an Assigned/Active task); `Version` bumps on change.
-    Each task has a `TaskPriority` (Normal default, High) fixed at creation, and an optional `Subject` (the module
+    Each task has a `TaskPriority` (Normal default, High) set at creation (changed only by `TaskBoard.SetPriority`, T-349), and an optional `Subject` (the module
     name a construction task serves, for the citizen panel). Construction defs (T-344, CN-20/24) live in
     `ConstructionTaskDefs`: `task.deliver_materials` (HelpersOnly, Ox, heavy load/unload) and `task.build`
     (HelpersOnly, heavy Work, no walk step yet).
@@ -96,7 +96,9 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     unless milling. Pass 1: workers (id order) of the family whose `WorkplaceId` = task owner; pass 2: helper families
     (no workplace) for `AssignedThenHelpers`/`HelpersOnly`. An assigned family never takes other work. Heavy tasks need
     age 14+. Best task = highest priority, then shortest straight-line distance to the target tree, then id. It reserves
-    the tree, then `Assign` + `Start`. Tasks needing an ox stay open (no ox handling yet); a task whose tree is gone is
+    the tree, then `Assign` + `Start`. T-349 (CN-31): one ranking for all Open tasks, per worker: priority, then travel
+    to the job (tree; ox for a delivery; site for a build), then id. A task that needs an ox is offered only once it has
+    one, only before the end of work, and only to the free eligible worker nearest the ox. A task whose tree is gone is
     cancelled. `StepRunnerSystem` runs Active tasks in id order: MoveTo issues a `MoveOrder` to the tree and waits (Walking);
     Work adds one progress tick per tick (Working). Target gone, no assignee or a Failed move cancels the task and frees
     the worker. `RoutineSystem` ignores busy citizens and resumes when the task ends.
@@ -185,6 +187,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     consumed). A builder at the cap ends the task and is free for a Deliver; Build is not re-offered until more logs
     arrive. At the full total the site record is removed (Built). Builders work where they stand (no walk-to-site step yet);
     the dispatcher breaks ties by distance to the site. Read API: `ConstructionProgress.Of(world, footprintId)` (null when Built).
+  - **Site priority (T-349, CN-30/31):** `SetSitePriority(footprintId, Normal|High)` (`Assets/Sim/Commands/SetSitePriority.cs`)
+    sets the `ConstructionSite.Priority` and `TaskBoard.SetPriority` on the site's unfinished tasks (deliver and build; both
+    carry `SiteFootprintId`). Unknown footprint → NotFound; built (no site) → NotAllowed; bad enum → InvalidArgument. Works
+    while paused. The dispatcher then hands High tasks out first (see the dispatcher entry above).
   - **Early fetch and sunset (T-291, WC-23/35):** `HaulSystem.Early.cs` opens a haul for an Active Fell task whose tree
     yields a full load once `FellMinutesLeft` ≤ the nearest idle worker's walk to the ox + the ox's led walk to the tree
     (ox speed). That haul (`TaskRecord.AwaitsTaskId` = the fell task) reserves ox and storage room at once, waits at the
