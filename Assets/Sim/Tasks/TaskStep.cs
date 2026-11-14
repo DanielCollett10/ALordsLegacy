@@ -41,20 +41,20 @@ namespace LordsLegacy.Sim.Tasks
 
         /// <summary>Load <paramref name="count"/> logs from ledger location <paramref name="pileLocationId"/> onto the ox,
         /// working <paramref name="durationTicks"/> minutes first.</summary>
-        public static TaskStep LoadOx(int pileLocationId, int count, int durationTicks)
+        public static TaskStep LoadOx(int pileLocationId, int count, int durationTicks, bool heavy = false)
         {
             if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
             if (durationTicks < 1) throw new ArgumentOutOfRangeException(nameof(durationTicks));
-            return new TaskStep(StepKind.LoadOx, durationTicks, false, null, 0, 0, pileLocationId, count);
+            return new TaskStep(StepKind.LoadOx, durationTicks, heavy, null, 0, 0, pileLocationId, count);
         }
 
         /// <summary>Unload <paramref name="count"/> logs from the ox into ledger location <paramref name="locationId"/>,
         /// working <paramref name="durationTicks"/> minutes first.</summary>
-        public static TaskStep UnloadOx(int locationId, int count, int durationTicks)
+        public static TaskStep UnloadOx(int locationId, int count, int durationTicks, bool heavy = false)
         {
             if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
             if (durationTicks < 1) throw new ArgumentOutOfRangeException(nameof(durationTicks));
-            return new TaskStep(StepKind.UnloadOx, durationTicks, false, null, 0, 0, locationId, count);
+            return new TaskStep(StepKind.UnloadOx, durationTicks, heavy, null, 0, 0, locationId, count);
         }
 
         /// <summary>Lead the ox to its rest spot and detach it.</summary>
