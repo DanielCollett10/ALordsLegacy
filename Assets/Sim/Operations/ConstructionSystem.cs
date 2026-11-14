@@ -195,20 +195,21 @@ namespace LordsLegacy.Sim.Operations
             TaskPriority priority = site.Priority == ConstructionPriority.High ? TaskPriority.High : TaskPriority.Normal;
             while (site.ReservationIds.Count > 0)
             {
-                int resId = site.ReservationIds[0];
+                int at = FirstIndex(world, site);
+                int resId = site.ReservationIds[at];
                 Reservation r = world.Inventory.GetReservation(resId);
-                if (r == null) { site.ReservationIds.RemoveAt(0); continue; }
+                if (r == null) { site.ReservationIds.RemoveAt(at); continue; }
                 LedgerLocation source = world.Inventory.Get(r.LocationId);
                 int n = Math.Min(load, r.Count);
                 int remainder = r.Count - n;
 
                 // Hand n logs from the site's reservation to the task.
                 world.Inventory.Release(resId);
-                site.ReservationIds.RemoveAt(0);
+                site.ReservationIds.RemoveAt(at);
                 if (remainder > 0)
                 {
                     int rest = world.Inventory.ReserveStock(source, Items.Log, remainder, fp.Id);
-                    site.ReservationIds.Insert(0, rest);
+                    site.ReservationIds.Insert(at, rest);
                 }
                 PathPoint pick = PointOf(world, source);
                 PathPoint drop = new PathPoint(fp.AccessPoint.XMetres, fp.AccessPoint.ZMetres);
@@ -221,6 +222,18 @@ namespace LordsLegacy.Sim.Operations
                     throw new InvalidOperationException("Could not re-reserve logs for a delivery task.");
                 }
             }
+        }
+
+        // CN-25b: reservations on the site's own piles (left by a sunset wind-down) are used before the others.
+        private static int FirstIndex(SimWorld world, ConstructionSite site)
+        {
+            for (int i = 0; i < site.ReservationIds.Count; i++)
+            {
+                Reservation r = world.Inventory.GetReservation(site.ReservationIds[i]);
+                LedgerLocation l = r == null ? null : world.Inventory.Get(r.LocationId);
+                if (l != null && l.Kind == LocationKind.GroundPile && l.OwnerOperationId == site.FootprintId) return i;
+            }
+            return 0;
         }
 
         private static PathPoint PointOf(SimWorld world, LedgerLocation l)
