@@ -17,6 +17,7 @@ namespace LordsLegacy.Game.Visuals
         private readonly Dictionary<string, List<Matrix4x4>> _byVisual = new Dictionary<string, List<Matrix4x4>>();
         private int _count;
         private int _builtVersion = -1;
+        private int _builtSites = -1;
         private Bounds _bounds;
 
         /// <summary>Modules currently drawn. For tests.</summary>
@@ -48,7 +49,7 @@ namespace LordsLegacy.Game.Visuals
         {
             if (host == null || !host.IsInitialized) return;
             var world = host.World;
-            if (world.Footprints.Version != _builtVersion) Build(world);
+            if (world.Footprints.Version != _builtVersion || world.Construction.Count != _builtSites) Build(world);
             if (registry == null) return;
             foreach (var kv in _byVisual)
                 if (registry.TryGet(kv.Key, out var def)) InstancedDraw.Draw(def, kv.Value, _bounds);
@@ -57,6 +58,7 @@ namespace LordsLegacy.Game.Visuals
         private void Build(LordsLegacy.Sim.Core.SimWorld world)
         {
             _builtVersion = world.Footprints.Version;
+            _builtSites = world.Construction.Count;
             _byVisual.Clear();
             _count = 0;
             var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
@@ -66,6 +68,7 @@ namespace LordsLegacy.Game.Visuals
                 {
                     var fp = world.Footprints.Get(id);
                     if (fp == null) continue;
+                    if (world.Construction.Get(id) != null) continue; // unbuilt: ConstructionRenderer draws the scaffold
                     string vid = VisualIdOf(fp.Type.Id);
                     var box = VisualSizes.Of(vid);
                     float x = (float)fp.Centre.XMetres, z = (float)fp.Centre.ZMetres;

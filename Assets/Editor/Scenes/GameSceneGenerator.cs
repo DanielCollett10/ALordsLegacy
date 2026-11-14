@@ -153,6 +153,9 @@ namespace LordsLegacy.EditorTools.Scenes
             var modules = new GameObject("ModuleRenderer").AddComponent<LordsLegacy.Game.Visuals.ModuleRenderer>();
             SetRef(modules, "host", host);
             SetRef(modules, "registry", registry);
+            var construction = new GameObject("ConstructionRenderer").AddComponent<LordsLegacy.Game.Visuals.ConstructionRenderer>();
+            SetRef(construction, "host", host);
+            SetRef(construction, "registry", registry);
             var logPiles = new GameObject("LogPileRenderer").AddComponent<LordsLegacy.Game.Visuals.LogPileRenderer>();
             SetRef(logPiles, "host", host);
             SetRef(logPiles, "registry", registry);

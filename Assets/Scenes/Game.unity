@@ -1895,6 +1895,52 @@ MonoBehaviour:
   _panel: {fileID: 100086}
   _controller: {fileID: 100082}
   _topBar: {fileID: 100090}
+--- !u!1 &485239386
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 485239388}
+  - component: {fileID: 485239387}
+  m_Layer: 0
+  m_Name: ConstructionRenderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &485239387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485239386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ae0b7443c5952b46888329034c893c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Visuals.ConstructionRenderer
+  host: {fileID: 100069}
+  registry: {fileID: 11400000, guid: 6e28376d06fa1e3469516f3ef81d24fd, type: 2}
+--- !u!4 &485239388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485239386}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2024791978
 GameObject:
   m_ObjectHideFlags: 0
@@ -2023,3 +2069,4 @@ SceneRoots:
   - {fileID: 100025}
   - {fileID: 100018}
   - {fileID: 2024791981}
+  - {fileID: 485239388}

@@ -87,6 +87,17 @@ namespace LordsLegacy.Game.Visuals
                     // Footprint rotation is counter-clockwise (x towards z); local X as a Unity yaw is 90 - rotation.
                     yaw = 90f - (float)fp.RotationDegrees;
                 }
+                else if (loc.Kind == LocationKind.Site)
+                {
+                    // Delivered logs lie beside the scaffold, on the footprint's local +X side (CN-42).
+                    var fp = world.Footprints.Get(loc.ModuleId);
+                    if (fp == null) continue;
+                    double rad = fp.RotationDegrees * System.Math.PI / 180.0;
+                    float off = Mathf.Max(fp.Type.WidthMm, fp.Type.DepthMm) / 2000f + length * 0.5f + 0.5f;
+                    cx = (float)(fp.Centre.XMetres + System.Math.Cos(rad) * off);
+                    cz = (float)(fp.Centre.ZMetres + System.Math.Sin(rad) * off);
+                    yaw = 90f - (float)fp.RotationDegrees;
+                }
                 else continue; // carriers are placed behind their ox each frame
                 float ground = world.Terrain.HeightAt(cx, cz);
                 var across = LyingPiece.Direction(yaw + 90f);

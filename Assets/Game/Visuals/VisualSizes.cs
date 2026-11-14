@@ -30,6 +30,8 @@ namespace LordsLegacy.Game.Visuals
         public const string ModuleLogStorage = "visual.module.log_storage";
         /// <summary>Id of the oxen stand module visual.</summary>
         public const string ModuleOxenStand = "visual.module.oxen_stand";
+        /// <summary>Id of the construction scaffold visual (stretched to the footprint, height grows with progress).</summary>
+        public const string ConstructionScaffold = "visual.construction.scaffold";
         /// <summary>Id of the tree stump visual.</summary>
         public const string TreeStump = "visual.tree.stump";
         /// <summary>Id of the felled trunk visual.</summary>
@@ -52,6 +54,7 @@ namespace LordsLegacy.Game.Visuals
                 case ModuleHut: return new Vector3(6f, 2.6f, 4f);
                 case ModuleLogStorage: return new Vector3(8f, 1.2f, 6f);
                 case ModuleOxenStand: return new Vector3(3f, 1f, 3f);
+                case ConstructionScaffold: return new Vector3(1f, 2.6f, 1f); // x, z are the footprint; y is the full height
                 case TreeStump: return new Vector3(0.6f, 0.5f, 0.6f);
                 case TreeFelled: return new Vector3(0.6f, 1f, 0.6f); // y is stretched to the trunk length
                 case ItemLog: return new Vector3(0.35f, 1f, 0.35f);   // y is stretched to the log length
