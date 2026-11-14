@@ -199,6 +199,25 @@ namespace LordsLegacy.Sim.Tasks
             return true;
         }
 
+        /// <summary>Id the next created task gets.</summary>
+        internal int NextId => _nextId;
+
+        /// <summary>Puts a saved task back (save reader only). Rebuilds the busy set for Assigned and Active tasks.</summary>
+        internal void RestoreTask(TaskRecord t, IEnumerable<TreeId> reservations)
+        {
+            if (t.Id >= _nextId) throw new InvalidOperationException("Task id " + t.Id + " is not below the id counter.");
+            _byId.Add(t.Id, t);
+            foreach (TreeId r in reservations) t.AddReservation(r);
+            if ((t.State == TaskState.Assigned || t.State == TaskState.Active) && t.AssigneeId.HasValue)
+                _busy.Add(t.AssigneeId.Value);
+        }
+
+        /// <summary>Sets the id counter and version. Call before <see cref="RestoreTask"/>.</summary>
+        internal void RestoreCounters(int nextId, int version)
+        {
+            _nextId = nextId; Version = version;
+        }
+
         private static bool Contains(TaskRecord t, TreeId tree)
         {
             foreach (var r in t.Reservations) if (r == tree) return true;
