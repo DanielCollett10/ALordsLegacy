@@ -172,7 +172,7 @@ namespace LordsLegacy.Sim.Operations
             foreach (int id in op.ModuleIds)
             {
                 Footprint f = world.Footprints.Get(id);
-                if (f != null && f.Type.Id == type.HutTypeId) return f;
+                if (f != null && f.Type.Id == type.HutTypeId && world.IsBuilt(f.Id)) return f;
             }
             return null;
         }
@@ -185,7 +185,7 @@ namespace LordsLegacy.Sim.Operations
             foreach (int id in op.ModuleIds)
             {
                 Footprint f = world.Footprints.Get(id);
-                if (f != null && f.Type.Id == type.LogStorageTypeId) list.Add(f);
+                if (f != null && f.Type.Id == type.LogStorageTypeId && world.IsBuilt(f.Id)) list.Add(f);
             }
             return list;
         }
