@@ -39,6 +39,13 @@ namespace LordsLegacy.Sim.Map
         /// <summary>The trees, in file order.</summary>
         public IReadOnlyList<MapTree> Trees { get; }
 
+        /// <summary>
+        /// 64-bit FNV-1a hash of the map file bytes. Set by <see cref="MapDataIO.Read(byte[])"/>; 0 for a map that was
+        /// not read from bytes (use <see cref="MapDataIO.ComputeContentHash(MapData)"/> for those). Saves store it so
+        /// a load can check it is the same map (saving.md SV-30).
+        /// </summary>
+        public ulong ContentHash { get; internal set; }
+
         /// <summary>Creates map data at <see cref="CurrentVersion"/>.</summary>
         public MapData(string mapId, HeightGrid heights, IEnumerable<MapTree> trees)
             : this(CurrentVersion, mapId, heights, trees)

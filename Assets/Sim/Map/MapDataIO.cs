@@ -16,6 +16,28 @@ namespace LordsLegacy.Sim.Map
     {
         private static readonly byte[] Magic = { (byte)'L', (byte)'L', (byte)'M', (byte)'P' };
 
+        private const ulong FnvOffset = 14695981039346656037UL;
+        private const ulong FnvPrime = 1099511628211UL;
+
+        /// <summary>64-bit FNV-1a hash of a byte array.</summary>
+        public static ulong Fnv1a64(byte[] bytes)
+        {
+            if (bytes == null) throw new ArgumentNullException(nameof(bytes));
+            ulong h = FnvOffset;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                h ^= bytes[i];
+                h *= FnvPrime;
+            }
+            return h;
+        }
+
+        /// <summary>Content hash of a map: the FNV-1a hash of the bytes <see cref="ToBytes"/> would write.</summary>
+        public static ulong ComputeContentHash(MapData map)
+        {
+            return Fnv1a64(ToBytes(map));
+        }
+
         /// <summary>Writes the map to a stream (left open).</summary>
         public static void Write(Stream stream, MapData map)
         {
@@ -50,17 +72,35 @@ namespace LordsLegacy.Sim.Map
             }
         }
 
-        /// <summary>Reads a map from a byte array. Throws <see cref="MapDataFormatException"/> on bad data.</summary>
+        /// <summary>
+        /// Reads a map from a byte array and sets <see cref="MapData.ContentHash"/> to the FNV-1a hash of those bytes.
+        /// Throws <see cref="MapDataFormatException"/> on bad data.
+        /// </summary>
         public static MapData Read(byte[] bytes)
         {
             if (bytes == null) throw new ArgumentNullException(nameof(bytes));
-            using (var ms = new MemoryStream(bytes, false)) return Read(ms);
+            MapData map;
+            using (var ms = new MemoryStream(bytes, false)) map = ReadCore(ms);
+            map.ContentHash = Fnv1a64(bytes);
+            return map;
         }
 
-        /// <summary>Reads a map from a stream (left open). Throws <see cref="MapDataFormatException"/> on bad data.</summary>
+        /// <summary>
+        /// Reads a map from the rest of a stream (left open) and sets <see cref="MapData.ContentHash"/>.
+        /// Throws <see cref="MapDataFormatException"/> on bad data.
+        /// </summary>
         public static MapData Read(Stream stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
+            using (var ms = new MemoryStream())
+            {
+                stream.CopyTo(ms);
+                return Read(ms.ToArray());
+            }
+        }
+
+        private static MapData ReadCore(Stream stream)
+        {
             try
             {
                 using (var r = new BinaryReader(stream, Encoding.UTF8, true))
