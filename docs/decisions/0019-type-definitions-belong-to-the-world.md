@@ -17,3 +17,8 @@ nothing can change them without editing code. `SimTuning` is already an instance
 **Consequences.** Type values are data (DEF-03), and a later save file can store them with the world. Unity code
 must stop calling `RoadTypes.Find` and `AreaTypes.Find` statically and read `World.RoadTypes`/`World.AreaTypes`.
 Adding a new road type means adding a definition, not code.
+
+**Status note (M10, not yet done).** Roads and areas follow this for the world catalogs. Still static, and so outside the rule:
+`OperationTypes` (used by `AssignFamily`, `DesignateArea`, `ModulePlacement`, `OperationSettings`, `HaulSystem`, the Unity
+operation views) and `ProcessDefs.Timber`. Several Unity tools also call the catalog-less `RoadSegment.SideLine(side)` and
+`CorridorPolygon()` overloads (`[Obsolete]`). Whether operation types should move onto the world is an open question for the owner.

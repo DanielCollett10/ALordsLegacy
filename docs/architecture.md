@@ -39,8 +39,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
     because commands work while paused. Rejected commands notify nobody.
     `SimWorld` takes an optional `systems` argument (null = `SimSystems.CreateDefault()`) so tests can supply their own order.
     Registered today, in run order: `NavSyncSystem` (sync), `RoutineSystem` (routine), `DispatchSystem` (dispatch),
-    `StepRunnerSystem` (steps), `MovementSystem` and `DebugSendSystem` (movement), `WoodcuttingSystem` and `HaulSystem`
-    (operations; `HaulSystem` is in the Haul tasks entry below). `WoodcuttingSystem` (T-276, WC-10..15/25, TMB-05/07; decision 0031): for each Working woodcutting operation it keeps one Open
+    `StepRunnerSystem` (steps), `MovementSystem` and `DebugSendSystem` (movement), `WoodcuttingSystem`, `HaulSystem` and
+    `ConstructionSystem` (operations; see the Haul tasks and Construction delivery entries below). `WoodcuttingSystem` (T-276, WC-10..15/25, TMB-05/07; decision 0031): for each Working woodcutting operation it keeps one Open
     `task.fell_tree` per idle adult worker of the assigned families, targeting the nearest standing unreserved tree to the
     hut access point inside `OperationStatus.WorkRegion`, reserved at creation. Steps = MoveTo + `ProcessDefs.Timber`
     effective stages (`TaskStep.StageId` carries the stage). `FellingOutcome` (called by `StepRunnerSystem` after each
@@ -230,8 +230,8 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   areaTypeId, point)` and `CanPlaceRoadPoint(world, point)` answer whether one (already snapped) point may be placed. They
   return a `PlacementResult` (`Ok`, or `Reason` = `InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`; `Text` for the UI).
   Pure queries, no state change. "Inside" means strictly inside: within `BoundaryToleranceMm` (50 mm) of an area edge or
-  road side line counts as boundary and is Ok. Work-area vertices are Ok anywhere on the map; road points are refused only
-  inside a building area. The tools only ask; shape checks (AR-15, AR-16, RD-13) still run on the finished shape.
+  road side line counts as boundary and is Ok. Work-area vertices are Ok anywhere on the map. Building-area vertices are
+  also refused inside a road corridor (`OnRoad`); road points are refused only inside a building area. The tools only ask; shape checks (AR-15, AR-16, RD-13) still run on the finished shape.
 - `Assets/Sim/Time/` (namespace `LordsLegacy.Sim.Calendar`, to avoid clashing with `UnityEngine.Time`):
   - `GameCalendar`: tick → `GameTime` (year, date, weekday, time, season). 365-day year, no leap years,
     the year number increments on 1 January.
@@ -243,10 +243,10 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
 - `Assets/Sim/Tuning/SimTuning.cs` (`LordsLegacy.Sim.Tuning`) holds the balancing numbers. Read by code today: pace,
   speeds, start date, daylight, walk and ox speed, ageing rate, milling and debug linger, world seed, standard log
   length, navigation cell size and max slope, road sample spacing, road minimum point spacing, road tree
-  clearance, the area values (curve flattening, slope grid, overlap tolerance, spatial index cell), and Sunday meal and
-  minimum sleep (`WorkDay`, T-277). Defined but read by nothing yet: trunk length range, starting oxen, rest-day switch
-  (see `tuning.md`). Food,
-  market, construction and population numbers are not in code yet. The Sim never hard-codes these.
+  clearance, the area values (curve flattening, slope grid, overlap tolerance, spatial index cell), Sunday meal and
+  minimum sleep (`WorkDay`), dispatch interval, ox load/unload minutes and max builders per site. Defined but read by
+  nothing yet: trunk length range, starting oxen, rest-day switch (see `tuning.md`). Food and market numbers are not in
+  code yet. The Sim never hard-codes these.
 - `Assets/Sim/Forestry/` (`LordsLegacy.Sim.Forestry`): `TreeRegistry` holds all trees keyed by `TreeId`, with a
   uniform 16 m spatial grid (`QueryRect`, `QueryRadius`, `LogYield`). `TreeRecord` holds id, x/z, usable trunk
   length, `State` (Standing → Felled → Stump, via `SetState`, forward only, bumps `Version`) and `ReservedBy`.
@@ -397,10 +397,11 @@ _Owner: the task that changes the Sim core. Other tasks do not edit this section
   get nothing from `DispatchSystem`, and an unfinished Build keeps its progress overnight. *Wind-down:* a Deliver still
   under way at the end of work is dropped as a site-owned pile where the ox stands, with its reservation moved to that
   pile; Build does not wind down. *Assignment gate:* `AssignFamily` refuses with "Hut not built yet" while the operation's
-  hut is unbuilt (CN-04b). The Unity panel side of the gate is not built.
-- Not built yet: food, markets, economy, saving; on the construction side the Unity panel and scaffold (CN-40..43),
-  the 50% removal refund (CN-33), artisan build steps (PPL-42), clearing trees as a job (BLD-10-C), and houses and the
-  granary (MVP-2). Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps); `task.fell_tree` and `task.haul_logs` are defined so far.
+  hut is unbuilt (CN-04b); `OperationPanelView` disables its Assign button with the same text.
+- Not built yet: food, markets, economy, saving (decision 0034); on the construction side the 50% removal refund (CN-33),
+  artisan build steps (PPL-42), a walk-to-site step for builders, clearing trees as a job (BLD-10-C), and houses and the
+  granary (MVP-2). Decision 0005 is implemented for `TaskDef` (MoveTo/Work steps and the ox steps). Task defs so far:
+  `task.fell_tree`, `task.haul_logs`, `task.deliver_materials`, `task.build`.
 
 ## Map pipeline
 
@@ -513,7 +514,11 @@ _Owner: the Unity-layer tasks. Other tasks do not edit this section._
   red when invalid); `HidePreview()` hides it. Colours are constants in the class, not `VisualDefinition`s. No colliders.
 - `InstancedDraw` (`Assets/Game/Visuals/`) is the shared `Graphics.RenderMeshInstanced` helper (batches of 1023), used by
   `TreeRenderer`, `PeopleRenderer`, `ModuleRenderer`, `LogPileRenderer` and `CampRenderer`.
-- No DOTS/ECS code yet. Rendering is `Graphics.RenderMeshInstanced` and MonoBehaviours (decision 0002 is still provisional).
+- No DOTS/ECS code yet. Rendering is `Graphics.RenderMeshInstanced` and MonoBehaviours (decision 0002: the working rule, though its file still says PROVISIONAL).
+- Construction (M10, `ConstructionRenderer`, `Assets/Game/Visuals/`): draws `visual.construction.scaffold` (instanced, no GameObjects) for every
+  unbuilt site, height following `ConstructionProgress.Fraction` (CN-42); `ModuleRenderer` skips unbuilt footprints. The operation panel
+  shows each module's state (`Delivering n / m logs`, `Building n%`, `Built`) and a High priority toggle that sends `SetSitePriority`
+  (CN-40); the citizen panel's task line comes from `CitizenTaskText` (CN-41). The panel disables Assign while the hut is unbuilt.
 - Sun and sky (`Assets/Game/Lighting/`): `SunLightModel` is pure maths (Sim `GameTime` + `Daylight` → elevation,
   azimuth, colour, intensity). `SunLightController` writes the result to the directional light and ambient in
   `LateUpdate`. Steady light is `ViewSettings.SteadyLight` (set by the top bar): fixed sun, visual only.
@@ -612,7 +617,9 @@ through `StartLayoutApplier` (camp footprint, trunk road via `Execute(DrawRoad)`
 Felling (M8): `WoodcuttingSystem` opens a `task.fell_tree` per idle worker → `DispatchSystem` assigns it → `StepRunnerSystem`
 walks to the tree and runs each timber stage → `FellingOutcome` sets the tree Felled, then Stump, and drops the logs in an
 operation-owned ground pile (`LogPileRenderer` draws them). Modules: `ModuleTool` → `ModulePlacement.Preview` (ghost) →
-`PlaceModule` through `SimHost.Execute`; built at once (WC-07). `PeopleRenderer` and `CampRenderer` read `World.People` and
+`PlaceModule` through `SimHost.Execute`. A module with an empty recipe is built at once; otherwise it becomes a
+construction site (M10, CN-01/02): `PlaceModule` reserves its logs, `ConstructionSystem` opens deliver tasks (`DispatchSystem` →
+`StepRunnerSystem`, ox haul steps) and build tasks (Work steps), and `ConstructionRenderer` draws the scaffold until the site is Built. `PeopleRenderer` and `CampRenderer` read `World.People` and
 `World.Camp` and lerp by `TickFraction`. A click goes `AgentPicker` → selection → `CitizenPanelView`; a debug right click
 goes `DebugSendController` → `SimHost.Execute(SendCitizenTo)` → `Citizen.DebugSend` → `RoutineSystem` skips it, `MovementSystem` walks it.
 
@@ -631,6 +638,8 @@ _Owner: the scene and prefab tasks. Other tasks do not edit this section._
   (`WorkAreaRenderer`) is added to that object by `OperationPanelView.OnEnable`, so it is not a scene object of its own.
   Sim side: Operations, Tasks, Inventory and Processes are described under Simulation core; Unity side under Unity layer.
   `GameSceneTests.GameSceneHasM8WoodcuttingWired` checks these pieces and their references.
+- M10 pieces (T-340..T-351, construction): one new component, `ConstructionRenderer` (-> SimHost, `VisualRegistry.asset`), added by
+  `GameSceneGenerator.CreatePeopleRenderers`. No new UI objects; the panel and citizen text are the existing ones. No M10 scene test yet.
 - M9 pieces (T-295, hauling): no new components. The hauling visuals and UI are the existing pieces wired by
   `GameSceneGenerator`: `PeopleRenderer` draws the oxen (led with their logs at the interpolated ox position, follow
   movement from `MovementSystem.Attach`), `LogPileRenderer` draws the logs carried and stacked in storages and the camp
