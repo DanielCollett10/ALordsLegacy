@@ -12,7 +12,8 @@ namespace LordsLegacy.Tests.PlayMode
     /// <summary>PlayMode tests for the autosave slot and timer (T-373, saving.md SV-11/12). Time is fed by hand, not by frames.</summary>
     public class AutosaveControllerTests
     {
-        private GameObject _hostGo, _autoGo;
+        private GameObject _hostGo, _autoGo, _menuGo;
+        private GameMenuView _menu;
         private SimHost _host;
         private AutosaveController _auto;
         private string _dir;
@@ -33,12 +34,17 @@ namespace LordsLegacy.Tests.PlayMode
             _auto.Store = new SaveStore(_dir);
             _auto.Clock = () => ++_clock;
             _auto.SetIntervalMinutes(0.0005f); // 0.03 real seconds
+
+            _menuGo = new GameObject("Menu");
+            _menu = _menuGo.AddComponent<GameMenuView>();
+            _menu.SetHost(_host);
         }
 
         [TearDown]
         public void TearDown()
         {
-            GameMenuState.IsOpen = false;
+            if (_menu != null) _menu.Close();
+            Object.DestroyImmediate(_menuGo);
             Object.DestroyImmediate(_autoGo);
             Object.DestroyImmediate(_hostGo);
             if (Directory.Exists(_dir)) Directory.Delete(_dir, true);
@@ -72,11 +78,14 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void MenuOpenStopsTheCount()
         {
-            GameMenuState.IsOpen = true;
+            _menu.Open();
+            Assert.IsTrue(GameMenuState.IsOpen);
             _auto.Advance(5f);
             Assert.AreEqual(0, _clock);
             Assert.AreEqual(0, _auto.Timer.ElapsedSeconds, 1e-9);
-            GameMenuState.IsOpen = false;
+            _menu.Close();
+            _auto.Advance(0.05f);
+            Assert.AreEqual(1, _clock, "The count runs again once the menu is closed.");
         }
 
         [Test]
