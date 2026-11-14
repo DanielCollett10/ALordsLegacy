@@ -230,6 +230,61 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual("family is not assigned to this operation", _view.MessageText);
         }
 
+        private void MakeUnbuilt(int footprintId)
+        {
+            var w = _host.World;
+            w.Construction.Add(new LordsLegacy.Sim.Construction.ConstructionSite(footprintId, w.Inventory.GetOrAddSite(footprintId).Id));
+        }
+
+        [UnityTest]
+        public IEnumerator ModulesList_ShowsDeliveringBuildingAndBuilt()
+        {
+            MakeUnbuilt(1);
+            yield return OpenPanel();
+            int need = ModuleTypes.WoodcuttingHut.ConstructionRecipe.Logs;
+            StringAssert.Contains("Hut - Delivering 0 / " + need + " logs", _view.ModulesText);
+            StringAssert.Contains("Log storage (", _view.ModulesText);
+            StringAssert.Contains("- Built", _view.ModulesText);
+
+            _host.World.Construction.Get(1).State = LordsLegacy.Sim.Construction.ConstructionState.Building;
+            yield return null;
+            StringAssert.Contains("Hut - Building 0%", _view.ModulesText);
+        }
+
+        [UnityTest]
+        public IEnumerator HighPriorityToggle_SendsSetSitePriority_OnlyForUnbuiltModules()
+        {
+            MakeUnbuilt(1);
+            yield return OpenPanel();
+            Assert.IsNull(_view.Find<Button>("priority-2"), "built module has no toggle");
+            Assert.IsNotNull(_view.Find<Button>("priority-1"));
+            _view.ClickPriority(1);
+            yield return null;
+            Assert.AreEqual(LordsLegacy.Sim.Construction.ConstructionPriority.High, _host.World.Construction.Get(1).Priority);
+            StringAssert.Contains("on", _view.Find<Button>("priority-1").text);
+            _view.ClickPriority(1);
+            Assert.AreEqual(LordsLegacy.Sim.Construction.ConstructionPriority.Normal, _host.World.Construction.Get(1).Priority);
+        }
+
+        [UnityTest]
+        public IEnumerator AssignDisabledWithReason_WhileHutUnbuilt_ThenEnabled()
+        {
+            MakeUnbuilt(1);
+            yield return OpenPanel();
+            var assign = _view.Find<Button>("assign-slot-0");
+            Assert.IsNotNull(assign);
+            Assert.IsFalse(assign.enabledSelf);
+            Assert.AreEqual("Hut not built yet", assign.text);
+            _view.ClickAssignSlot();
+            Assert.AreEqual("Hut not built yet", _view.MessageText);
+
+            _host.World.Construction.Remove(1);
+            yield return null;
+            assign = _view.Find<Button>("assign-slot-0");
+            Assert.IsTrue(assign.enabledSelf);
+            Assert.AreEqual("Assign", assign.text);
+        }
+
         [UnityTest]
         public IEnumerator PauseResumeAndUseDefaultSendCommands()
         {

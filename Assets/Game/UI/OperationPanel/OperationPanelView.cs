@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Inventory;
@@ -31,7 +32,8 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel, _familyBox, _pickerBox;
-        private VisualElement _oxenBox;
+        private VisualElement _oxenBox, _priorityBox;
+        private string _prioritySignature = "";
         private Label _title, _status, _modules, _workers, _logs, _trees, _workArea, _message, _stock;
         private Button _pause, _close, _oxenTab;
         private string _signature = "", _oxenSignature = "";
@@ -89,6 +91,13 @@ namespace LordsLegacy.Game
         /// <summary>An empty family slot's Assign button: shows or hides the list of unassigned families.</summary>
         public void ClickAssignSlot()
         {
+            var host = Host();
+            var op = OperationId();
+            if (host != null && host.IsInitialized && op.HasValue)
+            {
+                var o = host.World.Operations.Get(op.Value);
+                if (o != null && HutUnbuilt(host.World, o, OperationTypes.Find(o.TypeId))) { SetMessage(HutNotBuiltText); return; }
+            }
             _pickerOpen = !_pickerOpen;
             Refresh();
         }
@@ -176,6 +185,7 @@ namespace LordsLegacy.Game
             _title.text = "Woodcutter " + op.Id;
             _status.text = "Status: " + StateText(OperationStatus.Reported(world, op));
             _modules.text = ModuleText(world, op);
+            RebuildPriority(world, op);
             RebuildFamilies(world, op, def);
             _workers.text = WorkerText(world, op);
             _logs.text = "Logs waiting at tree sites: " + GroundLogs(world, op);
@@ -305,13 +315,74 @@ namespace LordsLegacy.Game
             {
                 Footprint f = world.Footprints.Get(id);
                 if (f == null) continue;
-                if (def != null && f.Type.Id == def.HutTypeId) { hut = true; sb.AppendLine("Hut"); }
-                else if (def != null && f.Type.Id == def.LogStorageTypeId) { storage = true; sb.AppendLine("Log storage (" + f.Type.LogCapacity + " logs)"); }
-                else sb.AppendLine(f.Type.Id);
+                string state = " - " + BuildStateText(world, id);
+                if (def != null && f.Type.Id == def.HutTypeId) { hut = true; sb.AppendLine("Hut" + state); }
+                else if (def != null && f.Type.Id == def.LogStorageTypeId) { storage = true; sb.AppendLine("Log storage (" + f.Type.LogCapacity + " logs)" + state); }
+                else sb.AppendLine(f.Type.Id + state);
             }
             if (!hut) sb.AppendLine("Hut: missing");
             if (!storage) sb.AppendLine("Log storage: missing");
             return sb.ToString().TrimEnd();
+        }
+
+        /// <summary>Construction state of a module from <see cref="ConstructionProgress.Of"/> (CN-40).</summary>
+        public static string BuildStateText(Sim.Core.SimWorld world, int footprintId)
+        {
+            var p = ConstructionProgress.Of(world, footprintId);
+            if (p == null) return "Built";
+            if (p.State == ConstructionState.Delivering) return "Delivering " + p.LogsDelivered + " / " + p.LogsNeeded + " logs";
+            return "Building " + Mathf.FloorToInt((float)(p.Fraction * 100.0)) + "%";
+        }
+
+        /// <summary>Text on a family Assign button while the operation's hut is unbuilt (CN-04b).</summary>
+        public const string HutNotBuiltText = "Hut not built yet";
+
+        private static bool HutUnbuilt(Sim.Core.SimWorld world, Operation op, OperationTypeDef def)
+        {
+            if (def == null) return false;
+            foreach (int id in op.ModuleIds)
+            {
+                Footprint f = world.Footprints.Get(id);
+                if (f != null && f.Type.Id == def.HutTypeId && !world.IsBuilt(id)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>A module's High priority toggle: sends SetSitePriority.</summary>
+        public void ClickPriority(int footprintId)
+        {
+            var host = Host();
+            if (host == null || !host.IsInitialized) return;
+            var site = host.World.Construction.Get(footprintId);
+            if (site == null) return;
+            Run(new SetSitePriority(footprintId,
+                site.Priority == ConstructionPriority.High ? ConstructionPriority.Normal : ConstructionPriority.High));
+        }
+
+        private void RebuildPriority(Sim.Core.SimWorld world, Operation op)
+        {
+            var sb = new StringBuilder();
+            sb.Append(op.Id);
+            foreach (int id in op.ModuleIds)
+            {
+                var site = world.Construction.Get(id);
+                if (site != null) sb.Append(',').Append(id).Append(site.Priority == ConstructionPriority.High ? 'H' : 'n');
+            }
+            string sig = sb.ToString();
+            if (sig == _prioritySignature) return;
+            _prioritySignature = sig;
+            _priorityBox.Clear();
+            foreach (int id in op.ModuleIds)
+            {
+                var site = world.Construction.Get(id);
+                if (site == null) continue;
+                int fid = id;
+                bool high = site.Priority == ConstructionPriority.High;
+                var b = new Button { name = "priority-" + fid, text = "High priority: " + (high ? "on" : "off") };
+                b.clicked += () => ClickPriority(fid);
+                _priorityBox.Add(b);
+            }
+            UiFocusRules.Apply(_priorityBox);
         }
 
         private static int GroundLogs(Sim.Core.SimWorld world, Operation op)
@@ -356,7 +427,8 @@ namespace LordsLegacy.Game
         private void RebuildFamilies(Sim.Core.SimWorld world, Operation op, OperationTypeDef def)
         {
             var sb = new StringBuilder();
-            sb.Append(op.Id).Append('|').Append(_pickerOpen);
+            bool hutUnbuilt = HutUnbuilt(world, op, def);
+            sb.Append(op.Id).Append('|').Append(_pickerOpen).Append(hutUnbuilt ? "|U" : "|B");
             foreach (int id in op.FamilyIds) sb.Append(",a").Append(id);
             var free = new List<Family>();
             foreach (var f in world.People.Families)
@@ -384,7 +456,8 @@ namespace LordsLegacy.Game
                 else
                 {
                     row.Add(MakeLabel("family-slot-" + i, 12, "Family " + (i + 1) + ": empty"));
-                    var assign = new Button { name = "assign-slot-" + i, text = "Assign" };
+                    var assign = new Button { name = "assign-slot-" + i, text = hutUnbuilt ? HutNotBuiltText : "Assign" };
+                    assign.SetEnabled(!hutUnbuilt);
                     assign.clicked += ClickAssignSlot;
                     row.Add(assign);
                 }
@@ -523,6 +596,8 @@ namespace LordsLegacy.Game
             _title.style.unityFontStyleAndWeight = FontStyle.Bold;
             _status = MakeLabel("operation-status", 12, "");
             _modules = MakeLabel("operation-modules", 12, "");
+            _priorityBox = new VisualElement { name = "operation-priority" };
+            _prioritySignature = "";
             _familyBox = new VisualElement { name = "operation-families" };
             _pickerBox = new VisualElement { name = "operation-assign-list" };
             _pickerBox.style.display = DisplayStyle.None;
@@ -554,7 +629,7 @@ namespace LordsLegacy.Game
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
-            _panel.Add(_title); _panel.Add(_status); _panel.Add(_modules);
+            _panel.Add(_title); _panel.Add(_status); _panel.Add(_modules); _panel.Add(_priorityBox);
             _panel.Add(MakeLabel("operation-families-heading", 12, "Families"));
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(MakeLabel("operation-workers-heading", 12, "Workers"));
