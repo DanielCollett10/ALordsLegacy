@@ -242,6 +242,39 @@ namespace LordsLegacy.Sim.Roads
             return new RoadHit(RoadHitKind.Line, -1, bestSeg.Id, p, bestD, bestHit.ArcLengthMm / PointMm.MmPerMetre);
         }
 
+        /// <summary>The id the next new node will get (for the save).</summary>
+        internal int NextNodeId => _nextNodeId;
+
+        /// <summary>The id the next new segment will get (for the save).</summary>
+        internal int NextSegmentId => _nextSegmentId;
+
+        /// <summary>Restore: empties the network and sets the id counters.</summary>
+        internal void RestoreBegin(int nextNodeId, int nextSegmentId)
+        {
+            _nodes.Clear(); _segments.Clear(); _nodeAt.Clear();
+            _nextNodeId = nextNodeId; _nextSegmentId = nextSegmentId;
+            Version++;
+        }
+
+        /// <summary>Restore: adds a node with its id and attached segment ids (in attach order). Throws on a duplicate id or position.</summary>
+        internal void RestoreNode(int id, PointMm position, IReadOnlyList<int> segmentIds)
+        {
+            if (_nodes.ContainsKey(id) || _nodeAt.ContainsKey(position)) throw new InvalidOperationException("Duplicate road node " + id);
+            var n = new RoadNode(id, position);
+            n.SegmentIdList.AddRange(segmentIds);
+            _nodes[id] = n;
+            _nodeAt[position] = id;
+        }
+
+        /// <summary>Restore: adds a segment with its id. Its nodes must have been restored. Throws on bad references.</summary>
+        internal void RestoreSegment(int id, int nodeA, int nodeB, string typeId, CurveKind curve,
+            PointMm[] controlPoints, PointMm[] samples, RoadTangent? startTangent, RoadTangent? endTangent)
+        {
+            if (_segments.ContainsKey(id)) throw new InvalidOperationException("Duplicate road segment " + id);
+            if (!_nodes.ContainsKey(nodeA) || !_nodes.ContainsKey(nodeB)) throw new InvalidOperationException("Segment " + id + " has an unknown node");
+            _segments[id] = new RoadSegment(id, nodeA, nodeB, typeId, curve, controlPoints, samples, startTangent, endTangent);
+        }
+
         private static PointMm[] Copy(IReadOnlyList<PointMm> list)
         {
             var a = new PointMm[list.Count];

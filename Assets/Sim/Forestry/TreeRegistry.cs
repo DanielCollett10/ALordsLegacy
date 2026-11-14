@@ -206,6 +206,42 @@ namespace LordsLegacy.Sim.Forestry
             return result;
         }
 
+        /// <summary>Ids of every removed tree, ascending (for the save).</summary>
+        internal List<int> RemovedIdsSorted()
+        {
+            var list = new List<int>(_removedIds);
+            list.Sort();
+            return list;
+        }
+
+        /// <summary>Every tree that is not an untouched standing one (felled, stump or reserved), ascending id (for the save).</summary>
+        internal List<TreeRecord> ChangedTrees()
+        {
+            var list = new List<TreeRecord>();
+            foreach (var t in _byId.Values)
+                if (t.State != TreeState.Standing || t.ReservedBy.HasValue) list.Add(t);
+            return list;
+        }
+
+        /// <summary>Restore: removes a tree as <see cref="Remove"/> does; an id that is not present is still marked removed.</summary>
+        internal void RestoreRemoved(int id)
+        {
+            if (!Remove(new TreeId(id))) _removedIds.Add(id);
+        }
+
+        /// <summary>Restore: sets a tree's state and reservation directly. Throws if the tree is unknown or the data is inconsistent.</summary>
+        internal void RestoreTree(int id, TreeState state, int? reservedBy)
+        {
+            if (!_byId.TryGetValue(id, out var t)) throw new InvalidOperationException("Cannot restore unknown tree " + id);
+            if (reservedBy.HasValue && state != TreeState.Standing)
+                throw new InvalidOperationException("Tree " + id + " is reserved but not standing");
+            if (t.State == TreeState.Standing && state != TreeState.Standing) _standing--;
+            else if (t.State != TreeState.Standing && state == TreeState.Standing) _standing++;
+            t.State = state;
+            t.ReservedBy = reservedBy;
+            _version++;
+        }
+
         private int Cell(float v) => (int)Math.Floor(v / _cellSize);
         private static long Key(int cx, int cz) => ((long)cx << 32) ^ (uint)cz;
     }

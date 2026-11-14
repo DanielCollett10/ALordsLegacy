@@ -14,7 +14,7 @@ namespace LordsLegacy.Sim.Save
         {
             return new ISaveSection[]
             {
-                // 1 Land (trees, roads, areas)
+                new Sections.LandSection(), // 1 Land (trees, roads; areas follow in part 2)
                 // 2 Structures (footprints, operations, construction sites)
                 // 3 Ledger
                 // 4 Population (families, citizens, oxen)
