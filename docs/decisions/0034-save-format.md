@@ -24,6 +24,10 @@ private state, id counters that are never reused, in-flight move orders and rese
   registry exposes `internal` restore methods that set its records and id counters directly. `Write` uses the
   same order. A new section is added at the end of this list unless it must come earlier, and that change is
   recorded here.
+- **Tasks section (T-367, id 7):** each task record is saved with its def id and its steps (step numbers depend on the
+  pile, load and tree). The def's policy (eligibility, required resource) is not saved: `TaskDefCatalog` looks it up by
+  def id, and an unknown id fails the load. A new task def id must be added to that catalog. The step runner's own
+  runtime state (walk orders, ox tracks, rest targets) is not in this section.
 - **Round-trip test (SAV-06):** `Write(Read(Write(w))) == Write(w)` byte for byte, and both worlds stepped for a game
   day must write identical bytes again. Every new Sim system must extend its section and these tests pass.
 - **Unity loads by reloading the Game scene** with the save bytes handed to `SimHost`, so renderers always build
