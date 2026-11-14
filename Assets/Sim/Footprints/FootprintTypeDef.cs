@@ -2,9 +2,6 @@ namespace LordsLegacy.Sim.Footprints
 {
     /// <summary>Definition of one kind of fixed-rectangle thing (camp now; hut and modules later).</summary>
     public sealed class FootprintTypeDef
-{
-    public ConstructionRecipe ConstructionRecipe { get; set; }
-
     {
         /// <summary>Id of the camp footprint type.</summary>
         public const string CampId = "footprint.camp";
@@ -27,10 +24,14 @@ namespace LordsLegacy.Sim.Footprints
         /// <summary>Oxen it holds (oxen stand: 1, WC-05); 0 for modules that hold none.</summary>
         public int OxCapacity { get; }
 
+        /// <summary>What it takes to build this type (CN-02). Empty means built at placement.</summary>
+        public ConstructionRecipe ConstructionRecipe { get; }
+
         /// <summary>Creates a type definition.</summary>
         public FootprintTypeDef(string id, long widthMm, long depthMm, bool blocksMovement, bool clearsTrees,
-            int logCapacity = 0, int oxCapacity = 0)
+            int logCapacity = 0, int oxCapacity = 0, ConstructionRecipe recipe = null)
         {
+            ConstructionRecipe = recipe ?? ConstructionRecipe.Empty;
             Id = id; WidthMm = widthMm; DepthMm = depthMm; BlocksMovement = blocksMovement; ClearsTrees = clearsTrees;
             LogCapacity = logCapacity; OxCapacity = oxCapacity;
         }

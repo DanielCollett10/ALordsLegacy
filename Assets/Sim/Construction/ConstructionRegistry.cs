@@ -1,51 +1,32 @@
-using LordsLegacy.Sim;
+using System.Collections.Generic;
 
 namespace LordsLegacy.Sim.Construction
 {
-    public class ConstructionRegistry
+    /// <summary>The construction sites of a world, keyed by footprint id (decision 0033).</summary>
+    public sealed class ConstructionRegistry
     {
-        private Dictionary<string, ConstructionSite> _sites = new Dictionary<string, ConstructionSite>();
+        private readonly SortedDictionary<int, ConstructionSite> _sites = new SortedDictionary<int, ConstructionSite>();
 
-        public void AddSite(string footprintId, ConstructionSite site)
+        /// <summary>All sites in footprint id order.</summary>
+        public IEnumerable<ConstructionSite> Sites => _sites.Values;
+
+        /// <summary>Number of unbuilt footprints.</summary>
+        public int Count => _sites.Count;
+
+        /// <summary>Adds a site. Throws if the footprint already has one.</summary>
+        public ConstructionSite Add(ConstructionSite site)
         {
-            _sites[footprintId] = site;
+            if (site == null) throw new System.ArgumentNullException(nameof(site));
+            if (_sites.ContainsKey(site.FootprintId))
+                throw new System.InvalidOperationException("Footprint " + site.FootprintId + " already has a site.");
+            _sites.Add(site.FootprintId, site);
+            return site;
         }
 
-        public ConstructionSite GetSite(string footprintId)
-        {
-            return _sites.ContainsKey(footprintId) ? _sites[footprintId] : null;
-        }
-    }
+        /// <summary>The site of a footprint, or null if it is built (or unknown).</summary>
+        public ConstructionSite Get(int footprintId) => _sites.TryGetValue(footprintId, out var s) ? s : null;
 
-    public class ConstructionSite
-    {
-        public string FootprintId { get; }
-        public ConstructionState State { get; set; }
-        public string ReservationId { get; set; }
-        public string LedgerLocationId { get; set; }
-        public int ProgressMinutes { get; set; }
-        public ConstructionPriority Priority { get; set; }
-
-        public ConstructionSite(string footprintId, ConstructionState state, string reservationId, string ledgerLocationId, int progressMinutes, ConstructionPriority priority)
-        {
-            FootprintId = footprintId;
-            State = state;
-            ReservationId = reservationId;
-            LedgerLocationId = ledgerLocationId;
-            ProgressMinutes = progressMinutes;
-            Priority = priority;
-        }
-    }
-
-    public enum ConstructionState
-    {
-        Delivering,
-        Building
-    }
-
-    public enum ConstructionPriority
-    {
-        Normal,
-        High
+        /// <summary>Removes a site (the footprint becomes Built). Returns false if there was none.</summary>
+        public bool Remove(int footprintId) => _sites.Remove(footprintId);
     }
 }

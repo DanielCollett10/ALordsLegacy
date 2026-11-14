@@ -17,7 +17,7 @@ namespace LordsLegacy.Sim.Footprints
 
         /// <summary>Woodcutting hut: 6 × 4 m, blocks movement, clears trees (WC-02, WC-06, WC-08).</summary>
         public static readonly FootprintTypeDef WoodcuttingHut =
-            new FootprintTypeDef(WoodcuttingHutId, 6000, 4000, true, true);
+            new FootprintTypeDef(WoodcuttingHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 960));
 
         /// <summary>Log storage: 8 × 6 m, walkable, clears trees, holds 20 logs (WC-02, WC-06, INV-A3).</summary>
         public static readonly FootprintTypeDef LogStorage =
@@ -25,7 +25,7 @@ namespace LordsLegacy.Sim.Footprints
 
         /// <summary>Oxen stand: 3 × 3 m, walkable, clears trees, holds 1 ox (WC-02, WC-05, WC-06).</summary>
         public static readonly FootprintTypeDef OxenStand =
-            new FootprintTypeDef(OxenStandId, 3000, 3000, false, true, oxCapacity: 1);
+            new FootprintTypeDef(OxenStandId, 3000, 3000, false, true, oxCapacity: 1, recipe: new ConstructionRecipe(1, 60));
 
         /// <summary>All woodcutting module types.</summary>
         public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand };
