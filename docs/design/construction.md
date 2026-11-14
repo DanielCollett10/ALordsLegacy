@@ -14,6 +14,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | CN-02 | Recipes are data on the footprint type: hut **8 logs, 960** worker-minutes; oxen stand **1 log, 60**; log storage **0 logs, 0** (designated ground). A recipe of 0 logs and 0 minutes is **built at once** on placement (as today) | DECIDED (values PLACEHOLDER, CON-A1) |
 | CN-03 | Site states: **Delivering** (materials on the way) → **Building** → **Built**. A built footprint is what M9 already has | DECIDED |
 | CN-04 | Until a module is Built it does nothing: an unbuilt hut means *Missing hut* (BLD-08, MVP-1-05), an unbuilt storage adds no capacity, an unbuilt stand holds no ox | DECIDED |
+| CN-04b | **A family can't be assigned until the hut is Built** (MVP-1-06). `AssignFamily` is refused with "Hut not built yet" while the operation's hut is unbuilt, and the panel's Assign button is disabled with that text | DECIDED (lead, following GDD MVP-1-06) |
 | CN-05 | The site's footprint exists from placement: it clears trees (WC-08), blocks movement if its type blocks, and stops other modules overlapping it | PROPOSED |
 
 ## Paying for it
@@ -52,6 +53,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | CN-32 | Removing an unbuilt site releases every undelivered reservation. Logs already on site, or on an ox mid-delivery, are dropped as an **unowned ground pile** at the site (CON-07). Site-owned piles left by a sunset wind-down (CN-25b) become unowned too. Unowned piles are construction sources (CN-11), so those logs get used again | PROPOSED |
+| CN-34 | Removing a built log storage that holds logs reserved for a construction site is **refused** ("Logs here are reserved for <site>"). Reservations therefore never point at a storage that has gone | PROPOSED |
 | CN-33 | Removing a **built** module returns nothing in M10 (as today). The 50% refund (BLD-11) comes later | PROPOSED |
 
 ## What the player sees
