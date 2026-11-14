@@ -3,8 +3,9 @@
 M11 (Save and come back). Implements GDD SAVE-01/02 and tech spec SAV-01..06. Technical shape: decision 0034.
 Wins over the tech spec where they disagree.
 
-> Implementation note (status): not built yet. There is no save code in `Assets/Sim/` or `Assets/Game/`; the format is
-> planned in decision 0034.
+> Implementation note (status): the Sim side is built (`Assets/Sim/Save/`, T-363..T-368: format, all list sections, round-trip
+> tests). The Unity side is not: nothing in `Assets/Game/` calls the save code yet, so there is no menu, Save/Load screen, autosave
+> or scene reload. The differences from the rules below are listed under "Implementation notes" at the end.
 
 Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN = not decided.
 
@@ -44,3 +45,26 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | SV-31 | **How the problem is avoided in real builds:** once a map ships in a build it is **never re-baked in place**. A changed map gets a new map version (a new file, e.g. `testmap.v2.lsmap`), and the build keeps the old files, so every old save still finds its map. Only new games use the newest map | PROPOSED (applies from the first player build) |
 | SV-32 | **During development**, re-baking the test map breaks old saves, and that is accepted: dev saves are throwaway. SV-30's message makes it obvious why | DECIDED |
 | SV-33 | Save format changes (new Sim state) use a format version with a migration step per version (SAV-03). Before the first player build, a format change may simply refuse old saves with a message | PROPOSED |
+
+## Implementation notes
+
+Where the code differs from, or fills in, the rules above. Decision 0034 is the technical shape; these notes are the
+current state (0034's "planned / not implemented" status line is out of date).
+
+- **Format (SV-13, SV-33):** magic `LLSV`, int32 version `1`. The reader refuses any other version with a message; there
+  are no migration steps yet. The header stores name, real creation time (int64, supplied by the caller), game tick, map id
+  and map hash. It does **not** store a game-date string. The list UI must derive the date from the tick.
+- **Header read alone (SV-13):** `SaveReader.ReadHeaderOnly` reads the header without the sections, for the Load list.
+- **Map refusal (SV-30):** `SaveMapMismatchException` carries the SV-30 text. It is thrown for a different map id or hash.
+  The hash is FNV-1a of the map file bytes.
+- **Tuning kept with the save (SV-14):** the Core section stores `SimConfig` tuning and both type catalogs, so a load does
+  not use current `SimConfig` values. Applying new tuning to an old save is not built.
+- **Pause (SV-02, SV-22):** the Core section stores `Paused`. Speed is not saved (decision 0006), so a load starts at the
+  default speed.
+- **Not saved:** `CommandLog`, `NavGrid` cells (only `Nav.Version`), and the step runner's own runtime state (walk orders,
+  ox tracks, rest targets). See decision 0034 and the Map pipeline notes in `docs/architecture.md` for what each section holds.
+- **Task defs (T-367):** tasks are saved with their def id. The policy comes from `TaskDefCatalog`, so a def id that is not in
+  the catalog fails the load.
+- **Scene reload (SAVE-02, SV-22):** the Unity side is not built. The plan is to reload the Game scene with the save bytes
+  handed to `SimHost`, so no renderer handles a world swap.
+- **Autosave (SV-11):** not built. It needs a Unity-side timer and the single `Autosave` slot.
