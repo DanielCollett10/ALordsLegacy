@@ -18,7 +18,7 @@ namespace LordsLegacy.Sim.Save
                 new Sections.StructuresSection(), // 2 Structures (footprints, camp, operations, construction sites)
                 new Sections.LedgerSection(), // 3 Ledger (locations, reservations, journal, id counters)
                 new Sections.PopulationSection(), // 4 Population (families, citizens, oxen)
-                // 5 Movement (move orders, follow links, routine, work day, debug send)
+                new Sections.MovementSection(), // 5 Movement (move orders, follow links, routine, work day, debug send)
                 // 6 Tasks
             };
         }

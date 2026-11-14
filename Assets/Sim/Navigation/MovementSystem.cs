@@ -21,6 +21,9 @@ namespace LordsLegacy.Sim.Navigation
     {
         private int _seenNavVersion = -1;
 
+        /// <summary>The nav version seen at the last step (-1 before any); saved and restored by the Movement section.</summary>
+        internal int SeenNavVersion { get => _seenNavVersion; set => _seenNavVersion = value; }
+
         /// <inheritdoc />
         public void Step(SimWorld world)
         {
