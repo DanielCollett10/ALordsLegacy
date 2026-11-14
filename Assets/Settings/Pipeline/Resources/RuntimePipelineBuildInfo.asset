@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bffff28fa8e3a084d86374beef94b84d, type: 3}
+  m_Name: RuntimePipelineBuildInfo
+  m_EditorClassIdentifier: Unity.Pipeline::Unity.Pipeline.Config.RuntimePipelineBuildInfo
+  allowedReloadRoots:
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Assets
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.inputsystem@be6c4fd0abf5
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.test-framework@0b7a23ab2e1d
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.multiplayer.center@f01f4ba8d00a
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.accessibility
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.adaptiveperformance
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.ai
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.androidjni
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.animation
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.assetbundle
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.audio
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.cloth
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.director
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.imageconversion
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.imgui
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.jsonserialize
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.particlesystem
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.physics
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.physics2d
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.screencapture
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.terrain
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.terrainphysics
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.tilemap
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.ui
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.uielements
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.umbra
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.unityanalytics
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.unitywebrequest
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.unitywebrequestassetbundle
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.unitywebrequestaudio
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.unitywebrequesttexture
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.unitywebrequestwww
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.vectorgraphics
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.vehicles
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.video
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.vr
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.wind
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.xr
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.pipeline@303cb578aa66
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.nuget.newtonsoft-json@4dfd81071c64
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.subsystems
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.modules.hierarchycore
+  - C:\Users\DCollett\source\personal\ALordsLegacy-editor\Library\PackageCache\com.unity.ext.nunit@d8c07649098d
+  pushPublicKey: upp1-rsa-pub:v0dXlzoF/Dv0J2Yp+3nnI8/Fi+3/DBHcVObWenU/xgfwCbPnecTnihm0yaq0sWz5IXI1H+qck7LdknTItCPJ7h/6gO2UGpwrP8q6NMjUUn6OfzK9ONXAyTE3S7wFH263ZjUbgnfJCdikKTyyGujeI4iN/d4Nw3DFo+/qAnbBOBs=.AQAB
