@@ -77,7 +77,7 @@ No mismatch found beyond the implementation notes below.
   samples, cut at the junction point.
 
 > Implementation note (segment fields): a `RoadSegment` stores its id, nodes, type id, curve kind, control points,
-> samples and length. It does **not** store a corridor (the corridor is the centre line ± half the type width, worked
+> samples, length and, for segments made at a dead end (RD-16), `StartTangent`/`EndTangent` (decision 0029). It does **not** store a corridor (the corridor is the centre line ± half the type width, worked
 > out when needed) and does not record which command drew it. Owner to decide whether to store either.
 - Two nodes are "connected" if a chain of segments links them. The debug overlay can show node and segment ids.
 

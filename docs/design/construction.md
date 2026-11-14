@@ -80,13 +80,13 @@ this list says what is still open.
   first. A walk-to-site step is still to come.
 - **Only Deliver winds down at sunset (CN-25).** An unfinished Build pauses overnight and keeps its progress, and it
   resumes next morning where the builder stands. Nothing is dropped. The Deliver wind-down follows CN-25b (site-owned pile).
-- **Assignment gate (CN-04b) is enforced in `AssignFamily.Validate` only.** The Sim refuses with "Hut not built yet".
-  The disabled button and its text are Unity-side and not built.
+- **Assignment gate (CN-04b) is enforced in `AssignFamily.Validate`.** The Sim refuses with "Hut not built yet", and
+  `OperationPanelView` disables the Assign button with the same text.
 - **Build tasks take the whole recipe minutes as their step length.** The cap (CN-23) ends a task early when a
   builder reaches it, so the step length is an upper bound, not the expected time.
-- **Sim data for the Unity panel exists, but no Unity code uses it yet.** `ConstructionProgress.Of` feeds CN-40 and
-  CN-42. `SetSitePriority` feeds the High toggle in CN-40. `ConstructionTaskDefs.VerbFor` gives the CN-41 text.
-  `Assets/Game/` has no construction UI or scaffold yet.
+- **Unity side is built.** `OperationPanelView` shows each module's state and the High toggle (CN-40, via
+  `ConstructionProgress.Of` and `SetSitePriority`). `ConstructionRenderer` draws the scaffold (CN-42). The citizen panel's
+  task line uses `ConstructionTaskDefs.VerbFor` (CN-41). Delivered logs are drawn by `LogPileRenderer` at the site.
 - **Values are placeholders (CN-02, CN-23).** The recipe numbers, `MaxBuildersPerSite` 4 and the ox load/unload minutes
   are tuning placeholders until CON-A1 is decided.
 - **Removing a built module returns nothing (CN-33).** The 50% refund is not built. The CN-34 refusal (a storage with

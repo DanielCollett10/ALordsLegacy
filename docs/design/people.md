@@ -73,5 +73,6 @@ How often people eat (weekly, daily, monthly) is a tuning value and may be refin
 | PPL-44 | Heavy steps (POP-A3: construction, leading oxen) are for 14+ only, so children don't do odd jobs in MVP-1 | DECIDED |
 | PPL-45 | Once a family is assigned, it does only its workplace's tasks plus its own burgage extension if it has one (non-artisan: allotment garden, orchard and so on, from MVP-2 and later). If that work stops (storage full, no trees), it **mills about**. It never falls back to odd jobs | DECIDED |
 
-> Implementation note (PPL-40, PPL-41, PPL-43): not built (construction is M10). The only task today, `task.fell_tree`, is
-> assigned-family-only, so unassigned families mill about (PPL-43). Haul tasks (`task.haul_logs`) are assigned-family-only too.
+> Implementation note (PPL-40, PPL-41, PPL-43): built in M10. Odd-jobbers take construction tasks only (`task.deliver_materials`,
+> `task.build`, `DispatchSystem` with `WorkDay`; construction.md CN-20..26). Unassigned families with no construction work mill
+> about (PPL-43). `task.fell_tree` and `task.haul_logs` are assigned-family-only (`EligibilityPolicy.AssignedFamilyOnly`).
