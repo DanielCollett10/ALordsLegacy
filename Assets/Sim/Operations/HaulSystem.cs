@@ -27,7 +27,7 @@ namespace LordsLegacy.Sim.Operations
         public const string HaulTaskId = "task.haul_logs";
 
         /// <summary>Haul tasks outrank Fell tasks once they have an ox.</summary>
-        public const int HaulPriority = 1;
+        public const TaskPriority HaulPriority = TaskPriority.High;
 
         /// <inheritdoc />
         public void Step(SimWorld world)

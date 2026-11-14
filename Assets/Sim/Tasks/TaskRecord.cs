@@ -16,8 +16,8 @@ namespace LordsLegacy.Sim.Tasks
         public int OwnerOperationId { get; }
         /// <summary>Target tree, or null when the task has no tree target.</summary>
         public TreeId? Target { get; }
-        /// <summary>Higher runs first.</summary>
-        public int Priority { get; }
+        /// <summary>Dispatch priority, fixed at creation. High tasks are handed out before Normal ones.</summary>
+        public TaskPriority Priority { get; }
         /// <summary>Lifecycle state.</summary>
         public TaskState State { get; internal set; }
         /// <summary>Assigned citizen id, or null.</summary>
@@ -44,7 +44,7 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>True when Done or Cancelled.</summary>
         public bool IsFinished => State == TaskState.Done || State == TaskState.Cancelled;
 
-        internal TaskRecord(int id, TaskDef def, int ownerOperationId, TreeId? target, int priority)
+        internal TaskRecord(int id, TaskDef def, int ownerOperationId, TreeId? target, TaskPriority priority)
         {
             Id = id; Def = def; OwnerOperationId = ownerOperationId; Target = target; Priority = priority;
         }

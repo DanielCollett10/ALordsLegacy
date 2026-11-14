@@ -37,8 +37,10 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>The task with this id, or null.</summary>
         public TaskRecord Get(int id) => _byId.TryGetValue(id, out var t) ? t : null;
 
-        /// <summary>Creates an Open task. Throws if <paramref name="def"/> is null.</summary>
-        public TaskRecord Create(TaskDef def, int ownerOperationId, TreeId? target = null, int priority = 0)
+        /// <summary>Creates an Open task at <paramref name="priority"/> (Normal unless given). Throws if
+        /// <paramref name="def"/> is null.</summary>
+        public TaskRecord Create(TaskDef def, int ownerOperationId, TreeId? target = null,
+            TaskPriority priority = TaskPriority.Normal)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
             var t = new TaskRecord(_nextId++, def, ownerOperationId, target, priority) { State = TaskState.Open };
