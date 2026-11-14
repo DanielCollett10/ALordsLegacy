@@ -60,6 +60,8 @@ namespace LordsLegacy.Sim.Tasks
                 Family f = world.People.FindFamily(c.FamilyId);
                 if (f == null) continue;
                 if (helpers != !f.WorkplaceId.HasValue) continue;
+                // An odd-jobber off shift is offered nothing (T-346, CN-25); assigned workers may take tomorrow's task.
+                if (helpers && !world.WorkDay.OnShift(world, c)) continue;
                 bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
 
                 TaskRecord best = null;
@@ -110,6 +112,7 @@ namespace LordsLegacy.Sim.Tasks
                     if (!IsIdle(world, c)) continue;
                     Family f = world.People.FindFamily(c.FamilyId);
                     if (f == null || helpers != !f.WorkplaceId.HasValue) continue;
+                    if (helpers && !world.WorkDay.OnShift(world, c)) continue;
                     bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
                     if (!Eligible(t, f, helpers, adult)) continue;
                     double dx = ox.X - c.X, dz = ox.Z - c.Z;

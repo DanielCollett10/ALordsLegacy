@@ -50,6 +50,9 @@ namespace LordsLegacy.Sim.Tasks
             return new TaskDef(BuildId, new[] { TaskStep.Work(minutes, heavy: true) }, EligibilityPolicy.HelpersOnly);
         }
 
+        /// <summary>True for the construction task definitions (deliver and build).</summary>
+        public static bool IsConstruction(string defId) => defId == DeliverId || defId == BuildId;
+
         /// <summary>The citizen-panel verb for a construction task, given the module it serves. Null when the
         /// definition is not a construction task.</summary>
         public static string VerbFor(string defId, string moduleName)
