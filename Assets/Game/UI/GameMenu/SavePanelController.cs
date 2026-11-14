@@ -108,7 +108,13 @@ namespace LordsLegacy.Game
             var light = new Color(240f / 255f, 230f / 255f, 210f / 255f);
             _nameField.labelElement.style.color = light;
             _nameField.labelElement.style.minWidth = 50;
-            _nameField.style.color = light;
+            // The typed text sits in the inner input element: give it a dark background so light text is readable.
+            var input = _nameField.Q(className: TextField.inputUssClassName);
+            if (input != null)
+            {
+                input.style.color = light;
+                input.style.backgroundColor = new Color(55f / 255f, 46f / 255f, 36f / 255f);
+            }
             _nameField.style.marginBottom = 6;
             _confirm.style.paddingTop = _confirm.style.paddingBottom = 6;
             _note.style.color = new Color(150f / 255f, 230f / 255f, 150f / 255f);
