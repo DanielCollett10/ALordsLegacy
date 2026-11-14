@@ -1,5 +1,4 @@
 using System.IO;
-using System.Linq;
 using LordsLegacy.Game;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.Save;
@@ -9,7 +8,12 @@ using UnityEngine;
 
 namespace LordsLegacy.Tests.PlayMode
 {
-    /// <summary>PlayMode tests for the autosave slot and timer (T-373, saving.md SV-11/12). Time is fed by hand, not by frames.</summary>
+    /// <summary>
+    /// PlayMode tests for the autosave slot and timer (T-373, saving.md SV-11/12). Time is fed by hand through
+    /// <c>Advance</c>, not by frames. SetUp keeps the default 30-minute interval so that real frames run by the test
+    /// runner between SetUp and the test body cannot fire an autosave. Each test that counts saves calls
+    /// <see cref="UseShortInterval"/> first, and test bodies are synchronous, so no frame runs while they count.
+    /// </summary>
     public class AutosaveControllerTests
     {
         private GameObject _hostGo, _autoGo, _menuGo;
@@ -33,7 +37,6 @@ namespace LordsLegacy.Tests.PlayMode
             _auto.SetHost(_host);
             _auto.Store = new SaveStore(_dir);
             _auto.Clock = () => ++_clock;
-            _auto.SetIntervalMinutes(0.0005f); // 0.03 real seconds
 
             _menuGo = new GameObject("Menu");
             _menu = _menuGo.AddComponent<GameMenuView>();
@@ -50,9 +53,17 @@ namespace LordsLegacy.Tests.PlayMode
             if (Directory.Exists(_dir)) Directory.Delete(_dir, true);
         }
 
+        /// <summary>Switches to a 0.03 s interval, restarts the count and zeroes the save counter. Call first in a test body.</summary>
+        private void UseShortInterval()
+        {
+            _clock = 0;
+            _auto.SetIntervalMinutes(0.0005f); // 0.03 real seconds
+        }
+
         [Test]
         public void TwoAutosavesLeaveExactlyOneAutosaveFile()
         {
+            UseShortInterval();
             _auto.Advance(0.02f);
             Assert.IsFalse(File.Exists(Path.Combine(_dir, SaveStore.AutosaveStem + SaveStore.Extension)), "No save before the interval.");
             _auto.Advance(0.02f);
@@ -67,6 +78,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void ManualSavesAreNeverOverwrittenByAutosave()
         {
+            UseShortInterval();
             string manual = _auto.Store.WriteNew("Camp", SimSave.Write(_host.World, "Camp", 1, _host.Map.MapId, _host.Map.ContentHash));
             _auto.Advance(0.05f);
             _auto.Advance(0.05f);
@@ -78,6 +90,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void MenuOpenStopsTheCount()
         {
+            UseShortInterval();
             _menu.Open();
             Assert.IsTrue(GameMenuState.IsOpen);
             _auto.Advance(5f);
@@ -91,6 +104,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void SimPausedStillCounts()
         {
+            UseShortInterval();
             _host.World.Pause();
             _auto.Advance(0.05f);
             Assert.AreEqual(1, _clock, "Paused game time counts (SV-11).");
@@ -99,6 +113,7 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void ManualSaveRestartsTheCount()
         {
+            UseShortInterval();
             _auto.Advance(0.02f);
             _auto.OnManualSaved();
             _auto.Advance(0.02f);
