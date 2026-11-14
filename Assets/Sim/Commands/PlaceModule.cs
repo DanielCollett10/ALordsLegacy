@@ -1,4 +1,6 @@
+using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
@@ -9,7 +11,7 @@ namespace LordsLegacy.Sim.Commands
     /// <summary>
     /// Places a module in an operation's area (WC-03, WC-07, WC-08). Re-runs <see cref="ModulePlacement.Preview"/>,
     /// adds the footprint, lists it on the operation and removes the trees under it (ids in
-    /// <see cref="CommandResult.RemovedTreeIds"/>). Built at once (M8 placeholder). Created ids hold the footprint id.
+    /// <see cref="CommandResult.RemovedTreeIds"/>). A type with a recipe gets a ConstructionSite (Delivering) and its logs reserved in the same Apply (CN-10, CN-12), or is refused when the settlement can't pay; an empty recipe is built at once. Created ids hold the footprint id.
     /// Agents under a blocking module are moved aside by the nav sync (MOV-12). Works while paused.
     /// </summary>
     public sealed class PlaceModule : ISimCommand
@@ -45,7 +47,19 @@ namespace LordsLegacy.Sim.Commands
             if (check.IsRejected) return check;
 
             FootprintTypeDef type = ModuleTypes.Find(ModuleTypeId);
-            Footprint fp = world.Footprints.Add(world.Footprints.NextId(), type, Centre, RotationDegrees);
+            int fpId = world.Footprints.NextId();
+            if (!type.ConstructionRecipe.IsEmpty)
+            {
+                var site = new ConstructionSite(fpId, world.Inventory.GetOrAddSite(fpId).Id);
+                if (type.ConstructionRecipe.Logs > 0)
+                {
+                    var ids = ConstructionSources.TryReserve(world, Items.Log, type.ConstructionRecipe.Logs, Centre, fpId);
+                    if (ids == null) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Not enough logs");
+                    site.ReservationIds.AddRange(ids);
+                }
+                world.Construction.Add(site);
+            }
+            Footprint fp = world.Footprints.Add(fpId, type, Centre, RotationDegrees);
             world.Operations.AddModule(OperationId, fp.Id);
 
             long[] trees = null;

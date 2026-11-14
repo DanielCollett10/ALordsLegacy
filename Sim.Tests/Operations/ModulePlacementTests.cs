@@ -5,6 +5,8 @@ using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Construction;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
@@ -19,7 +21,14 @@ namespace LordsLegacy.Sim.Tests.Operations
     {
         private static PointMm M(double x, double z) => PointMm.FromMetres(x, z);
 
-        private static SimWorld World() => new SimWorld(new SimTuning());
+        private static SimWorld World() => WorldWithLogs(100);
+
+        private static SimWorld WorldWithLogs(int logs)
+        {
+            var w = new SimWorld(new SimTuning());
+            if (logs > 0) w.Inventory.Produce(w.Inventory.AddStockpile(M(0, 0)), Items.Log, logs);
+            return w;
+        }
 
         // Area is the square (100,100)-(120,120).
         private static Operation Designate(SimWorld w)
@@ -286,6 +295,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             SimWorld w = SimWorld.FromMapData(map, new SimTuning());
             w.Step();
+            w.Inventory.Produce(w.Inventory.AddStockpile(M(0, 0)), Items.Log, 20);
             Operation op = Designate(w);
             w.People.AddFamily(1, "F", 110, 110);
             Citizen c = w.People.AddCitizen(1, "C", Sex.Male, 0, 1, 110, 110);

@@ -20,6 +20,8 @@ namespace LordsLegacy.Sim.Operations
         NotAllowedType,
         /// <summary>The operation already has the most modules of this type (second hut, second oxen stand).</summary>
         TooMany,
+        /// <summary>The settlement cannot pay the recipe's logs (CN-10).</summary>
+        NotEnoughMaterials,
     }
 
     /// <summary>Result of <see cref="ModulePlacement.Preview"/>. Immutable.</summary>
@@ -80,6 +82,13 @@ namespace LordsLegacy.Sim.Operations
                 Footprint other = world.Footprints.Get(id);
                 if (other != null && PolygonOverlap.Overlaps(fp.Polygon, other.Polygon, ToleranceM2))
                     return Refuse(ModuleRefusal.OverlapsModule, "Overlaps another module");
+            }
+            int need = type.ConstructionRecipe.Logs;
+            if (need > 0)
+            {
+                int haveLogs = Construction.ConstructionSources.Available(world, Inventory.Items.Log);
+                if (haveLogs < need)
+                    return Refuse(ModuleRefusal.NotEnoughMaterials, "Not enough logs (have " + haveLogs + ", need " + need + ")");
             }
             return new ModulePlacementResult(ModuleRefusal.None, string.Empty);
         }
