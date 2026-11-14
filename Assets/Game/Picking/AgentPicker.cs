@@ -155,6 +155,7 @@ namespace LordsLegacy.Game
         /// </summary>
         public bool ClickAt(Vector2 screenPos)
         {
+            if (GameMenuState.IsOpen) return false;
             if (_controller == null) _controller = FindFirstObjectByType<ToolController>();
             if (_controller != null && (_controller.ActiveTool != null || _controller.IsPointerOverUiAt(screenPos))) return false;
             var host = Host();

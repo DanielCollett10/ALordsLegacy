@@ -63,7 +63,7 @@ namespace LordsLegacy.Game
 
         private void Update()
         {
-            if (!FollowMouse) return;
+            if (!FollowMouse || GameMenuState.IsOpen) return;
             if (_picker == null) _picker = FindFirstObjectByType<GroundPicker>();
             var mouse = Mouse.current;
             if (_picker == null || mouse == null) return;

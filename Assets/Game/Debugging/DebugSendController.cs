@@ -37,7 +37,7 @@ namespace LordsLegacy.Game
         /// </summary>
         public bool RightClickAt(Vector2 screenPos)
         {
-            if (!DebugAvailable) return false;
+            if (!DebugAvailable || GameMenuState.IsOpen) return false;
             var host = _host != null ? _host : (_host = FindFirstObjectByType<SimHost>());
             var agents = _agents != null ? _agents : (_agents = FindFirstObjectByType<AgentPicker>());
             var picker = _picker != null ? _picker : (_picker = FindFirstObjectByType<GroundPicker>());

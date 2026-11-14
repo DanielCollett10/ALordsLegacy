@@ -9,6 +9,7 @@ namespace LordsLegacy.Game.Tools
     /// Keeps exactly one <see cref="ITool"/> active at a time (ui.md UIB-03, UIB-04, UIB-06). Listens to the build bar,
     /// highlights the active button, and tells the camera rig a tool owns the left and right mouse buttons.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     public sealed class ToolController : MonoBehaviour
     {
         [SerializeField] private BuildBarView _bar;
@@ -66,7 +67,7 @@ namespace LordsLegacy.Game.Tools
         /// </summary>
         public void Toggle(string id)
         {
-            if (!_tools.TryGetValue(id, out var tool)) return;
+            if (GameMenuState.IsOpen || !_tools.TryGetValue(id, out var tool)) return;
             if (ActiveTool == tool) { Deselect(); return; }
             Deselect();
             ActiveTool = tool;
@@ -126,6 +127,25 @@ namespace LordsLegacy.Game.Tools
             return true;
         }
 
+        /// <summary>
+        /// The Esc key (SV-01, SV-02, SV-04): an open menu handles it first (back or close). Otherwise the active tool gets
+        /// it (cancel draft, then leave the tool). Only when no tool is active and nothing else (agent or operation panel)
+        /// wants it does Esc open the game menu. Returns true if anything handled it.
+        /// </summary>
+        public bool HandleEscapeKey()
+        {
+            var menu = _menu != null ? _menu : (_menu = FindFirstObjectByType<GameMenuView>());
+            if (menu != null && menu.IsOpen) { menu.HandleEscape(); return true; }
+            if (HandleEscape()) return true;
+            var agents = FindFirstObjectByType<AgentPicker>();
+            if (agents != null && (agents.HasSelection || agents.HasOperation)) return false;
+            if (menu == null) return false;
+            menu.Open();
+            return true;
+        }
+
+        private GameMenuView _menu;
+
         private void OnEnable() { Subscribe(); SyncCamera(); }
 
         private void OnDisable()
@@ -146,7 +166,7 @@ namespace LordsLegacy.Game.Tools
             Subscribe();
             if (_camera == null) { _camera = FindFirstObjectByType<CameraRig>(); SyncCamera(); }
             var kb = Keyboard.current;
-            if (kb != null && kb.escapeKey.wasPressedThisFrame) HandleEscape();
+            if (kb != null && kb.escapeKey.wasPressedThisFrame) HandleEscapeKey();
         }
 
         private void Refresh()

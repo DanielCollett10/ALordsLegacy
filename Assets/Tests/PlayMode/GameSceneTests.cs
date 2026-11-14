@@ -77,7 +77,7 @@ namespace LordsLegacy.Tests.PlayMode
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GroundReadout", "OperationPanel", "ToolPanel", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GroundReadout", "OperationPanel", "ToolPanel", "TopBar" }, names);
         }
 
         [UnityTest]

@@ -205,6 +205,7 @@ namespace LordsLegacy.Game
         private void Update()
         {
             TryAcquireTerrain();
+            if (GameMenuState.IsOpen) return;
             var kb = Keyboard.current;
             var mouse = Mouse.current;
             float dt = Time.unscaledDeltaTime;
