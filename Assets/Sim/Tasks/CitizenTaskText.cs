@@ -33,7 +33,7 @@ namespace LordsLegacy.Sim.Tasks
             TaskStep step = t.Def.Steps[t.CurrentStep];
             if (step.Kind == StepKind.MoveTo) return "Walking to work";
 
-            string verb = VerbOf(t.Def.Id);
+            string verb = VerbOf(t);
             int total = CountStage(t.Def, step.StageId);
             if (step.StageId == null || total <= 1) return verb;
             int done = CountStageBefore(t.Def, t.CurrentStep, step.StageId);
@@ -66,9 +66,10 @@ namespace LordsLegacy.Sim.Tasks
             }
         }
 
-        private static string VerbOf(string taskDefId)
+        private static string VerbOf(TaskRecord t)
         {
-            return taskDefId == WoodcuttingSystem.FellTaskId ? FellVerb : "Working";
+            if (t.Def.Id == WoodcuttingSystem.FellTaskId) return FellVerb;
+            return ConstructionTaskDefs.VerbFor(t.Def.Id, t.Subject) ?? "Working";
         }
 
         private static string OperationName(string typeId)
