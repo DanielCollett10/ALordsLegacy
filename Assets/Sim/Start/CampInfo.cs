@@ -17,7 +17,19 @@ namespace LordsLegacy.Sim.Start
         /// The camp stockpile in the ledger (CON-08, INV-10): a <see cref="LocationKind.Stockpile"/> holding the
         /// starting stock. Not a storage module, so it is never part of an operation's pool (WC-37).
         /// </summary>
-        public LedgerLocation StockpileLocation { get; }
+        public LedgerLocation StockpileLocation { get; internal set; }
+
+        /// <summary>
+        /// Ledger location id of the stockpile, 0 for none. Used by the save: the Structures section is read before
+        /// the Ledger, so on load this id is kept until <see cref="StockpileLocation"/> can be attached.
+        /// </summary>
+        internal int StockpileLocationId
+        {
+            get => StockpileLocation != null ? StockpileLocation.Id : PendingStockpileLocationId;
+            set => PendingStockpileLocationId = value;
+        }
+
+        internal int PendingStockpileLocationId { get; private set; }
 
         /// <summary>Id of the camp footprint in <c>SimWorld.Footprints</c>.</summary>
         public int FootprintId { get; }

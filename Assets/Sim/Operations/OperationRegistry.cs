@@ -42,6 +42,31 @@ namespace LordsLegacy.Sim.Operations
             return o;
         }
 
+        /// <summary>Adds an operation with all its saved state when loading a save.</summary>
+        internal void RestoreOperation(int id, string typeId, int areaId, IEnumerable<int> modules, IEnumerable<int> families,
+            IEnumerable<int> oxen, int? workAreaId, bool paused)
+        {
+            if (typeId == null) throw new ArgumentNullException(nameof(typeId));
+            if (_byId.ContainsKey(id)) throw new InvalidOperationException("Operation id already restored: " + id);
+            if (FindByArea(areaId) != null) throw new InvalidOperationException("Area already has an operation: " + areaId);
+            var o = new Operation(id, typeId, areaId) { WorkAreaId = workAreaId, Paused = paused };
+            o.ModuleIdList.AddRange(modules);
+            o.FamilyIdList.AddRange(families);
+            o.OxIdList.AddRange(oxen);
+            _byId.Add(id, o);
+            if (id >= _nextId) _nextId = id + 1;
+        }
+
+        /// <summary>The id the next created operation gets.</summary>
+        internal int NextIdValue => _nextId;
+
+        /// <summary>Sets the id counter when loading a save.</summary>
+        internal void RestoreNextId(int nextId)
+        {
+            if (nextId < _nextId) throw new InvalidOperationException("Operation id counter " + nextId + " is below an existing id.");
+            _nextId = nextId;
+        }
+
         /// <summary>Removes an operation. Returns false, changing nothing, if unknown.</summary>
         public bool Remove(int id)
         {
