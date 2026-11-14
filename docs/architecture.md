@@ -427,6 +427,10 @@ _Owner: the map and terrain tasks. Other tasks do not edit this section._
   `StructuresSection` (id 3, T-363) follows Land: footprints (type id, centre, rotation, id counter), `CampInfo`, operations
   (all fields, id counter) and construction sites. It is read before the Ledger, so `CampInfo.StockpileLocationId` keeps the
   ledger id and the Ledger section must re-attach `CampInfo.StockpileLocation` (and check site location ids) when it loads.
+  T-364 `LedgerSection` (id 4): all locations (kind, position, owner, module id, capacity, counts), reservations, produced/consumed
+  journals and both id counters. Reserved/incoming totals are rebuilt from the reservations (`Ledger.Restore*`, internal, in
+  `Ledger.Restore.cs`). On read it re-attaches the camp stockpile, checks site location ids and runs `Ledger.Audit`; a fault throws
+  `SaveFormatException`.
 - `SimWorld.FromMapData(map, tuning)` uses the map's grid and trees. The map has no baked roads (RD-14, WORLD-08-A).
 - File format: little-endian binary, magic `LLMP`, int32 format version (`MapData.CurrentVersion` = 1), map id,
   height grid, then trees. Other versions are rejected.
