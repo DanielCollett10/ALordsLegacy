@@ -507,7 +507,7 @@ namespace LordsLegacy.Tests.PlayMode
             _view.ClickDeconstructModule(1);
             Assert.IsTrue(ConfirmDialog.IsOpen);
             StringAssert.Contains("Returns 4 logs", DialogMessage().text);
-            StringAssert.Contains("Families will be unassigned", DialogMessage().text);
+            Assert.AreEqual("Deconstruct the Hut?\nReturns 4 logs.", DialogMessage().text);
             Assert.IsNull(_host.World.Deconstruction.Get(1), "Nothing is sent before Confirm.");
 
             ConfirmDialog.Cancel();

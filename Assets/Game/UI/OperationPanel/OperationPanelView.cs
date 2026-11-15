@@ -418,32 +418,20 @@ namespace LordsLegacy.Game
             if (fp == null) return "";
             string name = ModuleTypes.DisplayName(fp.Type.Id);
             if (!world.IsBuilt(footprintId)) return "Cancel the unbuilt " + name + "? The site is removed at once.";
-            var sb = new StringBuilder("Deconstruct the " + name + "? Returns " + DeconstructionWork.RefundLogs(world, fp) + " logs.");
-            if (IsHut(op, fp) && op.FamilyIds.Count > 0) sb.Append(" Families will be unassigned.");
-            return sb.ToString();
+            return "Deconstruct the " + name + "?\nReturns " + DeconstructionWork.RefundLogs(world, fp) + " logs.";
         }
 
         /// <summary>Text of the confirm dialog for deconstructing a whole operation.</summary>
         public static string ConfirmTextForOperation(Sim.Core.SimWorld world, Operation op)
         {
             int logs = 0;
-            bool hut = false;
             foreach (int id in op.ModuleIds)
             {
                 Footprint fp = world.Footprints.Get(id);
                 if (fp == null) continue;
                 if (world.IsBuilt(id) && world.Deconstruction.Get(id) == null) logs += DeconstructionWork.RefundLogs(world, fp);
-                if (IsHut(op, fp) && world.IsBuilt(id)) hut = true;
             }
-            var sb = new StringBuilder("Deconstruct the whole operation? Returns " + logs + " logs.");
-            if (hut && op.FamilyIds.Count > 0) sb.Append(" Families will be unassigned.");
-            return sb.ToString();
-        }
-
-        private static bool IsHut(Operation op, Footprint fp)
-        {
-            var def = OperationTypes.Find(op.TypeId);
-            return def != null && fp.Type.Id == def.HutTypeId;
+            return "Deconstruct the whole operation?\nReturns " + logs + " logs.";
         }
 
         /// <summary>A module row's Deconstruct button: asks to confirm, then sends MarkForDeconstruction. While the
