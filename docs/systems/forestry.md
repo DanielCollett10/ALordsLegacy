@@ -46,7 +46,7 @@ through `Add`, `Remove` or `SetState`, or the renderer will not update.
 `Assets/Sim/Foraging/`: `BushRegistry` (`world.Bushes`: reserve/release/`TakeBasket`/`NearestAvailable`), `BushScatter` (new game
 only, own seeded `SimRandom`, forest edges plus a few clearings), `BushRegrowSystem` (full after `BushRegrowDays`). Tuning:
 `BushBaskets` 3, `BushRegrowDays` 14, `BushCount`, `BushEdgeM`, `BushTreeClearM`, `BushClearingChance`. Saved by `BushesSection`.
-Tests: `Save/BushesSectionTests.cs`. No picking task or renderer yet.
+Tests: `Save/BushesSectionTests.cs`. Picked by `task.forage` (`operations.md`). No renderer yet.
 
 ## Tests
 

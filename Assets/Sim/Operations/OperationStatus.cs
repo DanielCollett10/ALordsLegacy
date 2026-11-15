@@ -28,6 +28,8 @@ namespace LordsLegacy.Sim.Operations
         StorageFull = 6,
         /// <summary>Logs wait for an ox and none is free (only from <see cref="OperationStatus.Reported"/>; felling continues).</summary>
         WaitingForOx = 7,
+        /// <summary>No bush with baskets left in the work region (foraging, FD-22).</summary>
+        NoBushes = 8,
     }
 
     /// <summary>Computes operation status from world state. Nothing here is stored (GDD section 5).</summary>
@@ -39,6 +41,7 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>Working, or the first cause in order: Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull.</summary>
         public static OperationState Of(SimWorld world, Operation op)
         {
+            if (op.TypeId == OperationTypes.ForagingId) return Foraging.ForagingStatus.Of(world, op);
             if (op.Paused) return OperationState.Paused;
             if (Hut(world, op) == null) return OperationState.MissingHut;
             if (StorageModules(world, op).Count == 0) return OperationState.MissingStorage;

@@ -80,6 +80,28 @@ namespace LordsLegacy.Sim.Foraging
             return best;
         }
 
+        /// <summary>True when any bush with baskets left (reserved or not) lies inside the region.</summary>
+        public bool AnyWithBasketsIn(Forestry.TreeRegion region)
+        {
+            foreach (var b in _byId.Values)
+                if (b.Baskets > 0 && region.Contains(b.X, b.Z)) return true;
+            return false;
+        }
+
+        /// <summary>The nearest unreserved bush with baskets inside the region, or null. Ties go to the lowest id.</summary>
+        public BushRecord NearestAvailable(float x, float z, Forestry.TreeRegion region)
+        {
+            BushRecord best = null;
+            double bestD = double.MaxValue;
+            foreach (var b in _byId.Values)
+            {
+                if (b.Baskets <= 0 || b.ReservedBy.HasValue || !region.Contains(b.X, b.Z)) continue;
+                double dx = b.X - x, dz = b.Z - z, d = dx * dx + dz * dz;
+                if (d < bestD) { best = b; bestD = d; }
+            }
+            return best;
+        }
+
         /// <summary>Refills every emptied bush whose regrow time has passed (FD-21). Returns how many regrew.</summary>
         public int Regrow(long tick, SimTuning tuning)
         {

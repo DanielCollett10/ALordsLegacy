@@ -22,7 +22,7 @@ sections, each as int32 id + int32 length. `SimSave.Read` requires the exact lis
 |---|---|---|---|
 | 1 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares), road and area catalogs. |
 | 2 | 2 | Land | Trees as changes, road network, areas. |
-| 2b | 10 | Bushes | Forage bushes (T-421, version 10): position, kind, baskets, emptied tick, reservation, id counter. Replaces the new-game scatter on load. |
+| 2b | 10 | Bushes | Forage bushes (T-421, version 10): position, kind, baskets, emptied tick, reservation, id counter. Replaces the new-game scatter on load. Version 11 (T-423): forager tuning in Core, `BushId`/`CarrierId` per task. |
 | 3 | 3 | Structures | Footprints, camp, operations, construction sites, deconstruction entries, pending operations. |
 | 4 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
 | 5 | 5 | Population | Families, citizens, oxen. |

@@ -78,13 +78,15 @@ namespace LordsLegacy.Sim.Tasks
                 if (helpers != !f.WorkplaceId.HasValue) continue;
                 // An odd-jobber off shift is offered nothing (T-346, CN-25); assigned workers may take tomorrow's task.
                 if (helpers && !world.WorkDay.OnShift(world, c)) continue;
-                bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
+                double age = c.AgeYears(world.Tick, world.Tuning.AgeingRate);
+                bool adult = age >= OperationStatus.WorkingAgeYears;
+                bool forager = age >= world.Tuning.ForagerMinAge;
 
                 TaskRecord best = null;
                 double bestTravel = 0;
                 foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
                 {
-                    if (!Eligible(t, f, helpers, adult)) continue;
+                    if (!Eligible(t, f, helpers, adult, forager)) continue;
                     if (!TravelTo(world, t, c, helpers, oxOpen, out double travel)) continue;
                     if (best == null || t.Priority > best.Priority ||
                         (t.Priority == best.Priority && travel < bestTravel - 1e-9))
@@ -114,6 +116,16 @@ namespace LordsLegacy.Sim.Tasks
                 if (ox == null) return false;
                 if (!IsNearestFreeToOx(world, t, c, helpers, ox)) return false;
                 travel = DistanceM(ox.X, ox.Z, c.X, c.Z) / walk;
+                return true;
+            }
+            if (t.BushId.HasValue)
+            {
+                if (!world.Bushes.TryGet(t.BushId.Value, out Foraging.BushRecord bush) || bush.ReservedBy != t.Id)
+                {
+                    world.Tasks.Cancel(t.Id); // the bush is gone or no longer ours
+                    return false;
+                }
+                travel = DistanceM(bush.X, bush.Z, c.X, c.Z) / walk;
                 return true;
             }
             if (t.Target.HasValue)
@@ -156,8 +168,8 @@ namespace LordsLegacy.Sim.Tasks
             Family f = world.People.FindFamily(c.FamilyId);
             if (f == null || helpers != !f.WorkplaceId.HasValue) return false;
             if (helpers && !world.WorkDay.OnShift(world, c)) return false;
-            bool adult = c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears;
-            return Eligible(t, f, helpers, adult);
+            double age = c.AgeYears(world.Tick, world.Tuning.AgeingRate);
+            return Eligible(t, f, helpers, age >= OperationStatus.WorkingAgeYears, age >= world.Tuning.ForagerMinAge);
         }
 
         private static double SquaredDistance(double ax, double az, double bx, double bz)
@@ -172,10 +184,11 @@ namespace LordsLegacy.Sim.Tasks
             return Math.Sqrt(dx * dx + dz * dz);
         }
 
-        private static bool Eligible(TaskRecord t, Family f, bool helpers, bool adult)
+        private static bool Eligible(TaskRecord t, Family f, bool helpers, bool adult, bool forager)
         {
             if (t.State != TaskState.Open) return false;
             if (!adult && HasHeavyStep(t.Def)) return false;
+            if (!forager && t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return false; // FD-23: 8 and over
             switch (t.Def.Eligibility)
             {
                 case EligibilityPolicy.AssignedFamilyOnly:

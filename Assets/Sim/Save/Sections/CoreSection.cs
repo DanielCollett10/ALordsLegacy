@@ -110,6 +110,10 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.BushTreeClearM);
             w.WriteDouble(t.BushEdgeM);
             w.WriteDouble(t.BushClearingChance);
+            w.WriteInt32(t.ForagerMinAge);
+            w.WriteInt32(t.ForagerHutCapacity);
+            w.WriteInt32(t.GatherMinutesPerBasket);
+            w.WriteInt32(t.HandCarryItems);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -168,6 +172,10 @@ namespace LordsLegacy.Sim.Save.Sections
             t.BushTreeClearM = r.ReadDouble();
             t.BushEdgeM = r.ReadDouble();
             t.BushClearingChance = r.ReadDouble();
+            t.ForagerMinAge = r.ReadInt32();
+            t.ForagerHutCapacity = r.ReadInt32();
+            t.GatherMinutesPerBasket = r.ReadInt32();
+            t.HandCarryItems = r.ReadInt32();
             return t;
         }
 

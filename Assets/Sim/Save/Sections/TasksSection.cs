@@ -48,6 +48,8 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(t.StepProgress);
                 WriteOptInt(w, t.AwaitsTaskId);
                 w.WriteBool(t.WindingDown);
+                WriteOptInt(w, t.BushId);
+                WriteOptInt(w, t.CarrierId);
                 w.WriteInt32(t.Reservations.Count);
                 foreach (TreeId tree in t.Reservations) w.WriteInt32(tree.Value);
             }
@@ -91,6 +93,8 @@ namespace LordsLegacy.Sim.Save.Sections
                 int progress = r.ReadInt32();
                 int? awaits = ReadOptInt(r);
                 bool winding = r.ReadBool();
+                int? bush = ReadOptInt(r);
+                int? carrier = ReadOptInt(r);
                 int nRes = r.ReadCount(4);
                 var trees = new List<TreeId>(nRes);
                 for (int k = 0; k < nRes; k++) trees.Add(new TreeId(r.ReadInt32()));
@@ -108,7 +112,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 {
                     State = (TaskState)state, AssigneeId = assignee, CurrentStep = step, StepProgress = progress,
                     OxId = ox, OxWasAssigned = oxWasAssigned, SiteFootprintId = site, AwaitsTaskId = awaits,
-                    WindingDown = winding
+                    WindingDown = winding, BushId = bush, CarrierId = carrier
                 };
                 board.RestoreTask(t, trees);
             }
@@ -149,6 +153,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 case (int)StepKind.WalkTo: return TaskStep.WalkTo(new PathPoint(x, z));
                 case (int)StepKind.CollectFood: return TaskStep.CollectFood();
                 case (int)StepKind.DepositFood: return TaskStep.DepositFood();
+                case (int)StepKind.DepositForage: return TaskStep.DepositForage(loc, count);
                 default: throw new SaveFormatException("Bad task step kind " + kind + ".");
             }
         }

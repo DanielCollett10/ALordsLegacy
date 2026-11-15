@@ -91,8 +91,21 @@ namespace LordsLegacy.Sim.Areas
         public static readonly AreaTypeDef WoodcuttingWork =
             new AreaTypeDef(WoodcuttingWorkId, "Woodcutting work area", AreaKind.Work, 4, 8, 100, 40000, null, false, false);
 
+        /// <summary>Id of the foraging building area (FD-22).</summary>
+        public const string ForagingId = "area.foraging";
+        /// <summary>Id of the foraging work area (FD-22).</summary>
+        public const string ForagingWorkId = "area.work_foraging";
+
+        /// <summary>Foraging building area: 4–8 points, 100–5,000 m², 10° max slope, clears trees, blocks roads (FD-22).</summary>
+        public static readonly AreaTypeDef Foraging =
+            new AreaTypeDef(ForagingId, "Foraging camp", AreaKind.Building, 4, 8, 100, 5000, 10, true, true);
+
+        /// <summary>Foraging work area: 4–8 points, 100–400,000 m², no slope limit, no clearing, no blocking (FD-22).</summary>
+        public static readonly AreaTypeDef ForagingWork =
+            new AreaTypeDef(ForagingWorkId, "Foraging work area", AreaKind.Work, 4, 8, 100, 400000, null, false, false);
+
         /// <summary>All area types, in definition order.</summary>
-        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot };
+        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot, Foraging, ForagingWork };
 
         /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
         public static readonly AreaTypeCatalog DefaultCatalog = new AreaTypeCatalog(All);

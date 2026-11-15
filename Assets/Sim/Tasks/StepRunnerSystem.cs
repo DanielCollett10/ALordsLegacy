@@ -54,9 +54,10 @@ namespace LordsLegacy.Sim.Tasks
                 // Night, or not yet time to leave (PPL-24): keep progress and reservations; the routine walks the worker home.
                 _orders.Remove(t.Id);
                 // A task with no tree target (a build) has nowhere to walk back to yet: it resumes where the worker stands.
-                if (t.Target.HasValue && t.Def.Steps[t.CurrentStep].Kind == StepKind.Work) _returning.Add(t.Id);
+                if ((t.Target.HasValue || t.BushId.HasValue) && t.Def.Steps[t.CurrentStep].Kind == StepKind.Work) _returning.Add(t.Id);
                 return;
             }
+            if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) { StepForage(world, t, c); return; }
             if (t.Target.HasValue)
             {
                 if (!world.Trees.TryGet(t.Target.Value, out TreeRecord tree) || tree.State == TreeState.Stump)
@@ -178,6 +179,7 @@ namespace LordsLegacy.Sim.Tasks
             _returning.Remove(t.Id);
             _drop.Remove(t.Id);
             if (t.Def.Id == FoodTripSystem.FetchFoodTaskId) FailFoodTrip(world, t, c);
+            if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) FailForage(world, t, c);
             ReleaseOx(world, t, c);
             world.Tasks.Cancel(t.Id);
             if (c != null)

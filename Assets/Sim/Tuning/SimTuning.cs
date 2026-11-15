@@ -241,6 +241,18 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;
 
+        /// <summary>Youngest age that takes forage tasks. Unit: years. Rule: FD-23, POP-A2 (PLACEHOLDER).</summary>
+        public int ForagerMinAge { get; set; } = 8;
+
+        /// <summary>Food items the forager hut store holds. Unit: items. Rule: FD-23b (PLACEHOLDER).</summary>
+        public int ForagerHutCapacity { get; set; } = 30;
+
+        /// <summary>Game minutes to pick one basket. Unit: minutes. Rule: FD-24 (PLACEHOLDER).</summary>
+        public int GatherMinutesPerBasket { get; set; } = 30;
+
+        /// <summary>Most items a person carries by hand on one trip. Unit: items. Rule: FD-24, MKT-03e (PLACEHOLDER).</summary>
+        public int HandCarryItems { get; set; } = 10;
+
         /// <summary>Baskets a forage bush holds when full. Unit: baskets. Rule: FD-21 (PLACEHOLDER).</summary>
         public int BushBaskets { get; set; } = 3;
 

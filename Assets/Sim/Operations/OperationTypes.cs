@@ -27,8 +27,28 @@ namespace LordsLegacy.Sim.Operations
             familySlots: 2,
             defaultWorkRadiusM: 420);
 
+        /// <summary>Id of the foraging operation.</summary>
+        public const string ForagingId = "operation.foraging";
+
+        /// <summary>
+        /// Foraging camp: foraging building area with a mandatory forager hut (which is also its food store) and nothing
+        /// else, 2 family slots and a 300 m default work circle (FD-22, FD-23b).
+        /// </summary>
+        public static readonly OperationTypeDef Foraging = new OperationTypeDef(
+            ForagingId,
+            buildingAreaTypeId: AreaTypes.ForagingId,
+            workAreaTypeId: AreaTypes.ForagingWorkId,
+            hutTypeId: ModuleTypes.ForagerHutId,
+            hutCount: 1,
+            logStorageTypeId: null,
+            minLogStorageCount: 0,
+            oxenStandTypeId: null,
+            maxOxenStands: 0,
+            familySlots: 2,
+            defaultWorkRadiusM: 300);
+
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)

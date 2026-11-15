@@ -70,11 +70,13 @@ namespace LordsLegacy.Sim.Tasks
         private static string VerbOf(TaskRecord t)
         {
             if (t.Def.Id == WoodcuttingSystem.FellTaskId) return FellVerb;
+            if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return "Foraging";
             return ConstructionTaskDefs.VerbFor(t.Def.Id, Footprints.ModuleTypes.DisplayName(t.Subject)) ?? "Working";
         }
 
         private static string OperationName(string typeId)
         {
+            if (typeId == OperationTypes.ForagingId) return "Foraging camp";
             return typeId == OperationTypes.WoodcuttingId ? "Woodcutter" : "Operation";
         }
 
