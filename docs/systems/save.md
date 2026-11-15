@@ -19,8 +19,9 @@
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion` = 1), the header, then sections, each as int32 id + int32 byte length.
-A reader can skip unknown ids. Sections in order:
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`: 1 at M11, now higher; every change bumps it, decision 0038), the header,
+then sections, each as int32 id + int32 byte length. `SaveReader.NextSection` can step over an unknown id, but `SimSave.Read`
+requires the exact section order and throws on any other id. Sections in order:
 
 | Id | Section | Holds |
 |---|---|---|
