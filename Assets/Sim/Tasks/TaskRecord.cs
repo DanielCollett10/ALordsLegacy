@@ -12,7 +12,7 @@ namespace LordsLegacy.Sim.Tasks
         public int Id { get; }
         /// <summary>The definition this task was built from.</summary>
         public TaskDef Def { get; }
-        /// <summary>Owning operation id.</summary>
+        /// <summary>Owning operation id, or <see cref="Construction.DeconstructionWork.HouseOwnerId"/> (-1) for a house's tasks.</summary>
         public int OwnerOperationId { get; }
         /// <summary>Target tree, or null when the task has no tree target.</summary>
         public TreeId? Target { get; }

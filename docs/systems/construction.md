@@ -32,7 +32,7 @@ last log is in and the work is done, the site becomes a built footprint (decisio
    drops floor(recipe logs × `DeconstructRefundShare`) logs, plus storage contents, as one unowned pile at the site.
    A 0-minute recipe (log storage) is removed when marked; an unbuilt module is cancelled at once. Cancelling a mark loses
    its progress. Marking a hut unassigns its families (CN-56).
-7. **Houses (T-407, 0040):** a marked house evicts its family to the camp fire; finish or unbuilt cancel removes its plot (HM-14b). Tasks use owner -1. Gap: no operation, so builders never run.
+7. **Houses (T-407, 0040):** a marked house evicts its family to the camp fire; finish or unbuilt cancel removes its plot (HM-14b). Deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`) and pool oxen; the house is built like any module.
 
 ## Rules
 
@@ -57,4 +57,4 @@ rules (`save.md`). Progress rules belong in `ConstructionProgress`, not the step
 
 `Sim.Tests/ConstructionSiteTests.cs`, `ConstructionSourcesTests.cs`, `Sim.Tests/Operations/Construction*Tests.cs`,
 `PlaceRemoveConstructionTests.cs`, `SitePriorityTests.cs`, `Sim.Tests/Construction/BuildCostTests.cs`, `Deconstruct*Tests.cs`,
-`Sim.Tests/Homes/HouseDeconstructionTests.cs`. Unity: `Assets/Tests/PlayMode/ConstructionVisualsTests.cs`.
+`Sim.Tests/Homes/HouseDeconstructionTests.cs`, `HouseConstructionTests.cs`. Unity: `Assets/Tests/PlayMode/ConstructionVisualsTests.cs`.

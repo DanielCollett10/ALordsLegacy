@@ -17,8 +17,9 @@ namespace LordsLegacy.Sim.Operations
     /// For each site whose logs are not all on site, it opens <c>task.deliver_materials</c> tasks (up to
     /// <c>OxLoadLogs</c> logs each, from one reserved source), at the site's priority. Opening a task moves that many logs
     /// from the site's reservations to a reservation owned by the task, so the step runner's Transfer can consume it.
-    /// Each Open task asks <see cref="OxPool.FindFor"/> for an ox of the site's operation every tick. Helpers do the work
-    /// (the task def is HelpersOnly and heavy). The site moves to Building when its first log is on site (CN-23).
+    /// Each Open task asks <see cref="OxPool.FindFor"/> for an ox of the site's operation every tick (a house has none, so
+    /// its tasks ask for a pool ox with <c>HouseOwnerId</c>). Helpers do the work (the task def is HelpersOnly and heavy).
+    /// The site moves to Building when its first log is on site (CN-23). Houses (HM-06) get the same deliver and build tasks.
     /// Cancelled tasks give their logs back to the site's reservations; tasks of a removed site are cancelled.
     /// </summary>
     public sealed class ConstructionSystem : ISimSystem
@@ -40,13 +41,12 @@ namespace LordsLegacy.Sim.Operations
                 if (loc == null) continue;
                 if (site.State == ConstructionState.Delivering && (logs == 0 || loc.CountOf(Items.Log.Id) > 0))
                     site.State = ConstructionState.Building; // CN-23
-                Operation op = OperationOf(world, site.FootprintId);
-                if (site.State == ConstructionState.Building && op != null &&
-                    !ConstructionProgress.TryFinish(world, site, fp.Type.ConstructionRecipe))
-                    ManageBuilders(world, site, fp, op);
-                if (logs == 0 || op == null) continue;
+                int owner = OwnerOf(world, site.FootprintId);
+                if (site.State == ConstructionState.Building && !ConstructionProgress.TryFinish(world, site, fp.Type.ConstructionRecipe))
+                    ManageBuilders(world, site, fp, owner);
+                if (logs == 0) continue;
                 TopUp(world, site, fp, logs, loc);
-                OpenTasks(world, site, fp, op);
+                OpenTasks(world, site, fp, owner);
             }
             AttachOxen(world);
         }
@@ -65,7 +65,7 @@ namespace LordsLegacy.Sim.Operations
 
         // Build tasks (T-347, CN-23/23c): offered only while cap − progress > 0, up to MaxBuildersPerSite at once and never
         // more than there are minutes left. Open ones are withdrawn when the site is capped.
-        private static void ManageBuilders(SimWorld world, ConstructionSite site, Footprint fp, Operation op)
+        private static void ManageBuilders(SimWorld world, ConstructionSite site, Footprint fp, int owner)
         {
             int remaining = ConstructionProgress.Remaining(world, site, fp.Type.ConstructionRecipe);
             int live = 0;
@@ -80,7 +80,7 @@ namespace LordsLegacy.Sim.Operations
             for (int i = 0; i < want; i++)
             {
                 TaskDef def = ConstructionTaskDefs.Build(Math.Max(1, fp.Type.ConstructionRecipe.BuildWorkerMinutes));
-                TaskRecord task = world.Tasks.Create(def, op.Id, null, priority, fp.Type.Id);
+                TaskRecord task = world.Tasks.Create(def, owner, null, priority, fp.Type.Id);
                 world.Tasks.SetSite(task.Id, fp.Id);
             }
         }
@@ -99,8 +99,7 @@ namespace LordsLegacy.Sim.Operations
                 if (fp == null) { world.Deconstruction.Remove(e.FootprintId); continue; }
                 int remaining = DeconstructionWork.Remaining(world, e, fp);
                 if (remaining <= 0) { DeconstructionWork.Finish(world, e.FootprintId); continue; }
-                Operation op = OperationOf(world, e.FootprintId); // null for a house (HM-14): its tasks use HouseOwnerId
-                int owner = op != null ? op.Id : DeconstructionWork.HouseOwnerId;
+                int owner = OwnerOf(world, e.FootprintId);
                 int live = 0;
                 foreach (TaskRecord t in world.Tasks.All)
                     if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeconstructId && t.SiteFootprintId == e.FootprintId) live++;
@@ -129,6 +128,14 @@ namespace LordsLegacy.Sim.Operations
                 foreach (int id in op.ModuleIds)
                     if (id == footprintId) return op;
             return null;
+        }
+
+        // Owner id for the tasks of a site or deconstruction entry: its operation's id, or HouseOwnerId for a house
+        // (HM-06, HM-14), which belongs to no operation.
+        private static int OwnerOf(SimWorld world, int footprintId)
+        {
+            Operation op = OperationOf(world, footprintId);
+            return op != null ? op.Id : DeconstructionWork.HouseOwnerId;
         }
 
         private static TaskStep StepOf(TaskRecord t, StepKind kind, out int index)
@@ -221,7 +228,7 @@ namespace LordsLegacy.Sim.Operations
             if (ids != null) site.ReservationIds.AddRange(ids);
         }
 
-        private static void OpenTasks(SimWorld world, ConstructionSite site, Footprint fp, Operation op)
+        private static void OpenTasks(SimWorld world, ConstructionSite site, Footprint fp, int owner)
         {
             int load = Math.Max(1, world.Tuning.OxLoadLogs);
             TaskPriority priority = site.Priority == ConstructionPriority.High ? TaskPriority.High : TaskPriority.Normal;
@@ -247,7 +254,7 @@ namespace LordsLegacy.Sim.Operations
                 PathPoint drop = new PathPoint(fp.AccessPoint.XMetres, fp.AccessPoint.ZMetres);
                 TaskDef def = ConstructionTaskDefs.Deliver(pick, source.Id, drop, site.LedgerLocationId, n,
                     Math.Max(1, world.Tuning.OxLoadMinutes), Math.Max(1, world.Tuning.OxUnloadMinutes));
-                TaskRecord task = world.Tasks.Create(def, op.Id, null, priority, fp.Type.Id);
+                TaskRecord task = world.Tasks.Create(def, owner, null, priority, fp.Type.Id);
                 world.Tasks.SetSite(task.Id, fp.Id); // lets a priority change (CN-30) reach this task
                 if (world.Inventory.ReserveStock(source, Items.Log, n, task.Id) == 0)
                 {
