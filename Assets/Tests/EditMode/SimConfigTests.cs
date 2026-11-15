@@ -77,6 +77,43 @@ namespace LordsLegacy.Tests.EditMode
         }
 
         [Test]
+        public void DefaultSimConfigBuildsCodeAreaCatalog()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                var cat = cfg.BuildAreaCatalog();
+                Assert.AreEqual(AreaTypes.All.Count, cat.All.Count);
+                for (int i = 0; i < cat.All.Count; i++)
+                {
+                    var a = cat.All[i]; var d = AreaTypes.All[i];
+                    Assert.AreEqual(d.Id, a.Id);
+                    Assert.AreEqual(d.MinAreaM2, a.MinAreaM2, Eps);
+                    Assert.AreEqual(d.MaxAreaM2, a.MaxAreaM2, Eps);
+                    Assert.AreEqual(d.MaxSlopeDegrees.HasValue, a.MaxSlopeDegrees.HasValue);
+                    Assert.AreEqual(d.NearRoadReachM, a.NearRoadReachM, Eps);
+                }
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
+        public void DeconstructSharesComeFromConfig()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                Assert.AreEqual(new SimTuning().DeconstructTimeShare, cfg.BuildTuning().DeconstructTimeShare, Eps);
+                Assert.AreEqual(new SimTuning().DeconstructRefundShare, cfg.BuildTuning().DeconstructRefundShare, Eps);
+                cfg.deconstructTimeShare = 0.25f;
+                cfg.deconstructRefundShare = 0.75f;
+                Assert.AreEqual(0.25, cfg.BuildTuning().DeconstructTimeShare, Eps);
+                Assert.AreEqual(0.75, cfg.BuildTuning().DeconstructRefundShare, Eps);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
         public void AssetModuleRecipesEqualCodeDefaults()
         {
             var recipes = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath).BuildModuleRecipes();
