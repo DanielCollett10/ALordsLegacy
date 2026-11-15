@@ -8,8 +8,17 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>A felled log.</summary>
         public static readonly ItemDef Log = new ItemDef("item.log", ItemCategory.Log);
 
+        /// <summary>Meat: 3 rations each (FD-01).</summary>
+        public static readonly ItemDef Meat = new ItemDef("item.meat", ItemCategory.Food, 3);
+
+        /// <summary>Berries: 1 ration each (FD-01).</summary>
+        public static readonly ItemDef Berries = new ItemDef("item.berries", ItemCategory.Food, 1);
+
+        /// <summary>Mushrooms: 1 ration each (FD-01).</summary>
+        public static readonly ItemDef Mushrooms = new ItemDef("item.mushrooms", ItemCategory.Food, 1);
+
         /// <summary>All built-in items.</summary>
-        public static IReadOnlyList<ItemDef> All { get; } = new[] { Log };
+        public static IReadOnlyList<ItemDef> All { get; } = new[] { Log, Meat, Berries, Mushrooms };
 
         /// <summary>Finds an item by id, or null.</summary>
         public static ItemDef Find(string id)

@@ -67,6 +67,13 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.Carrier, default, null, 0, capacity));
         }
 
+        /// <summary>Adds a food-only store (a larder) holding up to <paramref name="capacity"/> items (FD-02).</summary>
+        public LedgerLocation AddFoodStore(int capacity = int.MaxValue)
+        {
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Must be positive.");
+            return Add(new LedgerLocation(_nextId++, LocationKind.FoodStore, default, null, 0, capacity));
+        }
+
         /// <summary>Finds the Site location of a footprint, or null (never creates).</summary>
         public LedgerLocation FindSite(int footprintId)
         {
@@ -110,6 +117,8 @@ namespace LordsLegacy.Sim.Inventory
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (n <= 0) throw new ArgumentOutOfRangeException(nameof(n), "Must be positive.");
             if (Get(location.Id) != location) throw new ArgumentException("Location is not in this ledger.", nameof(location));
+            string refusal = RefusalReason(location, item);
+            if (refusal != null) throw new InvalidOperationException(refusal);
             if (location.Capacity != int.MaxValue && (long)location.Total + n > location.Capacity)
                 throw new InvalidOperationException("Location " + location.Id + " would exceed its capacity of " + location.Capacity + ".");
             location.Counts.TryGetValue(item.Id, out int have);
@@ -117,6 +126,13 @@ namespace LordsLegacy.Sim.Inventory
             _produced.TryGetValue(item.Id, out int made);
             _produced[item.Id] = checked(made + n);
             Version++;
+        }
+
+        /// <summary>Why a location would not take an item (wrong category), or null when it would.</summary>
+        public static string RefusalReason(LedgerLocation location, ItemDef item)
+        {
+            if (location.Accepts(item.Category)) return null;
+            return "Location " + location.Id + " (" + location.Kind + ") does not accept " + item.Category + " items (" + item.Id + ").";
         }
 
         /// <summary>Total of one item id used up by <see cref="Consume"/> so far (the consumed journal).</summary>

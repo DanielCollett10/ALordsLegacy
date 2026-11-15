@@ -5,5 +5,7 @@ namespace LordsLegacy.Sim.Inventory
     {
         /// <summary>Felled timber.</summary>
         Log = 0,
+        /// <summary>Something people eat (FD-01).</summary>
+        Food = 1,
     }
 }

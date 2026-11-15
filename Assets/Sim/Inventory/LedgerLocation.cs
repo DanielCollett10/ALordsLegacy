@@ -16,6 +16,8 @@ namespace LordsLegacy.Sim.Inventory
         Stockpile = 3,
         /// <summary>Materials delivered to a construction site; owner is the footprint id (decision 0032/0033).</summary>
         Site = 4,
+        /// <summary>A food-only store such as a larder (FD-02); refuses non-food.</summary>
+        FoodStore = 5,
     }
 
     /// <summary>One place that holds items. Counts are owned by the <see cref="Ledger"/>.</summary>
@@ -39,6 +41,23 @@ namespace LordsLegacy.Sim.Inventory
 
         /// <summary>Most items (all kinds together) held here; <see cref="int.MaxValue"/> means no limit.</summary>
         public int Capacity { get; internal set; }
+
+        /// <summary>
+        /// Whether a kind of location takes items of a category. Log storage takes only logs, a food store only
+        /// food; ground piles, carriers, stockpiles and sites declare nothing and accept anything (FD-02).
+        /// </summary>
+        public static bool Accepts(LocationKind kind, ItemCategory category)
+        {
+            switch (kind)
+            {
+                case LocationKind.Storage: return category == ItemCategory.Log;
+                case LocationKind.FoodStore: return category == ItemCategory.Food;
+                default: return true;
+            }
+        }
+
+        /// <summary>Whether this location takes items of a category.</summary>
+        public bool Accepts(ItemCategory category) => Accepts(Kind, category);
 
         internal LedgerLocation(int id, LocationKind kind, PointMm position, int? owner, int moduleId, int capacity = int.MaxValue)
         {
