@@ -43,3 +43,4 @@ Rules added after reviews kept catching the same mistakes. Follow them like any 
 >>>>>>> main
 
 - When you add an entry to a Sim catalog or registry (area types, modules, operation types and similar), grep Sim.Tests for assertions on that collection's total Count or Length and update them. Prefer asserting on the specific entries over the total. Then run the full `dotnet test Sim.Tests/Sim.Tests.csproj`, quote the totals line and report only with 0 failures. _(learned from T-403)_
+- When a task adds a Command, a ModuleType or catalog entry, or a task-owner convention (such as owner -1), update the matching docs/systems/*.md file in the same task: commands.md, footprints.md or tasks.md. Then run a line count on it and keep it at 60 lines or fewer. List the docs you updated in the report. _(learned from T-444)_
