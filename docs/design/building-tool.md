@@ -19,7 +19,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | BT-10 | Clicking the entry starts a **draft**. Nothing reaches the Sim until Confirm | DECIDED |
-| BT-11 | **Area stage:** draw the area as today (points, bends, snapping). Closing a valid shape (Enter, double-click or the *Next: modules* button) locks it and moves to the module stage. To change the shape, Cancel and start again | PROPOSED |
+| BT-11 | **Area stage:** draw the area as today (points, bends, snapping). Closing a valid shape (Enter, double-click or the *Next: modules* button) locks it and moves to the module stage. To change the shape, Cancel and start again | DECIDED (owner 15/11/2026) |
 | BT-12 | **Module stage:** the tool panel lists the type's modules (Hut, Log storage, Oxen stand) with their cost. Pick one, it follows the cursor (Q/E, snapping as WC-04), click to place a **ghost** module. Ghosts are checked against the draft area, each other, existing footprints and roads, exactly as WC-03 | DECIDED |
 | BT-13 | **Cost while drafting:** each ghost adds its recipe to a running total shown in the panel (*Cost 9 logs, have 12*). A ghost that would take the total over available logs is refused: *Not enough logs (have 12, need 13)* | DECIDED |
 | BT-14 | **Right-click on a ghost module removes just that ghost** (not an undo of the last one). Right-click on empty ground does nothing in the module stage | DECIDED |

@@ -15,14 +15,14 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HM-03 | Plot area **60–400 m²** (HSE plot sizes, PLACEHOLDER). Too small: *Too small for a house*. In M13 extra space is just garden, with no use yet | PROPOSED |
 | HM-04 | The **house is placed for the player** on the frontage edge: a 6 × 8 m footprint (PLACEHOLDER), centred on the longest frontage edge, its long side along the road, set 1 m back. While drawing, the house shows as a ghost; if it can't fit, *No room for the house* | PROPOSED |
 | HM-05 | Confirm creates the plot and the house construction site in one command (like BT-16). Trees under the plot are cleared (BLD-10-A) | PROPOSED |
-| HM-06 | House recipe: **10 logs, 720** worker-minutes (CON-A1 720; logs PLACEHOLDER). Tier 1, logs only (HSE-23) | PLACEHOLDER |
+| HM-06 | House recipe: **10 logs, 720** worker-minutes (CON-A1 720). Tier 1, logs only (HSE-23) | DECIDED (owner 15/11/2026; values PLACEHOLDER) |
 
 ## Moving in
 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | HM-10 | A house holds **one family** (HSE-02, level 1) | DECIDED |
-| HM-11 | When a house is **Built**, a Homeless family moves in **automatically**: the one whose workplace (or the camp, if it has none) is nearest the house by straight-line distance; ties by lowest family id | PROPOSED |
+| HM-11 | When a house is **Built**, a Homeless family moves in **automatically**. Homeless families **with a workplace** come first, nearest workplace to the house (straight-line) first. If no homeless family has a workplace, any homeless family moves in (lowest family id). Ties by lowest family id. Player control over who lives where comes later | DECIDED (owner 15/11/2026) |
 | HM-12 | Moving in changes the family's **home** (PPL-11): its members sleep there, mill about near it (PPL-30) and commute from it (PPL-25). Their tent at the camp is removed. Someone mid-walk carries on and uses the new home from their next routine change | PROPOSED |
 | HM-13 | A family with a house is no longer **Homeless** (POP-A1) | DECIDED |
 | HM-14 | Deconstructing a house (CN-50..57) makes its family Homeless again, with a tent back at the camp | PROPOSED |
@@ -37,4 +37,5 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 ## Not in M13
 
-Backyards and expansions (HSE-04..05), household levels (HSE-09..), choosing which family moves in, larders (M14).
+Backyards and expansions (HSE-04..05), household levels (HSE-09..), choosing which family moves in (later: finer
+player control over family placement), larders (M14).

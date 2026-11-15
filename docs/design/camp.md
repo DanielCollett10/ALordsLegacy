@@ -10,7 +10,7 @@ MVP-1-01 where they disagree.
 | CMP-03 | Inside the camp: one **tent spot per family** (its home while Homeless, POP-A1), a **camp fire** (the milling centre, PPL-31), the **stockpile** spot and the **ox stand**. All are fixed points in the layout, relative to the camp | DECIDED |
 | CMP-04 | The camp footprint does not block walking (MOV-03). Trees under it are removed at start (BLD-10-A) | DECIDED |
 | CMP-05 | The trunk road is an ordinary road made at start with the normal road command (WORLD-08-A), passing beside the camp. The player can delete or reroute it | DECIDED |
-| CMP-06 | Stockpile: 20 logs (CON-08) with no capacity limit (INV-10). It holds items from M8, when the inventory ledger exists; in M7 the spot is only drawn | DECIDED |
+| CMP-06 | Stockpile: **40 logs** (owner 15/11/2026, was 20 under CON-08) with no capacity limit (INV-10). It holds items from M8, when the inventory ledger exists; in M7 the spot is only drawn | DECIDED |
 | CMP-07 | The 2 starting oxen stand at the ox stand (PPL-13) | DECIDED |
 | CMP-08 | The test map's layout is written by an editor script that finds a flat spot at the forest edge, so it can be regenerated with the map | PROPOSED |
 | CMP-09 | Placeholder look: a few tents, a fire, a log pile and a tie post | DECIDED |

@@ -63,10 +63,10 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | CN-50 | Each module row in the operation panel has a **Deconstruct** button (and the house panel, M13). It asks for confirmation: *Deconstruct Hut? Returns 4 logs* | DECIDED (confirm PROPOSED) |
 | CN-51 | On an **unbuilt** site, Deconstruct cancels it at once (CN-32: reservations released, delivered logs left as an unowned pile). Nothing was consumed past what the scaffold used | PROPOSED |
 | CN-52 | On a **built** module, Deconstruct **marks** it: state *Deconstructing*. From that moment it stops working (a storage adds no capacity and takes no logs, a stand holds no ox, a hut means *Missing hut*) | PROPOSED |
-| CN-53 | Odd-jobbers take a `task.deconstruct` at the site (same working day and priority rules as Build, CN-20..31). It takes **50% of the recipe's build minutes** (hut 480). A recipe of 0 minutes is removed at once | PROPOSED (share PLACEHOLDER) |
+| CN-53 | Odd-jobbers take a `task.deconstruct` at the site (same working day and priority rules as Build, CN-20..31). It takes **50% of the recipe's build minutes** (hut 480). A recipe of 0 minutes is removed at once | DECIDED (owner 15/11/2026; share PLACEHOLDER) |
 | CN-54 | When finished: the footprint is removed and **round down(recipe logs × 50%)** logs appear as an **unowned ground pile** at the site (hut 4, oxen stand 0). Unowned piles are construction sources (CN-11). The share is a tuning value (`DeconstructRefundShare`) | DECIDED (owner: half; rounding PROPOSED) |
 | CN-55 | A log storage still holding logs: its logs join the same unowned pile on completion. CN-34 still applies (refused while any are reserved for a site) | PROPOSED |
-| CN-56 | Deconstructing the **hut** unassigns its families at the moment of marking (they become odd-jobbers). The confirm text says so | PROPOSED |
+| CN-56 | Deconstructing the **hut** unassigns its families at the moment of marking (they become odd-jobbers). The confirm text says so | DECIDED (owner 15/11/2026) |
 | CN-57 | **Cancel deconstruction** is offered while it's under way. The module is working again at once; progress is thrown away | PROPOSED |
 | CN-58 | **Deconstruct operation** (panel button) marks every module. The area is removed when the last one is gone. Right-click delete of an operation area that still has modules is refused (*Deconstruct its buildings first*) | PROPOSED |
 
