@@ -24,4 +24,9 @@ the schedule needs homes), **M13 Food on the table** (foraging, granary, larders
 the only market, FOOD-A10b), and **M14 Markets** (stall families, MKT-03..03f).
 **Markets wait until food has been played**: the full stall-family system is not built before M13 is signed off.
 
+Update 15/11/2026 (owner, after M11): a fixes milestone goes first, so the numbers move up one: **M12 Fixes**
+(`building-tool.md`, deconstruction CN-50..58, deleting saves SV-23, autosave target SV-15, M11 milestone doc),
+**M13 Homes** (`homes.md`), **M14 Food on the table** (`food.md`), **M15 Markets**. Markets still wait until
+food has been played.
+
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).

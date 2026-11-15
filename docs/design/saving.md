@@ -37,7 +37,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | SV-20 | **Load** lists every save, **newest first**, showing name, real date and time created, and game date. Pick one and press Load | DECIDED (owner 13/11/2026) |
 | SV-21 | Loading replaces the current game with no "are you sure" in M11. Unsaved progress is lost | PROPOSED |
 | SV-22 | After a load everything on screen matches the saved Sim (SAVE-02): people mid-walk, oxen mid-haul with their logs, half-built sites, the clock, pause and speed default (speed is not saved, decision 0006) | DECIDED |
-| SV-23 | Deleting or renaming saves: not in M11 | PROPOSED |
+| SV-23 | **Delete (M12):** each row in the Load list has a recycle-bin icon on its right. Clicking it asks *Delete "<name>"? This can't be undone.* with **Delete** and **Cancel**. Delete removes the file and the row; the autosave can be deleted too. Renaming: not yet | DECIDED (owner 15/11/2026) |
+| SV-15 | **Autosave target (M12):** the game remembers its **current save**: the file it was loaded from, or the last manual save made this session. Autosave overwrites that file (same name, header time updated). A new game with no save yet autosaves to the `Autosave` slot. Manual Save still always writes a new file (SV-10) | PROPOSED (owner asked "autosave should save over its original save"; interpretation to confirm) |
 
 ## Saves and map changes
 
