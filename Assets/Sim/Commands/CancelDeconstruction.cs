@@ -23,6 +23,9 @@ namespace LordsLegacy.Sim.Commands
             CommandResult check = Validate(world);
             if (check.IsRejected) return check;
             world.Deconstruction.Remove(ModuleId);
+            foreach (LordsLegacy.Sim.Operations.Operation op in world.Operations.All)
+                foreach (int id in op.ModuleIds)
+                    if (id == ModuleId) world.Deconstruction.RemovePendingOperation(op.Id);
             return CommandResult.Accepted();
         }
     }

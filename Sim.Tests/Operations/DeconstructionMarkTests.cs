@@ -163,12 +163,11 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void SaveVersion_IsThree_PreviousVersionBytesAreRefusedWithSv33Message()
+        public void SaveVersion_PreviousVersionBytesAreRefusedWithSv33Message()
         {
-            Assert.AreEqual(3, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 2, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("Unknown save format version 2 (this build reads version 3).", e.Message);
+            StringAssert.Contains("Unknown save format version 2 (this build reads version " + SaveWriter.CurrentVersion + ").", e.Message);
         }
     }
 }

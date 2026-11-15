@@ -52,11 +52,31 @@ namespace LordsLegacy.Sim.Construction
                 if (refund > 0) inv.Produce(pile, Items.Log, refund);
             }
 
+            var owners = new List<int>();
             foreach (Operation op in new List<Operation>(world.Operations.All))
                 foreach (int id in new List<int>(op.ModuleIds))
-                    if (id == footprintId) world.Operations.RemoveModule(op.Id, footprintId);
+                    if (id == footprintId) { world.Operations.RemoveModule(op.Id, footprintId); owners.Add(op.Id); }
             world.Footprints.Remove(footprintId);
             world.Deconstruction.Remove(footprintId);
+            foreach (int opId in owners) CompletePendingOperation(world, opId);
+        }
+
+        /// <summary>
+        /// If the operation is marked for removal and has no modules left, removes its area and the operation (CN-58).
+        /// Returns true when it did.
+        /// </summary>
+        public static bool CompletePendingOperation(SimWorld world, int operationId)
+        {
+            if (!world.Deconstruction.IsOperationPending(operationId)) return false;
+            Operation op = world.Operations.Get(operationId);
+            if (op == null) { world.Deconstruction.RemovePendingOperation(operationId); return false; }
+            if (op.ModuleIds.Count > 0) return false;
+            foreach (Operation linked in new List<Operation>(world.Operations.All))
+                if (linked.WorkAreaId == op.AreaId) world.Operations.SetWorkArea(linked.Id, null);
+            world.Areas.Remove(op.AreaId);
+            world.Operations.Remove(op.Id);
+            world.Deconstruction.RemovePendingOperation(operationId);
+            return true;
         }
     }
 }

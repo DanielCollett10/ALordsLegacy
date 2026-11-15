@@ -22,6 +22,20 @@ namespace LordsLegacy.Sim.Construction
         /// <summary>All entries in footprint id order.</summary>
         public IEnumerable<DeconstructionEntry> Entries => _entries.Values;
 
+        private readonly SortedSet<int> _pendingOperations = new SortedSet<int>();
+
+        /// <summary>Operations whose whole area goes once their last module is gone (CN-58), in id order.</summary>
+        public IEnumerable<int> PendingOperationIds => _pendingOperations;
+
+        /// <summary>True if the operation is marked for removal.</summary>
+        public bool IsOperationPending(int operationId) => _pendingOperations.Contains(operationId);
+
+        /// <summary>Marks an operation for removal after its last module goes.</summary>
+        public void AddPendingOperation(int operationId) => _pendingOperations.Add(operationId);
+
+        /// <summary>Clears the mark. False if there was none.</summary>
+        public bool RemovePendingOperation(int operationId) => _pendingOperations.Remove(operationId);
+
         /// <summary>Number of entries.</summary>
         public int Count => _entries.Count;
 

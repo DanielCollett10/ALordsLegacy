@@ -80,12 +80,14 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void DeleteArea_RemovesOperationAndItsModules()
+        public void DeleteArea_WithModules_IsRefused_ThenWorksOnceModulesAreGone()
         {
             SimWorld w = World();
             Operation op = Designate(w);
-            AddModule(w, op, ModuleTypes.WoodcuttingHut, 105, 105);
-            AddModule(w, op, ModuleTypes.LogStorage, 112, 112);
+            int hut = AddModule(w, op, ModuleTypes.WoodcuttingHut, 105, 105);
+            Assert.IsTrue(w.Execute(new DeleteArea(op.AreaId)).IsRejected);
+            Assert.AreEqual(1, w.Operations.Count);
+            Assert.IsTrue(w.Execute(new RemoveModule(hut)).IsAccepted);
             Assert.IsTrue(w.Execute(new DeleteArea(op.AreaId)).IsAccepted);
             Assert.AreEqual(0, w.Operations.Count);
             Assert.AreEqual(0, w.Footprints.Count);
