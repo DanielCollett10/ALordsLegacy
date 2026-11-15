@@ -15,6 +15,7 @@ namespace LordsLegacy.Sim.Save
             return new ISaveSection[]
             {
                 new Sections.LandSection(), // 1 Land (trees, roads; areas follow in part 2)
+                new Sections.BushesSection(), // 1b Bushes (forage bushes; T-421, id 10, version 10)
                 new Sections.StructuresSection(), // 2 Structures (footprints, camp, operations, construction sites)
                 new Sections.LedgerSection(), // 3 Ledger (locations, reservations, journal, id counters)
                 new Sections.PopulationSection(), // 4 Population (families, citizens, oxen)

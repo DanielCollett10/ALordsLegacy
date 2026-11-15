@@ -241,6 +241,24 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;
 
+        /// <summary>Baskets a forage bush holds when full. Unit: baskets. Rule: FD-21 (PLACEHOLDER).</summary>
+        public int BushBaskets { get; set; } = 3;
+
+        /// <summary>Days an emptied bush takes to regrow to full. Unit: game days. Rule: FD-21 (PLACEHOLDER).</summary>
+        public int BushRegrowDays { get; set; } = 14;
+
+        /// <summary>Bushes scattered at new game. Unit: bushes. Rule: FD-20 (PLACEHOLDER density).</summary>
+        public int BushCount { get; set; } = 150;
+
+        /// <summary>A bush is never placed this close to a tree trunk. Unit: metres. Rule: FD-20 (PLACEHOLDER).</summary>
+        public double BushTreeClearM { get; set; } = 2;
+
+        /// <summary>A tree within this distance makes a spot a forest edge. Unit: metres. Rule: FD-20 (PLACEHOLDER).</summary>
+        public double BushEdgeM { get; set; } = 8;
+
+        /// <summary>Chance that an open spot away from trees (a clearing) takes a bush. Unit: fraction. Rule: FD-20 (PLACEHOLDER).</summary>
+        public double BushClearingChance { get; set; } = 0.15;
+
         /// <summary>
         /// Game minutes that pass per real second at 1× speed. Unit: game minutes per real second.
         /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 0.8 at the default of 30.
