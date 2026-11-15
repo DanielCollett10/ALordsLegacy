@@ -183,11 +183,22 @@ namespace LordsLegacy.Sim.Forestry
             var result = new List<TreeRecord>();
             if (b.IsEmpty) return result;
             int x0 = Cell(b.MinX), x1 = Cell(b.MaxX), z0 = Cell(b.MinZ), z1 = Cell(b.MaxZ);
-            for (int cx = x0; cx <= x1; cx++)
-                for (int cz = z0; cz <= z1; cz++)
-                    if (_cells.TryGetValue(Key(cx, cz), out var list))
-                        foreach (var t in list)
-                            if (t.State == TreeState.Standing && b.Contains(t.X, t.Z)) result.Add(t);
+            long span = ((long)x1 - x0 + 1) * ((long)z1 - z0 + 1);
+            if (span > _cells.Count)
+            {
+                // Huge rectangle: scanning the occupied cells is cheaper than probing every cell in range.
+                foreach (var list in _cells.Values)
+                    foreach (var t in list)
+                        if (t.State == TreeState.Standing && b.Contains(t.X, t.Z)) result.Add(t);
+            }
+            else
+            {
+                for (int cx = x0; cx <= x1; cx++)
+                    for (int cz = z0; cz <= z1; cz++)
+                        if (_cells.TryGetValue(Key(cx, cz), out var list))
+                            foreach (var t in list)
+                                if (t.State == TreeState.Standing && b.Contains(t.X, t.Z)) result.Add(t);
+            }
             result.Sort((a, c) => a.Id.Value.CompareTo(c.Id.Value));
             return result;
         }

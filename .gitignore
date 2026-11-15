@@ -36,3 +36,4 @@ Sim.Tests/obj/
 # Perf spike test build output
 Perf.Tests/bin/
 Perf.Tests/obj/
+TestResults/
