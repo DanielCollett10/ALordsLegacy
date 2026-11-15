@@ -80,9 +80,66 @@ namespace LordsLegacy.Game
                 row.style.whiteSpace = WhiteSpace.Normal;
                 row.style.marginBottom = 4;
                 row.focusable = false;
-                _list.Add(row);
+                row.style.flexGrow = 1;
+                row.style.marginBottom = 0;
+
+                var container = new VisualElement { name = "load-row-container" };
+                container.style.flexDirection = FlexDirection.Row;
+                container.style.alignItems = Align.Stretch;
+                container.style.marginBottom = 4;
+                container.Add(row);
+                container.Add(MakeBinButton(e));
+                _list.Add(container);
                 _rows.Add(row);
             }
+        }
+
+        /// <summary>Asks to delete a save through the shared <see cref="ConfirmDialog"/> (SV-23). Confirm deletes and refreshes.</summary>
+        public void RequestDelete(SaveEntry entry)
+        {
+            ConfirmDialog.Show("Delete \"" + entry.Header.Name + "\"? This can't be undone.", "Delete", () =>
+            {
+                try { (Store ?? (Store = SaveStore.Default())).Delete(entry.Path); }
+                catch (Exception ex)
+                {
+                    Build();
+                    _note.text = "Delete failed: " + ex.Message;
+                    return;
+                }
+                Refresh();
+            });
+        }
+
+        // The bin is drawn from plain elements (lid, handle, body), so there is no texture that can be missing.
+        private Button MakeBinButton(SaveEntry e)
+        {
+            var bin = new Button(() => RequestDelete(e)) { name = "load-delete" };
+            bin.focusable = false;
+            bin.tooltip = "Delete this save";
+            bin.style.width = 36;
+            bin.style.marginLeft = 4;
+            bin.style.marginRight = 0;
+            bin.style.marginTop = 0;
+            bin.style.marginBottom = 0;
+            bin.style.paddingLeft = bin.style.paddingRight = bin.style.paddingTop = bin.style.paddingBottom = 0;
+            bin.style.backgroundColor = new Color(0.45f, 0.2f, 0.15f, 1f);
+            bin.style.alignItems = Align.Center;
+            bin.style.justifyContent = Justify.Center;
+            var ink = new Color(0.97f, 0.95f, 0.9f, 1f);
+            Func<float, float, float, float, string, VisualElement> part = (w, h, mt, r, n) =>
+            {
+                var v = new VisualElement { name = n, pickingMode = PickingMode.Ignore };
+                v.style.width = w;
+                v.style.height = h;
+                v.style.marginTop = mt;
+                v.style.backgroundColor = ink;
+                v.style.borderBottomLeftRadius = v.style.borderBottomRightRadius = r;
+                return v;
+            };
+            bin.Add(part(8, 3, 0, 0, "bin-handle"));
+            bin.Add(part(20, 3, 1, 0, "bin-lid"));
+            bin.Add(part(14, 16, 1, 3, "bin-body"));
+            return bin;
         }
 
         /// <summary>
