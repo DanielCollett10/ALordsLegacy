@@ -10,6 +10,7 @@ last log is in and the work is done, the site becomes a built footprint (decisio
 | `ConstructionRegistry` | `Assets/Sim/Construction/` (`SimWorld.Construction`) | One `ConstructionSite` per unbuilt footprint. No record means built. |
 | `ConstructionSite` | `Construction/ConstructionSite.cs` | State Delivering / Building, reservation ids, `Site` ledger location id, progress minutes, `LogsConsumed`, priority. |
 | `ConstructionSources` | `Construction/ConstructionSources.cs` | `Available(world, item)` sums stockpile, Built log storage and unowned piles. `TryReserve` reserves nearest-first, all or nothing. |
+| `BuildCost` | `Construction/BuildCost.cs` | Read-only: `MinimumFor(OperationTypeDef)` (mandatory hut and storage recipes, 8 for woodcutting), `Of(moduleTypeIds)` (summed recipe logs), `CanAfford(world, logs)` (CN-11 available logs). Decision 0037. |
 | `ConstructionProgress` | `Construction/ConstructionProgress.cs` | Read API: `Of(world, footprintId)` (null when built) and `Work(...)`, which adds build minutes. |
 | `ConstructionSystem` | `Assets/Sim/Operations/ConstructionSystem.cs` | Operations phase, after `HaulSystem`. Opens and cancels deliver and build tasks. |
 | `ConstructionTaskDefs` | `Assets/Sim/Tasks/` | `task.deliver_materials`, `task.build` (see `tasks.md`). |
@@ -52,5 +53,6 @@ its save rules (`save.md`). Put progress rules in `ConstructionProgress`, not th
 ## Tests
 
 `Sim.Tests/ConstructionSiteTests.cs`, `ConstructionSourcesTests.cs`, `Sim.Tests/Operations/ConstructionBuildTests.cs`,
-`ConstructionDeliveryTests.cs`, `ConstructionSunsetDropTests.cs`, `PlaceRemoveConstructionTests.cs`, `SitePriorityTests.cs`.
+`ConstructionDeliveryTests.cs`, `ConstructionSunsetDropTests.cs`, `PlaceRemoveConstructionTests.cs`, `SitePriorityTests.cs`,
+`Sim.Tests/Construction/BuildCostTests.cs`.
 Unity: `Assets/Tests/PlayMode/ConstructionVisualsTests.cs`.
