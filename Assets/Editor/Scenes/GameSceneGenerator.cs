@@ -230,13 +230,15 @@ namespace LordsLegacy.EditorTools.Scenes
                 new[] { "TestAreaTool", LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Sim.Areas.AreaTypes.TestId },
                 new[] { "TestWorkAreaTool", LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, LordsLegacy.Sim.Areas.AreaTypes.TestWorkId },
                 new[] { "WoodcutterWorkAreaTool", "woodcutter-work", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingWorkId },
-                new[] { "WoodcutterAreaTool", "woodcutter", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
+                new[] { "WoodcutterAreaTool", "woodcutter-draw", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
             };
             GameObject last = null;
+            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null;
             foreach (var d in defs)
             {
                 last = new GameObject(d[0]);
                 var tool = last.AddComponent<LordsLegacy.Game.Tools.AreaTool>();
+                if (d[1] == "woodcutter-draw") woodcutterDraw = tool;
                 SetString(tool, "_toolId", d[1]);
                 SetString(tool, "_typeId", d[2]);
                 SetRef(tool, "_host", host);
@@ -246,6 +248,17 @@ namespace LordsLegacy.EditorTools.Scenes
                 SetRef(tool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
                 SetRef(tool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             }
+            // T-390: the "woodcutter" build bar entry runs the one-go draft; its area stage is drawn by the composed AreaTool above.
+            var draftTool = new GameObject("OperationDraftTool").AddComponent<LordsLegacy.Game.Tools.OperationDraftTool>();
+            SetString(draftTool, "_toolId", "woodcutter");
+            SetString(draftTool, "_operationTypeId", LordsLegacy.Sim.Operations.OperationTypes.WoodcuttingId);
+            SetRef(draftTool, "_host", host);
+            SetRef(draftTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(draftTool, "_areaTool", woodcutterDraw);
+            SetRef(draftTool, "_areas", ar);
+            SetRef(draftTool, "_panel", panel);
+            SetRef(draftTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
+            SetRef(draftTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             var moduleTool = new GameObject("ModuleTool").AddComponent<LordsLegacy.Game.Tools.ModuleTool>();
             SetRef(moduleTool, "_host", host);
             SetRef(moduleTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
