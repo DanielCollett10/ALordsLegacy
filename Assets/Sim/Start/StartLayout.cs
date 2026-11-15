@@ -66,9 +66,9 @@ namespace LordsLegacy.Sim.Start
     /// </summary>
     public sealed class StartLayout
     {
-        /// <summary>The starting stockpile stock: 20 logs (CON-08).</summary>
+        /// <summary>The starting stockpile stock: 40 logs (CMP-06, owner 15/11/2026; was 20 under CON-08).</summary>
         public static readonly IReadOnlyList<StartStock> DefaultStock =
-            new[] { new StartStock(Items.Log, 20) };
+            new[] { new StartStock(Items.Log, 40) };
 
         /// <summary>Creates a layout. Lists are copied. A null <paramref name="stock"/> gives <see cref="DefaultStock"/>.</summary>
         public StartLayout(PointMm campCentre, double campRotationDegrees, PointMm fire, PointMm stockpile,

@@ -126,15 +126,15 @@ namespace LordsLegacy.Sim.Tests
         }
 
         [Test]
-        public void Start_Has20LogsInCampStockpile()
+        public void Start_Has40LogsInCampStockpile()
         {
             var w = Ramp();
             StartLayoutApplier.Apply(w, Layout());
             LedgerLocation sp = w.Camp.StockpileLocation;
             Assert.IsNotNull(sp);
             Assert.AreEqual(LocationKind.Stockpile, sp.Kind);
-            Assert.AreEqual(20, sp.CountOf(Items.Log.Id));
-            Assert.AreEqual(20, w.Inventory.TotalOf(Items.Log));
+            Assert.AreEqual(40, sp.CountOf(Items.Log.Id));
+            Assert.AreEqual(40, w.Inventory.TotalOf(Items.Log));
             Assert.IsNull(w.Inventory.Audit());
         }
 
@@ -157,7 +157,7 @@ namespace LordsLegacy.Sim.Tests
                 AreaTypes.WoodcuttingId));
             Assert.IsTrue(r.IsAccepted, r.Text);
             Operation op = w.Operations.FindByArea((int)r.Created[0]);
-            Assert.AreEqual(20, w.Inventory.TotalOf(Items.Log));
+            Assert.AreEqual(40, w.Inventory.TotalOf(Items.Log));
             OperationPool pool = w.OperationPool(op.Id, Items.Log);
             Assert.AreEqual(0, pool.Total);
             Assert.AreEqual(0, pool.Reserved);
@@ -193,11 +193,11 @@ namespace LordsLegacy.Sim.Tests
         }
 
         [Test]
-        public void DefaultLayout_Stock_IsTwentyLogs()
+        public void DefaultLayout_Stock_IsFortyLogs()
         {
             Assert.AreEqual(1, StartLayout.DefaultStock.Count);
             Assert.AreEqual("item.log", StartLayout.DefaultStock[0].Item.Id);
-            Assert.AreEqual(20, StartLayout.DefaultStock[0].Count);
+            Assert.AreEqual(40, StartLayout.DefaultStock[0].Count);
         }
     }
 }

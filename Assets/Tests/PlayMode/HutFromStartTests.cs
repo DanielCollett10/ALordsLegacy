@@ -17,7 +17,7 @@ namespace LordsLegacy.Tests.PlayMode
 {
     /// <summary>
     /// M10 end to end through SimHost: from the start camp, a placed woodcutting hut becomes Built at 32x (CN-22, CN-23).
-    /// Uses the default start layout of the MVP-1 scenario (20 logs, two oxen, three families).
+    /// Uses the default start layout of the MVP-1 scenario (40 logs, two oxen, three families).
     /// </summary>
     public class HutFromStartTests
     {
@@ -41,7 +41,7 @@ namespace LordsLegacy.Tests.PlayMode
 
         private static StartCitizen Adult(string name, Sex sex) => new StartCitizen(name, sex, -4_000_000);
 
-        // Default start layout from the MVP-1 scenario: camp at the origin, stockpile (6,0), ox stand (-6,0), 20 logs.
+        // Default start layout from the MVP-1 scenario: camp at the origin, stockpile (6,0), ox stand (-6,0), 40 logs.
         private static StartLayout DefaultLayout()
         {
             var families = new List<StartFamily>
@@ -51,7 +51,7 @@ namespace LordsLegacy.Tests.PlayMode
                 new StartFamily("Thorne", M(9, 5), new[] { Adult("Hugh", Sex.Male), Adult("Joan", Sex.Female) }),
             };
             return new StartLayout(M(0, 0), 0, M(0, 0), M(6, 0), M(-6, 0), new PointMm[0], families, 2,
-                stock: new[] { new StartStock(Items.Log, 20) });
+                stock: new[] { new StartStock(Items.Log, 40) });
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace LordsLegacy.Tests.PlayMode
             var map = new MapData("flat", new HeightGrid(-50f, -50f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             host.Initialize(_config.BuildTuning(), map);
             StartLayoutApplier.Apply(host.World, DefaultLayout());
-            Assert.AreEqual(20, host.World.Inventory.TotalOf(Items.Log.Id), "start stock is 20 logs");
+            Assert.AreEqual(40, host.World.Inventory.TotalOf(Items.Log.Id), "start stock is 40 logs");
 
             CommandResult area = host.Execute(new DesignateArea(
                 AreaShape.Straight(new[] { M(38, -12), M(66, -12), M(66, 12), M(38, 12) }), AreaTypes.WoodcuttingId));

@@ -39,8 +39,8 @@ namespace LordsLegacy.Sim.Tests.Scenarios
         /// <summary>Born 4,000,000 ticks before the start: aged 14+ under POP-27 (odd-jobbers must be working age).</summary>
         private const long AdultBirth = -4_000_000;
 
-        /// <summary>Logs in the default start stockpile (CON-08).</summary>
-        private const int StartingLogs = 20;
+        /// <summary>Logs in the default start stockpile (CMP-06).</summary>
+        private const int StartingLogs = 40;
 
         /// <summary>Logs a woodcutting hut takes from the stockpile (ModuleTypes recipe).</summary>
         private const int HutLogs = 8;
@@ -77,7 +77,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
 
         /// <summary>
         /// Default start layout: camp centre (0,0) unrotated, fire (0,0), stockpile (6,0), ox stand (-6,0), no trunk road,
-        /// three unassigned families of two adults (six odd-jobbers), two oxen and 20 logs in the stockpile.
+        /// three unassigned families of two adults (six odd-jobbers), two oxen and 40 logs in the stockpile.
         /// Family ids are 1..3 (Apply numbers them in order), so family 1 is "Ashford".
         /// </summary>
         private static StartLayout DefaultLayout(int logs = StartingLogs)
@@ -236,7 +236,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             Assert.Greater(OperationStatus.LogLoad(w, op), 0, "felled logs are held by the operation");
             Assert.IsNull(w.Inventory.Audit(), "final ledger audit");
 
-            // Stockpile exactly 8 lower (20 - 8), and the hut's logs were consumed, not lost.
+            // Stockpile exactly 8 lower (40 - 8), and the hut's logs were consumed, not lost.
             Assert.AreEqual(StartingLogs - HutLogs, stockpile.Total, "stockpile exactly 8 lower");
             Assert.AreEqual(HutLogs, w.Inventory.ConsumedOf(Items.Log.Id), "the hut consumed 8 logs");
             Assert.IsNull(ConstructionProgress.Of(w, hutId), "no construction site once built");
@@ -287,7 +287,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
         /// <summary>A second hut with fewer than 8 logs available is refused and changes nothing.</summary>
         /// <remarks>
         /// One hut is allowed per operation, so the second hut goes in a second woodcutting area (x 70..96) with its
-        /// own operation. Done in its own world: the default 20 logs leave 12 after the first hut, which is enough for
+        /// own operation. Done in its own world: the default 40 logs leave 32 after the first hut, which is enough for
         /// a second one. Here 15 logs are in stock, so 7 are available after the first hut reserves 8.
         /// </remarks>
         [Test]
