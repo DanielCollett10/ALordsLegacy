@@ -2,6 +2,7 @@ using LordsLegacy.Game;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UIElements;
 
 namespace LordsLegacy.Tests.PlayMode
