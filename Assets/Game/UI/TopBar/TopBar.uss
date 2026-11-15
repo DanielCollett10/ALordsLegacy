@@ -6,6 +6,7 @@
     background-color: rgba(30, 24, 18, 0.9);
 }
 .top-bar__date { color: rgb(240, 230, 210); font-size: 20px; -unity-font-style: bold; }
+.top-bar__food { color: rgb(240, 230, 210); font-size: 16px; margin-left: 16px; background-color: rgba(0, 0, 0, 0); }
 .top-bar__notice { color: rgb(240, 170, 80); margin-left: 16px; }
 .top-bar__spacer { flex-grow: 1; }
 .top-bar__speeds { flex-direction: row; margin: 0 8px; }

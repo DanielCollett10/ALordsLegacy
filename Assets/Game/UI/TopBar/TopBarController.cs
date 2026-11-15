@@ -18,6 +18,7 @@ namespace LordsLegacy.Game
 
         private Label _dateLabel;
         private Label _notice;
+        private Label _foodLabel;
         private Button _pauseButton;
         private Button _steadyButton;
         private Button _snappingButton;
@@ -30,6 +31,12 @@ namespace LordsLegacy.Game
 
         /// <summary>The text currently shown for date/time (or "Paused").</summary>
         public string DateText => _dateLabel == null ? "" : _dateLabel.text;
+
+        /// <summary>The food readout text, e.g. "Food: 342 days" (FD-04).</summary>
+        public string FoodReadoutText => _foodLabel == null ? "" : _foodLabel.text;
+
+        /// <summary>The food readout tooltip: raw counts by type (FD-04). Empty before the first refresh.</summary>
+        public string FoodReadoutTooltip => _foodLabel == null ? "" : _foodLabel.tooltip;
 
         /// <summary>Sets the SimHost to read from (for code that creates the component). Call before enabling.</summary>
         public void SetHost(SimHost host) { _host = host; }
@@ -47,6 +54,7 @@ namespace LordsLegacy.Game
 
             _dateLabel = root.Q<Label>("date-label");
             _notice = root.Q<Label>("slowed-notice");
+            _foodLabel = root.Q<Label>("food-label");
             _pauseButton = root.Q<Button>("pause-button");
             _steadyButton = root.Q<Button>("steady-light-toggle");
             _snappingButton = root.Q<Button>("snapping-toggle");
@@ -94,6 +102,7 @@ namespace LordsLegacy.Game
             var bar = new VisualElement { name = "top-bar" };
             bar.style.flexDirection = FlexDirection.Row;
             bar.Add(new Label { name = "date-label" });
+            bar.Add(new Label { name = "food-label" });
             bar.Add(new Label("Running slower than real time") { name = "slowed-notice" });
             bar.Add(new Button { name = "pause-button", text = "Pause" });
             var speeds = new VisualElement { name = "speed-buttons" };
@@ -149,6 +158,11 @@ namespace LordsLegacy.Game
             if (_dateLabel == null || _host == null || !_host.IsInitialized) return;
             BuildSpeedButtons();
             _dateLabel.text = _host.World.Paused ? "Paused" : _host.World.Now.Format();
+            if (_foodLabel != null)
+            {
+                _foodLabel.text = FoodText.DaysLine(_host.World);
+                _foodLabel.tooltip = FoodText.Tooltip(_host.World);
+            }
             _pauseButton.EnableInClassList(ActiveClass, _host.World.Paused);
             _steadyButton.EnableInClassList(ActiveClass, ViewSettings.SteadyLight);
             _notice.style.display = _host.Pacer.SlowedDown ? DisplayStyle.Flex : DisplayStyle.None;

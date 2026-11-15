@@ -1,5 +1,8 @@
 using LordsLegacy.Game;
+using LordsLegacy.Sim.Food;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
@@ -37,6 +40,25 @@ namespace LordsLegacy.Tests.PlayMode
             Object.DestroyImmediate(_uiGo);
             Object.DestroyImmediate(_hostGo);
             Object.DestroyImmediate(_panel);
+        }
+
+        [Test]
+        public void FoodReadoutShowsWholeDaysAndRawCountsInTooltip()
+        {
+            // No people yet: nobody to feed, so no days to count (FD-04).
+            _bar.Refresh();
+            Assert.AreEqual("Food: –", _bar.FoodReadoutText);
+
+            var w = _host.World;
+            w.People.AddFamily(1, "Archer", 100, 100);
+            w.People.AddCitizen(1, "Alda", Sex.Female, -20L * Citizen.TicksPerYear, 1, 100, 100); // one adult: 1 ration a day
+            Family family = w.People.FindFamily(1);
+            w.Inventory.Produce(Larders.ForFamily(w, family), Items.Meat, 4);     // 12 rations
+            w.Inventory.Produce(Larders.ForFamily(w, family), Items.Berries, 2);  // 2 rations
+
+            _bar.Refresh();
+            Assert.AreEqual("Food: 14 days", _bar.FoodReadoutText);
+            Assert.AreEqual("Meat: 4 (12 rations)\nBerries: 2 (2 rations)\nMushrooms: 0 (0 rations)", _bar.FoodReadoutTooltip);
         }
 
         private long Run100()

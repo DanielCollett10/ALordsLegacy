@@ -83,6 +83,27 @@ namespace LordsLegacy.Tests.PlayMode
         private Label L(string name) => _uiGo.GetComponent<UIDocument>().rootVisualElement.Q<Label>(name);
 
         [UnityTest]
+        public IEnumerator HungryLineShowsWhenFamilyRanShortAtMidnight()
+        {
+            yield return null;
+            var world = _host.World;
+            Family family = world.People.FindFamily(1);
+            // This test world has no food, so the first midnight leaves the family short (FD-16).
+            Assert.IsFalse(family.IsHungry);
+            Assert.IsTrue(_agents.ClickAt(ScreenOf(100, 100)));
+            yield return null;
+            Assert.IsTrue(_view.IsShown);
+            Assert.AreEqual("", _view.HungryText, "no Hungry line before the first midnight");
+            Assert.AreEqual(DisplayStyle.None, L("citizen-hungry").style.display.value);
+
+            do world.Step(); while (!(world.Now.Hour == 0 && world.Now.Minute == 0));
+            Assert.IsTrue(family.IsHungry);
+            yield return null;
+            Assert.AreEqual("Hungry", _view.HungryText);
+            Assert.AreEqual(DisplayStyle.Flex, L("citizen-hungry").style.display.value);
+        }
+
+        [UnityTest]
         public IEnumerator SelectingKnownCitizenShowsItsName()
         {
             yield return null;
