@@ -205,7 +205,8 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(1, _host.World.Operations.Count);
             int sites = 0;
             foreach (var s in _host.World.Construction.Sites) sites++;
-            Assert.AreEqual(2, sites, "One site per module.");
+            Assert.AreEqual(1, sites, "The hut gets a site; the log storage has no recipe and is built at once.");
+            Assert.AreEqual(2, _host.World.Footprints.Count, "Both modules exist as footprints.");
         }
 
         [UnityTest]
