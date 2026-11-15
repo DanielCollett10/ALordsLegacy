@@ -38,8 +38,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 ## Implementation notes
 
-> Implementation note (BT-03): only the woodcutter has a cost gate. The house and granary entries do not exist yet, so
-> nothing else is gated (`ToolEntry.CostLogs` is ready for them).
+> Implementation note (BT-03): the woodcutter and the house plot have a cost gate (`ToolEntry.CostLogs`). The granary entry
+> does not exist yet (M14).
 > Implementation note (BT-12, BT-20): Expand offers no hut when one already stands in the area. The hut count is capped at
 > `HutCount` by the same rule as BT-18, and the Confirm text for Expand is "Place at least one module" (BT-21).
 

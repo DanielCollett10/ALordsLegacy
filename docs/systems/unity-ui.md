@@ -12,11 +12,12 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 | `UiFocusRules` | `UI/` | `Apply(root)`: `focusable = false` and stops navigation events at the panel root. Every game panel calls it. |
 | `ViewSettings` | `UI/` | Presentation settings: `Snapping`, `SnapDistancePx` (12), `RoadSnapDistancePx` (16), `SteadyLight`, `WalkStepsPerMetre`. |
 | `TopBarController` | `UI/TopBar/` | Date, time, pause, speed buttons from `Pacer.Speeds`, steady light, "running slower" notice, snapping toggle. |
-| `BuildBarView`, `ToolEntry` | `UI/BuildBar/` | Non-focusable buttons from `ToolEntry.Defaults()`. Road, Test area, Test work area and Woodcutter are enabled; the rest greyed ("Coming later"). Raises `ToolClicked`. A `ToolEntry` may carry `CostLogs` (a `Func<int>`, for example `BuildCost.MinimumFor`): the bar re-checks it every frame against available logs and greys the button with the tooltip "Needs N logs (have M)" (BT-02). |
+| `BuildBarView`, `ToolEntry` | `UI/BuildBar/` | Non-focusable buttons from `ToolEntry.Defaults()`. Road, Test area, Test work area, Woodcutter and House plot are enabled; Storage yard and Granary are greyed ("Coming later"). Raises `ToolClicked`. A `ToolEntry` may carry `CostLogs` (a `Func<int>`, for example `BuildCost.MinimumFor`): the bar re-checks it every frame against available logs and greys the button with the tooltip "Needs N logs (have M)" (BT-02). |
 | `BuildEntryState` | `UI/BuildBar/` | Plain C#: `Of(costLogs, availableLogs)` → `(Enabled, Tooltip)`. Equal cost counts as affordable. |
 | `ToolPanelView` | `UI/ToolPanel/` | Status line, hint line, Cancel and Confirm. `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Also action buttons (`SetActions`). The draft tool writes the status ("Cost N logs, have M") and passes `CanConfirm` as `isValid`. |
 | `OperationPanelView`, `OxText` | `UI/OperationPanel/` | Opened by selecting an operation. Status cause, modules with state, Deconstruct per module (and cancel while under way), Deconstruct operation, Expand modules (opens the draft tool), 2 family slots, worker tasks, ground logs, tree count, Pause/Resume, Draw work area, Use default, Oxen tab, stock line, High priority toggle. |
-| `CitizenPanelView` | `UI/CitizenPanel/` | Read-only name, age, family, activity, position, and the task line from `CitizenTaskText`. Shows refusals of debug sends. |
+| `CitizenPanelView` | `UI/CitizenPanel/` | Read-only name, age, family, activity, position, the home line ("Home: <family> house" or "Homeless (camp)", HM-22), and the task line from `CitizenTaskText`. Shows refusals of debug sends. |
+| `HousePanelView` | `UI/HousePanel/` | Opened when `AgentPicker` selects a house or its plot (HM-21). State (Delivering, Building n%, Built, Deconstructing n%), household and members or Empty, High priority while unbuilt, Deconstruct (or Cancel house while unbuilt). Uses `ConfirmDialog`. See `homes.md`. |
 | `DebugOverlayView` | `UI/DebugOverlay/` | F3 toggles. FPS, tree and road counts, nav cell, area under the cursor, `SimStats`. Read only. |
 | `GameMenuView`, `GameMenuState` | `UI/GameMenu/` | Esc menu: Resume, Save, Load, Options, Quit (menu rules SV-01..04 in `docs/design/saving.md`). |
 | `SavePanelController`, `LoadPanelController` | `UI/GameMenu/` | Save with a name. Load lists saves newest first; each row has a bin (`Delete` through `ConfirmDialog`). A save this build cannot read is greyed with its reason and Load disabled. Load checks the map. See `save.md`. |
@@ -47,4 +48,4 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 
 `Assets/Tests/PlayMode/`: `TopBarTests`, `ToolPanelTests`, `OperationPanelTests`, `CitizenPanelTests`, `DebugOverlayTests`,
 `GameMenuTests`, `LoadPanelTests`, `SaveLoadScreenMatchTests`, `SnappingToggleTests`, `ConfirmDialogTests`,
-`BuildBarAffordabilityTests`, `InputFocusSetUpFixture`, `TestPanelSettings`. EditMode: `BuildEntryStateTests`.
+`BuildBarAffordabilityTests`, `HousePanelTests`, `InputFocusSetUpFixture`, `TestPanelSettings`. EditMode: `BuildEntryStateTests`.

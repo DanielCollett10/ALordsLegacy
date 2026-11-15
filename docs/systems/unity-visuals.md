@@ -13,8 +13,8 @@
 | `TreeRenderer` | Standing trees from `TreeRegistry`, grouped in 64 m cells, frustum-culled. Also stumps and felled trunks. |
 | `PeopleRenderer` | Citizens (adult or child, by age) and oxen. Lerps `PreviousX/Z` → `X/Z` by `TickFraction` (current while paused). Yaw from `FacingRad`. |
 | `WalkBob` | Placeholder walk bob. Rate depends on metres walked per tick and `ViewSettings.WalkStepsPerMetre`. |
-| `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. Rebuilds on footprint, camp or family changes. |
-| `ModuleRenderer` | Woodcutting modules, stretched to the footprint. Skips unbuilt footprints. |
+| `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. One tent per Homeless family (no tent once housed). Rebuilds on footprint, camp, family or `Homes.Version` changes. |
+| `ModuleRenderer` | Woodcutting modules and houses (`visual.module.house`), stretched to the footprint. Skips unbuilt footprints. |
 | `LogPileRenderer` | One log per ledger log in every location. Piles and stockpile stack at their point; storages along the footprint's X; ox carriers drag logs behind the ox. |
 | `ConstructionRenderer` | Scaffold per unbuilt site, height from `ConstructionProgress.Fraction`. |
 | `RoadRenderer` | One mesh per `RoadSegment`, rebuilt on `RoadNetwork.Version`. Preview mesh red where `InvalidRanges` apply. |
@@ -55,5 +55,5 @@
 ## Tests
 
 `Assets/Tests/PlayMode/`: `TreeRendererTests`, `PeopleRendererTests`, `RoadRendererTests`, `AreaRendererTests`, `LogStacksTests`,
-`ConstructionVisualsTests`, `WoodcuttingVisualsTests`, `CursorMarkerTests`, `GroundOverlayTests`, `SunLightControllerTests`.
+`ConstructionVisualsTests`, `WoodcuttingVisualsTests`, `HouseVisualsTests`, `CursorMarkerTests`, `GroundOverlayTests`, `SunLightControllerTests`.
 EditMode: `GroundOverlayBuildTests`, `GroundOverlayTests`, `TerrainDrapeTests`, `VisualRegistryTests`, `SunLightModelTests`, `WalkBobTests`.

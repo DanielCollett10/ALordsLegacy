@@ -9,7 +9,8 @@ Folder `Assets/Sim/Areas/` (`LordsLegacy.Sim.Areas`).
 | Type | Role |
 |---|---|
 | `AreaShape` | Vertices plus one `AreaEdge` per vertex: Straight, Bent (quadratic handle), FollowsRoad, NearRoad (AR-24), NearArea (AR-25). |
-| `AreaTypeDef`, `AreaTypes`, `AreaTypeCatalog` | Types: `area.test` (Building), `area.test_work` (Work), `area.woodcutting` (Building, 150–5,000 m²), `area.work_woodcutting` (Work). Limits per `docs/design/tuning.md`. |
+| `AreaTypeDef`, `AreaTypes`, `AreaTypeCatalog` | Types: `area.test` (Building), `area.test_work` (Work), `area.woodcutting` (Building, 150–5,000 m²), `area.work_woodcutting` (Work), `area.plot` (Building, 60–400 m², needs road frontage; M13). Limits per `docs/design/tuning.md`. |
+| `HousePlacement` | Pure. Puts the 6 × 8 m house on a plot's longest frontage edge, 1 m back (HM-04). Used by `DesignatePlot` and the plot tool's ghost. See `homes.md`. |
 | `AreaFlattener` | `Flatten(shape, roads, areas, spacing)`: a CCW `PointMm` outline that passes through every vertex in order (AR-30). Helpers `NearRoadGeometry`, `NearAreaGeometry`. |
 | `AreaValidator` | Pure. `Validate(world, shape, typeId)` → `AreaPreview` (outline, m², `AreaRefusal`, neighbour names). |
 | `AreaTrim` | Internal. Building areas: subtracts overlapped neighbours and road corridors (AR-34). |
@@ -45,5 +46,6 @@ Names are "<prefix> N" with per-type counters that never reuse a number.
 ## Tests
 
 `Sim.Tests/Areas/` (`AreaTests`, `AreaValidatorTests`, `AreaPlacementTests`, `AreaTrimTests`, `AreaRoadTrimTests`,
-`AreaUntanglerTests`, `AreaRegistryTests`, `NearAreaEdgeTests`, `NearRoadEdgeTests`, `FlattenInvariantTests`, `AreaCommandTests`).
+`AreaUntanglerTests`, `AreaRegistryTests`, `NearAreaEdgeTests`, `NearRoadEdgeTests`, `FlattenInvariantTests`, `AreaCommandTests`,
+`PlotTypeTests`, `HousePlacementTests`).
 Unity: `Assets/Tests/PlayMode/AreaToolTests.cs`, `AreaRendererTests.cs`, `AreaPlacementTests.cs`.

@@ -1,7 +1,6 @@
 # Save and load
 
-**Purpose:** write the whole Sim to bytes and rebuild it exactly, so a load continues as if it never stopped (decision 0034,
-`docs/design/saving.md`). Sim side: `Assets/Sim/Save/`. Unity side: `Assets/Game/Saving/` and `Assets/Game/UI/GameMenu/`.
+**Purpose:** write the whole Sim to bytes and rebuild it exactly (decision 0034, `docs/design/saving.md`). Sim: `Assets/Sim/Save/`. Unity: `Assets/Game/Saving/`, `Assets/Game/UI/GameMenu/`.
 
 ## Key types and files
 
@@ -16,18 +15,19 @@
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 4; every change bumps it, decision 0038), the header, then
-sections, each as int32 id + int32 length. `SimSave.Read` requires the exact section order and throws on any other id.
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 5; every change bumps it, decision 0038), the header, then
+sections, each as int32 id + int32 length. `SimSave.Read` requires the exact list order and throws on any other id. Homes is id 8 but written after Population (0034).
 
-| Id | Section | Holds |
-|---|---|---|
-| 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares), road and area catalogs. |
-| 2 | Land | Trees as changes, road network, areas. |
-| 3 | Structures | Footprints, camp, operations, construction sites, deconstruction entries, pending operations. |
-| 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
-| 5 | Population | Families, citizens, oxen. |
-| 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
-| 7 | Tasks | Task records (by def id) and their steps. |
+| Order | Id | Section | Holds |
+|---|---|---|---|
+| 1 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares), road and area catalogs. |
+| 2 | 2 | Land | Trees as changes, road network, areas. |
+| 3 | 3 | Structures | Footprints, camp, operations, construction sites, deconstruction entries, pending operations. |
+| 4 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
+| 5 | 5 | Population | Families, citizens, oxen. |
+| 6 | 8 | Homes | Per house: footprint id, plot area id, family id (0 = Empty). Sets each family's `HomeHouseId`. |
+| 7 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
+| 8 | 7 | Tasks | Task records (by def id) and their steps. |
 
 ## How data moves
 
@@ -56,5 +56,4 @@ Any task that adds Sim state adds it to a section in the same task, and extends 
 
 ## Tests
 
-`Sim.Tests/Save/` (`SimSaveRoundTripTests`, `SimSaveTests`, `SaveFormatTests`, one `*SectionTests` per section).
-Unity: `SaveStoreTests`, `AutosaveTimerTests` (EditMode); `AutosaveControllerTests`, `LoadPanelTests`, `GameMenuTests` (PlayMode).
+`Sim.Tests/Save/` (`SimSaveRoundTripTests`, `SimSaveTests`, `SaveFormatTests`, one `*SectionTests` per section).Unity: `SaveStoreTests`, `AutosaveTimerTests` (EditMode); `AutosaveControllerTests`, `LoadPanelTests`, `GameMenuTests` (PlayMode).
