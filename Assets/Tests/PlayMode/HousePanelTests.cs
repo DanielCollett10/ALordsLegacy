@@ -30,7 +30,7 @@ namespace LordsLegacy.Tests.PlayMode
 
         private static PointMm M(double x, double z) => PointMm.FromMetres(x, z);
 
-        [SetUp]
+        [UnitySetUp]
         public IEnumerator SetUp()
         {
             _hostGo = new GameObject("Host");
