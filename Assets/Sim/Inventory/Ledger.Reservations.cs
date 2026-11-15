@@ -31,7 +31,7 @@ namespace LordsLegacy.Sim.Inventory
         public int ReserveCapacity(LedgerLocation location, ItemDef item, int n, int owner)
         {
             Check(location, item, n);
-            if (location.FreeSpace < n) return 0;
+            if (RefusalReason(location, item) != null || location.FreeSpace < n) return 0;
             Bump(location.IncomingCounts, item.Id, n);
             return AddReservation(ReservationKind.Capacity, location, item, n, owner);
         }
@@ -68,7 +68,7 @@ namespace LordsLegacy.Sim.Inventory
             if (to == null) throw new ArgumentNullException(nameof(to));
             Check(from, item, n);
             Check(to, item, n);
-            if (from == to) return false;
+            if (from == to || RefusalReason(to, item) != null) return false;
             if (from.CountOf(item.Id) < n) return false;
             int stockCovered = Math.Min(n, Matching(ReservationKind.Stock, from, item, owner));
             if (from.AvailableOf(item.Id) < n - stockCovered) return false;
