@@ -30,6 +30,10 @@ namespace LordsLegacy.Sim.Areas
         OverlapsArea = 10,
         /// <summary>Overlaps a road corridor (AR-16).</summary>
         CrossesRoad = 11,
+        /// <summary>A plot has no edge flush to a road (HM-02).</summary>
+        NoFrontage = 12,
+        /// <summary>A plot is under its minimum size (HM-03).</summary>
+        PlotTooSmall = 13,
     }
 
     /// <summary>Result of <see cref="AreaValidator.Validate"/>. Immutable.</summary>
@@ -65,6 +69,8 @@ namespace LordsLegacy.Sim.Areas
                     case AreaRefusal.TooSteep: return "too steep";
                     case AreaRefusal.OverlapsArea: return "overlaps " + OverlapName;
                     case AreaRefusal.CrossesRoad: return "crosses road";
+                    case AreaRefusal.NoFrontage: return "A plot must face a road";
+                    case AreaRefusal.PlotTooSmall: return "Too small for a house";
                     default: return string.Empty;
                 }
             }

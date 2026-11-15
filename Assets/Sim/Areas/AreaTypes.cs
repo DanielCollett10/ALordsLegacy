@@ -35,6 +35,12 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>True if roads may not cross the area (AR-16).</summary>
         public bool BlocksRoads { get; }
 
+        /// <summary>
+        /// True if at least one edge must follow a road side (HM-02). Derived from the id, not stored, so the saved
+        /// catalog layout stays unchanged (decision 0019).
+        /// </summary>
+        public bool RequiresRoadFrontage => Id == AreaTypes.PlotId;
+
         /// <summary>How far (m) a NearRoad edge's vertices may be from the road side (AR-24).</summary>
         public double NearRoadReachM { get; }
 
@@ -62,6 +68,13 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>Id of the woodcutting work area (WC-10..12).</summary>
         public const string WoodcuttingWorkId = "area.work_woodcutting";
 
+        /// <summary>Id of the house plot building area (HM-01).</summary>
+        public const string PlotId = "area.plot";
+
+        /// <summary>House plot: building, 4–8 points, 60–400 m² (HM-03), 10° max slope, clears trees, blocks roads; needs road frontage (HM-02).</summary>
+        public static readonly AreaTypeDef Plot =
+            new AreaTypeDef(PlotId, "Plot", AreaKind.Building, 4, 8, 60, 400, 10, true, true);
+
         /// <summary>Test area: building, 4–8 points, 100–5,000 m², 10°, clears trees, blocks roads.</summary>
         public static readonly AreaTypeDef Test =
             new AreaTypeDef(TestId, "Test area", AreaKind.Building, 4, 8, 100, 5000, 10, true, true);
@@ -79,7 +92,7 @@ namespace LordsLegacy.Sim.Areas
             new AreaTypeDef(WoodcuttingWorkId, "Woodcutting work area", AreaKind.Work, 4, 8, 100, 40000, null, false, false);
 
         /// <summary>All area types, in definition order.</summary>
-        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork };
+        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot };
 
         /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
         public static readonly AreaTypeCatalog DefaultCatalog = new AreaTypeCatalog(All);
