@@ -26,6 +26,7 @@ namespace LordsLegacy.Sim.Homes
                 Family f = world.People.FindFamily(home.FamilyId);
                 if (f != null && f.HomeHouseId == houseFootprintId)
                 {
+                    Food.Larders.OnEvict(world, home, f);
                     f.HomeHouseId = null;
                     if (world.Camp != null)
                     {

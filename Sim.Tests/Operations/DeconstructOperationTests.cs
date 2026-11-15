@@ -175,12 +175,12 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void SaveVersion_IsFive_VersionFourBytesAreRefused()
+        public void SaveVersion_IsSix_VersionFourBytesAreRefused()
         {
-            Assert.AreEqual(5, SaveWriter.CurrentVersion);
+            Assert.AreEqual(6, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 4, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("Unknown save format version 4 (this build reads version 5).", e.Message);
+            StringAssert.Contains("Unknown save format version 4 (this build reads version 6).", e.Message);
         }
     }
 }

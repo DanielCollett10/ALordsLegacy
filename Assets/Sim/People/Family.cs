@@ -37,6 +37,9 @@ namespace LordsLegacy.Sim.People
         /// <summary>Footprint id of the house the family lives in, or null while Homeless (POP-A1, HM-13). Set by <c>HomeRegistry</c>.</summary>
         public int? HomeHouseId { get; internal set; }
 
+        /// <summary>Ledger id of the family's camp larder (FD-10), or 0 for none yet. Saved by the Food section.</summary>
+        public int LarderLocationId { get; internal set; }
+
         /// <summary>True while the family has no house (it lives at the camp).</summary>
         public bool IsHomeless => !HomeHouseId.HasValue;
 

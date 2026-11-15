@@ -229,6 +229,15 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Share of the recipe's logs returned as a ground pile, rounded down. Unit: fraction. Rule: CN-54.</summary>
         public double DeconstructRefundShare { get; set; } = 0.5;
 
+        /// <summary>Meat placed in the camp food store at the start. Unit: items. Rule: FD-03 (PLACEHOLDER).</summary>
+        public int StartingMeat { get; set; } = 400;
+
+        /// <summary>Rations an adult (14+) eats per day. Unit: rations per day. Rule: FD-04.</summary>
+        public double AdultRations { get; set; } = 1.0;
+
+        /// <summary>Rations a child eats per day. Unit: rations per day. Rule: FD-04.</summary>
+        public double ChildRations { get; set; } = 0.5;
+
         /// <summary>
         /// Game minutes that pass per real second at 1× speed. Unit: game minutes per real second.
         /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 0.8 at the default of 30.

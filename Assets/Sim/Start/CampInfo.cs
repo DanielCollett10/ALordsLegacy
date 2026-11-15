@@ -31,6 +31,9 @@ namespace LordsLegacy.Sim.Start
 
         internal int PendingStockpileLocationId { get; private set; }
 
+        /// <summary>The camp food store (FD-02, FD-03): a food-only ledger location, separate from the log stockpile. Null when none.</summary>
+        public LedgerLocation FoodStoreLocation { get; internal set; }
+
         /// <summary>Id of the camp footprint in <c>SimWorld.Footprints</c>.</summary>
         public int FootprintId { get; }
         /// <summary>Camp fire, world mm.</summary>
