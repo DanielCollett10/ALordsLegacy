@@ -12,7 +12,8 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 | `UiFocusRules` | `UI/` | `Apply(root)`: `focusable = false` and stops navigation events at the panel root. Every game panel calls it. |
 | `ViewSettings` | `UI/` | Presentation settings: `Snapping`, `SnapDistancePx` (12), `RoadSnapDistancePx` (16), `SteadyLight`, `WalkStepsPerMetre`. |
 | `TopBarController` | `UI/TopBar/` | Date, time, pause, speed buttons from `Pacer.Speeds`, steady light, "running slower" notice, snapping toggle. |
-| `BuildBarView`, `ToolEntry` | `UI/BuildBar/` | Non-focusable buttons from `ToolEntry.Defaults()`. Road, Test area, Test work area and Woodcutter are enabled; the rest greyed ("Coming later"). Raises `ToolClicked`. |
+| `BuildBarView`, `ToolEntry` | `UI/BuildBar/` | Non-focusable buttons from `ToolEntry.Defaults()`. Road, Test area, Test work area and Woodcutter are enabled; the rest greyed ("Coming later"). Raises `ToolClicked`. A `ToolEntry` may carry `CostLogs` (a `Func<int>`, for example `BuildCost.MinimumFor`): the bar re-checks it every frame against available logs and greys the button with the tooltip "Needs N logs (have M)" (BT-02). |
+| `BuildEntryState` | `UI/BuildBar/` | Plain C#: `Of(costLogs, availableLogs)` → `(Enabled, Tooltip)`. Equal cost counts as affordable. |
 | `ToolPanelView` | `UI/ToolPanel/` | Status line, hint line, Cancel and Confirm. `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Also action buttons (`SetActions`). |
 | `OperationPanelView`, `OxText` | `UI/OperationPanel/` | Opened by selecting an operation. Status cause, modules with state, 2 family slots, worker tasks, ground logs, tree count, Pause/Resume, Draw work area, Use default, Oxen tab, stock line, High priority toggle. |
 | `CitizenPanelView` | `UI/CitizenPanel/` | Read-only name, age, family, activity, position, and the task line from `CitizenTaskText`. Shows refusals of debug sends. |
