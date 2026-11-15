@@ -144,7 +144,7 @@ namespace LordsLegacy.Sim.Tests.Food
             SimWorld sun = World(new SimTuning { StartWeekday = Weekday.Sunday });
             Family fs = Add(sun, 1, 10);
             Assert.AreEqual(0, fs.AllotmentReservationIds.Count);
-            sun.Step(60 * 24);
+            for (int i = 0; i < 60 * 24 && fs.AllotmentReservationIds.Count == 0; i++) sun.Step(1); // the trip (T-418) later collects it
             Assert.AreEqual(3, ReservedRations(sun, fs) / 3);
             Assert.AreEqual(3, sun.Camp.FoodStoreLocation.ReservedOf(Items.Meat.Id));
         }

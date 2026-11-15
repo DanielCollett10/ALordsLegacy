@@ -40,6 +40,9 @@ namespace LordsLegacy.Sim.People
         /// <summary>Ledger id of the family's camp larder (FD-10), or 0 for none yet. Saved by the Food section.</summary>
         public int LarderLocationId { get; internal set; }
 
+        /// <summary>Ledger id of the carrier that holds the family's food on the Sunday trip (FD-14), or 0 for none yet. Saved by the Food section.</summary>
+        public int TripCarrierId { get; internal set; }
+
         /// <summary>Rations left over from a part-eaten item, carried to tomorrow (FD-15). Saved by the Food section.</summary>
         public double CarriedRations { get; internal set; }
 

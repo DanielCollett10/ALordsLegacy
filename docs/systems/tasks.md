@@ -12,6 +12,7 @@ Operations create tasks; the dispatcher assigns them; the step runner performs t
 | `TaskDef` | Id, explicit `TaskStep` list, `EligibilityPolicy` (for example `AssignedThenHelpers`, `HelpersOnly`), `RequiredResource` (`Ox`, …). |
 | `TaskDefCatalog` | Looks a def up by id. Saves refer to defs by id; an unknown id fails the load. |
 | `ConstructionTaskDefs` | `task.deliver_materials` (HelpersOnly, Ox, heavy load/unload) and `task.build` (HelpersOnly, heavy Work), and `task.deconstruct` (HelpersOnly, heavy Work, T-394). |
+| `FoodTripSystem` (`Food/`) | `task.fetch_food` (T-418, FD-14): policy `OwnerFamily`, owner `-1000-familyId`; opened per household over the Sunday morning, run by `DispatchSystem.RunFamilyTrips` and `StepRunnerSystem.Food.cs` (`WalkTo`, `CollectFood`, `DepositFood`; ignores shifts; carrier = `Family.TripCarrierId`, Food section). Text "Fetching food". |
 | `TaskStep` | `MoveTo`, `Work(duration)` (with heavy flag and stage id), and ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`. |
 | `TaskRecord` | Id, def, state, owner, assignee, priority, subject (module name), target, step index, `OxId`, `AwaitsTaskId`, `WindingDown`, `SiteFootprintId`. |
 | `TaskPriority` | Normal (default) or High. Changed only by `TaskBoard.SetPriority`. |
@@ -52,7 +53,6 @@ Haul and construction tasks carry extra rules (wind-down at the end of work, ear
 - `RoutineSystem` ignores busy citizens and resumes when the task ends.
 - A task that needs an ox is not offered to a worker who is mid-tree (the worker is busy).
 - Runtime step state (walk orders, ox tracks, rest targets) is not saved. Only the task record and its steps are (`save.md`).
-- Decision 0005 (task types as data) is implemented for `TaskDef` (steps and eligibility policy). Task defs are C# objects, not asset files.
 
 ## Tests
 
