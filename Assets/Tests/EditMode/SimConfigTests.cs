@@ -114,6 +114,30 @@ namespace LordsLegacy.Tests.EditMode
         }
 
         [Test]
+        public void FoodAndForagingFieldsReachTuning()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                cfg.startingMeat = 123; cfg.adultRations = 1.5f; cfg.childRations = 0.25f; cfg.marketRangeM = 700f;
+                cfg.bushBaskets = 4; cfg.bushRegrowDays = 20; cfg.foragerMinAge = 10; cfg.foragerHutCapacity = 40;
+                cfg.gatherMinutesPerBasket = 45; cfg.handCarryItems = 12;
+                var t = cfg.BuildTuning();
+                Assert.AreEqual(123, t.StartingMeat);
+                Assert.AreEqual(1.5, t.AdultRations, Eps);
+                Assert.AreEqual(0.25, t.ChildRations, Eps);
+                Assert.AreEqual(700, t.MarketRangeM, Eps);
+                Assert.AreEqual(4, t.BushBaskets);
+                Assert.AreEqual(20, t.BushRegrowDays);
+                Assert.AreEqual(10, t.ForagerMinAge);
+                Assert.AreEqual(40, t.ForagerHutCapacity);
+                Assert.AreEqual(45, t.GatherMinutesPerBasket);
+                Assert.AreEqual(12, t.HandCarryItems);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
         public void AssetModuleRecipesEqualCodeDefaults()
         {
             var recipes = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath).BuildModuleRecipes();

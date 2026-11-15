@@ -95,6 +95,18 @@ namespace LordsLegacy.Game
         [Tooltip("AR-15 overlap tolerance, m2")] [Range(0f, 10f)] public float overlapToleranceM2 = 0.1f;
         [Tooltip("Decision 0012 spatial index cell size, metres")] [Range(4f, 256f)] public float spatialIndexCellM = 32f;
 
+        [Header("Food and foraging (M14, tuning.md \"Food\", \"Markets\", \"Foraging\")")]
+        [Tooltip("FD-03 meat in the camp food store at the start, items")] [Range(0, 10000)] public int startingMeat = 400;
+        [Tooltip("FD-04 rations an adult (14+) eats per day")] [Range(0f, 5f)] public float adultRations = 1f;
+        [Tooltip("FD-04 rations a child eats per day")] [Range(0f, 5f)] public float childRations = 0.5f;
+        [Tooltip("FD-11, MKT-06 camp market walking range, metres")] [Range(0f, 5000f)] public float marketRangeM = 630f;
+        [Tooltip("FD-21 baskets a forage bush holds when full")] [Range(0, 20)] public int bushBaskets = 3;
+        [Tooltip("FD-21 days an emptied bush takes to regrow to full")] [Range(1, 365)] public int bushRegrowDays = 14;
+        [Tooltip("FD-23 youngest age that takes forage tasks, years")] [Range(0, 120)] public int foragerMinAge = 8;
+        [Tooltip("FD-23b food items the forager hut store holds")] [Range(0, 10000)] public int foragerHutCapacity = 30;
+        [Tooltip("FD-24 game minutes to pick one basket")] [Range(1, 600)] public int gatherMinutesPerBasket = 30;
+        [Tooltip("FD-24, MKT-03e most items carried by hand on one trip")] [Range(1, 100)] public int handCarryItems = 10;
+
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
         public sealed class ModuleRecipeConfig
@@ -134,6 +146,10 @@ namespace LordsLegacy.Game
             RoadTreeClearanceM = D(roadTreeClearanceM), CurveFlattenSpacingM = D(curveFlattenSpacingM),
             SlopeSampleGridM = D(slopeSampleGridM), OverlapToleranceM2 = D(overlapToleranceM2),
             SpatialIndexCellM = D(spatialIndexCellM),
+            StartingMeat = startingMeat, AdultRations = D(adultRations), ChildRations = D(childRations),
+            MarketRangeM = D(marketRangeM), BushBaskets = bushBaskets, BushRegrowDays = bushRegrowDays,
+            ForagerMinAge = foragerMinAge, ForagerHutCapacity = foragerHutCapacity,
+            GatherMinutesPerBasket = gatherMinutesPerBasket, HandCarryItems = handCarryItems,
         };
 
         /// <summary>Builds the road catalog from these values.</summary>

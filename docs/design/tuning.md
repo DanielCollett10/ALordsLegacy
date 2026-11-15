@@ -144,6 +144,21 @@ changes *when* they eat.)
 
 Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise items per trip.
 
+## Foraging
+
+| Value | Default | Unit | Rule |
+| --- | --- | --- | --- |
+| Bush baskets when full | 3 | baskets (`SimTuning.BushBaskets`, `SimConfig.bushBaskets`) | FD-21 |
+| Bush regrow time | 14 | game days to full (`BushRegrowDays`) | FD-21 |
+| Forager minimum age | 8 | years (`ForagerMinAge`) | FD-23 |
+| Forager hut store capacity | 30 | food items (`ForagerHutCapacity`) | FD-23b |
+| Gather time per basket | 30 | game minutes (`GatherMinutesPerBasket`) | FD-24 |
+| Hand carry per trip | 10 | items (`HandCarryItems`) | FD-24, MKT-03e |
+
+Food values in the tables above also map to `SimConfig` fields: starting meat 400 (`StartingMeat`), adult 1 and child
+0.5 rations per day (`AdultRations`, `ChildRations`), market range 630 m (`MarketRangeM`). The Foraging values are
+PLACEHOLDER until playtested.
+
 ## Construction and timber
 
 | Value | Default | Unit | Rule |

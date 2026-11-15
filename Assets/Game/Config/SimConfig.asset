@@ -42,6 +42,16 @@ MonoBehaviour:
   slopeSampleGridM: 2
   overlapToleranceM2: 0.1
   spatialIndexCellM: 32
+  startingMeat: 400
+  adultRations: 1
+  childRations: 0.5
+  marketRangeM: 630
+  bushBaskets: 3
+  bushRegrowDays: 14
+  foragerMinAge: 8
+  foragerHutCapacity: 30
+  gatherMinutesPerBasket: 30
+  handCarryItems: 10
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
@@ -109,6 +119,30 @@ MonoBehaviour:
     clearsTrees: 1
     blocksRoads: 1
     nearRoadReachM: 10
+  - id: area.foraging
+    namePrefix: Foraging camp
+    kind: 0
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 5000
+    limitSlope: 1
+    maxSlopeDegrees: 10
+    clearsTrees: 1
+    blocksRoads: 1
+    nearRoadReachM: 10
+  - id: area.work_foraging
+    namePrefix: Foraging work area
+    kind: 1
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 400000
+    limitSlope: 0
+    maxSlopeDegrees: 10
+    clearsTrees: 0
+    blocksRoads: 0
+    nearRoadReachM: 10
   moduleRecipes:
   - moduleId: module.woodcutting_hut
     logs: 8
@@ -122,3 +156,9 @@ MonoBehaviour:
   - moduleId: module.house
     logs: 10
     buildWorkerMinutes: 720
+  - moduleId: module.granary
+    logs: 8
+    buildWorkerMinutes: 600
+  - moduleId: module.forager_hut
+    logs: 8
+    buildWorkerMinutes: 480
