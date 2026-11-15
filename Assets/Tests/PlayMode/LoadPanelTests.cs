@@ -92,8 +92,9 @@ namespace LordsLegacy.Tests.PlayMode
             foreach (var row in panel.Rows)
                 Assert.IsNotNull(row.parent.Q<UnityEngine.UIElements.Button>("load-delete"), "Each row has a bin.");
 
-            panel.Rows[0].parent.Q<UnityEngine.UIElements.Button>("load-delete").SendEvent(
-                UnityEngine.UIElements.ClickEvent.GetPooled());
+            // A synthetic ClickEvent does not trigger Button.clickable (it listens to pointer events), so call the
+            // handler the bin button is wired to.
+            panel.RequestDelete(store.List()[0]);
             Assert.IsTrue(ConfirmDialog.IsOpen);
             yield return null;
             yield return null;
