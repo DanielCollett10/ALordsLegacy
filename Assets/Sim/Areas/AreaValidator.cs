@@ -46,6 +46,7 @@ namespace LordsLegacy.Sim.Areas
             if (n < type.MinPoints) return AreaRefusal.TooFewPoints;
             if (n > type.MaxPoints) return AreaRefusal.TooManyPoints;
             if (!RoadEdgesOk(world, shape, type)) return AreaRefusal.NotOnRoad;
+            if (type.RequiresRoadFrontage && !HasFrontage(shape)) return AreaRefusal.NoFrontage;
             if (HasZeroLengthEdge(shape) || !Polygons.IsSimple(poly)) return AreaRefusal.EdgesCross;
             for (int i = 0; i < poly.Length; i++)
                 if (!world.Terrain.Contains((float)poly[i].XMetres, (float)poly[i].ZMetres)) return AreaRefusal.OutsideMap;
@@ -62,7 +63,7 @@ namespace LordsLegacy.Sim.Areas
                 if (fit == AreaTrim.FitResult.CrossesRoad) return AreaRefusal.CrossesRoad;
                 if (fitted.Count > 0) { poly = trimmed; area = Math.Abs(Polygons.SignedAreaM2(poly)); }
             }
-            if (area < type.MinAreaM2) return AreaRefusal.TooSmall;
+            if (area < type.MinAreaM2) return type.RequiresRoadFrontage ? AreaRefusal.PlotTooSmall : AreaRefusal.TooSmall;
             if (area > type.MaxAreaM2) return AreaRefusal.TooLarge;
             if (type.Kind != AreaKind.Building) return AreaRefusal.Valid; // work areas skip checks 6-8
             if (type.MaxSlopeDegrees.HasValue && AreaPlacementChecks.TooSteep(world, poly, type.MaxSlopeDegrees.Value))
@@ -71,6 +72,14 @@ namespace LordsLegacy.Sim.Areas
             if (other != null) { overlapName = other.Name; return AreaRefusal.OverlapsArea; }
             if (AreaPlacementChecks.CrossesRoad(world, poly)) return AreaRefusal.CrossesRoad;
             return AreaRefusal.Valid;
+        }
+
+        // HM-02: frontage means at least one edge flush to a road side (FollowsRoad; RoadEdgesOk already checked it is on that road).
+        private static bool HasFrontage(AreaShape shape)
+        {
+            for (int i = 0; i < shape.Edges.Count; i++)
+                if (shape.Edges[i].Kind == AreaEdgeKind.FollowsRoad) return true;
+            return false;
         }
 
         // The flattener drops repeated points, so zero-length edges are looked for on the shape itself.

@@ -43,7 +43,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.AreSame(AreaTypes.Woodcutting, cat.Find("area.woodcutting"));
             Assert.AreSame(AreaTypes.WoodcuttingWork, cat.Find("area.work_woodcutting"));
             Assert.IsNull(cat.Find("area.woodcutting_hut"));
-            Assert.AreEqual(4, cat.All.Count);
+            Assert.AreEqual(5, cat.All.Count);
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace LordsLegacy.Sim.Tests.Operations
         {
             Assert.IsNull(ModuleTypes.Find("module.nope"));
             Assert.IsNull(ModuleTypes.Find(null));
-            Assert.AreEqual(3, ModuleTypes.All.Count);
+            Assert.AreEqual(4, ModuleTypes.All.Count);
         }
 
         [Test]

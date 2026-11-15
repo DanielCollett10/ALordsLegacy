@@ -150,7 +150,8 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 | --- | --- | --- | --- |
 | Woodcutting hut | 8 logs, 960 | worker-minutes | CON-A1, WCO-04 |
 | Oxen stand | 1 log, 60 | worker-minutes | CON-A1 |
-| House (MVP-2) | 6 logs, 720 | worker-minutes | CON-A1 |
+| House (MVP-2) | 10 logs, 720 | worker-minutes | CON-A1, HM-06 |
+| House footprint / plot size | 6 × 8 m / 60–400 m² | m / m² | HM-03, HM-04 |
 | Granary | 6 logs, 600 | worker-minutes | CON-A1 |
 | Demolish refund / rebuild cost | 50% / 50% | of materials | BLD-11, MIL-08 |
 | Standard log length | 4 | m | TMB-04 |
