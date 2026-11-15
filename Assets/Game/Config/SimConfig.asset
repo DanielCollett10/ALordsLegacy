@@ -119,3 +119,6 @@ MonoBehaviour:
   - moduleId: module.oxen_stand
     logs: 1
     buildWorkerMinutes: 60
+  - moduleId: module.house
+    logs: 10
+    buildWorkerMinutes: 720

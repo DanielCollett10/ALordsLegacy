@@ -75,7 +75,9 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_view.GetButton("test-area").ClassListContains("build-bar__button--disabled"));
             Assert.IsFalse(_view.GetButton("test-work-area").ClassListContains("build-bar__button--disabled"));
             Assert.IsFalse(_view.GetButton("woodcutter").ClassListContains("build-bar__button--disabled"));
-            foreach (var id in new[] { "storage-yard", "house", "granary" })
+            Assert.AreEqual("House plot", ToolEntry.Defaults()[5].Label);
+            Assert.IsFalse(_view.GetButton("house").ClassListContains("build-bar__button--disabled"), "House plot is affordable with 40 logs.");
+            foreach (var id in new[] { "storage-yard", "granary" })
             {
                 Assert.AreEqual("Coming later", _view.GetButton(id).tooltip, id);
                 Assert.IsTrue(_view.GetButton(id).ClassListContains("build-bar__button--disabled"), id);
@@ -105,8 +107,8 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void DisabledButtonDoesNothing()
         {
-            // "house" is greyed out ("Coming later"); test-area is enabled since T-114.
-            _view.Click("house");
+            // "storage-yard" is greyed out ("Coming later").
+            _view.Click("storage-yard");
             Assert.IsNull(_ctl.ActiveTool);
         }
 
