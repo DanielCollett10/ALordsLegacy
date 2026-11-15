@@ -22,6 +22,16 @@ namespace LordsLegacy.Game
         {
             var ps = ScriptableObject.CreateInstance<PanelSettings>();
             ps.sortingOrder = 1000f;
+#if UNITY_EDITOR
+            // Everything is styled in code, so the missing-theme warning is noise (same switch as the test PanelSettings).
+            var so = new UnityEditor.SerializedObject(ps);
+            var prop = so.FindProperty("m_DisableNoThemeWarning");
+            if (prop != null)
+            {
+                prop.boolValue = true;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+#endif
             return ps;
         }
 

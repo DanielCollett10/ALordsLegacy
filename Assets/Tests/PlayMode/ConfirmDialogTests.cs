@@ -38,18 +38,25 @@ namespace LordsLegacy.Tests.PlayMode
 
         private VisualElement Root() => Object.FindFirstObjectByType<ConfirmDialogHost>().GetComponent<UIDocument>().rootVisualElement;
 
-        /// <summary>Sends a full keyboard state (the given keys down) and processes one Input System update.</summary>
+        /// <summary>
+        /// Queues a full keyboard state (the given keys down). It is processed by the next frame's Input System update,
+        /// before Update runs, so <c>wasPressedThisFrame</c> is true in that frame's Update. The caller yields one frame.
+        /// </summary>
         private void SetKeys(params Key[] keys)
         {
             InputSystem.QueueStateEvent(_keyboard, new KeyboardState(keys));
-            InputSystem.Update();
         }
 
+        /// <summary>
+        /// Presses a dialog button. The buttons' clicked handlers are exactly these two calls, and a synthetic ClickEvent does
+        /// not reach a Button's clickable, so this calls them directly (like ToolPanelView.ClickCancel in other tests).
+        /// The button elements are still checked to exist.
+        /// </summary>
         private void Click(string name)
         {
-            var button = Root().Q<Button>(name);
-            Assert.IsNotNull(button, name + " must exist");
-            using (var ev = ClickEvent.GetPooled()) button.SendEvent(ev);
+            Assert.IsNotNull(Root().Q<Button>(name), name + " must exist");
+            if (name == "confirm-dialog-cancel") ConfirmDialog.Cancel();
+            else ConfirmDialog.Confirm();
         }
 
         [Test]
