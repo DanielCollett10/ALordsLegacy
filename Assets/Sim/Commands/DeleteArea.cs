@@ -21,14 +21,19 @@ namespace LordsLegacy.Sim.Commands
         /// <inheritdoc />
         public CommandResult Validate(SimWorld world)
         {
-            return world.Areas.Get(AreaId) == null
-                ? CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId)
-                : CommandResult.Accepted();
+            if (world.Areas.Get(AreaId) == null)
+                return CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId);
+            Operation op = world.Operations.FindByArea(AreaId);
+            if (op != null && op.ModuleIds.Count > 0)
+                return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Deconstruct its buildings first");
+            return CommandResult.Accepted();
         }
 
         /// <inheritdoc />
         public CommandResult Apply(SimWorld world)
         {
+            CommandResult check = Validate(world);
+            if (check.IsRejected) return check;
             if (!world.Areas.Remove(AreaId))
                 return CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId);
             foreach (Operation linked in new System.Collections.Generic.List<Operation>(world.Operations.All))

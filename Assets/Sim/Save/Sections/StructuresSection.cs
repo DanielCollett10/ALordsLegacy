@@ -30,6 +30,7 @@ namespace LordsLegacy.Sim.Save.Sections
             WriteOperations(world.Operations, w);
             WriteSites(world.Construction, w);
             WriteDeconstruction(world.Deconstruction, w);
+            WritePendingOperations(world.Deconstruction, w);
         }
 
         /// <inheritdoc />
@@ -42,6 +43,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 ReadOperations(world.Operations, r);
                 ReadSites(world, r);
                 ReadDeconstruction(world, r);
+                ReadPendingOperations(world, r);
             }
             catch (InvalidOperationException e) { throw new SaveFormatException(e.Message); }
             catch (ArgumentException e) { throw new SaveFormatException(e.Message); }
@@ -194,6 +196,21 @@ namespace LordsLegacy.Sim.Save.Sections
                 if (world.Footprints.Get(fp) == null) throw new SaveFormatException("Deconstruction of missing footprint " + fp + ".");
                 if (!world.IsBuilt(fp)) throw new SaveFormatException("Deconstruction of unbuilt footprint " + fp + ".");
                 world.Deconstruction.Add(new DeconstructionEntry(fp) { ProgressMinutes = progress });
+            }
+        }
+
+        private static void WritePendingOperations(DeconstructionRegistry reg, SaveWriter w)
+        {
+            var ids = new List<int>(reg.PendingOperationIds);
+            WriteInts(w, ids);
+        }
+
+        private static void ReadPendingOperations(SimWorld world, SaveReader r)
+        {
+            foreach (int id in ReadInts(r))
+            {
+                if (world.Operations.Get(id) == null) throw new SaveFormatException("Pending removal of missing operation " + id + ".");
+                world.Deconstruction.AddPendingOperation(id);
             }
         }
 
