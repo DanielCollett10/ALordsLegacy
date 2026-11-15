@@ -226,6 +226,74 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _host.World.Areas.Count);
         }
 
+        private int PlaceHutAndStorage()
+        {
+            SeedLogs(40);
+            LockSquare();
+            _tool.Pick(ModuleTypes.WoodcuttingHutId);
+            _tool.ClickAt(Screen(60, 60));
+            _tool.Pick(ModuleTypes.LogStorageId);
+            _tool.ClickAt(Screen(50, 70));
+            _panel.ClickConfirm();
+            Assert.AreEqual(1, _host.World.Operations.Count);
+            foreach (var o in _host.World.Operations.All) return o.Id;
+            return 0;
+        }
+
+        [UnityTest]
+        public IEnumerator ExpandOpensModuleStageOnExistingAreaWithoutHutAndConfirmSendsPlaceModules()
+        {
+            yield return Setup();
+            int opId = PlaceHutAndStorage();
+            Assert.IsNull(_controller.ActiveTool);
+            int modulesBefore = _host.World.Operations.Get(opId).ModuleIds.Count;
+            int areasBefore = _host.World.Areas.Count;
+
+            Assert.IsTrue(_controller.BeginExpandModules(opId, OperationTypes.WoodcuttingId));
+            Assert.AreSame(_tool, _controller.ActiveTool);
+            Assert.IsTrue(_tool.IsExpansion);
+            Assert.AreEqual(DraftStage.ModuleStage, _tool.Draft.Stage);
+            Assert.IsFalse(_area.IsActive, "No area drawing: the area exists already.");
+            Assert.AreEqual(modulesBefore, _tool.ExistingDrawn, "Existing modules are drawn solid.");
+            Assert.AreEqual(0, _tool.Draft.Ghosts.Count);
+            CollectionAssert.DoesNotContain(_panel.ActionNames, OperationDraftTool.PickPrefix + ModuleTypes.WoodcuttingHutId, "Hut is not offered when one exists.");
+            CollectionAssert.Contains(_panel.ActionNames, OperationDraftTool.PickPrefix + ModuleTypes.LogStorageId);
+            Assert.IsFalse(_panel.IsConfirmEnabled, "Confirm needs at least one ghost.");
+
+            int logBefore = _host.World.CommandLog.Count;
+            _tool.Pick(ModuleTypes.LogStorageId);
+            _tool.ClickAt(Screen(70, 72));
+            Assert.AreEqual(1, _tool.Draft.Ghosts.Count, _tool.Message);
+            Assert.AreEqual(1, _tool.PlacedGhostsDrawn, "The new module is a ghost.");
+            Assert.IsTrue(_panel.IsConfirmEnabled, _panel.Status);
+            Assert.AreEqual(logBefore, _host.World.CommandLog.Count, "Nothing is sent before Confirm.");
+
+            _panel.ClickConfirm();
+            Assert.AreEqual(logBefore + 1, _host.World.CommandLog.Count);
+            Assert.IsTrue(_host.World.CommandLog.Entries[_host.World.CommandLog.Count - 1].Command is LordsLegacy.Sim.Commands.PlaceModules);
+            Assert.IsNull(_controller.ActiveTool);
+            Assert.AreEqual(modulesBefore + 1, _host.World.Operations.Get(opId).ModuleIds.Count);
+            Assert.AreEqual(areasBefore, _host.World.Areas.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator ExpandCancelDiscardsGhostsAndSendsNothing()
+        {
+            yield return Setup();
+            int opId = PlaceHutAndStorage();
+            int modulesBefore = _host.World.Operations.Get(opId).ModuleIds.Count;
+            _controller.BeginExpandModules(opId, OperationTypes.WoodcuttingId);
+            _tool.Pick(ModuleTypes.LogStorageId);
+            _tool.ClickAt(Screen(70, 72));
+            Assert.AreEqual(1, _tool.Draft.Ghosts.Count, _tool.Message);
+            int logBefore = _host.World.CommandLog.Count;
+            _panel.ClickCancel();
+            Assert.IsNull(_controller.ActiveTool);
+            Assert.AreEqual(logBefore, _host.World.CommandLog.Count);
+            Assert.AreEqual(modulesBefore, _host.World.Operations.Get(opId).ModuleIds.Count);
+            Assert.AreEqual(1, _host.World.Areas.Count, "The existing area stays.");
+        }
+
         [UnityTest]
         public IEnumerator QAndERotateInFifteenDegreeSteps()
         {

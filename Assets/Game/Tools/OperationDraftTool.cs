@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using LordsLegacy.Game.Tools.Shared;
 using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Operations;
@@ -14,9 +15,11 @@ namespace LordsLegacy.Game.Tools
     /// <summary>
     /// Build tool for an operation placed in one go (building-tool.md BT-10..18). Area stage: an <see cref="AreaTool"/>
     /// (composition, its <see cref="AreaTool.LockHandler"/>) draws and validates the area. Module stage: a palette lists the
-    /// type's modules with costs; the picked module follows the cursor (Q / E turn 15°, Shift 1°, side snapping as
-    /// <see cref="ModuleTool"/>), a left click adds a ghost (red with the Sim's reason when refused), a right click on a ghost
-    /// removes it, Escape drops the module in hand and then cancels, Confirm sends the one command. Rules live in
+    /// type's modules with costs; the picked module follows the cursor (Q / E turn 15°, Shift 1°, side snapping to the area edge),
+    /// a left click adds a ghost (red with the Sim's reason when refused), a right click on a ghost
+    /// removes it, Escape drops the module in hand and then cancels, Confirm sends the one command. Expansion (BT-20..21):
+    /// <see cref="PrepareExpand"/> then activate starts in the module stage on an existing operation's area, its modules drawn
+    /// solid, Confirm sends <see cref="PlaceModules"/>. Rules live in
     /// <see cref="OperationDraft"/> and the Sim; nothing reaches the Sim until Confirm.
     /// </summary>
     public sealed class OperationDraftTool : MonoBehaviour, ITool
@@ -113,12 +116,58 @@ namespace LordsLegacy.Game.Tools
             }
         }
 
+        /// <summary>The operation type this tool places (e.g. woodcutting).</summary>
+        public string OperationTypeId => _operationTypeId;
+
+        /// <summary>True while the draft expands an existing operation (module stage on its area, building-tool.md BT-20).</summary>
+        public bool IsExpansion => _draft != null && _draft.IsExpansion;
+
+        /// <summary>Number of existing modules drawn solid.</summary>
+        public int ExistingDrawn
+        {
+            get { int n = 0; foreach (var g in _existingVis) if (g.IsShown) n++; return n; }
+        }
+
+        /// <summary>Marks the next <see cref="Activate"/> as an expansion of this operation (Expand modules button).</summary>
+        public void PrepareExpand(int operationId) { _expandOperationId = operationId; }
+
+        private int? _expandOperationId;
+        private readonly List<GhostVisual> _existingVis = new List<GhostVisual>();
+
+        private void ActivateExpansion(int operationId)
+        {
+            _draft = OperationDraft.ForExpansion(_host.World, _type, operationId);
+            if (_draft == null) return;
+            IsActive = true;
+            _areaPolygon = _draft.AreaPolygon; _message = null; Rotation = 0; _hasHover = false;
+            RedrawExisting(); // the area itself is already drawn by the area renderer
+
+            Subscribe();
+            ShowPanel();
+        }
+
+        private void RedrawExisting()
+        {
+            var existing = _draft.Existing;
+            while (_existingVis.Count < existing.Count) _existingVis.Add(new GhostVisual(transform, "DraftExisting" + _existingVis.Count));
+            for (int i = 0; i < _existingVis.Count; i++)
+            {
+                if (i < existing.Count) _existingVis[i].Draw(_host.World.Terrain, existing[i].Polygon, ExistingSolid);
+                else _existingVis[i].Hide();
+            }
+        }
+
+        private static readonly Color ExistingSolid = new Color(0.55f, 0.42f, 0.28f, 0.95f);
+
         /// <inheritdoc />
         public void Activate()
         {
-            if (_host == null || !_host.IsInitialized || _areaTool == null) return;
+            int? expand = _expandOperationId;
+            _expandOperationId = null;
+            if (_host == null || !_host.IsInitialized || (_areaTool == null && !expand.HasValue)) return;
             _type = OperationTypes.Find(_operationTypeId);
             if (_type == null) return;
+            if (expand.HasValue) { ActivateExpansion(expand.Value); return; }
             IsActive = true;
             _draft = new OperationDraft(_host.World, _type);
             _areaPolygon = null; _message = null; Rotation = 0; _hasHover = false;
@@ -130,7 +179,9 @@ namespace LordsLegacy.Game.Tools
         public void Deactivate()
         {
             IsActive = false;
-            if (_areaTool != null) { _areaTool.LockHandler = null; _areaTool.Deactivate(); }
+            _expandOperationId = null;
+            bool expansion = IsExpansion;
+            if (_areaTool != null && !expansion) { _areaTool.LockHandler = null; _areaTool.Deactivate(); }
             Unsubscribe();
             if (_areas != null) _areas.HidePreview();
             DiscardVisuals();
@@ -142,8 +193,9 @@ namespace LordsLegacy.Game.Tools
         /// <inheritdoc />
         public void Cancel()
         {
+            bool expansion = IsExpansion;
             if (_draft != null) _draft.Cancel();
-            if (_areaTool != null) _areaTool.Cancel();
+            if (_areaTool != null && !expansion) _areaTool.Cancel();
             DiscardVisuals();
         }
 
@@ -230,7 +282,7 @@ namespace LordsLegacy.Game.Tools
         public void Confirm()
         {
             if (!IsActive || _draft == null || _draft.Stage != DraftStage.ModuleStage || !_draft.CanConfirm) return;
-            var cmd = _draft.BuildCommand();
+            ISimCommand cmd = _draft.IsExpansion ? (ISimCommand)_draft.BuildExpandCommand() : _draft.BuildCommand();
             if (cmd == null) return;
             var result = _host.Execute(cmd);
             if (!result.IsAccepted)
@@ -305,6 +357,8 @@ namespace LordsLegacy.Game.Tools
         {
             foreach (var g in _placed) g.Destroy();
             _placed.Clear();
+            foreach (var g in _existingVis) g.Destroy();
+            _existingVis.Clear();
             if (_hover != null) { _hover.Destroy(); _hover = null; }
             GhostVisible = false; GhostIsRed = false; GhostSnapped = false;
         }
@@ -328,6 +382,7 @@ namespace LordsLegacy.Game.Tools
             {
                 FootprintTypeDef def = ModuleTypes.Find(id);
                 if (def == null) continue;
+                if (_draft.IsExpansion && !_draft.CanOffer(id)) continue; // BT-20: no second hut
                 actions.Add(new KeyValuePair<string, string>(PickPrefix + id,
                     NameOf(id) + " · " + def.ConstructionRecipe.Logs + " logs"));
             }
@@ -402,7 +457,7 @@ namespace LordsLegacy.Game.Tools
             if (IsActive && mouse.rightButton.wasReleasedThisFrame) RemoveAt(pos);
         }
 
-        /// <summary>One drawn module outline (the same terrain-draped fill as <see cref="ModuleTool"/>'s ghost).</summary>
+        /// <summary>One drawn module outline (a terrain-draped fill).</summary>
         private sealed class GhostVisual
         {
             private readonly GameObject _go;

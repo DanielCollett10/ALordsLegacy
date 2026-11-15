@@ -23,7 +23,7 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 ## Lifecycle
 
 1. **Designate:** `DesignateArea` of a building type with an operation type creates an operation.
-2. **Modules:** `ModuleTool` → `ModulePlacement.Preview` → `PlaceModule`. The footprint is added and trees under it are
+2. **Modules:** `OperationDraftTool` (ghosts, `DraftModulePlacement`) → `DesignateOperation` or, when expanding, `PlaceModules`. The footprint is added and trees under it are
    cleared. A module with an empty recipe is built at once, else it is a construction site (`construction.md`).
    `RemoveModule` removes it.
 3. **Assign:** `AssignFamily` sets the family's `WorkplaceId` and the operation's family list. Nothing is automatic. Assign

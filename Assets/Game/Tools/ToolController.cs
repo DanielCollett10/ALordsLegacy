@@ -76,15 +76,18 @@ namespace LordsLegacy.Game.Tools
         }
 
         /// <summary>
-        /// Area-to-module hand-off (WC-01): after an operation's area is designated, switches to the module tool for that
-        /// operation with the given module types queued in order. Does nothing if no module tool is registered.
+        /// Operation panel "Expand modules" (building-tool.md BT-20): activates the draft tool of the operation's type in
+        /// the module stage on the existing area. Returns false if no draft tool is registered for that type.
         /// </summary>
-        public bool BeginModulePlacement(int operationId, IEnumerable<string> moduleTypeIds)
+        public bool BeginExpandModules(int operationId, string operationTypeId)
         {
-            if (!_tools.TryGetValue(ModuleTool.ToolId, out var t) || !(t is ModuleTool module)) return false;
+            OperationDraftTool found = null;
+            foreach (var t in _tools.Values)
+                if (t is OperationDraftTool d && d.OperationTypeId == operationTypeId) { found = d; break; }
+            if (found == null) return false;
             Deselect();
-            module.Begin(operationId, moduleTypeIds);
-            Toggle(ModuleTool.ToolId);
+            found.PrepareExpand(operationId);
+            Toggle(found.Id);
             return true;
         }
 

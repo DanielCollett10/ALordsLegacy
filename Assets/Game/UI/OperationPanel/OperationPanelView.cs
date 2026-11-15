@@ -146,6 +146,22 @@ namespace LordsLegacy.Game
             SetMessage("");
         }
 
+        /// <summary>Expand modules button (BT-20): opens the draft tool in the module stage on this operation's area.</summary>
+        public void ClickExpandModules()
+        {
+            int? op = OperationId();
+            var host = Host();
+            if (!op.HasValue || host == null || !host.IsInitialized) return;
+            var o = host.World.Operations.Get(op.Value);
+            var controller = Controller();
+            if (o == null || controller == null || !controller.BeginExpandModules(op.Value, o.TypeId))
+            {
+                SetMessage("The module tool is not available.");
+                return;
+            }
+            SetMessage("");
+        }
+
         /// <summary>Use default button: sends UseDefaultWorkArea.</summary>
         public void ClickUseDefault()
         {
@@ -616,6 +632,8 @@ namespace LordsLegacy.Game
 
             _pause = new Button { name = "pause-resume", text = "Pause" };
             _pause.clicked += ClickPauseResume;
+            var expand = new Button { name = "expand-modules", text = "Expand modules" };
+            expand.clicked += ClickExpandModules;
 
             _oxenTab = new Button { name = "oxen-tab", text = "Oxen" };
             _oxenTab.clicked += ClickOxenTab;
@@ -634,7 +652,7 @@ namespace LordsLegacy.Game
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(MakeLabel("operation-workers-heading", 12, "Workers"));
             _panel.Add(_workers); _panel.Add(_logs); _panel.Add(_trees); _panel.Add(_workArea);
-            _panel.Add(areaRow); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
+            _panel.Add(areaRow); _panel.Add(expand); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
             _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);

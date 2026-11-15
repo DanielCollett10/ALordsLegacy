@@ -317,7 +317,6 @@ namespace LordsLegacy.Game.Tools
                     if (_controller != null && _controller.ActiveTool == (ITool)this) _controller.Deselect();
                     return;
                 }
-                HandOffToModules(result);
                 return;
             }
             _rejection = string.IsNullOrEmpty(result.Text) ? result.Reason.ToString() : result.Text;
@@ -326,17 +325,6 @@ namespace LordsLegacy.Game.Tools
 
         /// <summary>True when this tool draws an operation's building area (e.g. the woodcutter), which has modules to place next.</summary>
         private bool StartsOperation => OperationTypes.FindByBuildingArea(_typeId) != null;
-
-        /// <summary>WC-01: a new operation's area was designated, so activate the module tool: hut first, then log storage.</summary>
-        private void HandOffToModules(CommandResult result)
-        {
-            if (_controller == null || result.Created.Length == 0) return;
-            var op = _host.World.Operations.FindByArea((int)result.Created[0]);
-            if (op == null) return;
-            var def = OperationTypes.Find(op.TypeId);
-            if (def == null) return;
-            _controller.BeginModulePlacement(op.Id, new[] { def.HutTypeId, def.LogStorageTypeId });
-        }
 
         /// <summary>Drops the draft; for an operation area the tool is left too, so cancelling returns to no tool.</summary>
         private void CancelDraft()
