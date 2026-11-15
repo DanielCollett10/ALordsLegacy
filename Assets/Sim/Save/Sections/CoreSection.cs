@@ -103,6 +103,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.StartingMeat);
             w.WriteDouble(t.AdultRations);
             w.WriteDouble(t.ChildRations);
+            w.WriteDouble(t.MarketRangeM);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -154,6 +155,7 @@ namespace LordsLegacy.Sim.Save.Sections
             t.StartingMeat = r.ReadInt32();
             t.AdultRations = r.ReadDouble();
             t.ChildRations = r.ReadDouble();
+            t.MarketRangeM = r.ReadDouble();
             return t;
         }
 

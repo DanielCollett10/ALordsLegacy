@@ -222,12 +222,12 @@ namespace LordsLegacy.Sim.Tests.Food
         }
 
         [Test]
-        public void SaveVersion_IsSeven_VersionFiveBytesAreRefused()
+        public void SaveVersion_IsEight_VersionFiveBytesAreRefused()
         {
-            Assert.AreEqual(7, SaveWriter.CurrentVersion);
+            Assert.AreEqual(8, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 5, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("Unknown save format version 5 (this build reads version 7).", e.Message);
+            StringAssert.Contains("Unknown save format version 5 (this build reads version 8).", e.Message);
         }
     }
 }

@@ -238,6 +238,9 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Rations a child eats per day. Unit: rations per day. Rule: FD-04.</summary>
         public double ChildRations { get; set; } = 0.5;
 
+        /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
+        public double MarketRangeM { get; set; } = 630;
+
         /// <summary>
         /// Game minutes that pass per real second at 1× speed. Unit: game minutes per real second.
         /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 0.8 at the default of 30.
