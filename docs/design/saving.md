@@ -61,6 +61,8 @@ current state (0034's "planned / not implemented" status line is out of date).
 - **Header read alone (SV-13):** `SaveReader.ReadHeaderOnly` reads the header without the sections, for the Load list.
 - **Map refusal (SV-30):** `SaveMapMismatchException` carries the SV-30 text. It is thrown for a different map id or hash.
   The hash is FNV-1a of the map file bytes.
+- **Unreadable rows (SV-34, M12):** only a format-version mismatch greys a row (`SaveStore.List`). A save from an unknown
+  map is listed as normal; Load then refuses it with the SV-30 text. Delete (SV-23) works on every row, the autosave included.
 - **Tuning kept with the save (SV-14):** the Core section stores `SimConfig` tuning and both type catalogs, so a load does
   not use current `SimConfig` values. Applying new tuning to an old save is not built.
 - **Pause (SV-02, SV-22):** the Core section stores `Paused`. Speed is not saved (decision 0006), so a load starts at the

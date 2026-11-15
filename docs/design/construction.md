@@ -103,5 +103,8 @@ this list says what is still open.
   task line uses `ConstructionTaskDefs.VerbFor` (CN-41). Delivered logs are drawn by `LogPileRenderer` at the site.
 - **Values are placeholders (CN-02, CN-23).** The recipe numbers, `MaxBuildersPerSite` 4 and the ox load/unload minutes
   are tuning placeholders until CON-A1 is decided.
-- **Removing a built module returns nothing (CN-33).** The 50% refund is not built. The CN-34 refusal (a storage with
+- **Deconstruction is built (CN-50..58, T-393..T-397, decision 0039).** CN-33 is replaced: a built module is marked, a
+  `task.deconstruct` takes it down, and the refund is `floor(recipe logs × 50%)` in one unowned pile. CN-34 (a storage with
   logs reserved for a site cannot be removed) is in code.
+  > Implementation note (CN-51, CN-52): an unbuilt module is removed at once, as `RemoveModule` does, not marked. A built
+  > module stops working as soon as it is marked. Shares and minutes are placeholders (CN-53).

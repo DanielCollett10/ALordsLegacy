@@ -14,13 +14,13 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 | `TopBarController` | `UI/TopBar/` | Date, time, pause, speed buttons from `Pacer.Speeds`, steady light, "running slower" notice, snapping toggle. |
 | `BuildBarView`, `ToolEntry` | `UI/BuildBar/` | Non-focusable buttons from `ToolEntry.Defaults()`. Road, Test area, Test work area and Woodcutter are enabled; the rest greyed ("Coming later"). Raises `ToolClicked`. A `ToolEntry` may carry `CostLogs` (a `Func<int>`, for example `BuildCost.MinimumFor`): the bar re-checks it every frame against available logs and greys the button with the tooltip "Needs N logs (have M)" (BT-02). |
 | `BuildEntryState` | `UI/BuildBar/` | Plain C#: `Of(costLogs, availableLogs)` → `(Enabled, Tooltip)`. Equal cost counts as affordable. |
-| `ToolPanelView` | `UI/ToolPanel/` | Status line, hint line, Cancel and Confirm. `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Also action buttons (`SetActions`). |
-| `OperationPanelView`, `OxText` | `UI/OperationPanel/` | Opened by selecting an operation. Status cause, modules with state, 2 family slots, worker tasks, ground logs, tree count, Pause/Resume, Draw work area, Use default, Oxen tab, stock line, High priority toggle. |
+| `ToolPanelView` | `UI/ToolPanel/` | Status line, hint line, Cancel and Confirm. `Show(status, hint, isValid)`, `Hide()`, events `Cancelled` and `Confirmed`. Also action buttons (`SetActions`). The draft tool writes the status ("Cost N logs, have M") and passes `CanConfirm` as `isValid`. |
+| `OperationPanelView`, `OxText` | `UI/OperationPanel/` | Opened by selecting an operation. Status cause, modules with state, Deconstruct per module (and cancel while under way), Deconstruct operation, Expand modules (opens the draft tool), 2 family slots, worker tasks, ground logs, tree count, Pause/Resume, Draw work area, Use default, Oxen tab, stock line, High priority toggle. |
 | `CitizenPanelView` | `UI/CitizenPanel/` | Read-only name, age, family, activity, position, and the task line from `CitizenTaskText`. Shows refusals of debug sends. |
 | `DebugOverlayView` | `UI/DebugOverlay/` | F3 toggles. FPS, tree and road counts, nav cell, area under the cursor, `SimStats`. Read only. |
 | `GameMenuView`, `GameMenuState` | `UI/GameMenu/` | Esc menu: Resume, Save, Load, Options, Quit (menu rules SV-01..04 in `docs/design/saving.md`). |
-| `SavePanelController`, `LoadPanelController` | `UI/GameMenu/` | Save with a name, list saves newest first, load with the map check. See `save.md`. |
-| `ConfirmDialog`, `ConfirmDialogHost` | `UI/ConfirmDialog/` | Shared modal: `Show(message, confirmText, onConfirm)`, Cancel and Escape cancel, Confirm runs the action once. Built in code on its own UIDocument (created on first use). While open, `GameMenuState.IsOpen` is true, so tool, camera and picking input are blocked. Buttons are non-focusable (UIK-01). |
+| `SavePanelController`, `LoadPanelController` | `UI/GameMenu/` | Save with a name. Load lists saves newest first; each row has a bin (`Delete` through `ConfirmDialog`). A save this build cannot read is greyed with its reason and Load disabled. Load checks the map. See `save.md`. |
+| `ConfirmDialog`, `ConfirmDialogHost` | `UI/ConfirmDialog/` | Shared modal: `Show(message, confirmText, onConfirm)`, Cancel and Escape cancel, Confirm runs the action once. Built in code on its own UIDocument (created on first use). While open, `GameMenuState.IsOpen` is true, so tool, camera and picking input are blocked. Buttons are non-focusable (UIK-01). Used by deconstruction and save delete. |
 | `SnappingHotkey` | `UI/TopBar/` | See `unity-tools.md`. |
 
 ## Rules
@@ -46,4 +46,5 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 ## Tests
 
 `Assets/Tests/PlayMode/`: `TopBarTests`, `ToolPanelTests`, `OperationPanelTests`, `CitizenPanelTests`, `DebugOverlayTests`,
-`GameMenuTests`, `LoadPanelTests`, `SaveLoadScreenMatchTests`, `SnappingToggleTests`, `InputFocusSetUpFixture`, `TestPanelSettings`.
+`GameMenuTests`, `LoadPanelTests`, `SaveLoadScreenMatchTests`, `SnappingToggleTests`, `ConfirmDialogTests`,
+`BuildBarAffordabilityTests`, `InputFocusSetUpFixture`, `TestPanelSettings`. EditMode: `BuildEntryStateTests`.

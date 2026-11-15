@@ -6,6 +6,7 @@ Start with [`architecture.md`](architecture.md) for the big picture and [`../CLA
 - [`design/`](design/README.md): the designer's rules and why (owned by the human; agents read it).
 - [`decisions/`](decisions/): short records of technical decisions, `NNNN-title.md`. Read before re-arguing one.
 - [`milestones/`](milestones/): what each finished milestone shipped and what it left open.
+- [`test-runs/`](test-runs/): recorded results of full suite runs for a milestone.
 - [`unity-mcp.md`](unity-mcp.md): how agents drive the Unity Editor.
 
 ## Systems
