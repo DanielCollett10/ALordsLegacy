@@ -40,6 +40,12 @@ namespace LordsLegacy.Sim.People
         /// <summary>Ledger id of the family's camp larder (FD-10), or 0 for none yet. Saved by the Food section.</summary>
         public int LarderLocationId { get; internal set; }
 
+        /// <summary>Rations left over from a part-eaten item, carried to tomorrow (FD-15). Saved by the Food section.</summary>
+        public double CarriedRations { get; internal set; }
+
+        /// <summary>True when the family's larder could not cover its last daily need (FD-15). No effect on work (FD-16).</summary>
+        public bool IsHungry { get; internal set; }
+
         /// <summary>True while the family has no house (it lives at the camp).</summary>
         public bool IsHomeless => !HomeHouseId.HasValue;
 
