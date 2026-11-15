@@ -13,6 +13,7 @@ namespace LordsLegacy.Game
     {
         private static ConfirmDialogHost _host;
         private static bool _open;
+        private static int _escapeFrame = -1;
         private static Action _onConfirm;
 
         /// <summary>True while the dialog is shown.</summary>
@@ -29,6 +30,20 @@ namespace LordsLegacy.Game
             _open = true;
             _onConfirm = onConfirm;
             _host.Render(message ?? "", string.IsNullOrEmpty(confirmText) ? "Confirm" : confirmText);
+        }
+
+        /// <summary>
+        /// True while an Escape press belongs to the dialog: it is open, or it was cancelled by Escape in this frame.
+        /// Every other Escape handler must ignore the key when this is true, whatever the Update order.
+        /// </summary>
+        public static bool OwnsEscape => _open || _escapeFrame == UnityEngine.Time.frameCount;
+
+        /// <summary>Cancels because Escape was pressed, and marks the key as consumed for the rest of this frame.</summary>
+        internal static void CancelWithEscape()
+        {
+            if (!_open) return;
+            _escapeFrame = UnityEngine.Time.frameCount;
+            Cancel();
         }
 
         /// <summary>Closes the dialog without calling the confirm action. Ignored while closed.</summary>

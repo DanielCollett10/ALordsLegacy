@@ -147,7 +147,7 @@ namespace LordsLegacy.Game
                 Build();
             Refresh();
             var kb = Keyboard.current;
-            if (kb != null && kb.escapeKey.wasPressedThisFrame && _panel != null
+            if (kb != null && kb.escapeKey.wasPressedThisFrame && !ConfirmDialog.OwnsEscape && _panel != null
                 && _panel.style.display.value != DisplayStyle.None)
             {
                 var controller = _controller != null ? _controller : (_controller = FindFirstObjectByType<ToolController>());

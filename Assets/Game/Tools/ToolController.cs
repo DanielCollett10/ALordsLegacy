@@ -170,7 +170,7 @@ namespace LordsLegacy.Game.Tools
             if (_camera == null) { _camera = FindFirstObjectByType<CameraRig>(); SyncCamera(); }
             var kb = Keyboard.current;
             // While a confirm dialog is open, Escape belongs to it (ConfirmDialogHost cancels it), not to the tool or menu.
-            if (kb != null && kb.escapeKey.wasPressedThisFrame && !ConfirmDialog.IsOpen) HandleEscapeKey();
+            if (kb != null && kb.escapeKey.wasPressedThisFrame && !ConfirmDialog.OwnsEscape) HandleEscapeKey();
         }
 
         private void Refresh()

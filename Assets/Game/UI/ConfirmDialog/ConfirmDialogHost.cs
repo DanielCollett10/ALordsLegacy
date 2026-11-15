@@ -54,7 +54,7 @@ namespace LordsLegacy.Game
         private void Update()
         {
             var kb = Keyboard.current;
-            if (ConfirmDialog.IsOpen && kb != null && kb.escapeKey.wasPressedThisFrame) ConfirmDialog.Cancel();
+            if (ConfirmDialog.IsOpen && kb != null && kb.escapeKey.wasPressedThisFrame) ConfirmDialog.CancelWithEscape();
         }
 
         private void EnsureBuilt()

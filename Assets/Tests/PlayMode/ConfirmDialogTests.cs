@@ -108,6 +108,41 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _confirms);
         }
 
+        private sealed class StubTool : LordsLegacy.Game.Tools.ITool
+        {
+            public string Id => "stub";
+            public bool HasDraft => false;
+            public void Activate() { }
+            public void Deactivate() { }
+            public void Cancel() { }
+            public bool HandleEscape() { return false; }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator EscapeThatClosesDialogDoesNotDeselectTool()
+        {
+            var go = new GameObject("ToolController");
+            var ctl = go.AddComponent<LordsLegacy.Game.Tools.ToolController>();
+            ctl.Register(new StubTool());
+            ctl.Toggle("stub");
+            Assert.IsNotNull(ctl.ActiveTool);
+
+            ConfirmDialog.Show("Deconstruct?", "Deconstruct", () => { });
+            yield return null;
+            SetKeys(Key.Escape);
+            yield return null;
+            try
+            {
+                Assert.IsFalse(ConfirmDialog.IsOpen);
+                Assert.IsTrue(ConfirmDialog.OwnsEscape, "The Escape that closed the dialog stays owned for the rest of the frame.");
+                Assert.IsNotNull(ctl.ActiveTool, "That Escape must not also deselect the tool.");
+                SetKeys();
+                yield return null;
+                Assert.IsFalse(ConfirmDialog.OwnsEscape, "Ownership ends with the frame.");
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
         [Test]
         public void ShowingAgainReplacesMessageAndAction()
         {
