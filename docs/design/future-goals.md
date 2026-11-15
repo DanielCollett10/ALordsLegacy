@@ -10,6 +10,7 @@ system doc with rules. Source: T-119 notes (M3/M4 play), triaged 07/11/2026.
 | FG-03 | **Map-authoring pipeline** (real maps instead of the generated test map: hand-sculpted or imported heightmaps, forest painting, rivers) | Only worth building once map size (FG-01) is fixed | `Assets/Editor/MapGen/`, bake |
 | FG-04 | **Enemy AI faction and orchestrator** (a rival lord who plans and acts) | Needs people, movement, economy and military first (GDD MVP-1 and later) | New Sim system |
 | FG-05 | **Reshaping confirmed areas and roads** (owner, M6 planning). A confirmed building area must not be freely reshaped. It waits for the build / "work in progress" mechanic: while a building is still a WIP it can be changed from the WIP building panel at the bottom of the screen. A **work area** is reshaped from a button on the UI panel of the building it belongs to (e.g. the woodcutting work area lives in the woodcutter's panel) | Needs construction (WIP state) and building panels first (MVP-1) | Building panel UI, `AreaRegistry` reshape command (AREA-11) |
+| FG-06 | **Buildings block pathing by their model** (owner, 15/11/2026): most 3D models block walking across their whole footprint, except open structures on posts | Needs per-type model shapes and a blocking flag review; today only some footprint types block (decision 0018) | `FootprintTypeDef` blocking flag, `NavGrid` |
 
 ## Milestone order (owner, M6 planning)
 
