@@ -61,6 +61,13 @@ namespace LordsLegacy.Sim.Commands
             }
             Footprint fp = world.Footprints.Add(fpId, type, Centre, RotationDegrees);
             world.Operations.AddModule(OperationId, fp.Id);
+            if (type.FoodCapacity > 0)
+            {
+                // The forager hut is its camp's own food-only store (FD-23b); its size is a tuning value. It takes
+                // deliveries only once built (ForagingStores checks IsWorking).
+                int cap = type.Id == ModuleTypes.ForagerHutId ? world.Tuning.ForagerHutCapacity : type.FoodCapacity;
+                world.Inventory.AddFoodStore(System.Math.Max(1, cap), fp.Id);
+            }
 
             long[] trees = null;
             if (type.ClearsTrees)

@@ -31,6 +31,7 @@ namespace LordsLegacy.Sim.Footprints
                 case OxenStandId: return "Oxen stand";
                 case HouseId: return "House";
                 case GranaryId: return "Granary";
+                case ForagerHutId: return "Forager hut";
                 default: return typeId;
             }
         }
@@ -59,8 +60,19 @@ namespace LordsLegacy.Sim.Footprints
             new FootprintTypeDef(GranaryId, 8000, 6000, true, true, recipe: new ConstructionRecipe(8, 600),
                 foodCapacity: 100, yardMarginMm: 5000);
 
+        /// <summary>Id of the forager hut module (FD-22).</summary>
+        public const string ForagerHutId = "module.forager_hut";
+
+        /// <summary>
+        /// Forager hut: 6 × 4 m, blocks movement, clears trees, 8 logs / 480 worker-minutes (FD-22). It is also the camp's
+        /// food-only store: <see cref="FootprintTypeDef.FoodCapacity"/> is the default 30 items, set from
+        /// <c>SimTuning.ForagerHutCapacity</c> when the store is created (FD-23b).
+        /// </summary>
+        public static readonly FootprintTypeDef ForagerHut =
+            new FootprintTypeDef(ForagerHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 480), foodCapacity: 30);
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)

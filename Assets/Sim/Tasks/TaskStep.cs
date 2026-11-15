@@ -69,6 +69,14 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Move everything the carrier holds into the household's larder (FD-14).</summary>
         public static TaskStep DepositFood() => new TaskStep(StepKind.DepositFood, 0, false, null);
 
+        /// <summary>Put the <paramref name="count"/> baskets' worth of food the forager carries into ledger store
+        /// <paramref name="storeLocationId"/> (FD-24).</summary>
+        public static TaskStep DepositForage(int storeLocationId, int count)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+            return new TaskStep(StepKind.DepositForage, 0, false, null, 0, 0, storeLocationId, count);
+        }
+
         /// <summary>A walk to the task target.</summary>
         public static TaskStep MoveTo(bool heavy = false) => new TaskStep(StepKind.MoveTo, 0, heavy, null);
 

@@ -33,6 +33,10 @@ namespace LordsLegacy.Sim.Tasks
         public int? OxId { get; internal set; }
         /// <summary>For a build task (T-347): the footprint id of the site it builds; null otherwise.</summary>
         public int? SiteFootprintId { get; internal set; }
+        /// <summary>For a forage task (T-423): the bush it picks from; null otherwise. The task reserves it with its own id.</summary>
+        public int? BushId { get; internal set; }
+        /// <summary>For a forage task: the ledger carrier holding what has been picked so far; null until the first basket.</summary>
+        public int? CarrierId { get; internal set; }
         /// <summary>True if the ox was assigned to the owner operation when the task took it.</summary>
         public bool OxWasAssigned { get; internal set; }
         /// <summary>For an early-fetch haul (T-291, WC-23): the Fell task whose logs it will carry. The haul waits at

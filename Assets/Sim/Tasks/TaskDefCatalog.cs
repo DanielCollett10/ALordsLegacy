@@ -18,6 +18,7 @@ namespace LordsLegacy.Sim.Tasks
                 { ConstructionTaskDefs.DeliverId, (EligibilityPolicy.HelpersOnly, RequiredResource.Ox) },
                 { ConstructionTaskDefs.BuildId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
                 { ConstructionTaskDefs.DeconstructId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
+                { Foraging.ForagingSystem.ForageTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { Food.FoodTripSystem.FetchFoodTaskId, (EligibilityPolicy.OwnerFamily, RequiredResource.None) },
             };
 

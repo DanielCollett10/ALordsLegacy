@@ -53,7 +53,9 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Transfer the family's reserved allotment from the market stock to its carrier.</summary>
         CollectFood,
         /// <summary>Transfer the carrier's food to the family's larder.</summary>
-        DepositFood
+        DepositFood,
+        /// <summary>Move what the forager carries into the store named by the step's location id (FD-24).</summary>
+        DepositForage
     }
 
     /// <summary>Lifecycle of a task: Open, Assigned, Active, Done, or Cancelled from any live state.</summary>

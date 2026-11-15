@@ -165,6 +165,26 @@ namespace LordsLegacy.Sim.Tasks
             return true;
         }
 
+        /// <summary>Sets the bush a live forage task picks from. False if unknown or finished.</summary>
+        public bool SetBush(int taskId, int bushId)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.BushId = bushId;
+            Version++;
+            return true;
+        }
+
+        /// <summary>Sets the carrier location a live forage task fills. False if unknown or finished.</summary>
+        public bool SetCarrier(int taskId, int carrierLocationId)
+        {
+            var t = Get(taskId);
+            if (t == null || t.IsFinished) return false;
+            t.CarrierId = carrierLocationId;
+            Version++;
+            return true;
+        }
+
         /// <summary>Sets or clears (null) the Fell task an early-fetch haul waits for. False if unknown or finished.</summary>
         public bool SetAwaiting(int taskId, int? awaitedTaskId)
         {

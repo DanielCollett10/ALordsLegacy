@@ -24,7 +24,7 @@ namespace LordsLegacy.Sim.Construction
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             int total = type.HutCount * LogsOf(type.HutTypeId);
-            total += type.MinLogStorageCount * LogsOf(type.LogStorageTypeId);
+            if (type.LogStorageTypeId != null) total += type.MinLogStorageCount * LogsOf(type.LogStorageTypeId);
             return total;
         }
 

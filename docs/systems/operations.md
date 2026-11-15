@@ -21,6 +21,13 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 | `OxPool` | `FindFor(opId, from)`: assigned oxen first, then the nearest free pool ox. Stand occupancy, rest spots (WC-31/32). |
 | `Processes/` | `ProcessDef` (ordered `StageDef`s), `ProcessDefs.Timber`. `EffectiveStages` moves a disabled stage's time to the next. |
 
+## Foraging camp (T-423, FD-22..24, FD-23b)
+
+`OperationTypes.Foraging` (`area.foraging`): mandatory `module.forager_hut` (8 logs/480 min; also a food-only store of 30, made by
+`PlaceModule`, used once built), no log storage, 300 m circle. `ForagingSystem` opens one `task.forage` per idle forager aged 8+: reserve
+the nearest bush, pick up to `HandCarryItems` baskets (1 item each), deliver to the nearest store with room (`ForagingStores`: own hut or
+built granary, never the camp). `ForagingStatus` adds `NoBushes`; every store full = StorageFull.
+
 ## Lifecycle
 
 1. **Designate:** `OperationDraftTool` (area, then module ghosts in `OperationDraft`) → one `DesignateOperation` on Confirm.
@@ -42,17 +49,12 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 - `DeleteArea` refuses an operation area that still has modules ("Deconstruct its buildings first", CN-58), and a plot that still has a house ("Deconstruct the house first", HM-14b).
 
 ## Extending
-
-- A new operation type is an `OperationTypeDef` plus area types in `AreaTypes`. A new status reason goes in `OperationStatus.Of`.
-- Do not store status; compute it.
+- A new operation type is an `OperationTypeDef` plus area types in `AreaTypes`. A new status reason goes in `OperationStatus.Of`. Compute status, never store it.
 
 ## Gotchas
-
 - `OperationStatus.Of` gates felling. Footprint and operation ids share the ledger owner field, so `RemoveModule` guards
   against an operation seeing a site's pile as its own. Oxen stands hold `OxCapacity` = 1 (camp stand unlimited).
 
 ## Tests
-
-`Sim.Tests/Operations/` (`Woodcutting*`, `OperationStatusTests`, `OperationCommandTests`, `*ModulePlacementTests`, `Ox*`,
-`LogLoad`, `StorageFullFelling`, `Haul*`, `BuiltModuleGate`, `DeconstructOperation`), `Sim.Tests/Commands/` (`DesignateOperation`,
-`PlaceModules`), `Sim.Tests/Processes/`. Unity: `OperationPanelTests`, `OperationDraftToolTests`, `OperationDraftTests` (EditMode).
+`Sim.Tests/Operations/` (`Woodcutting*`, `Foraging` incl. the full pipeline, `OperationStatus`, `OperationCommand`, `Haul*`, `Ox*`, `LogLoad`,
+`DeconstructOperation`), `Sim.Tests/Commands/`, `Sim.Tests/Processes/`. Unity (EditMode): `OperationPanelTests`, `OperationDraft*Tests`.
