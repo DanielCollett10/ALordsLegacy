@@ -41,7 +41,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreatePeopleRenderers(host);
             CreateGroundPicker(host, cam);
             var topBar = CreateTopBar(host);
-            CreateBuildBar();
+            CreateBuildBar(host);
             CreateRoadTool(host);
             CreateAreaTools(host);
             CreateGroundReadout();
@@ -185,11 +185,12 @@ namespace LordsLegacy.EditorTools.Scenes
         }
 
         /// <summary>Adds the build bar UIDocument and the ToolController wired to it and the camera rig.</summary>
-        public static GameObject CreateBuildBar()
+        public static GameObject CreateBuildBar(SimHost host)
         {
             var go = CreateUiDocument("BuildBar", "Assets/Game/UI/BuildBar/BuildBar.uxml");
             var view = go.AddComponent<BuildBarView>();
             SetRef(view, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/BuildBar/BuildBar.uss"));
+            SetRef(view, "_host", host);
             var tools = new GameObject("ToolController").AddComponent<LordsLegacy.Game.Tools.ToolController>();
             SetRef(tools, "_bar", view);
             SetRef(tools, "_camera", Object.FindFirstObjectByType<CameraRig>());

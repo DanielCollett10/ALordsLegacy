@@ -38,6 +38,7 @@ namespace LordsLegacy.Tests.PlayMode
             _panel = TestPanelSettings.Create();
             _uiGo.AddComponent<UIDocument>().panelSettings = _panel;
             _view = _uiGo.AddComponent<BuildBarView>();
+            _view.AvailableLogs = () => 40; // starting logs: the woodcutter (8 logs) is affordable (BT-02)
             _uiGo.SetActive(true);
 
             _camGo = new GameObject("Rig");
