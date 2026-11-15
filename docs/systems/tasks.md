@@ -11,7 +11,7 @@ Operations create tasks; the dispatcher assigns them; the step runner performs t
 |---|---|
 | `TaskDef` | Id, explicit `TaskStep` list, `EligibilityPolicy` (for example `AssignedThenHelpers`, `HelpersOnly`), `RequiredResource` (`Ox`, …). |
 | `TaskDefCatalog` | Looks a def up by id. Saves refer to defs by id; an unknown id fails the load. |
-| `ConstructionTaskDefs` | `task.deliver_materials` (HelpersOnly, Ox, heavy load/unload) and `task.build` (HelpersOnly, heavy Work). |
+| `ConstructionTaskDefs` | `task.deliver_materials` (HelpersOnly, Ox, heavy load/unload) and `task.build` (HelpersOnly, heavy Work), and `task.deconstruct` (HelpersOnly, heavy Work, T-394). |
 | `TaskStep` | `MoveTo`, `Work(duration)` (with heavy flag and stage id), and ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`. |
 | `TaskRecord` | Id, def, state, owner, assignee, priority, subject (module name), target, step index, `OxId`, `AwaitsTaskId`, `WindingDown`, `SiteFootprintId`. |
 | `TaskPriority` | Normal (default) or High. Changed only by `TaskBoard.SetPriority`. |

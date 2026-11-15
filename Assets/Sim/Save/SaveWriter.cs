@@ -12,7 +12,7 @@ namespace LordsLegacy.Sim.Save
     public sealed class SaveWriter
     {
         /// <summary>The save format version this code writes and reads.</summary>
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         internal static readonly byte[] Magic = { (byte)'L', (byte)'L', (byte)'S', (byte)'V' };
 

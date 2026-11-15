@@ -48,6 +48,11 @@ namespace LordsLegacy.Sim.Commands
                 foreach (int fid in families) new UnassignFamily(op.Id, fid).Apply(world);
             }
             world.Deconstruction.Add(new DeconstructionEntry(ModuleId));
+            if (fp != null && DeconstructionWork.TotalMinutes(world, fp) <= 0)
+            {
+                DeconstructionWork.Finish(world, ModuleId); // 0-minute recipe: removed at once (CN-53)
+                return CommandResult.Accepted(removed: new long[] { ModuleId });
+            }
             return CommandResult.Accepted();
         }
     }

@@ -223,6 +223,12 @@ namespace LordsLegacy.Sim.Tuning
         /// </summary>
         public double SpatialIndexCellM { get; set; } = 32;
 
+        /// <summary>Deconstruction takes this share of the recipe's build minutes. Unit: fraction. Rule: CN-53 (PLACEHOLDER).</summary>
+        public double DeconstructTimeShare { get; set; } = 0.5;
+
+        /// <summary>Share of the recipe's logs returned as a ground pile, rounded down. Unit: fraction. Rule: CN-54.</summary>
+        public double DeconstructRefundShare { get; set; } = 0.5;
+
         /// <summary>
         /// Game minutes that pass per real second at 1× speed. Unit: game minutes per real second.
         /// Derived: 1440 ÷ (<see cref="RealMinutesPerGameDayAt1x"/> × 60); 0.8 at the default of 30.
