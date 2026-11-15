@@ -47,6 +47,8 @@ namespace LordsLegacy.EditorTools
             MapData map = MapDataIO.Read(File.ReadAllBytes(mapPath));
             ForestRegion region = ForestScatter.ReadRegion(ForestScatter.RegionPath);
             var cfg = Build(map, region);
+            // The main object's name must match the file name, or Unity logs "Main Object Name ... does not match filename".
+            cfg.name = Path.GetFileNameWithoutExtension(assetPath);
 
             var asset = AssetDatabase.LoadAssetAtPath<StartLayoutConfig>(assetPath);
             if (asset == null)

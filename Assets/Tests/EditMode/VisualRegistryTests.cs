@@ -30,6 +30,7 @@ namespace LordsLegacy.Tests.EditMode
         {
             Object.DestroyImmediate(_tree);
             Object.DestroyImmediate(_rock);
+            Object.DestroyImmediate(_registry.Fallback);
             Object.DestroyImmediate(_registry);
         }
 
