@@ -20,6 +20,7 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 | `DebugOverlayView` | `UI/DebugOverlay/` | F3 toggles. FPS, tree and road counts, nav cell, area under the cursor, `SimStats`. Read only. |
 | `GameMenuView`, `GameMenuState` | `UI/GameMenu/` | Esc menu: Resume, Save, Load, Options, Quit (menu rules SV-01..04 in `docs/design/saving.md`). |
 | `SavePanelController`, `LoadPanelController` | `UI/GameMenu/` | Save with a name, list saves newest first, load with the map check. See `save.md`. |
+| `ConfirmDialog`, `ConfirmDialogHost` | `UI/ConfirmDialog/` | Shared modal: `Show(message, confirmText, onConfirm)`, Cancel and Escape cancel, Confirm runs the action once. Built in code on its own UIDocument (created on first use). While open, `GameMenuState.IsOpen` is true, so tool, camera and picking input are blocked. Buttons are non-focusable (UIK-01). |
 | `SnappingHotkey` | `UI/TopBar/` | See `unity-tools.md`. |
 
 ## Rules

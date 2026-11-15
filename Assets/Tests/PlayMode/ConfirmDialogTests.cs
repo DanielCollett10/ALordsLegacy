@@ -1,0 +1,121 @@
+using LordsLegacy.Game;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+
+namespace LordsLegacy.Tests.PlayMode
+{
+    /// <summary>PlayMode tests for the shared <see cref="ConfirmDialog"/> (T-396): message, buttons, input block, Escape.</summary>
+    public class ConfirmDialogTests
+    {
+        private Keyboard _keyboard;
+        private int _confirms;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _keyboard = InputSystem.AddDevice<Keyboard>();
+            _confirms = 0;
+            ConfirmDialog.Cancel();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            ConfirmDialog.Cancel();
+            var host = Object.FindFirstObjectByType<ConfirmDialogHost>();
+            if (host != null)
+            {
+                var doc = host.GetComponent<UIDocument>();
+                var ps = doc.panelSettings;
+                Object.DestroyImmediate(host.gameObject);
+                if (ps != null) Object.DestroyImmediate(ps);
+            }
+            if (_keyboard != null) InputSystem.RemoveDevice(_keyboard);
+        }
+
+        private VisualElement Root() => Object.FindFirstObjectByType<ConfirmDialogHost>().GetComponent<UIDocument>().rootVisualElement;
+
+        /// <summary>Sends a full keyboard state (the given keys down) and processes one Input System update.</summary>
+        private void SetKeys(params Key[] keys)
+        {
+            InputSystem.QueueStateEvent(_keyboard, new KeyboardState(keys));
+            InputSystem.Update();
+        }
+
+        private void Click(string name)
+        {
+            var button = Root().Q<Button>(name);
+            Assert.IsNotNull(button, name + " must exist");
+            using (var ev = ClickEvent.GetPooled()) button.SendEvent(ev);
+        }
+
+        [Test]
+        public void ShowOpensWithMessageConfirmTextAndBlocksGameInput()
+        {
+            Assert.IsFalse(GameMenuState.IsOpen);
+            ConfirmDialog.Show("Deconstruct this hut? Half its logs come back.", "Deconstruct", () => _confirms++);
+
+            Assert.IsTrue(ConfirmDialog.IsOpen);
+            Assert.IsTrue(GameMenuState.IsOpen, "An open dialog must block tool and camera input.");
+            Assert.AreEqual("Deconstruct this hut? Half its logs come back.", Root().Q<Label>("confirm-dialog-message").text);
+            Assert.AreEqual("Deconstruct", Root().Q<Button>("confirm-dialog-confirm").text);
+            Assert.AreEqual("Cancel", Root().Q<Button>("confirm-dialog-cancel").text);
+            Assert.AreEqual(DisplayStyle.Flex, Root().Q("confirm-dialog-backdrop").style.display.value);
+            Assert.AreEqual(0, _confirms, "Showing must not confirm.");
+        }
+
+        [Test]
+        public void CancelButtonClosesWithoutConfirming()
+        {
+            ConfirmDialog.Show("Delete save 'Autumn'?", "Delete", () => _confirms++);
+            Click("confirm-dialog-cancel");
+
+            Assert.IsFalse(ConfirmDialog.IsOpen);
+            Assert.IsFalse(GameMenuState.IsOpen, "Closing must release the input block.");
+            Assert.AreEqual(0, _confirms);
+            Assert.AreEqual(DisplayStyle.None, Root().Q("confirm-dialog-backdrop").style.display.value);
+        }
+
+        [Test]
+        public void ConfirmButtonClosesAndRunsActionOnce()
+        {
+            ConfirmDialog.Show("Deconstruct the work area?", "Deconstruct", () => _confirms++);
+            Click("confirm-dialog-confirm");
+
+            Assert.IsFalse(ConfirmDialog.IsOpen);
+            Assert.IsFalse(GameMenuState.IsOpen);
+            Assert.AreEqual(1, _confirms);
+
+            Click("confirm-dialog-confirm");
+            Assert.AreEqual(1, _confirms, "A closed dialog must not run its action again.");
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator EscapeCancelsWithoutConfirming()
+        {
+            ConfirmDialog.Show("Deconstruct?", "Deconstruct", () => _confirms++);
+            yield return null;
+
+            SetKeys(Key.Escape);
+            yield return null;
+            SetKeys();
+
+            Assert.IsFalse(ConfirmDialog.IsOpen, "Escape must cancel the dialog.");
+            Assert.IsFalse(GameMenuState.IsOpen);
+            Assert.AreEqual(0, _confirms);
+        }
+
+        [Test]
+        public void ShowingAgainReplacesMessageAndAction()
+        {
+            ConfirmDialog.Show("First", "One", () => Assert.Fail("The replaced action must not run."));
+            ConfirmDialog.Show("Second", "Two", () => _confirms++);
+            Assert.AreEqual("Second", Root().Q<Label>("confirm-dialog-message").text);
+
+            Click("confirm-dialog-confirm");
+            Assert.AreEqual(1, _confirms);
+        }
+    }
+}
