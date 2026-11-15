@@ -1144,7 +1144,9 @@ namespace LordsLegacy.Tests.PlayMode
 
             module.ClickAt(Screen(55, 60));
             drawn.Refresh();
-            Assert.AreEqual(1, drawn.BoxCount, "A placed module must be drawn.");
+            // The hut has a construction site since T-342; ConstructionRenderer draws its scaffold, not ModuleRenderer.
+            Assert.AreEqual(1, _host.World.Construction.Count, "The placed hut is a construction site.");
+            Assert.AreEqual(0, drawn.BoxCount, "An unbuilt module is drawn as scaffold, not as a box.");
             Assert.AreEqual(1, module.Queue.Count, _panel.Status);
             Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.LogStorageId, module.Queue[0]);
             StringAssert.Contains("log storage", _panel.Status);
@@ -1154,7 +1156,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreSame(module, _controller.ActiveTool, _panel.Status);
             StringAssert.Contains("All modules placed", _panel.Status);
             drawn.Refresh();
-            Assert.AreEqual(2, drawn.BoxCount);
+            Assert.AreEqual(1, drawn.BoxCount, "Only the log storage (no recipe) is built at once; the hut is a site.");
             Assert.IsTrue(_controller.HandleEscape());
             Assert.IsNull(_controller.ActiveTool);
             Assert.IsFalse(_panel.IsShown);
