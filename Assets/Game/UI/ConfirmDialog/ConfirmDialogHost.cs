@@ -23,7 +23,25 @@ namespace LordsLegacy.Game
         /// <summary>Creates the PanelSettings used by the dialog's UIDocument. Drawn above the other UI documents.</summary>
         public static PanelSettings CreatePanelSettings()
         {
-            var ps = ScriptableObject.CreateInstance<PanelSettings>();
+            // A PanelSettings with no theme stylesheet has no default font, so labels and buttons draw no text. Copy the
+            // shared PanelSettings (it carries the runtime theme) from any UIDocument already in the scene.
+            PanelSettings ps = null;
+            foreach (var other in Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None))
+            {
+                if (other.panelSettings != null && other.panelSettings.themeStyleSheet != null)
+                {
+                    ps = Object.Instantiate(other.panelSettings);
+                    break;
+                }
+            }
+            if (ps == null)
+            {
+                ps = ScriptableObject.CreateInstance<PanelSettings>();
+#if UNITY_EDITOR
+                ps.themeStyleSheet = UnityEditor.AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(
+                    "Assets/UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss");
+#endif
+            }
             ps.sortingOrder = 1000f;
 #if UNITY_EDITOR
             // Everything is styled in code, so the missing-theme warning is noise (same switch as the test PanelSettings).
