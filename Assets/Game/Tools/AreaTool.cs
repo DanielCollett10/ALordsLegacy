@@ -117,6 +117,9 @@ namespace LordsLegacy.Game.Tools
         /// <summary>Sets the view settings (snapping on/off and distance). Without them the top bar's, or defaults (snapping on, 12 px).</summary>
         public void SetViewSettings(ViewSettings settings) { _settings = settings; }
 
+        /// <summary>The draft as a shape (edges resolved the way Confirm would send them); used by tools composing this one.</summary>
+        public AreaShape DraftShape => CurrentShape();
+
         /// <summary>The draft's edges (one per point; edge i joins point i to point i+1), with road-following edges resolved.</summary>
         public IReadOnlyList<AreaEdge> Edges => CurrentShape().Edges;
 

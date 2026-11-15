@@ -60,6 +60,20 @@ namespace LordsLegacy.Tests.EditMode
         }
 
         [Test]
+        public void HousePlotEntry_IsGatedByTheHouseCost()
+        {
+            ToolEntry house = null;
+            foreach (var e in ToolEntry.Defaults())
+                if (e.Id == "house") house = e;
+            Assert.IsNotNull(house);
+            Assert.AreEqual("House plot", house.Label);
+            Assert.IsTrue(house.Enabled);
+            Assert.AreEqual(10, house.CostLogs());
+            Assert.IsFalse(BuildEntryState.Of(house.CostLogs(), 9).Enabled);
+            Assert.IsTrue(BuildEntryState.Of(house.CostLogs(), 10).Enabled);
+        }
+
+        [Test]
         public void EntriesWithoutCost_HaveNoCostSource()
         {
             foreach (var e in ToolEntry.Defaults())

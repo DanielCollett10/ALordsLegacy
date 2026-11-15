@@ -259,6 +259,22 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(draftTool, "_panel", panel);
             SetRef(draftTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             SetRef(draftTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            // T-408: the "house" build bar entry draws a plot with the composed plot AreaTool and shows the house ghost.
+            var plotArea = new GameObject("PlotAreaTool").AddComponent<LordsLegacy.Game.Tools.AreaTool>();
+            SetString(plotArea, "_toolId", "plot-draw");
+            SetString(plotArea, "_typeId", LordsLegacy.Sim.Areas.AreaTypes.PlotId);
+            SetRef(plotArea, "_host", host);
+            SetRef(plotArea, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(plotArea, "_areas", ar);
+            SetRef(plotArea, "_panel", panel);
+            SetRef(plotArea, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            SetRef(plotArea, "_topBar", Object.FindFirstObjectByType<TopBarController>());
+            var plotTool = new GameObject("PlotTool").AddComponent<LordsLegacy.Game.Tools.PlotTool>();
+            SetString(plotTool, "_toolId", LordsLegacy.Game.Tools.PlotTool.HouseToolId);
+            SetRef(plotTool, "_host", host);
+            SetRef(plotTool, "_areaTool", plotArea);
+            SetRef(plotTool, "_panel", panel);
+            SetRef(plotTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             return last;
         }
 

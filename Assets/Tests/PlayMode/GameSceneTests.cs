@@ -112,7 +112,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(areaRenderer, "AreaRenderer missing.");
             AssertNoNullRefs(areaRenderer);
             var areaTools = Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None);
-            Assert.AreEqual(4, areaTools.Length, "Test area, Test work area, Woodcutter work area and Woodcutter tools expected.");
+            Assert.AreEqual(5, areaTools.Length, "Test area, Test work area, Woodcutter work area, Woodcutter and Plot tools expected.");
             foreach (var t in areaTools) AssertNoNullRefs(t);
         }
 
@@ -132,7 +132,7 @@ namespace LordsLegacy.Tests.PlayMode
             foreach (var t in Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None))
                 ids.Add(t.Id);
             ids.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter-draw", "woodcutter-work" }, ids);
+            CollectionAssert.AreEqual(new[] { "plot-draw", LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter-draw", "woodcutter-work" }, ids);
             var draftTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.OperationDraftTool>();
             Assert.IsNotNull(draftTool, "OperationDraftTool missing.");
             Assert.AreEqual("woodcutter", draftTool.Id);
