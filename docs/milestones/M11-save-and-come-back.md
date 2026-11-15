@@ -31,7 +31,9 @@ decision 0034.
   `PendingLoad` (bytes handed to the next scene), `SimHost` takes them on start, so renderers always build from a fresh world.
 - **Autosave (SV-11):** `AutosaveTimer` (plain C#, real-time count, runs only while a world is loaded and the menu is closed;
   Sim pause still counts), `AutosaveController` (30 minutes by default, `Autosave.llsave`, "Saved" note for 2 s). Any manual
-  save restarts the count. Wired into the Game scene by T-373 and T-374.
+  save restarts the count: this is the owner's rule (SV-11, "the timer restarts after any save"). `AutosaveControllerTests.
+  ManualSaveRestartsTheCount` calls `OnManualSaved` directly. It has not been run for this summary, and the Save panel's
+  `Saved` event reaching it has not been checked in play. Wired into the Game scene by T-373 and T-374.
 - **Process rule:** new Sim state goes into a save section in the same task and must pass the round-trip test (CLAUDE.md,
   T-369).
 
@@ -53,6 +55,8 @@ decision 0034.
   state (walk orders, ox tracks, rest targets). SV-22 is covered by `SaveLoadScreenMatchTests` for mid-haul and mid-build.
 - **Options and Quit** are disabled by design (SV-03). Their behaviour is not built.
 - **Menu rules in play:** SV-01..04 are covered by `GameMenuTests` in PlayMode. Their feel in real play has not been checked.
+- **Autosave restart after a manual save (SV-11)** is the intended rule, but the end-to-end path (Save panel to
+  `AutosaveController`) is not tested. Only the controller method is.
 - **Tuning:** a save keeps its tuning (SV-14), so editing `SimConfig` does not change existing saves. There is no "load with
   current tuning" option.
 - **Map changes:** a re-bake breaks old saves by hash (SV-30 and SV-32). That is accepted during development only; SV-31 is
