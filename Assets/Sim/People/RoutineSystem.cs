@@ -269,7 +269,9 @@ namespace LordsLegacy.Sim.People
             double cx, cz;
             Family own = world.People.FindFamily(c.FamilyId);
             // Workers of an assigned family with nothing to do mill about near home (PPL-45).
-            if (world.Camp != null && !(own != null && own.WorkplaceId.HasValue)) { cx = world.Camp.Fire.XMetres; cz = world.Camp.Fire.ZMetres; }
+            // A housed family mills about its house access point, not the camp (HM-12, PPL-30).
+            bool housed = own != null && !own.IsHomeless;
+            if (world.Camp != null && !housed && !(own != null && own.WorkplaceId.HasValue)) { cx = world.Camp.Fire.XMetres; cz = world.Camp.Fire.ZMetres; }
             else
             {
                 Family f = world.People.FindFamily(c.FamilyId);

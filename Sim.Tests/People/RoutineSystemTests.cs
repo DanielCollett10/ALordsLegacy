@@ -223,5 +223,29 @@ namespace LordsLegacy.Sim.Tests
             w.People.AddCitizen(1, "Z", Sex.Male, 0, 1, 50, 50);
             Assert.DoesNotThrow(() => w.Step(1440));
         }
+
+        [Test]
+        public void HousedFamily_MillsAndSleepsAtHouseAccessPoint_NotCamp_OverASimulatedDay()
+        {
+            SimWorld w = NewWorld();
+            Family ash = w.People.Families.First(f => f.Surname == "Ash");
+            ash.HomeHouseId = 99; // housed: home point is the house access point (HM-12)
+            ash.HomeX = 40; ash.HomeZ = 40;
+            double maxDist = 0;
+            for (int i = 0; i < 24 * 60; i++)
+            {
+                w.Step();
+                foreach (Citizen c in w.People.Citizens.Where(x => x.FamilyId == ash.Id && x.Activity == Activity.MillingAbout))
+                    maxDist = Math.Max(maxDist, Math.Sqrt((c.X - 40) * (c.X - 40) + (c.Z - 40) * (c.Z - 40)));
+            }
+            Assert.That(maxDist, Is.GreaterThan(0).And.LessThanOrEqualTo(w.Tuning.MillRadiusM + 1.0));
+            StepTo(w, 2, 0);
+            foreach (Citizen c in w.People.Citizens.Where(x => x.FamilyId == ash.Id))
+            {
+                Assert.AreEqual(Activity.Sleeping, c.Activity, c.Name);
+                Assert.AreEqual(40, c.X, 0.01, c.Name);
+                Assert.AreEqual(40, c.Z, 0.01, c.Name);
+            }
+        }
     }
 }
