@@ -29,6 +29,7 @@ namespace LordsLegacy.Sim.Save.Sections
             WriteCamp(world.Camp, w);
             WriteOperations(world.Operations, w);
             WriteSites(world.Construction, w);
+            WriteDeconstruction(world.Deconstruction, w);
         }
 
         /// <inheritdoc />
@@ -40,6 +41,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 ReadCamp(world, r);
                 ReadOperations(world.Operations, r);
                 ReadSites(world, r);
+                ReadDeconstruction(world, r);
             }
             catch (InvalidOperationException e) { throw new SaveFormatException(e.Message); }
             catch (ArgumentException e) { throw new SaveFormatException(e.Message); }
@@ -169,6 +171,29 @@ namespace LordsLegacy.Sim.Save.Sections
                 };
                 site.ReservationIds.AddRange(reservations);
                 world.Construction.Add(site);
+            }
+        }
+
+        private static void WriteDeconstruction(DeconstructionRegistry reg, SaveWriter w)
+        {
+            w.WriteInt32(reg.Count);
+            foreach (DeconstructionEntry e in reg.Entries)
+            {
+                w.WriteInt32(e.FootprintId);
+                w.WriteInt32(e.ProgressMinutes);
+            }
+        }
+
+        private static void ReadDeconstruction(SimWorld world, SaveReader r)
+        {
+            int count = r.ReadCount(8);
+            for (int i = 0; i < count; i++)
+            {
+                int fp = r.ReadInt32();
+                int progress = r.ReadInt32();
+                if (world.Footprints.Get(fp) == null) throw new SaveFormatException("Deconstruction of missing footprint " + fp + ".");
+                if (!world.IsBuilt(fp)) throw new SaveFormatException("Deconstruction of unbuilt footprint " + fp + ".");
+                world.Deconstruction.Add(new DeconstructionEntry(fp) { ProgressMinutes = progress });
             }
         }
 

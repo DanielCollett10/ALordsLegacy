@@ -155,6 +155,18 @@ namespace LordsLegacy.Sim.Tests.Save
         }
 
         [Test]
+        public void DeconstructionEntries_RoundTrip()
+        {
+            var (w, map, _, hut) = MakeWithHut();
+            w.Construction.Remove(hut);
+            w.Deconstruction.Add(new DeconstructionEntry(hut) { ProgressMinutes = 120 });
+            SimWorld back = RoundTrip(w, map);
+            Assert.AreEqual(1, back.Deconstruction.Count);
+            Assert.AreEqual(120, back.Deconstruction.Get(hut).ProgressMinutes);
+            Assert.IsFalse(back.IsWorking(hut));
+        }
+
+        [Test]
         public void SiteForMissingFootprint_IsRejectedOnRead()
         {
             var (w, map) = Make();
