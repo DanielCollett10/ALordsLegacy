@@ -29,6 +29,8 @@ MonoBehaviour:
   oxSpeedMPerGameMinute: 1.04
   minSleepHours: 6
   maxBuildersPerSite: 4
+  deconstructTimeShare: 0.5
+  deconstructRefundShare: 0.5
   standardLogLengthM: 4
   trunkLengthMinM: 12
   trunkLengthMaxM: 20
