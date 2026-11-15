@@ -4,6 +4,7 @@ using LordsLegacy.Game;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Construction;
+using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Map;
@@ -183,6 +184,47 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_house.IsShown);
             Assert.AreEqual("Homeless (camp)", _citizen.HomeText, "Marking the house evicts the family (HM-14).");
             Assert.AreEqual("Home: Archer house", CitizenPanelView.HomeLine(HomedFamily()));
+        }
+
+        [UnityTest]
+        public IEnumerator HousePanelShowsTheHouseLarderByTypeAndDaysLeft()
+        {
+            var w = _host.World;
+            var family = w.People.Families.First();
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
+            w.Inventory.Produce(Larders.ForHome(w, w.Homes.Get(_houseId)), Items.Meat, 2);
+            w.Inventory.Produce(Larders.ForHome(w, w.Homes.Get(_houseId)), Items.Berries, 3);
+            _agents.SelectHouse(_houseId);
+            yield return null;
+
+            Assert.IsTrue(_house.IsShown);
+            StringAssert.Contains("Meat: 2 (6 rations)", _house.LarderText);
+            StringAssert.Contains("Berries: 3 (3 rations)", _house.LarderText);
+            StringAssert.Contains("Mushrooms: 0", _house.LarderText);
+            double days = 9.0 / (2 * w.Tuning.AdultRations);
+            StringAssert.Contains("Days left: " + days.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), _house.LarderText);
+            Assert.AreEqual("", _house.HungryText, "Fed household is not Hungry.");
+            var b = _house.PanelElement.worldBound;
+            Assert.Greater(b.width, 0f);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator HousePanelShowsHungryWhenTheHouseLarderRanShortAtMidnight()
+        {
+            var w = _host.World;
+            var family = w.People.Families.First();
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
+            _agents.SelectHouse(_houseId);
+            // Empty larder: the household eats nothing at the next midnight and is Hungry (FD-16).
+            int guard = 0;
+            do { w.Step(); guard++; } while (!(w.Now.Hour == 0 && w.Now.Minute == 0) && guard < 5000);
+            yield return null;
+
+            Assert.IsTrue(family.IsHungry);
+            Assert.AreEqual("Hungry", _house.HungryText);
+            StringAssert.Contains("Days left: 0.0", _house.LarderText);
+            yield return null;
         }
     }
 }

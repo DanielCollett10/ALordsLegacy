@@ -1,8 +1,11 @@
+using System;
+using System.Globalization;
 using System.Text;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.People;
 using UnityEngine;
@@ -13,7 +16,8 @@ namespace LordsLegacy.Game
 {
     /// <summary>
     /// Info panel for the house chosen through <see cref="AgentPicker"/> (HM-21): state (Delivering, Building n%, Built,
-    /// Deconstructing n%), the household name and members or "Empty", a High priority toggle while unbuilt, and
+    /// Deconstructing n%), the household name and members or "Empty", the household larder by food type with days left
+    /// and a Hungry line (T-420, FD-10, FD-16), a High priority toggle while unbuilt, and
     /// Deconstruct (with a confirm dialog). Read from the Sim every frame; commands go through <see cref="SimHost"/>.
     /// Built in code, never takes keyboard focus, closes with its button or Escape (no tool active).
     /// </summary>
@@ -25,7 +29,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _title, _state, _household, _members, _message;
+        private Label _title, _state, _household, _members, _larder, _hungry, _message;
         private Button _priority, _deconstruct, _close;
         private bool _subscribed;
 
@@ -43,6 +47,12 @@ namespace LordsLegacy.Game
 
         /// <summary>Members line text (names, comma separated); empty when the house is Empty.</summary>
         public string MembersText => _members?.text ?? "";
+
+        /// <summary>Larder lines: one per food type ("Meat: 4 (12 rations)") then "Days left: 4.8"; empty when Empty.</summary>
+        public string LarderText => _larder?.style.display.value == DisplayStyle.Flex ? _larder.text : "";
+
+        /// <summary>"Hungry" while the household's larder ran short at the last midnight (FD-16); empty otherwise.</summary>
+        public string HungryText => _hungry?.style.display.value == DisplayStyle.Flex ? _hungry.text : "";
 
         /// <summary>Message line text (a refused command); empty when none.</summary>
         public string MessageText => _message?.text ?? "";
@@ -106,6 +116,31 @@ namespace LordsLegacy.Game
             return "Deconstruct this house?\nReturns " + Sim.Construction.DeconstructionWork.RefundLogs(world, fp) + " logs." + family;
         }
 
+        /// <summary>
+        /// Larder text for a household (FD-10, HM-21): every food type with its count and rations, then days left at
+        /// the current need. Pure read of the Sim; "Days left: -" when nobody in the household eats.
+        /// </summary>
+        public static string LarderLines(SimWorld world, Family family)
+        {
+            var sb = new StringBuilder();
+            foreach (FoodStock s in HouseholdLarder.CountsOf(world, family))
+            {
+                sb.Append(ItemLabel(s.Item.Id)).Append(": ").Append(s.Count);
+                if (s.Count > 0) sb.Append(" (").Append(s.Rations).Append(s.Rations == 1 ? " ration)" : " rations)");
+                sb.Append('\n');
+            }
+            double days = HouseholdLarder.DaysLeft(world, family);
+            sb.Append("Days left: ").Append(double.IsInfinity(days) ? "-" : days.ToString("0.0", CultureInfo.InvariantCulture));
+            return sb.ToString();
+        }
+
+        /// <summary>Display name for an item id, e.g. "item.meat" → "Meat".</summary>
+        private static string ItemLabel(string id)
+        {
+            string name = id.StartsWith("item.", StringComparison.Ordinal) ? id.Substring(5) : id;
+            return name.Length == 0 ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);
+        }
+
         private void Run(ISimCommand cmd)
         {
             var host = Host();
@@ -142,6 +177,8 @@ namespace LordsLegacy.Game
                 _household.text = "Empty";
                 _members.text = "";
                 _members.style.display = DisplayStyle.None;
+                _larder.style.display = DisplayStyle.None;
+                _hungry.style.display = DisplayStyle.None;
             }
             else
             {
@@ -158,6 +195,11 @@ namespace LordsLegacy.Game
                 }
                 _members.text = sb.ToString();
                 _members.style.display = DisplayStyle.Flex;
+                _larder.text = LarderLines(world, family);
+                _larder.style.display = DisplayStyle.Flex;
+                // FD-16: Hungry is shown only while the household is short; it changes nothing else.
+                _hungry.text = "Hungry";
+                _hungry.style.display = family.IsHungry ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             var site = world.Construction.Get(id);
@@ -249,6 +291,11 @@ namespace LordsLegacy.Game
             _state = MakeLabel("house-state", 12, false);
             _household = MakeLabel("house-household", 12, false);
             _members = MakeLabel("house-members", 12, false);
+            _larder = MakeLabel("house-larder", 12, false);
+            _larder.style.display = DisplayStyle.None;
+            _hungry = MakeLabel("house-hungry", 12, true);
+            _hungry.style.color = new Color(1f, 0.55f, 0.45f);
+            _hungry.style.display = DisplayStyle.None;
             _message = MakeLabel("house-message", 12, false);
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
@@ -259,6 +306,7 @@ namespace LordsLegacy.Game
             _deconstruct.clicked += ClickDeconstruct;
 
             _panel.Add(_title); _panel.Add(_state); _panel.Add(_household); _panel.Add(_members);
+            _panel.Add(_hungry); _panel.Add(_larder);
             _panel.Add(_priority); _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);
