@@ -59,7 +59,7 @@ namespace LordsLegacy.Sim.Commands
             world.Construction.Add(site);
             Footprint fp = world.Footprints.Add(fpId, type, h.Centre, h.RotationDegrees);
             int plotId = (int)area.Created[0];
-            world.Homes.Add(fp.Id, plotId);
+            Food.Larders.ForHome(world, world.Homes.Add(fp.Id, plotId));
             return CommandResult.Accepted(created: new long[] { plotId, fp.Id }, removedTreeIds: area.RemovedTreeIds);
         }
 

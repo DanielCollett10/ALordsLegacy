@@ -28,7 +28,7 @@ namespace LordsLegacy.Sim.Homes
                 if (house == null || !world.IsWorking(house.Id)) continue;
                 Family f = Choose(world, house);
                 if (f == null) continue;
-                world.Homes.MoveIn(home, f);
+                if (world.Homes.MoveIn(home, f)) Food.Larders.OnMoveIn(world, home, f);
                 f.HomeX = house.AccessPoint.XMetres;
                 f.HomeZ = house.AccessPoint.ZMetres;
             }

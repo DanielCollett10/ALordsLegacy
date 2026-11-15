@@ -14,6 +14,9 @@ namespace LordsLegacy.Sim.Homes
         /// <summary>Id of the family living here, or 0 while the house is Empty.</summary>
         public int FamilyId { get; internal set; }
 
+        /// <summary>Ledger id of the house's larder (FD-10), or 0 for none yet. Saved by the Food section.</summary>
+        public int LarderLocationId { get; internal set; }
+
         internal HomeRecord(int houseFootprintId, int plotAreaId, int familyId)
         {
             HouseFootprintId = houseFootprintId; PlotAreaId = plotAreaId; FamilyId = familyId;

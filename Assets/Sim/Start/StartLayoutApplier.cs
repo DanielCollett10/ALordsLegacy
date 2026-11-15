@@ -39,14 +39,17 @@ namespace LordsLegacy.Sim.Start
             foreach (StartStock s in layout.Stock)
                 if (s.Count > 0) world.Inventory.Produce(stockpile, s.Item, s.Count);
 
+            LedgerLocation foodStore = world.Inventory.AddFoodStore(stockpileSpot);
+            if (world.Tuning.StartingMeat > 0) world.Inventory.Produce(foodStore, Items.Meat, world.Tuning.StartingMeat);
+
             world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), stockpileSpot,
-                ToWorld(layout, layout.OxStand), stockpile);
+                ToWorld(layout, layout.OxStand), stockpile) { FoodStoreLocation = foodStore };
 
             int famId = 1, citId = 1;
             foreach (StartFamily f in layout.Families)
             {
                 PointMm home = ToWorld(layout, f.TentSpot);
-                world.People.AddFamily(famId, f.Surname, home.XMetres, home.ZMetres);
+                Food.Larders.ForFamily(world, world.People.AddFamily(famId, f.Surname, home.XMetres, home.ZMetres));
                 foreach (StartCitizen c in f.Citizens)
                     world.People.AddCitizen(citId++, c.Name, c.Sex, c.BirthTick, famId, home.XMetres, home.ZMetres);
                 famId++;
