@@ -14,20 +14,20 @@
 | `ISaveSection` | `Save/ISaveSection.cs` | One section: `Write` and `Read`. Sections live in `Save/Sections/`. |
 | `SaveDiff` | `Save/SaveDiff.cs` | `FirstDifference(a, b)`: names the first differing section id (0 = header). Used by tests. |
 | `SaveFormatException`, `SaveMapMismatchException` | `Save/` | Bad format; wrong map id or hash (text starts with the SV-30 rule). |
-| `SavePanelController`, `LoadPanelController` | `Assets/Game/UI/GameMenu/` | Save with a name, list and load. Load checks the map, sets `PendingLoad`, reloads the Game scene. |
-| `AutosaveController`, `AutosaveTimer`, `SaveStore`, `PendingLoad` | `Assets/Game/Saving/` | One autosave slot every 30 real minutes (`Autosave.llsave`), files in `persistentDataPath/Saves/`, and the bytes handed to the next scene. |
+| `SavePanelController`, `LoadPanelController` | `Assets/Game/UI/GameMenu/` | Save with a name. Load lists saves (greyed when unreadable, bin to delete through `ConfirmDialog`), checks the map, sets `PendingLoad`, reloads the Game scene. |
+| `AutosaveController`, `AutosaveTimer`, `SaveStore`, `PendingLoad` | `Assets/Game/Saving/` | One autosave slot every 30 real minutes (`Autosave.llsave`). `SaveStore` lists headers (`List`), writes, and `Delete`s files in `persistentDataPath/Saves/`. `PendingLoad` hands bytes to the next scene. |
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`: 1 at M11, now higher; every change bumps it, decision 0038), the header,
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, currently 4; every change bumps it, decision 0038), the header,
 then sections, each as int32 id + int32 byte length. `SaveReader.NextSection` can step over an unknown id, but `SimSave.Read`
 requires the exact section order and throws on any other id. Sections in order:
 
 | Id | Section | Holds |
 |---|---|---|
-| 1 | Core | Tick, pause, random state, tuning, road and area catalogs. |
+| 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares), road and area catalogs. |
 | 2 | Land | Trees as changes, road network, areas. |
-| 3 | Structures | Footprints, camp, operations, construction sites. |
+| 3 | Structures | Footprints, camp, operations, construction sites, deconstruction entries and pending operations. |
 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile and runs `Audit`. |
 | 5 | Population | Families, citizens, oxen. |
 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
@@ -52,6 +52,7 @@ ox tracks, rest targets).
 
 - A new section gets the next id and goes at the end unless it must load earlier. Record that in decision 0034.
 - A format change bumps the version. Old versions are refused with a message; there are no migrations yet (SV-33).
+  The Load list shows a refused save greyed out (`SaveEntry.UnreadableReason`, from `SaveStore.ReasonForVersion`). Its bin still deletes it.
 - A new task def id must be in `TaskDefCatalog`, or old saves with it cannot load.
 
 ## Gotchas
@@ -60,6 +61,8 @@ ox tracks, rest targets).
 - Re-baking the map breaks old saves by hash (SV-30). That is accepted in development (SV-32).
 - Autosave runs while the Esc menu is closed. Sim pause still counts.
 - Speed is not saved, so a load starts at the default speed.
+- A save from another map is not greyed in the list. It shows as normal and is refused at Load with the SV-30 text.
+- `SaveReader` refuses a bad version with "Unknown save format version N"; the list uses the friendlier SV-34 text.
 
 ## Tests
 

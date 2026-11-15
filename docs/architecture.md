@@ -26,7 +26,9 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   Systems also get `OnCommandApplied` after an accepted command.
 - **Commands:** every change from outside goes through `world.Execute(ISimCommand)`. It validates first
   (validation never mutates), applies only if accepted, works while paused, never changes `Tick`, and is
-  logged. A rejected command changes nothing.
+  logged. A rejected command changes nothing. A change with several parts is one batch command that validates
+  all parts first (`DesignateOperation`, `PlaceModules`, decision 0037).
+- **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.
 - **Queries:** tools and views ask pure queries before committing (`RoadValidator.Validate`,
   `AreaValidator.Validate`, `ModulePlacement.Preview`, `PlacementRules`). They return previews and refusal
   reasons, never state.
@@ -105,6 +107,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-Food, markets and the wider economy; houses and the granary (MVP-2); the 50% removal refund (CN-33); artisan
-build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design status is in
+Food, markets and the wider economy; houses and the granary (MVP-2); artisan build steps (PPL-42); a walk-to-site
+step for builders; clearing trees as a job (BLD-10-C). The design status is in
 `docs/design/`.

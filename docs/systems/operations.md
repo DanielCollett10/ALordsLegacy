@@ -17,15 +17,19 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 | `FellingOutcome` | Called by the step runner after each step. After fell: tree Felled. On the last step: Stump plus `floor(trunk ÷ StandardLogLengthM)` logs in an operation-owned pile at the tree. |
 | `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` for each own pile holding ≥ `OxLoadLogs`. Early fetch and wind-down. |
 | `ModulePlacement` | Pure `Preview(world, opId, moduleTypeId, centre, rotationDeg)` → `ModulePlacementResult` (`Ok`, `Refusal`). |
+| `DraftModulePlacement` | Pure preview of a module inside a draft: checks the polygon and the other ghosts, which are not in the world yet. Same rules as `ModulePlacement` (decision 0037). |
+| `DesignateOperation`, `PlaceModules` | Commands: area + ordered modules (new operation), or modules on an existing operation (Expand). All or nothing. |
+| `DeconstructOperation` | Command: marks every module of an operation; the area goes when the last one is gone (`DeconstructionWork.CompletePendingOperation`). |
 | `OxPool` | `FindFor(opId, from)`: assigned oxen first, then the nearest free pool ox. Stand `Occupancy`/`HasRoom`, `RestSpot`/`Rest` (WC-31/32). |
 | `Processes/` | `ProcessDef` (ordered `StageDef`s), `ProcessDefs.Timber` (fell 90, delimb 30 off, buck 15 per log). `EffectiveStages(logCount)` moves a disabled stage's time into the next enabled one. |
 
 ## Lifecycle
 
-1. **Designate:** `DesignateArea` of a building type with an operation type creates an operation.
-2. **Modules:** `OperationDraftTool` (ghosts, `DraftModulePlacement`) → `DesignateOperation` or, when expanding, `PlaceModules`. The footprint is added and trees under it are
-   cleared. A module with an empty recipe is built at once, else it is a construction site (`construction.md`).
-   `RemoveModule` removes it.
+1. **Designate:** the player's path is `OperationDraftTool` (area, then module ghosts in `OperationDraft`) → one
+   `DesignateOperation` on Confirm. `DesignateOperation` applies a `DesignateArea` inside its own `Apply`.
+2. **Modules:** ghosts are checked by `DraftModulePlacement`. Expand (`PlaceModules`) adds modules to an existing operation.
+   The footprint is added and trees under it are cleared. A module with an empty recipe is built at once, else it is a
+   construction site (`construction.md`). `RemoveModule` removes an unbuilt module; a built one is deconstructed (`construction.md`).
 3. **Assign:** `AssignFamily` sets the family's `WorkplaceId` and the operation's family list. Nothing is automatic. Assign
    is refused for a hut that is not built (CN-04b). `UnassignFamily` cancels the family's unfinished tasks.
 4. **Work:** felling tasks are opened per idle worker. They are dispatched and stepped (`tasks.md`). Each step's walk and
@@ -34,12 +38,14 @@ it, and a work area in which it fells trees. It creates the tasks its families d
    near. At sunset a haul still on its way is wound down: logs dropped where the ox stands, as an operation pile.
 6. **Pause and work area:** `PauseOperation` / `ResumeOperation`, `SetWorkArea` (must be the type's work area), and
    `UseDefaultWorkArea`. `DeleteArea` resets a linked work area to the default.
+7. **Deconstruct:** `DeconstructOperation` marks every module; the area and operation go when the last module is gone.
 
 ## Rules
 
 - Felling stops when `LogLoad` (piles, storage, carried logs, reserved room, all without double counting) reaches total
   storage capacity. It restarts when logs leave storage or a second storage adds capacity (to 40).
-- A removed operation area also removes its module footprints. Ledger locations are not cleaned up.
+- `DeleteArea` refuses an operation area that still has modules ("Deconstruct its buildings first", CN-58). Ledger
+  locations are not cleaned up on delete.
 
 ## Extending
 
@@ -57,6 +63,8 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 ## Tests
 
 `Sim.Tests/Operations/` (`WoodcuttingSystemTests`, `WoodcuttingTypeTests`, `OperationStatusTests`, `OperationCommandTests`,
-`ModulePlacementTests`, `OxCommandTests`, `OxPoolTests`, `LogLoadTests`, `StorageFullFellingTests`, `HaulSystemTests`,
-`HaulFetchAndSunsetTests`, `BuiltModuleGateTests`), `Sim.Tests/Processes/ProcessDefTests.cs`, `Sim.Tests/Save/StructuresSectionTests.cs`.
-Unity: `Assets/Tests/PlayMode/OperationPanelTests.cs`, `WoodcuttingVisualsTests.cs`.
+`ModulePlacementTests`, `DraftModulePlacementTests`, `OxCommandTests`, `OxPoolTests`, `LogLoadTests`, `StorageFullFellingTests`,
+`HaulSystemTests`, `HaulFetchAndSunsetTests`, `BuiltModuleGateTests`, `DeconstructOperationTests`), `Sim.Tests/Commands/`
+(`DesignateOperationTests`, `PlaceModulesTests`), `Sim.Tests/Processes/ProcessDefTests.cs`, `Sim.Tests/Save/StructuresSectionTests.cs`.
+Unity: `Assets/Tests/PlayMode/OperationPanelTests.cs`, `OperationDraftToolTests.cs`, `WoodcuttingVisualsTests.cs`;
+`Assets/Tests/EditMode/OperationDraftTests.cs`.
