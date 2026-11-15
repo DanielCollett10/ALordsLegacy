@@ -38,6 +38,7 @@ namespace LordsLegacy.Game.Visuals
             {
                 case ModuleTypes.WoodcuttingHutId: return VisualSizes.ModuleHut;
                 case ModuleTypes.OxenStandId: return VisualSizes.ModuleOxenStand;
+                case ModuleTypes.HouseId: return VisualSizes.ModuleHouse;
                 default: return VisualSizes.ModuleLogStorage;
             }
         }
@@ -63,8 +64,11 @@ namespace LordsLegacy.Game.Visuals
             _count = 0;
             var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            foreach (var op in world.Operations.All)
-                foreach (int id in op.ModuleIds)
+            var ids = new List<int>();
+            foreach (var op in world.Operations.All) ids.AddRange(op.ModuleIds);
+            foreach (var home in world.Homes.All) ids.Add(home.HouseFootprintId); // houses are not operation modules (HM-20)
+            {
+                foreach (int id in ids)
                 {
                     var fp = world.Footprints.Get(id);
                     if (fp == null) continue;
@@ -92,6 +96,7 @@ namespace LordsLegacy.Game.Visuals
                     min = Vector3.Min(min, p - new Vector3(r, 1f, r));
                     max = Vector3.Max(max, p + new Vector3(r, box.y + 1f, r));
                 }
+            }
             _bounds = new Bounds();
             if (_count > 0) _bounds.SetMinMax(min, max);
         }
