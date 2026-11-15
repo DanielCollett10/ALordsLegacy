@@ -20,7 +20,7 @@ private state, id counters that are never reused, in-flight move orders and rese
   catalogs), then builds the world with an internal `SimWorld.ForRestore(map, core)`: no start layout, no systems
   stepped. Then it runs each section's `Read(world, reader)` in this **fixed order**: Land (trees, roads, areas) →
   Structures (footprints, operations, construction sites) → Ledger → Population (families, citizens, oxen) →
-  Movement (move orders, follow links, routine, work day, debug send) → Tasks. Then a full `NavSync`. Each
+  Homes (T-405, id 8, version 5: houses, plot ids, family links; needs footprints, areas and families) → Movement (move orders, follow links, routine, work day, debug send) → Tasks. Then a full `NavSync`. Each
   registry exposes `internal` restore methods that set its records and id counters directly. `Write` uses the
   same order. A new section is added at the end of this list unless it must come earlier, and that change is
   recorded here.
