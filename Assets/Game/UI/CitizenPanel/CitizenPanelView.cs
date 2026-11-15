@@ -20,7 +20,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _name, _age, _family, _activity, _workplace, _task, _message;
+        private Label _name, _age, _family, _home, _activity, _workplace, _task, _message;
         private string _pendingMessage = "";
         private Button _close;
         private bool _subscribed;
@@ -36,6 +36,9 @@ namespace LordsLegacy.Game
 
         /// <summary>Family line text (empty for an ox).</summary>
         public string FamilyText => _family?.text ?? "";
+
+        /// <summary>Home line text: "Home: Archer house" or "Homeless (camp)" (HM-22); empty for an ox.</summary>
+        public string HomeText => _home?.text ?? "";
 
         /// <summary>Activity line text.</summary>
         public string ActivityText => _activity?.text ?? "";
@@ -90,7 +93,8 @@ namespace LordsLegacy.Game
                 var ox = world.People.FindOx(sel.Id);
                 if (ox == null) { _panel.style.display = DisplayStyle.None; return; }
                 _name.text = ox.Name;
-                _age.text = ""; _family.text = "";
+                _age.text = ""; _family.text = ""; _home.text = "";
+                _home.style.display = DisplayStyle.None;
                 _age.style.display = DisplayStyle.None;
                 _family.style.display = DisplayStyle.None;
                 // T-294: an ox shows its owner building and what it carries (reusing the work / task lines).
@@ -109,6 +113,8 @@ namespace LordsLegacy.Game
                 int age = (int)System.Math.Floor(c.AgeYears(world.Tick, world.Tuning.AgeingRate));
                 _age.text = "Age: " + age;
                 _family.text = "Family: " + (family != null ? family.Surname : "none");
+                _home.text = HomeLine(family);
+                _home.style.display = DisplayStyle.Flex;
                 _age.style.display = DisplayStyle.Flex;
                 _family.style.display = DisplayStyle.Flex;
                 _workplace.text = "Work: " + CitizenTaskText.Workplace(world, c);
@@ -118,6 +124,13 @@ namespace LordsLegacy.Game
                 _activity.text = "Doing: " + ActivityName(c.Activity);
             }
             _panel.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>The citizen panel's home line (HM-22): the family's house, or Homeless (camp).</summary>
+        public static string HomeLine(Family family)
+        {
+            if (family == null || family.IsHomeless) return "Homeless (camp)";
+            return "Home: " + family.Surname + " house";
         }
 
         private static string ActivityName(Activity a)
@@ -208,6 +221,7 @@ namespace LordsLegacy.Game
             _name = MakeLabel("citizen-name", 15, true);
             _age = MakeLabel("citizen-age", 12, false);
             _family = MakeLabel("citizen-family", 12, false);
+            _home = MakeLabel("citizen-home", 12, false);
             _activity = MakeLabel("citizen-activity", 12, false);
             _workplace = MakeLabel("citizen-workplace", 12, false);
             _task = MakeLabel("citizen-task", 12, false);
@@ -215,7 +229,7 @@ namespace LordsLegacy.Game
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
-            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_activity);
+            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_home); _panel.Add(_activity);
             _panel.Add(_workplace); _panel.Add(_task); _panel.Add(_message); _panel.Add(_close);
             ShowMessage(_pendingMessage);
             holder.Add(_panel);
