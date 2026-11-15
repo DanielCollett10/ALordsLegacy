@@ -44,6 +44,9 @@ namespace LordsLegacy.Tests.PlayMode
             _host = _hostGo.AddComponent<SimHost>();
             _host.Initialize(new SimTuning(), SyntheticMap.CreateRamp());
             _host.AutoUpdate = false;
+            // Module placement pays in logs (T-342), so the woodcutter tests need stock to place modules (pre-existing failure on main).
+            if (typeId == AreaTypes.WoodcuttingId)
+                _host.World.Inventory.Produce(_host.World.Inventory.AddStockpile(PointMm.FromMetres(95, 95)), LordsLegacy.Sim.Inventory.Items.Log, 40);
 
             _camGo = new GameObject("TestCam");
             _cam = _camGo.AddComponent<Camera>();
