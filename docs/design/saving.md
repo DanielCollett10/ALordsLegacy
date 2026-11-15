@@ -3,8 +3,8 @@
 M11 (Save and come back). Implements GDD SAVE-01/02 and tech spec SAV-01..06. Technical shape: decision 0034.
 Wins over the tech spec where they disagree.
 
-> Implementation note (status): the Sim side is built (`Assets/Sim/Save/`, T-363..T-368: format, all list sections, round-trip
-> tests). The Unity side is in the code too: the Esc menu (`Assets/Game/UI/GameMenu/`), `SavePanelController` and
+> Implementation note (status): the Sim side is built (`Assets/Sim/Save/`, T-358..T-368: format core, restore path, all list sections,
+> round-trip tests). The Unity side is in the code too: the Esc menu (`Assets/Game/UI/GameMenu/`), `SavePanelController` and
 > `LoadPanelController`, `AutosaveController` (`Assets/Game/Saving/`), and load by scene reload through `PendingLoad` and
 > `SimHost`. PlayMode tests: `GameMenuTests`, `LoadPanelTests`, `AutosaveControllerTests`, `SaveLoadScreenMatchTests`. Whether the
 > menu rules above (SV-01..04) are met in play is not checked here. Differences from the rules below are listed under "Implementation notes".
@@ -55,7 +55,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 Where the code differs from, or fills in, the rules above. Decision 0034 is the technical shape; these notes are the
 current state (0034's "planned / not implemented" status line is out of date).
 
-- **Format (SV-13, SV-33):** magic `LLSV`, int32 version `1`. The reader refuses any other version with a message; there
+- **Format (SV-13, SV-33):** magic `LLSV`, int32 version (`1` at M11; the current number is `SaveWriter.CurrentVersion`, bumped per change by decision 0038). The reader refuses any other version with a message; there
   are no migration steps yet. The header stores name, real creation time (int64, supplied by the caller), game tick, map id
   and map hash. It does **not** store a game-date string. The list UI must derive the date from the tick.
 - **Header read alone (SV-13):** `SaveReader.ReadHeaderOnly` reads the header without the sections, for the Load list.
