@@ -34,6 +34,12 @@ namespace LordsLegacy.Sim.People
         /// <summary>Id of the workplace, or null for none (always none in M7).</summary>
         public int? WorkplaceId { get; set; }
 
+        /// <summary>Footprint id of the house the family lives in, or null while Homeless (POP-A1, HM-13). Set by <c>HomeRegistry</c>.</summary>
+        public int? HomeHouseId { get; internal set; }
+
+        /// <summary>True while the family has no house (it lives at the camp).</summary>
+        public bool IsHomeless => !HomeHouseId.HasValue;
+
         internal void AddMember(int citizenId) => _memberIds.Add(citizenId);
 
         internal void RemoveMember(int citizenId) => _memberIds.Remove(citizenId);
