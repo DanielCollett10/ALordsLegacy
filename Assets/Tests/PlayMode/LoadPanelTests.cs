@@ -117,6 +117,41 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator OlderSaveIsGreyedWithReasonLoadDoesNothingAndBinStillDeletes()
+        {
+            yield return LoadGame();
+            var host = Object.FindFirstObjectByType<SimHost>();
+            var panel = Object.FindFirstObjectByType<LoadPanelController>();
+            var store = new SaveStore(_folder);
+            panel.Store = store;
+            string reloaded = null;
+            panel.SceneLoader = n => reloaded = n;
+            host.World.Pause();
+            byte[] bytes = SimSave.Write(host.World, "Old", 100, host.Map.MapId, host.Map.ContentHash);
+            bytes[4] = (byte)(SaveWriter.CurrentVersion - 1); // an older format version (SV-34)
+            store.WriteNew("Old", bytes);
+
+            var menu = panel.GetComponent<GameMenuView>();
+            menu.Open();
+            menu.ClickLoad();
+            Assert.AreEqual(1, panel.Rows.Count, "The old save has a row.");
+            var row = panel.Rows[0];
+            StringAssert.Contains("Made with an older version of the game", row.text);
+            Assert.IsFalse(row.enabledSelf, "Load is disabled on an unreadable save.");
+            Assert.IsNotNull(row.parent.Q<UnityEngine.UIElements.Button>("load-delete"), "The bin is still there.");
+
+            Assert.IsFalse(panel.TryLoad(store.List()[0]));
+            Assert.AreEqual("Made with an older version of the game", panel.NoteLabel.text);
+            Assert.IsFalse(PendingLoad.HasPending, "Load must set nothing.");
+            Assert.IsNull(reloaded, "Load must not reload the scene.");
+
+            panel.RequestDelete(store.List()[0]);
+            ConfirmDialog.Confirm();
+            Assert.AreEqual(0, store.List().Count, "The bin deletes the old save.");
+            menu.Close();
+        }
+
+        [UnityTest]
         public IEnumerator LoadRestoresTickThenNextReloadStartsNewGame()
         {
             yield return LoadGame();

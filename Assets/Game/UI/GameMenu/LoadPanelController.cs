@@ -73,15 +73,17 @@ namespace LordsLegacy.Game
             foreach (var entry in entries)
             {
                 var e = entry;
-                string real = DateTimeOffset.FromUnixTimeSeconds(e.Header.CreatedRealTime).LocalDateTime.ToString("yyyy-MM-dd HH:mm");
-                string text = e.Header.Name + "\n" + real + " · " + calendar.Format(e.Header.GameTick);
+                string real = DateTimeOffset.FromUnixTimeSeconds(e.SortTime).LocalDateTime.ToString("yyyy-MM-dd HH:mm");
+                string text = e.IsReadable
+                    ? e.Name + "\n" + real + " · " + calendar.Format(e.Header.GameTick)
+                    : e.Name + "\n" + e.UnreadableReason;
                 var row = new Button(() => TryLoad(e)) { name = "load-row", text = text };
                 row.style.unityTextAlign = TextAnchor.MiddleLeft;
                 row.style.whiteSpace = WhiteSpace.Normal;
-                row.style.marginBottom = 4;
                 row.focusable = false;
                 row.style.flexGrow = 1;
                 row.style.marginBottom = 0;
+                if (!e.IsReadable) StyleUnreadable(row);
 
                 var container = new VisualElement { name = "load-row-container" };
                 container.style.flexDirection = FlexDirection.Row;
@@ -94,10 +96,19 @@ namespace LordsLegacy.Game
             }
         }
 
+        // SV-34: a save this build can't read stays in the list greyed out, with Load disabled. Its bin still works.
+        private static void StyleUnreadable(Button row)
+        {
+            row.SetEnabled(false);
+            row.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
+            row.style.backgroundColor = new Color(0.16f, 0.16f, 0.16f, 1f);
+            row.style.opacity = 0.7f;
+        }
+
         /// <summary>Asks to delete a save through the shared <see cref="ConfirmDialog"/> (SV-23). Confirm deletes and refreshes.</summary>
         public void RequestDelete(SaveEntry entry)
         {
-            ConfirmDialog.Show("Delete \"" + entry.Header.Name + "\"? This can't be undone.", "Delete", () =>
+            ConfirmDialog.Show("Delete \"" + entry.Name + "\"? This can't be undone.", "Delete", () =>
             {
                 try { (Store ?? (Store = SaveStore.Default())).Delete(entry.Path); }
                 catch (Exception ex)
@@ -149,6 +160,11 @@ namespace LordsLegacy.Game
         public bool TryLoad(SaveEntry entry)
         {
             Build();
+            if (!entry.IsReadable)
+            {
+                _note.text = entry.UnreadableReason;
+                return false;
+            }
             var host = Host();
             if (host == null || !host.IsInitialized || host.Map == null)
             {

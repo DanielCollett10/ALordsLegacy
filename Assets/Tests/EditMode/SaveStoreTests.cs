@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using LordsLegacy.Game;
 using LordsLegacy.Sim.Core;
@@ -105,6 +106,45 @@ namespace LordsLegacy.Tests.EditMode
         {
             _store.WriteNew("good", Save("good", 1));
             File.WriteAllBytes(Path.Combine(_dir, "bad" + SaveStore.Extension), new byte[] { 1, 2, 3 });
+            Assert.AreEqual(1, _store.List().Count);
+        }
+
+        private static byte[] WithVersion(byte[] bytes, int version)
+        {
+            BitConverter.GetBytes(version).CopyTo(bytes, 4);
+            return bytes;
+        }
+
+        [Test]
+        public void OlderFormatSave_IsListedAsUnreadableWithReason()
+        {
+            string path = _store.WriteNew("Old camp", WithVersion(Save("Old camp", 500), SaveWriter.CurrentVersion - 1));
+            var list = _store.List();
+            Assert.AreEqual(1, list.Count, "An old save still gets a row (SV-34).");
+            Assert.IsFalse(list[0].IsReadable);
+            Assert.IsNull(list[0].Header, "No header is read from another format version.");
+            Assert.AreEqual("Made with an older version of the game", list[0].UnreadableReason);
+            Assert.AreEqual(path, list[0].Path);
+            Assert.AreEqual("Old camp", list[0].Name);
+        }
+
+        [Test]
+        public void NewerFormatSave_IsListedAsUnreadableWithReason()
+        {
+            _store.WriteNew("Future", WithVersion(Save("Future", 1), SaveWriter.CurrentVersion + 1));
+            var list = _store.List();
+            Assert.AreEqual(1, list.Count);
+            Assert.AreEqual("Made with a newer version of the game", list[0].UnreadableReason);
+        }
+
+        [Test]
+        public void OlderFormatSave_IsNotDeletedByListing()
+        {
+            _store.WriteNew("Old", WithVersion(Save("Old", 1), SaveWriter.CurrentVersion - 1));
+            _store.WriteNew("Good", Save("Good", 2));
+            var list = _store.List();
+            Assert.AreEqual(2, list.Count, "Readable and unreadable saves are both listed.");
+            Assert.IsTrue(_store.Delete(list.Find(e => !e.IsReadable).Path), "The bin can still delete it.");
             Assert.AreEqual(1, _store.List().Count);
         }
     }
