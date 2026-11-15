@@ -37,10 +37,17 @@ namespace LordsLegacy.Sim.Commands
         // ever taken down by deconstruction (MarkForDeconstruction), so it is not removable here.
         private bool IsUnbuiltHouse(SimWorld world) => world.Homes.Get(ModuleId) != null && !world.IsBuilt(ModuleId);
 
+        // A standalone structure (granary) has no operation either; an unbuilt one is cancelled like a site.
+        private bool IsStructure(SimWorld world)
+        {
+            Footprint f = world.Footprints.Get(ModuleId);
+            return f != null && f.Type.IsStandalone;
+        }
+
         /// <inheritdoc />
         public CommandResult Validate(SimWorld world)
         {
-            if (Owner(world) == null && !IsUnbuiltHouse(world))
+            if (Owner(world) == null && !IsUnbuiltHouse(world) && !IsStructure(world))
                 return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
             LedgerLocation storage = world.Inventory.FindStorage(ModuleId);
             if (storage != null && world.IsBuilt(ModuleId))
@@ -89,7 +96,7 @@ namespace LordsLegacy.Sim.Commands
         public CommandResult Apply(SimWorld world)
         {
             Operation op = Owner(world);
-            if (op == null && !IsUnbuiltHouse(world)) return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
+            if (op == null && !IsUnbuiltHouse(world) && !IsStructure(world)) return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
             CommandResult check = Validate(world);
             if (check.IsRejected) return check;
             ConstructionSite site = world.Construction.Get(ModuleId);

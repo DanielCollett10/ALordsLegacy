@@ -24,7 +24,9 @@ namespace LordsLegacy.Sim.Commands
         public CommandResult Validate(SimWorld world)
         {
             // A built house has no operation: it is marked directly (HM-14). Unbuilt ones are checked by RemoveModule.
-            bool builtHouse = world.Homes.Get(ModuleId) != null && world.IsBuilt(ModuleId);
+            Footprint target = world.Footprints.Get(ModuleId);
+            bool builtHouse = world.IsBuilt(ModuleId)
+                && (world.Homes.Get(ModuleId) != null || (target != null && target.Type.IsStandalone));
             if (!builtHouse)
             {
                 CommandResult r = new RemoveModule(ModuleId).Validate(world);

@@ -24,16 +24,26 @@ namespace LordsLegacy.Sim.Footprints
         /// <summary>Oxen it holds (oxen stand: 1, WC-05); 0 for modules that hold none.</summary>
         public int OxCapacity { get; }
 
+        /// <summary>Food items it holds (granary: 100, FOOD-04); 0 for modules that store no food.</summary>
+        public int FoodCapacity { get; }
+        /// <summary>
+        /// Walkable yard in mm around the building on every side (granary: 5 m, FD-30b). 0 means no yard. A type with a
+        /// yard is a standalone structure placed by <c>PlaceStructure</c>, with no operation or plot area.
+        /// </summary>
+        public long YardMarginMm { get; }
+        /// <summary>True for a standalone structure (has a yard margin).</summary>
+        public bool IsStandalone => YardMarginMm > 0;
+
         /// <summary>What it takes to build this type (CN-02). Empty means built at placement.</summary>
         public ConstructionRecipe ConstructionRecipe { get; }
 
         /// <summary>Creates a type definition.</summary>
         public FootprintTypeDef(string id, long widthMm, long depthMm, bool blocksMovement, bool clearsTrees,
-            int logCapacity = 0, int oxCapacity = 0, ConstructionRecipe recipe = null)
+            int logCapacity = 0, int oxCapacity = 0, ConstructionRecipe recipe = null, int foodCapacity = 0, long yardMarginMm = 0)
         {
             ConstructionRecipe = recipe ?? ConstructionRecipe.Empty;
             Id = id; WidthMm = widthMm; DepthMm = depthMm; BlocksMovement = blocksMovement; ClearsTrees = clearsTrees;
-            LogCapacity = logCapacity; OxCapacity = oxCapacity;
+            LogCapacity = logCapacity; OxCapacity = oxCapacity; FoodCapacity = foodCapacity; YardMarginMm = yardMarginMm;
         }
     }
 }
