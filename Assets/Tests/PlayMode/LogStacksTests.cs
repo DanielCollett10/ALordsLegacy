@@ -73,7 +73,7 @@ namespace LordsLegacy.Tests.PlayMode
 
             var inv = world.Inventory;
             var stock = world.Camp.StockpileLocation;
-            Assert.AreEqual(20, stock.CountOf(Items.Log.Id), "Camp starts with 20 logs.");
+            Assert.AreEqual(40, stock.CountOf(Items.Log.Id), "Camp starts with 40 logs.");
             AssertDrawnEqualsLedger(r, world, "start");
             Assert.AreEqual(20, r.DrawnFor(stock.Id), "20-log camp stockpile is drawn.");
 
