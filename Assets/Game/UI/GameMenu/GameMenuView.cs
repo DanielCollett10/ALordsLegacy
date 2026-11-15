@@ -67,7 +67,7 @@ namespace LordsLegacy.Game
             _wasPaused = host != null && host.IsInitialized && host.World.Paused;
             if (host != null && host.IsInitialized) host.World.Pause();
             _open = true;
-            GameMenuState.IsOpen = true;
+            GameMenuState.MenuOpen = true;
             ShowMain();
             _root.style.display = DisplayStyle.Flex;
         }
@@ -77,7 +77,7 @@ namespace LordsLegacy.Game
         {
             if (!_open) return;
             _open = false;
-            GameMenuState.IsOpen = false;
+            GameMenuState.MenuOpen = false;
             if (_root != null) _root.style.display = DisplayStyle.None;
             var host = Host();
             if (!_wasPaused && host != null && host.IsInitialized) host.World.Resume();

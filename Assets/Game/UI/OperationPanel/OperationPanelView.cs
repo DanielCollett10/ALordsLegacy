@@ -518,7 +518,7 @@ namespace LordsLegacy.Game
             ShowWorkAreaRefusals();
             Refresh();
             var kb = Keyboard.current;
-            if (kb != null && kb.escapeKey.wasPressedThisFrame && IsShown)
+            if (kb != null && kb.escapeKey.wasPressedThisFrame && !ConfirmDialog.OwnsEscape && IsShown)
             {
                 var c = Controller();
                 if (c == null || c.ActiveTool == null) ClickClose();
