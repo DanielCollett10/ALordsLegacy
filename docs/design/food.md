@@ -34,12 +34,14 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | FD-20 | **Forage bushes** are Sim records scattered at new-game time with the seeded random, in clearings and forest edges (density PLACEHOLDER). The map file is not re-baked, so old maps and saves stay valid | PROPOSED |
 | FD-21 | A bush holds **3 baskets** (berries or mushrooms by bush kind). Picked empty, it regrows to full after **14 days** (FOOD-06; no seasons yet) | PLACEHOLDER |
 | FD-22 | The foraging camp is an area operation (building-tool.md): core **forager hut** (8 logs, 480 min; logs DECIDED owner 15/11/2026, minutes PLACEHOLDER), no storage module. Work area: default circle, 300 m (PLACEHOLDER), or drawn (WC-12) | PROPOSED |
-| FD-23 | Foraging is **light work** (POP-A3): family members **8+** forage (the first light step, POP-A2) | PROPOSED |
-| FD-24 | A forager picks the nearest bush with baskets left (30 min per basket, PLACEHOLDER), carries up to **10 items** by hand (MKT-03e), then walks to the nearest **built granary with room**. Foragers never deliver to the camp (FD-12). With no such granary the operation shows *No granary* and stops gathering | PROPOSED |
+| FD-23 | Foraging is **light work** (POP-A3): family members **8+** forage (the first light step, POP-A2) | DECIDED (owner 15/11/2026; age PLACEHOLDER) |
+| FD-23b | **A forager camp stores food locally.** The forager hut holds **30 items** (PLACEHOLDER; food only). A forager camp works with no granary at all. When its store and every reachable granary are full it shows *Storage full* and stops gathering | DECIDED (owner 15/11/2026; storing in the hut rather than a separate module PROPOSED) |
+| FD-24 | A forager picks the nearest bush with baskets left (30 min per basket, PLACEHOLDER), carries up to **10 items** by hand (MKT-03e), then walks to the **nearest store with room**: its own hut store or any built granary, whichever is nearer. Foragers never deliver to the camp (FD-12) | PROPOSED |
 
 ## Granary
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| FD-30 | Fixed footprint, placed alone with no area (GDD section 5): **8 × 6 m**, capacity **100 items** (FOOD-04), recipe **8 logs, 600** min (CON-A1) | DECIDED (owner 15/11/2026; values PLACEHOLDER) |
+| FD-30 | A separate building with a **fixed size**, placed as one piece with no drawn area (GDD section 5). Building **8 × 6 m**, capacity **100 items** (FOOD-04), recipe **8 logs, 600** min (CON-A1) | DECIDED (owner 15/11/2026; values PLACEHOLDER) |
+| FD-30b | The granary's **plot is the building plus 5 m on every side** (18 × 16 m for an 8 × 6 m building). The whole plot must be clear of other footprints, areas and roads, and clears trees. Only the building blocks walking; the 5 m yard is walkable. The placement ghost shows both building and yard. It rotates with Q/E like a module | DECIDED (owner 15/11/2026: 5 m; blocking and rotation PROPOSED) |
 | FD-31 | Panel: stock by type and capacity, state, Deconstruct (contents become a ground pile at the site, CN-55) | PROPOSED |
