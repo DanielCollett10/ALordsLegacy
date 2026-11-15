@@ -73,7 +73,9 @@ namespace LordsLegacy.Sim.Core
             if (map == null) throw new ArgumentNullException(nameof(map));
             var trees = new TreeRegistry();
             foreach (var t in map.Trees) trees.Add(t.Id, t.X, t.Z, t.TrunkLengthM);
-            return new SimWorld(tuning, map.Heights, trees, roadTypes, areaTypes, systems);
+            var world = new SimWorld(tuning, map.Heights, trees, roadTypes, areaTypes, systems);
+            LordsLegacy.Sim.Foraging.BushScatter.Run(world); // a load replaces these from the Bushes section
+            return world;
         }
 
         /// <summary>

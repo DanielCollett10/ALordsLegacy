@@ -18,7 +18,7 @@ private state, id counters that are never reused, in-flight move orders and rese
 - `CommandLog` is not saved.
 - **Restore path:** `SimSave.Read` reads the header, then the Core section (tick, pause, random state, tuning,
   catalogs), then builds the world with an internal `SimWorld.ForRestore(map, core)`: no start layout, no systems
-  stepped. Then it runs each section's `Read(world, reader)` in this **fixed order**: Land (trees, roads, areas) →
+  stepped. Then it runs each section's `Read(world, reader)` in this **fixed order**: Land (trees, roads, areas) → Bushes (T-421, id 10, version 10: forage bushes, baskets, reservations) →
   Structures (footprints, operations, construction sites) → Ledger → Population (families, citizens, oxen) →
   Homes (T-405, id 8, version 5: houses, plot ids, family links; needs footprints, areas and families) → Food (T-415, id 9, version 6: camp food store id, family and house larder ids; needs ledger, homes, families) → Movement (move orders, follow links, routine, work day, debug send) → Tasks. Then a full `NavSync`. Each
   registry exposes `internal` restore methods that set its records and id counters directly. `Write` uses the

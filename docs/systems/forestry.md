@@ -41,6 +41,13 @@ through `Add`, `Remove` or `SetState`, or the renderer will not update.
 - Unity draws trees from `TreeRegistry` with no GameObjects (decision 0008). The Unity `TreeAuthoringData` asset is only the
   bake input.
 
+## Forage bushes (T-421, FD-20..21)
+
+`Assets/Sim/Foraging/`: `BushRegistry` (`world.Bushes`: reserve/release/`TakeBasket`/`NearestAvailable`), `BushScatter` (new game
+only, own seeded `SimRandom`, forest edges plus a few clearings), `BushRegrowSystem` (full after `BushRegrowDays`). Tuning:
+`BushBaskets` 3, `BushRegrowDays` 14, `BushCount`, `BushEdgeM`, `BushTreeClearM`, `BushClearingChance`. Saved by `BushesSection`.
+Tests: `Save/BushesSectionTests.cs`. No picking task or renderer yet.
+
 ## Tests
 
 `Sim.Tests/TreeRegistryTests.cs`, `TreeStateTests.cs`, `TreeClearingTests.cs`, `Roads/RoadTreeClearanceTests.cs`,

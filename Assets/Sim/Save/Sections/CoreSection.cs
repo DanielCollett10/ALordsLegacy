@@ -104,6 +104,12 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.AdultRations);
             w.WriteDouble(t.ChildRations);
             w.WriteDouble(t.MarketRangeM);
+            w.WriteInt32(t.BushBaskets);
+            w.WriteInt32(t.BushRegrowDays);
+            w.WriteInt32(t.BushCount);
+            w.WriteDouble(t.BushTreeClearM);
+            w.WriteDouble(t.BushEdgeM);
+            w.WriteDouble(t.BushClearingChance);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -156,6 +162,12 @@ namespace LordsLegacy.Sim.Save.Sections
             t.AdultRations = r.ReadDouble();
             t.ChildRations = r.ReadDouble();
             t.MarketRangeM = r.ReadDouble();
+            t.BushBaskets = r.ReadInt32();
+            t.BushRegrowDays = r.ReadInt32();
+            t.BushCount = r.ReadInt32();
+            t.BushTreeClearM = r.ReadDouble();
+            t.BushEdgeM = r.ReadDouble();
+            t.BushClearingChance = r.ReadDouble();
             return t;
         }
 
