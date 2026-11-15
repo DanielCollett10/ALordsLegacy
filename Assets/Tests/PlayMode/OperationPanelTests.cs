@@ -490,5 +490,57 @@ namespace LordsLegacy.Tests.PlayMode
                 Object.DestroyImmediate(areaGo);
             }
         }
+
+        private static Label DialogMessage() =>
+            Object.FindFirstObjectByType<ConfirmDialogHost>().GetComponent<UIDocument>().rootVisualElement.Q<Label>("confirm-dialog-message");
+
+        [UnityTest]
+        public IEnumerator DeconstructModule_ConfirmShowsRefundAndFamilies_CommandOnlyAfterConfirm()
+        {
+            ConfirmDialog.Cancel();
+            Assert.IsTrue(_host.Execute(new AssignFamily(_op.Id, 2)).IsAccepted);
+            yield return OpenPanel();
+            var button = _view.Find<Button>("deconstruct-1");
+            Assert.IsNotNull(button);
+            Assert.AreEqual("Deconstruct Hut", button.text);
+
+            _view.ClickDeconstructModule(1);
+            Assert.IsTrue(ConfirmDialog.IsOpen);
+            StringAssert.Contains("Returns 4 logs", DialogMessage().text);
+            StringAssert.Contains("Families will be unassigned", DialogMessage().text);
+            Assert.IsNull(_host.World.Deconstruction.Get(1), "Nothing is sent before Confirm.");
+
+            ConfirmDialog.Cancel();
+            Assert.IsNull(_host.World.Deconstruction.Get(1));
+            Assert.AreEqual(1, _op.FamilyIds.Count);
+
+            _view.ClickDeconstructModule(1);
+            ConfirmDialog.Confirm();
+            Assert.IsNotNull(_host.World.Deconstruction.Get(1));
+            Assert.AreEqual(0, _op.FamilyIds.Count, "The hut's families are unassigned.");
+            yield return null;
+            StringAssert.Contains("Deconstructing 0%", _view.ModulesText);
+            Assert.AreEqual("Cancel deconstruction: Hut", _view.Find<Button>("deconstruct-1").text);
+
+            _view.ClickDeconstructModule(1);
+            ConfirmDialog.Confirm();
+            Assert.IsNull(_host.World.Deconstruction.Get(1), "Cancel deconstruction sends CancelDeconstruction.");
+        }
+
+        [UnityTest]
+        public IEnumerator DeconstructOperation_ButtonAsksToConfirmThenMarksEveryModule()
+        {
+            ConfirmDialog.Cancel();
+            yield return OpenPanel();
+            Assert.IsNotNull(_view.Find<Button>("deconstruct-operation"));
+            _view.ClickDeconstructOperation();
+            Assert.IsTrue(ConfirmDialog.IsOpen);
+            StringAssert.Contains("Returns 4 logs", DialogMessage().text);
+            Assert.IsNull(_host.World.Deconstruction.Get(1));
+            ConfirmDialog.Confirm();
+            Assert.IsNotNull(_host.World.Deconstruction.Get(1));
+            Assert.IsNotNull(_host.World.Deconstruction.Get(2));
+            Assert.IsTrue(_host.World.Deconstruction.IsOperationPending(_op.Id));
+        }
     }
 }
