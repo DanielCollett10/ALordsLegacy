@@ -77,6 +77,8 @@ namespace LordsLegacy.Game
 
         [Header("Construction")]
         [Tooltip("CN-23 most odd-jobbers building one site at once (PLACEHOLDER rule value)")] [Range(1, 16)] public int maxBuildersPerSite = 4;
+        [Tooltip("CN-53 deconstruction takes this share of the recipe's build minutes (PLACEHOLDER)")] [Range(0f, 1f)] public float deconstructTimeShare = 0.5f;
+        [Tooltip("CN-54 share of the recipe's logs returned as a ground pile, rounded down")] [Range(0f, 1f)] public float deconstructRefundShare = 0.5f;
 
         [Header("Timber and oxen")]
         [Tooltip("TMB-04 standard log length, metres")] [Range(1f, 10f)] public float standardLogLengthM = 4f;
@@ -124,6 +126,7 @@ namespace LordsLegacy.Game
             MinDaylightHours = D(minDaylightHours), MaxDaylightHours = D(maxDaylightHours),
             RestDayEnabled = restDayEnabled, SundayMealMinutes = sundayMealMinutes, MinSleepHours = D(minSleepHours),
             MaxBuildersPerSite = maxBuildersPerSite,
+            DeconstructTimeShare = D(deconstructTimeShare), DeconstructRefundShare = D(deconstructRefundShare),
             WalkSpeedMPerGameMinute = D(walkSpeedMPerGameMinute), OxSpeedMPerGameMinute = D(oxSpeedMPerGameMinute),
             StandardLogLengthM = D(standardLogLengthM), TrunkLengthMinM = D(trunkLengthMinM),
             TrunkLengthMaxM = D(trunkLengthMaxM), StartingOxen = startingOxen,
