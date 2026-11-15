@@ -18,3 +18,7 @@ MVP-1-01 where they disagree.
 > Implementation note (CMP-06, CMP-01): the start layout's `Stock` (default 20 `item.log`, T-287) is produced into a
 > ledger `Stockpile` location at the stockpile spot, with no capacity limit. It landed in M9, while CMP-06 says M8.
 > Owner to decide whether the milestone label should change. No operation storage counts it (WC-37).
+
+> Implementation note (CMP-02, site search): `StartLayoutGenerator` looks for a flat spot with slope at most 5°
+> (`MaxCampSlopeDeg`), just outside the forest edge, with at least 50 trees within 50 m (`MinTrees`). The design gives no
+> tree count. Owner to confirm the 50.

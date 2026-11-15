@@ -1,6 +1,6 @@
 # 0034: Save format, round-trip testing and loading by scene reload
 
-**Status:** Sim side implemented (`Assets/Sim/Save/`, T-363..T-368). Unity side (menu, load by scene reload, autosave) not built yet; see `docs/design/saving.md` Implementation notes. The "new state must be saved" rule is now in CLAUDE.md (T-369).
+**Status:** Implemented. Sim side in `Assets/Sim/Save/` (T-363..T-368); Unity side (Esc menu, save/load panels, autosave, load by scene reload via `PendingLoad`) in `Assets/Game/Saving/` and `UI/GameMenu/`. The "new state must be saved" rule is in CLAUDE.md (T-369).
 
 **Context.** M11 adds save/load (`docs/design/saving.md`, tech spec SAV-01..06). The Sim has many registries with
 private state, id counters that are never reused, in-flight move orders and reservations.

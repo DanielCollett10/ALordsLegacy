@@ -46,6 +46,12 @@ new rules use `-A` suffixes. Technical decisions are in `docs/decisions/`.
 | TIME-A8 | At 1× walking always looks real. The start camp sits at the forest edge. **Citizens eat once a week, on Sunday evening at home**: the Sunday working day is shorter and the meal itself is not simulated. There is no meal in the working day (replaces TIME-05's daily meal at home, FOOD-02's walk and FOOD-A9's daily eating). Commutes happen outside daylight. Full rules: `people.md` | DECIDED |
 | ROAD-10-A | Dirt path speed multiplier is **1.25×** (was 1.5), with the walk animation sped up to match (`movement.md` MOV-09) | DECIDED (value PLACEHOLDER) |
 
+> Implementation note (TIME-A5, "with a meal break"): the code has no meal break. `people.md` PPL-20 (no meal break, later)
+> is what the Sim does. This row is out of date. Owner to fix it.
+>
+> Implementation note (FOOD-A4, rest day): `SimTuning.RestDayEnabled` exists, but no system reads it. Sunday is a normal
+> working day that ends `SundayMealMinutes` early (PPL-21). Owner to decide whether the switch stays.
+
 ## Visuals (ART)
 
 | ID | Rule | Tag |
@@ -132,6 +138,10 @@ Full rules: **`roads.md`**, **`areas.md`** and **`ui.md`** (they win over GDD se
 | POP-A6 | Arriving adults first fill a missing role in an incomplete family. Otherwise they form a new family unit, which may be incomplete and waits for a partner | DECIDED |
 | POP-A7 | Arriving family make-up is weighted: most often a couple with 2–4 children; sometimes a single parent with children, a couple without children, or a family with adult children. Weights in data | DECIDED (weights PLACEHOLDER) |
 | POP-A8 | Coming of age (option D) stays the intended main source of new families, for now | DECIDED |
+
+> Implementation note (POP-A2, light work from age 8): not built. The only age gate is `OperationStatus.WorkingAgeYears`
+> (14), used by the dispatcher, the woodcutting system and the haul system. `StageDef` has a light/heavy flag, but no light
+> step is in use, so children do no work.
 
 ## Food (FOOD)
 

@@ -4,8 +4,10 @@ M11 (Save and come back). Implements GDD SAVE-01/02 and tech spec SAV-01..06. Te
 Wins over the tech spec where they disagree.
 
 > Implementation note (status): the Sim side is built (`Assets/Sim/Save/`, T-363..T-368: format, all list sections, round-trip
-> tests). The Unity side is not: nothing in `Assets/Game/` calls the save code yet, so there is no menu, Save/Load screen, autosave
-> or scene reload. The differences from the rules below are listed under "Implementation notes" at the end.
+> tests). The Unity side is in the code too: the Esc menu (`Assets/Game/UI/GameMenu/`), `SavePanelController` and
+> `LoadPanelController`, `AutosaveController` (`Assets/Game/Saving/`), and load by scene reload through `PendingLoad` and
+> `SimHost`. PlayMode tests: `GameMenuTests`, `LoadPanelTests`, `AutosaveControllerTests`, `SaveLoadScreenMatchTests`. Whether the
+> menu rules above (SV-01..04) are met in play is not checked here. Differences from the rules below are listed under "Implementation notes".
 
 Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN = not decided.
 
@@ -65,8 +67,8 @@ current state (0034's "planned / not implemented" status line is out of date).
   ox tracks, rest targets). See decision 0034 and the Map pipeline notes in `docs/architecture.md` for what each section holds.
 - **Task defs (T-367):** tasks are saved with their def id. The policy comes from `TaskDefCatalog`, so a def id that is not in
   the catalog fails the load.
-- **Scene reload (SAVE-02, SV-22):** the Unity side is not built. The plan is to reload the Game scene with the save bytes
-  handed to `SimHost`, so no renderer handles a world swap.
+- **Scene reload (SAVE-02, SV-22):** `LoadPanelController` checks the map (SV-30), sets `PendingLoad` and reloads the Game
+  scene; `SimHost.Start` takes the pending bytes, so no renderer handles a world swap.
 - **Autosave (SV-11, T-373):** `AutosaveController` (`Assets/Game/Saving/`, on its own UIDocument in the Game scene) keeps a
   real-time count (`AutosaveTimer`, plain C#) that advances while a world is loaded and the Esc menu is closed; Sim pause still counts.
   The interval is the serialized `_intervalMinutes` (default 30). At the interval it overwrites `Autosave.llsave` through

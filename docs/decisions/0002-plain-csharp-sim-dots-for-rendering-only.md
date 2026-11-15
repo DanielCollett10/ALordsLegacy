@@ -26,3 +26,8 @@ is now 5,000–10,000 citizens (gdd-amendments.md); the perf spike measures at 1
 parallel pure queries applied in a fixed order). Escape hatch: the Sim defines an interface
 (e.g. `IPathfinder`) and the Unity layer may supply a Burst implementation, while tests use
 the plain C# one. Using it needs a new decision. Tech spec sections that say "ECS" mean "Sim state".
+
+> Implementation note (checked 15/11/2026): no DOTS package is used. Nothing in `Assets/` references `Unity.Entities`,
+> `Unity.Burst`, `Unity.Jobs` or `Unity.Collections`. The Sim is plain C# in `Assets/Sim`. Drawing uses
+> `Graphics.RenderMeshInstanced` (`InstancedDraw`, `TreeRenderer`, `PeopleRenderer`, `ModuleRenderer`), so the
+> "DOTS for rendering" allowance is unused. No Burst pathfinder exists; `GridPathfinder` (plain C#) does the search.

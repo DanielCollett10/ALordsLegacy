@@ -78,6 +78,9 @@ If walk speed or day length changes, recompute these numbers and the tables belo
 | Overlap tolerance | 0.1 | m² | AR-15 |
 | Spatial index cell | 32 | m | decision 0012 |
 
+> Implementation note (Dead-end extension tangent tolerance, RD-16): no code reads a 1° tolerance. The new curve uses the
+> dead end's own arriving direction exactly (`StartTangent`/`EndTangent`, decision 0029), which is within the 1° allowed.
+
 Where they live: per-type values (road width, max grade, area points, m², max slope) are on the type definitions
 (`RoadTypeDef`, `AreaTypeDef`). Shared values (sample spacing, min point distance, tree clearance, curve flattening
 spacing, slope sample grid, overlap tolerance, spatial index cell) are in `SimTuning`. Snap distance is a
@@ -100,6 +103,9 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Starting oxen | 2 | | Oxen |
 
 > Implementation note (Starting oxen): `SimTuning.StartingOxen` (2) is not read. The start layout's `OxCount` (2) creates the oxen.
+>
+> Implementation note (Light work from age 8, POP-A2; Adult, may marry from 18, POP-17): neither age is in code. The only
+> working age is `OperationStatus.WorkingAgeYears` (14), and no light task exists, so children do no work. Nothing marries.
 
 ## Food
 
