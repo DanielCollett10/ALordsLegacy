@@ -56,6 +56,7 @@ namespace LordsLegacy.Game
                 (agent.IsOx ? host.World.People.FindOx(agent.Id) != null : host.World.People.FindCitizen(agent.Id) != null);
             if (!exists) { Clear(); return; }
             _hasSelection = true;
+            _houseId = null;
             _selected = agent;
             SelectionChanged?.Invoke();
         }
