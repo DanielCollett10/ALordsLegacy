@@ -28,7 +28,7 @@ Tasks reserve trees in `Trees` with the task id as owner. `Cancel` and completio
 
 ## How data moves
 
-1. An operation or system opens a task (`WoodcuttingSystem`, `HaulSystem`, `ConstructionSystem`).
+1. An operation or system opens a task (`WoodcuttingSystem`, `HaulSystem`, `ConstructionSystem`). House deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`), not an operation id.
 2. `DispatchSystem` runs every `DispatchIntervalMinutes` (10). An idle worker (awake, no debug send, not busy, not mid-walk
    unless milling) takes the best Open task: pass 1 for the family whose workplace owns it, pass 2 for helper families.
    Ranking: priority, then travel to the job (tree, ox, or site), then id. A heavy task needs age 14+. A task that needs an
