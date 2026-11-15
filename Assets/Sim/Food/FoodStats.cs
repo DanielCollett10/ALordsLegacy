@@ -19,6 +19,16 @@ namespace LordsLegacy.Sim.Food
             return (int)Math.Min(t, int.MaxValue);
         }
 
+        /// <summary>Raw counts per food type across every location, in catalog order (FD-04 tooltip). Includes zero counts.</summary>
+        public static System.Collections.Generic.IReadOnlyList<FoodStock> CountsByType(SimWorld world)
+        {
+            if (world == null) throw new ArgumentNullException(nameof(world));
+            var list = new System.Collections.Generic.List<FoodStock>();
+            foreach (ItemDef item in Items.All)
+                if (item.Category == ItemCategory.Food) list.Add(new FoodStock(item, world.Inventory.TotalOf(item)));
+            return list;
+        }
+
         /// <summary>Rations the village eats per day: adults (14+) AdultRations each, children ChildRations each.</summary>
         public static double DailyNeed(SimWorld world)
         {

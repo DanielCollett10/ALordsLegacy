@@ -20,7 +20,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _name, _age, _family, _home, _activity, _workplace, _task, _message;
+        private Label _name, _age, _family, _home, _hungry, _activity, _workplace, _task, _message;
         private string _pendingMessage = "";
         private Button _close;
         private bool _subscribed;
@@ -39,6 +39,9 @@ namespace LordsLegacy.Game
 
         /// <summary>Home line text: "Home: Archer house" or "Homeless (camp)" (HM-22); empty for an ox.</summary>
         public string HomeText => _home?.text ?? "";
+
+        /// <summary>Hungry line text ("Hungry" while the family's larder ran short last midnight, FD-16); empty when fed or an ox.</summary>
+        public string HungryText => _hungry?.style.display.value == DisplayStyle.Flex ? _hungry.text : "";
 
         /// <summary>Activity line text.</summary>
         public string ActivityText => _activity?.text ?? "";
@@ -95,6 +98,7 @@ namespace LordsLegacy.Game
                 _name.text = ox.Name;
                 _age.text = ""; _family.text = ""; _home.text = "";
                 _home.style.display = DisplayStyle.None;
+                _hungry.style.display = DisplayStyle.None;
                 _age.style.display = DisplayStyle.None;
                 _family.style.display = DisplayStyle.None;
                 // T-294: an ox shows its owner building and what it carries (reusing the work / task lines).
@@ -115,6 +119,9 @@ namespace LordsLegacy.Game
                 _family.text = "Family: " + (family != null ? family.Surname : "none");
                 _home.text = HomeLine(family);
                 _home.style.display = DisplayStyle.Flex;
+                // FD-16: Hungry is shown only while the family is short; it changes nothing else.
+                _hungry.text = "Hungry";
+                _hungry.style.display = family != null && family.IsHungry ? DisplayStyle.Flex : DisplayStyle.None;
                 _age.style.display = DisplayStyle.Flex;
                 _family.style.display = DisplayStyle.Flex;
                 _workplace.text = "Work: " + CitizenTaskText.Workplace(world, c);
@@ -222,6 +229,9 @@ namespace LordsLegacy.Game
             _age = MakeLabel("citizen-age", 12, false);
             _family = MakeLabel("citizen-family", 12, false);
             _home = MakeLabel("citizen-home", 12, false);
+            _hungry = MakeLabel("citizen-hungry", 12, true);
+            _hungry.style.color = new Color(1f, 0.67f, 0.31f);
+            _hungry.style.display = DisplayStyle.None;
             _activity = MakeLabel("citizen-activity", 12, false);
             _workplace = MakeLabel("citizen-workplace", 12, false);
             _task = MakeLabel("citizen-task", 12, false);
@@ -229,7 +239,7 @@ namespace LordsLegacy.Game
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
-            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_home); _panel.Add(_activity);
+            _panel.Add(_name); _panel.Add(_age); _panel.Add(_family); _panel.Add(_home); _panel.Add(_hungry); _panel.Add(_activity);
             _panel.Add(_workplace); _panel.Add(_task); _panel.Add(_message); _panel.Add(_close);
             ShowMessage(_pendingMessage);
             holder.Add(_panel);
