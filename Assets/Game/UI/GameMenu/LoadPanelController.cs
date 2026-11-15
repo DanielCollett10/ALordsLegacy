@@ -28,7 +28,6 @@ namespace LordsLegacy.Game
         private Label _note;
         private VisualElement _builtFor;
         private readonly List<Button> _rows = new List<Button>();
-        private readonly List<Button> _bins = new List<Button>();
 
         /// <summary>Store used for reading. Defaults to <c>persistentDataPath/Saves</c>; tests replace it.</summary>
         public SaveStore Store { get; set; }
@@ -65,8 +64,7 @@ namespace LordsLegacy.Game
             _rows.Clear();
             var host = Host();
             var calendar = host != null && host.IsInitialized ? CalendarOf(host) : new GameCalendar();
-            _bins.Clear();
-            var entries = (Store ?? (Store = SaveStore.Default())).ListAll();
+            var entries = (Store ?? (Store = SaveStore.Default())).List();
             if (entries.Count == 0)
             {
                 _list.Add(new Label("No saves yet.") { name = "load-empty" });
@@ -75,80 +73,16 @@ namespace LordsLegacy.Game
             foreach (var entry in entries)
             {
                 var e = entry;
-                string real = DateTimeOffset.FromUnixTimeSeconds(e.CreatedRealTime).LocalDateTime.ToString("yyyy-MM-dd HH:mm");
-                string text = e.IsReadable
-                    ? e.Name + "\n" + real + " · " + calendar.Format(e.Header.GameTick)
-                    : e.Name + "\n" + real + " · " + e.UnreadableReason;
-                var container = new VisualElement { name = "load-row-container" };
-                container.style.flexDirection = FlexDirection.Row;
-                container.style.alignItems = Align.Stretch;
-                container.style.marginBottom = 4;
+                string real = DateTimeOffset.FromUnixTimeSeconds(e.Header.CreatedRealTime).LocalDateTime.ToString("yyyy-MM-dd HH:mm");
+                string text = e.Header.Name + "\n" + real + " · " + calendar.Format(e.Header.GameTick);
                 var row = new Button(() => TryLoad(e)) { name = "load-row", text = text };
                 row.style.unityTextAlign = TextAnchor.MiddleLeft;
                 row.style.whiteSpace = WhiteSpace.Normal;
-                row.style.flexGrow = 1;
-                row.style.marginBottom = 0;
+                row.style.marginBottom = 4;
                 row.focusable = false;
-                if (!e.IsReadable)
-                {
-                    row.SetEnabled(false);
-                    row.style.color = new Color(0.55f, 0.55f, 0.55f);
-                }
-                var bin = new Button(() => AskDelete(e)) { name = "load-delete", tooltip = "Delete this save" };
-                bin.focusable = false;
-                bin.style.width = 32;
-                bin.style.marginLeft = 4;
-                bin.style.marginRight = 0;
-                bin.style.backgroundColor = new Color(0.25f, 0.18f, 0.18f);
-                bin.generateVisualContent += DrawBin;
-                container.Add(row);
-                container.Add(bin);
-                _list.Add(container);
+                _list.Add(row);
                 _rows.Add(row);
-                _bins.Add(bin);
             }
-        }
-
-        /// <summary>The recycle-bin buttons, one per row in the same order as <see cref="Rows"/> (SV-23).</summary>
-        public IReadOnlyList<Button> DeleteButtons => _bins;
-
-        /// <summary>Asks to delete a save. Delete removes the file and refreshes the list; Cancel changes nothing.</summary>
-        public void AskDelete(SaveEntry entry)
-        {
-            ConfirmDialog.Show("Delete \"" + entry.Name + "\"? This can't be undone.", "Delete", () =>
-            {
-                var store = Store ?? (Store = SaveStore.Default());
-                bool ok = store.Delete(entry.Path);
-                Refresh();
-                if (!ok) _note.text = "Could not delete the save.";
-            });
-        }
-
-        private static void DrawBin(MeshGenerationContext ctx)
-        {
-            var r = ctx.visualElement.contentRect;
-            if (r.width < 4 || r.height < 4) return;
-            var p = ctx.painter2D;
-            float s = Mathf.Min(r.width, r.height) * 0.5f;
-            var c = r.center;
-            p.fillColor = new Color(0.92f, 0.78f, 0.75f);
-            p.strokeColor = p.fillColor;
-            p.lineWidth = 2;
-            p.BeginPath();
-            p.MoveTo(new Vector2(c.x - s * 0.7f, c.y - s * 0.55f));
-            p.LineTo(new Vector2(c.x + s * 0.7f, c.y - s * 0.55f));
-            p.LineTo(new Vector2(c.x + s * 0.55f, c.y + s));
-            p.LineTo(new Vector2(c.x - s * 0.55f, c.y + s));
-            p.ClosePath();
-            p.Fill();
-            p.BeginPath();
-            p.MoveTo(new Vector2(c.x - s, c.y - s * 0.8f));
-            p.LineTo(new Vector2(c.x + s, c.y - s * 0.8f));
-            p.MoveTo(new Vector2(c.x - s * 0.3f, c.y - s * 0.8f));
-            p.LineTo(new Vector2(c.x - s * 0.3f, c.y - s));
-            p.LineTo(new Vector2(c.x + s * 0.3f, c.y - s));
-            p.LineTo(new Vector2(c.x + s * 0.3f, c.y - s * 0.8f));
-            p.Stroke();
         }
 
         /// <summary>
@@ -162,11 +96,6 @@ namespace LordsLegacy.Game
             if (host == null || !host.IsInitialized || host.Map == null)
             {
                 _note.text = "Cannot load: the game is not running.";
-                return false;
-            }
-            if (!entry.IsReadable)
-            {
-                _note.text = entry.UnreadableReason;
                 return false;
             }
             var h = entry.Header;
