@@ -73,9 +73,9 @@ namespace LordsLegacy.Tests.PlayMode
 
             var inv = world.Inventory;
             var stock = world.Camp.StockpileLocation;
-            Assert.AreEqual(20, stock.CountOf(Items.Log.Id), "Camp starts with 20 logs.");
+            Assert.AreEqual(40, stock.CountOf(Items.Log.Id), "Camp starts with 40 logs.");
             AssertDrawnEqualsLedger(r, world, "start");
-            Assert.AreEqual(20, r.DrawnFor(stock.Id), "20-log camp stockpile is drawn.");
+            Assert.AreEqual(40, r.DrawnFor(stock.Id), "40-log camp stockpile is drawn.");
 
             var fp = world.Footprints.Add(50, ModuleTypes.LogStorage, pt(130000, 100000), 30);
             var storage = inv.GetOrAddStorage(fp.Id, fp.Type);
@@ -101,7 +101,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsTrue(inv.Transfer(carrier, storage, Items.Log, 2), "deliver again");
             AssertDrawnEqualsLedger(r, world, "delivered 2");
             Assert.AreEqual(6, r.DrawnFor(storage.Id));
-            Assert.AreEqual(26, r.LogCount);
+            Assert.AreEqual(46, r.LogCount);
         }
     }
 }

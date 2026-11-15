@@ -9,7 +9,7 @@ through the normal commands, so starting state follows the same rules as play (d
 
 | Type | Role |
 |---|---|
-| `StartLayout` | Pure data. Camp centre and rotation, fire, stockpile, ox stand and tent spots (relative to the camp, rotated with it), trunk road control points, families with citizens, `OxCount`, `Stock` (`StartStock` list, default 20 `item.log`). |
+| `StartLayout` | Pure data. Camp centre and rotation, fire, stockpile, ox stand and tent spots (relative to the camp, rotated with it), trunk road control points, families with citizens, `OxCount`, `Stock` (`StartStock` list, default 40 `item.log`, CMP-06). |
 | `StartLayoutApplier` | `Apply(world, layout)`. Adds the camp footprint (clears trees under it), draws the trunk road with `Execute(DrawRoad)`, adds families (home = tent spot), citizens and oxen, and produces the start stock into the stockpile. Throws `InvalidOperationException` with the refusal text if a command is refused. |
 | `CampInfo` | `SimWorld.Camp`: footprint id, world-space fire, stockpile and stand points, `StockpileLocation`. Null until applied. |
 | `StartLayoutConfig` (Unity) | ScriptableObject. `ToLayout()` converts it to `StartLayout`. Asset `Assets/Maps/TestMap/StartLayout.asset`. |
