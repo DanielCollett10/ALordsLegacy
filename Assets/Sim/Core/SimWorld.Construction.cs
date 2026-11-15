@@ -10,5 +10,11 @@ namespace LordsLegacy.Sim.Core
 
         /// <summary>True when the footprint has no construction site record (so it is Built).</summary>
         public bool IsBuilt(int footprintId) => Construction.Get(footprintId) == null;
+
+        /// <summary>Built modules marked for deconstruction (CN-52). Never null.</summary>
+        public DeconstructionRegistry Deconstruction { get; } = new DeconstructionRegistry();
+
+        /// <summary>True when built and not marked for deconstruction: it counts for capacity, ox room and the hut.</summary>
+        public bool IsWorking(int footprintId) => IsBuilt(footprintId) && Deconstruction.Get(footprintId) == null;
     }
 }

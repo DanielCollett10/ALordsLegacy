@@ -74,7 +74,7 @@ namespace LordsLegacy.Sim.Construction
             var builtStorage = new HashSet<int>();
             foreach (Operation op in world.Operations.All)
                 foreach (Footprint f in OperationStatus.StorageModules(world, op))
-                    if (world.IsBuilt(f.Id)) builtStorage.Add(f.Id);
+                    if (world.IsWorking(f.Id)) builtStorage.Add(f.Id);
 
             var list = new List<Source>();
             foreach (LedgerLocation l in world.Inventory.Locations)
