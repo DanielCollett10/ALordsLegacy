@@ -47,3 +47,9 @@ touching the simulation.
 - When you change how things fit together, update `docs/architecture.md`.
 - Record a decision that future agents should not re-argue as
   `docs/decisions/NNNN-short-title.md` (context, decision, consequences; 10–20 lines).
+
+## Lessons learned
+
+Rules added after reviews kept catching the same mistakes. Follow them like any other rule.
+
+- Milestone docs (docs/milestones/*.md) and per-system docs (docs/systems/*.md) must each stay at 60 lines or fewer. Before reporting a task that edits a doc, run a line count on every changed doc and trim it if it is over. Keep decisions, gaps and follow-ups. Fold test lists and technical bullets into short lines. _(learned from T-439)_
