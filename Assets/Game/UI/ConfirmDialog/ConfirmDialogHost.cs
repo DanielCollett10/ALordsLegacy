@@ -78,8 +78,21 @@ namespace LordsLegacy.Game
 
         private void Build(VisualElement root)
         {
+            // The UIDocument root can collapse to its content height, which put the centred dialog at the top of the
+            // screen. Make the root fill the panel explicitly so the backdrop's centring is relative to the whole screen.
+            root.style.position = Position.Absolute;
+            root.style.left = 0;
+            root.style.right = 0;
+            root.style.top = 0;
+            root.style.bottom = 0;
+            root.style.width = new Length(100, LengthUnit.Percent);
+            root.style.height = new Length(100, LengthUnit.Percent);
+            root.pickingMode = PickingMode.Ignore;
+
             _backdrop = new VisualElement { name = "confirm-dialog-backdrop" };
             _backdrop.style.position = Position.Absolute;
+            _backdrop.style.width = new Length(100, LengthUnit.Percent);
+            _backdrop.style.height = new Length(100, LengthUnit.Percent);
             _backdrop.style.left = 0;
             _backdrop.style.right = 0;
             _backdrop.style.top = 0;
