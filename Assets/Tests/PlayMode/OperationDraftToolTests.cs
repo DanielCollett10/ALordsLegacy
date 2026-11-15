@@ -167,6 +167,64 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(logBefore, _host.World.CommandLog.Count);
         }
 
+        private void SeedLogs(int n)
+        {
+            var inv = _host.World.Inventory;
+            inv.Produce(inv.AddStockpile(LordsLegacy.Sim.Geometry.PointMm.FromMetres(95, 95)), LordsLegacy.Sim.Inventory.Items.Log, n);
+        }
+
+        [UnityTest]
+        public IEnumerator FullFlowCostGateConfirmSendsOneCommandAndSitesAppear()
+        {
+            yield return Setup();
+            SeedLogs(40);
+            int logBefore = _host.World.CommandLog.Count;
+            LockSquare();
+            StringAssert.Contains("Cost 0 logs, have 40", _panel.Status);
+            StringAssert.Contains("Place a Hut", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled, "Confirm disabled while the hut is missing.");
+
+            _tool.Pick(ModuleTypes.WoodcuttingHutId);
+            _tool.ClickAt(Screen(60, 60));
+            Assert.AreEqual(1, _tool.Draft.Ghosts.Count, _tool.Message);
+            StringAssert.Contains("Cost 8 logs, have 40", _panel.Status);
+            StringAssert.Contains("Place a Log storage", _panel.Status);
+            Assert.IsFalse(_panel.IsConfirmEnabled);
+
+            _tool.Pick(ModuleTypes.LogStorageId);
+            _tool.ClickAt(Screen(50, 70));
+            Assert.AreEqual(2, _tool.Draft.Ghosts.Count, _tool.Message);
+            StringAssert.Contains("Cost " + _tool.Draft.RunningCost + " logs, have 40", _panel.Status);
+            Assert.IsTrue(_panel.IsConfirmEnabled, _panel.Status);
+            Assert.AreEqual(logBefore, _host.World.CommandLog.Count, "Nothing is sent before Confirm.");
+
+            _panel.ClickConfirm();
+            Assert.AreEqual(logBefore + 1, _host.World.CommandLog.Count, "Confirm sends exactly one command.");
+            Assert.IsNull(_controller.ActiveTool, "The draft closes on success.");
+            Assert.IsFalse(_panel.IsShown);
+            Assert.AreEqual(1, _host.World.Operations.Count);
+            int sites = 0;
+            foreach (var s in _host.World.Construction.Sites) sites++;
+            Assert.AreEqual(2, sites, "One site per module.");
+        }
+
+        [UnityTest]
+        public IEnumerator CancelDiscardsAreaAndGhosts()
+        {
+            yield return Setup();
+            SeedLogs(40);
+            int logBefore = _host.World.CommandLog.Count;
+            LockSquare();
+            _tool.Pick(ModuleTypes.WoodcuttingHutId);
+            _tool.ClickAt(Screen(60, 60));
+            Assert.AreEqual(1, _tool.Draft.Ghosts.Count);
+            _panel.ClickCancel();
+            Assert.IsNull(_controller.ActiveTool);
+            Assert.AreEqual(logBefore, _host.World.CommandLog.Count);
+            Assert.AreEqual(0, _host.World.Operations.Count);
+            Assert.AreEqual(0, _host.World.Areas.Count);
+        }
+
         [UnityTest]
         public IEnumerator QAndERotateInFifteenDegreeSteps()
         {
