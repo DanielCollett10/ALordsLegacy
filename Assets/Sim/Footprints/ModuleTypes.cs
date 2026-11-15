@@ -18,6 +18,9 @@ namespace LordsLegacy.Sim.Footprints
         /// <summary>Id of the house footprint (HM-04).</summary>
         public const string HouseId = "module.house";
 
+        /// <summary>Id of the granary structure (FD-30).</summary>
+        public const string GranaryId = "module.granary";
+
         /// <summary>Short player-facing name of a module type id ("Hut", "Log storage", "Oxen stand"); other ids pass through.</summary>
         public static string DisplayName(string typeId)
         {
@@ -27,6 +30,7 @@ namespace LordsLegacy.Sim.Footprints
                 case LogStorageId: return "Log storage";
                 case OxenStandId: return "Oxen stand";
                 case HouseId: return "House";
+                case GranaryId: return "Granary";
                 default: return typeId;
             }
         }
@@ -47,8 +51,16 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef House =
             new FootprintTypeDef(HouseId, 6000, 8000, true, true, recipe: new ConstructionRecipe(10, 720));
 
+        /// <summary>
+        /// Granary: 8 × 6 m building that blocks movement, with a walkable 5 m yard (plot 18 × 16 m), clears trees,
+        /// holds 100 food items, 8 logs / 600 worker-minutes (FD-30, FD-30b, FOOD-04, CON-A1).
+        /// </summary>
+        public static readonly FootprintTypeDef Granary =
+            new FootprintTypeDef(GranaryId, 8000, 6000, true, true, recipe: new ConstructionRecipe(8, 600),
+                foodCapacity: 100, yardMarginMm: 5000);
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)

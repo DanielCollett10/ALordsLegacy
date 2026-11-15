@@ -93,7 +93,7 @@ namespace LordsLegacy.Sim.Tests.Operations
         {
             Assert.IsNull(ModuleTypes.Find("module.nope"));
             Assert.IsNull(ModuleTypes.Find(null));
-            Assert.AreEqual(4, ModuleTypes.All.Count);
+            Assert.AreSame(ModuleTypes.Granary, ModuleTypes.Find(ModuleTypes.GranaryId));
         }
 
         [Test]

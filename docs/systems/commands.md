@@ -12,7 +12,7 @@
 | `CommandLog`, `CommandLogEntry` | `Commands/` | Append-only `(tick, command, result)`. Not saved. |
 
 Commands are in `Assets/Sim/Commands/`: `DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`, `DesignateArea`, `DeleteArea`,
-`DesignatePlot`, `DesignateOperation`, `DeconstructOperation`, `PlaceModule(s)`, `RemoveModule`, `MarkForDeconstruction`,
+`DesignatePlot`, `DesignateOperation`, `DeconstructOperation`, `PlaceModule(s)`, `PlaceStructure` (granary, FD-30b), `RemoveModule`, `MarkForDeconstruction`,
 `CancelDeconstruction`, `AssignFamily`, `UnassignFamily`, `AssignOx`, `UnassignOx`, `SetSitePriority`, `SendCitizenTo`,
 plus `OperationSettings` (pause, resume, work area, use default area).
 `DesignatePlot` makes the plot area, the house site and an Empty home in one all-or-nothing Apply (HM-05, decision 0037 pattern).

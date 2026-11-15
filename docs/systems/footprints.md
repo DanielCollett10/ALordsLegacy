@@ -25,6 +25,11 @@ rectangle with an access point. It blocks or clears movement and holds a constru
 - A footprint with a non-empty recipe is not built until its site is built (`ConstructionRegistry`). `IsBuilt(id)` is true when
   there is no site record.
 
+- **Standalone structure** (granary, T-422): a type with `YardMarginMm > 0`; `Footprint.PlotPolygon` is building + yard. Placed
+  by `PlaceStructure` after `StructurePlacement.Preview` (whole plot clear of footprints, areas, roads). Only the building
+  blocks the nav grid. Its food-only store is `Ledger.FindFoodStore(footprintId)`, created at placement (capacity from the
+  type); deconstruction drops the contents as a ground pile. No save layout change: type id, centre, rotation are saved.
+
 ## Extending
 
 New buildings are a `FootprintTypeDef` plus a `ModuleTypes` entry. Set the recipe for construction. Put the rule in the type,

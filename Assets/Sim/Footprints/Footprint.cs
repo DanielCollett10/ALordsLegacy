@@ -26,6 +26,8 @@ namespace LordsLegacy.Sim.Footprints
         public PointMm AccessPoint { get; }
         /// <summary>Bounding box of the polygon.</summary>
         public BoundsMm Bounds { get; }
+        /// <summary>The building plus its yard margin on every side (FD-30b); equals <see cref="Polygon"/> when the type has no yard.</summary>
+        public PointMm[] PlotPolygon { get; }
 
         /// <summary>Creates a footprint and computes its polygon and access point.</summary>
         public Footprint(int id, FootprintTypeDef type, PointMm centre, double rotationDegrees)
@@ -38,6 +40,11 @@ namespace LordsLegacy.Sim.Footprints
             Polygon = new[]
             {
                 Place(-hw, -hd, c, s), Place(hw, -hd, c, s), Place(hw, hd, c, s), Place(-hw, hd, c, s),
+            };
+            double m = type.YardMarginMm;
+            PlotPolygon = m <= 0 ? Polygon : new[]
+            {
+                Place(-hw - m, -hd - m, c, s), Place(hw + m, -hd - m, c, s), Place(hw + m, hd + m, c, s), Place(-hw - m, hd + m, c, s),
             };
             AccessPoint = Place(0, -hd - AccessOffsetMm, c, s);
             Bounds = Polygons.Bounds(Polygon);

@@ -74,6 +74,22 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.FoodStore, default, null, 0, capacity));
         }
 
+        /// <summary>Adds a food-only store bound to a footprint (a granary, FD-30), holding up to <paramref name="capacity"/> items.</summary>
+        public LedgerLocation AddFoodStore(int capacity, int moduleId)
+        {
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Must be positive.");
+            return Add(new LedgerLocation(_nextId++, LocationKind.FoodStore, default, null, moduleId, capacity));
+        }
+
+        /// <summary>Finds the food store bound to a footprint (a granary), or null (never creates).</summary>
+        public LedgerLocation FindFoodStore(int moduleId)
+        {
+            if (moduleId == 0) return null;
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.FoodStore && l.ModuleId == moduleId) return l;
+            return null;
+        }
+
         /// <summary>Adds an unlimited food-only store at a point (the camp food store, FD-02).</summary>
         public LedgerLocation AddFoodStore(PointMm position) =>
             Add(new LedgerLocation(_nextId++, LocationKind.FoodStore, position, null, 0));

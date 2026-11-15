@@ -46,6 +46,7 @@ namespace LordsLegacy.Sim.Construction
             Ledger inv = world.Inventory;
             int refund = RefundLogs(world, fp);
             LedgerLocation storage = inv.FindStorage(footprintId);
+            if (storage == null) storage = inv.FindFoodStore(footprintId); // a granary's food store (CN-55)
             bool hasContents = storage != null && storage.Total > 0;
             if (refund > 0 || hasContents)
             {
