@@ -39,7 +39,7 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 
 - Felling stops when `LogLoad` (piles, storage, carried logs, reserved room, no double counting) reaches storage capacity.
   It restarts when logs leave storage or a second storage adds capacity (to 40).
-- `DeleteArea` refuses an operation area that still has modules ("Deconstruct its buildings first", CN-58).
+- `DeleteArea` refuses an operation area that still has modules ("Deconstruct its buildings first", CN-58), and a plot that still has a house ("Deconstruct the house first", HM-14b).
 
 ## Extending
 
