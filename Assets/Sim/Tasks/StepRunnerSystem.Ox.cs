@@ -57,7 +57,7 @@ namespace LordsLegacy.Sim.Tasks
                 _drop[t.Id] = ++done;
                 if (done < Math.Max(1, world.Tuning.OxUnloadMinutes)) return true;
                 ConstructionSite site = t.Def.Id == ConstructionTaskDefs.DeliverId ? SiteOfDeliver(world, t) : null;
-                int? owner = site != null ? site.FootprintId : t.OwnerOperationId;
+                int? owner = site != null ? (int?)site.FootprintId : PileOwner(t);
                 LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(ox.X, ox.Z), owner);
                 world.Inventory.Transfer(carrier, pile, Items.Log, carried);
                 // The logs are on the ground now, so the storage room this haul reserved for them is no longer needed.
@@ -74,6 +74,10 @@ namespace LordsLegacy.Sim.Tasks
             StepOxWalk(world, t, c, ox, TaskStep.ReturnOx());
             return true;
         }
+
+        // Owner of a ground pile a task drops logs on: its operation, or none for a house task (HouseOwnerId, HM-06).
+        private static int? PileOwner(TaskRecord t) =>
+            t.OwnerOperationId == DeconstructionWork.HouseOwnerId ? (int?)null : t.OwnerOperationId;
 
         // The construction site a Deliver unloads into, or null.
         private static ConstructionSite SiteOfDeliver(SimWorld world, TaskRecord t)
@@ -195,7 +199,7 @@ namespace LordsLegacy.Sim.Tasks
                 {
                     int n = carrier.CountOf(item.Id);
                     if (n <= 0) continue;
-                    LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(x, z), t.OwnerOperationId);
+                    LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(x, z), PileOwner(t));
                     world.Inventory.Transfer(carrier, pile, item, n);
                 }
             }
