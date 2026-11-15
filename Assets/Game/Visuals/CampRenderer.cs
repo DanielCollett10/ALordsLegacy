@@ -5,7 +5,7 @@ using UnityEngine;
 namespace LordsLegacy.Game.Visuals
 {
     /// <summary>
-    /// Draws the camp pieces from Sim state: one tent per family home, the fire, the log pile at the stockpile and
+    /// Draws the camp pieces from Sim state: one tent per Homeless family, the fire, the log pile at the stockpile and
     /// the tie post at the ox stand. Instanced, no GameObjects or colliders. The matrices are rebuilt only when
     /// <c>FootprintRegistry.Version</c>, the camp itself or the family count changes.
     /// </summary>
@@ -22,6 +22,7 @@ namespace LordsLegacy.Game.Visuals
         private bool _built;
         private int _builtFootprintVersion;
         private int _builtFamilies;
+        private int _builtHomesVersion;
         private CampInfoRef _builtCamp;
 
         // Plain wrapper so the reference comparison does not depend on CampInfo equality.
@@ -58,7 +59,7 @@ namespace LordsLegacy.Game.Visuals
                 return;
             }
             if (!_built || world.Footprints.Version != _builtFootprintVersion
-                || world.People.FamilyCount != _builtFamilies
+                || world.People.FamilyCount != _builtFamilies || world.Homes.Version != _builtHomesVersion
                 || !ReferenceEquals(_builtCamp?.Camp, world.Camp))
                 Build(world);
 
@@ -74,6 +75,7 @@ namespace LordsLegacy.Game.Visuals
             BuildCount++;
             _builtFootprintVersion = world.Footprints.Version;
             _builtFamilies = world.People.FamilyCount;
+            _builtHomesVersion = world.Homes.Version;
             _builtCamp = new CampInfoRef { Camp = world.Camp };
             _tents.Clear(); _fire.Clear(); _logs.Clear(); _posts.Clear();
 
@@ -85,7 +87,8 @@ namespace LordsLegacy.Game.Visuals
             var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
             foreach (var f in world.People.Families)
-                _tents.Add(Piece(world, registry.Get(VisualSizes.CampTent), VisualSizes.CampTent, f.HomeX, f.HomeZ, yaw, ref min, ref max));
+                if (f.IsHomeless) // a family that moved into a house takes its tent down (HM-20)
+                    _tents.Add(Piece(world, registry.Get(VisualSizes.CampTent), VisualSizes.CampTent, f.HomeX, f.HomeZ, yaw, ref min, ref max));
             _fire.Add(Piece(world, registry.Get(VisualSizes.CampFire), VisualSizes.CampFire,
                 camp.Fire.XMetres, camp.Fire.ZMetres, yaw, ref min, ref max));
             _logs.Add(Piece(world, registry.Get(VisualSizes.CampLogPile), VisualSizes.CampLogPile,
