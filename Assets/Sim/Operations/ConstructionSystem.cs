@@ -27,9 +27,10 @@ namespace LordsLegacy.Sim.Operations
         public void Step(SimWorld world)
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
-            if (world.Construction.Count == 0 && !AnyLiveDeliver(world)) return;
+            if (world.Construction.Count == 0 && world.Deconstruction.Count == 0 && !AnyLiveDeliver(world)) return;
             Sweep(world);
             SweepBuilds(world);
+            ManageDeconstruction(world);
             foreach (ConstructionSite site in new List<ConstructionSite>(world.Construction.Sites))
             {
                 Footprint fp = world.Footprints.Get(site.FootprintId);
@@ -81,6 +82,35 @@ namespace LordsLegacy.Sim.Operations
                 TaskDef def = ConstructionTaskDefs.Build(Math.Max(1, fp.Type.ConstructionRecipe.BuildWorkerMinutes));
                 TaskRecord task = world.Tasks.Create(def, op.Id, null, priority, fp.Type.Id);
                 world.Tasks.SetSite(task.Id, fp.Id);
+            }
+        }
+
+        // Deconstruct tasks (T-394, CN-53): up to MaxBuildersPerSite live per marked module, never more than the minutes
+        // left. Tasks of an entry that is gone (cancelled, CN-57) are cancelled. A 0-minute module is removed at once.
+        private static void ManageDeconstruction(SimWorld world)
+        {
+            foreach (TaskRecord t in new List<TaskRecord>(world.Tasks.All))
+                if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeconstructId && t.SiteFootprintId.HasValue &&
+                    world.Deconstruction.Get(t.SiteFootprintId.Value) == null)
+                    world.Tasks.Cancel(t.Id);
+            foreach (DeconstructionEntry e in new List<DeconstructionEntry>(world.Deconstruction.Entries))
+            {
+                Footprint fp = world.Footprints.Get(e.FootprintId);
+                if (fp == null) { world.Deconstruction.Remove(e.FootprintId); continue; }
+                int remaining = DeconstructionWork.Remaining(world, e, fp);
+                if (remaining <= 0) { DeconstructionWork.Finish(world, e.FootprintId); continue; }
+                Operation op = OperationOf(world, e.FootprintId);
+                if (op == null) continue;
+                int live = 0;
+                foreach (TaskRecord t in world.Tasks.All)
+                    if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeconstructId && t.SiteFootprintId == e.FootprintId) live++;
+                int want = Math.Min(Math.Max(1, world.Tuning.MaxBuildersPerSite), remaining) - live;
+                for (int i = 0; i < want; i++)
+                {
+                    TaskRecord task = world.Tasks.Create(ConstructionTaskDefs.Deconstruct(remaining), op.Id, null,
+                        TaskPriority.Normal, fp.Type.Id);
+                    world.Tasks.SetSite(task.Id, fp.Id);
+                }
             }
         }
 

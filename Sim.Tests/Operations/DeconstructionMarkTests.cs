@@ -59,7 +59,7 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void Mark_BuiltStorage_RecordsEntry_NoCapacity_MissingStorage()
+        public void Mark_BuiltStorage_ZeroMinuteRecipe_IsRemovedAtOnce_T394()
         {
             SimWorld w = World(0, out _);
             Operation op = Designate(w);
@@ -67,10 +67,22 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.AreEqual(ModuleTypes.LogStorage.LogCapacity, OperationStatus.LogCapacity(w, op));
 
             Assert.IsTrue(w.Execute(new MarkForDeconstruction(storage)).IsAccepted);
-            Assert.IsNotNull(w.Deconstruction.Get(storage));
-            Assert.IsNotNull(w.Footprints.Get(storage), "footprint stays until the work is done");
+            Assert.IsNull(w.Footprints.Get(storage));
+            Assert.AreEqual(0, w.Deconstruction.Count);
             Assert.AreEqual(0, OperationStatus.LogCapacity(w, op));
             Assert.AreEqual(0, OperationStatus.StorageModules(w, op).Count);
+        }
+
+        [Test]
+        public void Mark_BuiltOxenStand_RecordsEntry_FootprintStaysUntilWorkDone()
+        {
+            SimWorld w = World(1, out _);
+            Operation op = Designate(w);
+            int stand = Place(w, op, ModuleTypes.OxenStandId, 110);
+            w.Construction.Remove(stand);
+            Assert.IsTrue(w.Execute(new MarkForDeconstruction(stand)).IsAccepted);
+            Assert.IsNotNull(w.Deconstruction.Get(stand));
+            Assert.IsNotNull(w.Footprints.Get(stand));
         }
 
         [Test]
@@ -137,25 +149,26 @@ namespace LordsLegacy.Sim.Tests.Operations
         [Test]
         public void Cancel_RestoresModuleAtOnce_AndRejectsWhenNotMarked()
         {
-            SimWorld w = World(0, out _);
+            SimWorld w = World(1, out _);
             Operation op = Designate(w);
-            int storage = Place(w, op, ModuleTypes.LogStorageId, 110);
-            Assert.IsTrue(w.Execute(new CancelDeconstruction(storage)).IsRejected);
-            w.Execute(new MarkForDeconstruction(storage));
-            Assert.AreEqual(0, OperationStatus.LogCapacity(w, op));
+            int stand = Place(w, op, ModuleTypes.OxenStandId, 110);
+            w.Construction.Remove(stand);
+            Assert.IsTrue(w.Execute(new CancelDeconstruction(stand)).IsRejected);
+            w.Execute(new MarkForDeconstruction(stand));
+            Assert.AreEqual(1, w.Deconstruction.Count);
 
-            Assert.IsTrue(w.Execute(new CancelDeconstruction(storage)).IsAccepted);
+            Assert.IsTrue(w.Execute(new CancelDeconstruction(stand)).IsAccepted);
             Assert.AreEqual(0, w.Deconstruction.Count);
-            Assert.AreEqual(ModuleTypes.LogStorage.LogCapacity, OperationStatus.LogCapacity(w, op));
+            Assert.IsTrue(w.IsWorking(stand));
         }
 
         [Test]
-        public void SaveVersion_IsTwo_PreviousVersionBytesAreRefusedWithSv33Message()
+        public void SaveVersion_IsThree_PreviousVersionBytesAreRefusedWithSv33Message()
         {
-            Assert.AreEqual(2, SaveWriter.CurrentVersion);
-            byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 1, 0, 0, 0, 0, 0, 0, 0 };
+            Assert.AreEqual(3, SaveWriter.CurrentVersion);
+            byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 2, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("Unknown save format version 1 (this build reads version 2).", e.Message);
+            StringAssert.Contains("Unknown save format version 2 (this build reads version 3).", e.Message);
         }
     }
 }

@@ -65,6 +65,7 @@ namespace LordsLegacy.Sim.Tasks
             }
 
             if (t.Def.Id == ConstructionTaskDefs.BuildId && t.SiteFootprintId.HasValue) { StepBuild(world, t, c); return; }
+            if (t.Def.Id == ConstructionTaskDefs.DeconstructId && t.SiteFootprintId.HasValue) { StepDeconstruct(world, t, c); return; }
             TaskStep step = t.Def.Steps[t.CurrentStep];
             if (t.AwaitsTaskId.HasValue && step.Kind == StepKind.LoadOx)
             {
@@ -139,6 +140,21 @@ namespace LordsLegacy.Sim.Tasks
                     ConstructionProgress.Remaining(world, site, fp.Type.ConstructionRecipe) > 0) return; // keep building
             }
             Advance(world, t, c); // capped, or the site just finished
+        }
+
+        private void StepDeconstruct(SimWorld world, TaskRecord t, Citizen c)
+        {
+            DeconstructionEntry e = t.SiteFootprintId.HasValue ? world.Deconstruction.Get(t.SiteFootprintId.Value) : null;
+            Footprint fp = e == null ? null : world.Footprints.Get(e.FootprintId);
+            if (fp != null && DeconstructionWork.Remaining(world, e, fp) > 0)
+            {
+                c.Activity = Activity.Working;
+                world.Tasks.AddProgress(t.Id, 1);
+                e.ProgressMinutes++;
+                if (DeconstructionWork.Remaining(world, e, fp) <= 0) DeconstructionWork.Finish(world, e.FootprintId);
+                else return; // keep working
+            }
+            Advance(world, t, c); // done, or the mark was cancelled
         }
 
         private void Advance(SimWorld world, TaskRecord t, Citizen c)

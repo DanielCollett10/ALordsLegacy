@@ -15,6 +15,9 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Id of the build task definition: a worker builds a site.</summary>
         public const string BuildId = "task.build";
 
+        /// <summary>Id of the deconstruct task definition: a worker takes a built module down (CN-53).</summary>
+        public const string DeconstructId = "task.deconstruct";
+
         /// <summary>
         /// Deliver up to <paramref name="count"/> logs: fetch the ox, lead it to the pile, load, lead it to the site,
         /// unload and return the ox. The load and unload work is heavy.
@@ -50,8 +53,15 @@ namespace LordsLegacy.Sim.Tasks
             return new TaskDef(BuildId, new[] { TaskStep.Work(minutes, heavy: true) }, EligibilityPolicy.HelpersOnly);
         }
 
-        /// <summary>True for the construction task definitions (deliver and build).</summary>
-        public static bool IsConstruction(string defId) => defId == DeliverId || defId == BuildId;
+        /// <summary>Deconstruct for <paramref name="minutes"/> minutes of heavy work (CN-53), helpers only like Build.</summary>
+        /// <param name="minutes">Work duration in minutes; at least 1.</param>
+        public static TaskDef Deconstruct(int minutes)
+        {
+            return new TaskDef(DeconstructId, new[] { TaskStep.Work(minutes, heavy: true) }, EligibilityPolicy.HelpersOnly);
+        }
+
+        /// <summary>True for the construction task definitions (deliver, build and deconstruct).</summary>
+        public static bool IsConstruction(string defId) => defId == DeliverId || defId == BuildId || defId == DeconstructId;
 
         /// <summary>The citizen-panel verb for a construction task, given the module it serves. Null when the
         /// definition is not a construction task.</summary>
@@ -60,6 +70,7 @@ namespace LordsLegacy.Sim.Tasks
             bool named = !string.IsNullOrEmpty(moduleName);
             if (defId == DeliverId) return named ? "Delivering logs to " + moduleName : "Delivering logs";
             if (defId == BuildId) return named ? "Building " + moduleName : "Building";
+            if (defId == DeconstructId) return named ? "Deconstructing " + moduleName : "Deconstructing";
             return null;
         }
     }

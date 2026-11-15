@@ -27,6 +27,11 @@ last log is in and the work is done, the site becomes a built footprint (decisio
    adds one minute per tick (`StepBuild` → `ConstructionProgress.Work`). Progress cap = recipe minutes × delivered ÷ needed,
    where delivered = on site + `LogsConsumed`. Each log share passed consumes one log (`Ledger.Consume`).
 4. **Built:** at the full total the site record is removed. Its footprint now counts as built (`world.IsBuilt`).
+6. **Deconstruct (T-394):** a marked built module (`world.Deconstruction`) gets up to `MaxBuildersPerSite` `task.deconstruct`
+   tasks (HelpersOnly, heavy Work of recipe minutes × `DeconstructTimeShare`, hut 480). `StepDeconstruct` adds a minute to the
+   entry per tick. `DeconstructionWork.Finish` removes the footprint and puts floor(recipe logs × `DeconstructRefundShare`)
+   logs plus any storage contents into one unowned ground pile at the site. A 0-minute recipe (log storage) is removed at once
+   when marked. `CancelDeconstruction` removes the entry (progress is thrown away) and the system then cancels its tasks.
 5. **Cancel:** a cancelled deliver hands its logs back. A removed site cancels its tasks and moves its logs to an unowned pile.
 
 ## Rules

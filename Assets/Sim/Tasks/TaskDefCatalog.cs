@@ -17,6 +17,7 @@ namespace LordsLegacy.Sim.Tasks
                 { HaulSystem.HaulTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.Ox) },
                 { ConstructionTaskDefs.DeliverId, (EligibilityPolicy.HelpersOnly, RequiredResource.Ox) },
                 { ConstructionTaskDefs.BuildId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
+                { ConstructionTaskDefs.DeconstructId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
             };
 
         /// <summary>The policy and resource of a known task def id; false for an unknown id.</summary>

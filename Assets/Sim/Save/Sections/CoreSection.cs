@@ -98,6 +98,8 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.MaxWalkSlopeDeg);
             w.WriteDouble(t.OverlapToleranceM2);
             w.WriteDouble(t.SpatialIndexCellM);
+            w.WriteDouble(t.DeconstructTimeShare);
+            w.WriteDouble(t.DeconstructRefundShare);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -144,6 +146,8 @@ namespace LordsLegacy.Sim.Save.Sections
             t.MaxWalkSlopeDeg = r.ReadDouble();
             t.OverlapToleranceM2 = r.ReadDouble();
             t.SpatialIndexCellM = r.ReadDouble();
+            t.DeconstructTimeShare = r.ReadDouble();
+            t.DeconstructRefundShare = r.ReadDouble();
             return t;
         }
 
