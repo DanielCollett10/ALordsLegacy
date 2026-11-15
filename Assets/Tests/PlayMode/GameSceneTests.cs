@@ -132,7 +132,11 @@ namespace LordsLegacy.Tests.PlayMode
             foreach (var t in Object.FindObjectsByType<LordsLegacy.Game.Tools.AreaTool>(FindObjectsSortMode.None))
                 ids.Add(t.Id);
             ids.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter", "woodcutter-work" }, ids);
+            CollectionAssert.AreEqual(new[] { LordsLegacy.Game.Tools.AreaTool.TestToolId, LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, "woodcutter-draw", "woodcutter-work" }, ids);
+            var draftTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.OperationDraftTool>();
+            Assert.IsNotNull(draftTool, "OperationDraftTool missing.");
+            Assert.AreEqual("woodcutter", draftTool.Id);
+            AssertNoNullRefs(draftTool);
             var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
             Assert.IsNotNull(moduleTool, "ModuleTool missing.");
             var moduleRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();

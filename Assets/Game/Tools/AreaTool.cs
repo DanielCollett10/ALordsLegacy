@@ -71,6 +71,12 @@ namespace LordsLegacy.Game.Tools
 
         private int? _workAreaFor;
 
+        /// <summary>
+        /// When set, a valid Confirm hands the closed shape to this callback instead of sending <see cref="DesignateArea"/>
+        /// (used by <see cref="OperationDraftTool"/>, which drives the area stage by composition). Null by default: no change.
+        /// </summary>
+        public System.Action<AreaShape> LockHandler { get; set; }
+
         /// <summary>Operation the next confirmed area is linked to with <see cref="SetWorkArea"/>, or null for a plain area.</summary>
         public int? WorkAreaFor { get => _workAreaFor; set => _workAreaFor = value; }
 
@@ -297,6 +303,7 @@ namespace LordsLegacy.Game.Tools
             if (!_active || _host == null || !_host.IsInitialized || !CanClose) return;
             Refresh(); // AR-11: never trust a stale preview; re-run the validator on the draft as it is now
             if (_preview == null || !_preview.IsValid) return;
+            if (LockHandler != null) { LockHandler(CurrentShape()); return; } // composed by OperationDraftTool: hand the shape over, send nothing
             var result = _host.Execute(new DesignateArea(CurrentShape(), _typeId));
             if (result.IsAccepted)
             {

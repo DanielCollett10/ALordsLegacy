@@ -13,6 +13,7 @@ Sim's pure validators. Picking and the camera only read the Sim (decision 0017 f
 | `ToolController` | Keeps exactly one active tool. `Register`, `Toggle(id)`, `HandleEscape()`, `IsPointerOverUi`. Sets `CameraRig.ToolActive`. |
 | `RoadTool` (id `road`) | Draft points and node drag. Calls `RoadValidator`, `PlacementRules`, `SimHost.Execute` (`DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`). |
 | `AreaTool` (ids `test-area`, `test-work-area`, woodcutter ids) | Draft points with edges. Click on an edge inserts a point (max 8). Drag a handle to bend it, double-click to straighten. Snaps when `Snapping` is on. |
+| `OperationDraftTool` (id `woodcutter`) | Build entry for an operation placed in one go (BT-10..18). Area stage: composes the `AreaTool` `woodcutter-draw`, whose `LockHandler` hands the closed shape over instead of sending `DesignateArea`. Module stage: palette (`pick:<typeId>` actions with costs), ghost follows the cursor (Q/E 15°, Shift 1°, side snap), left click adds a ghost (red + Sim reason if refused), right click removes the ghost under it, Esc drops the module then cancels. Rules live in `OperationDraft`. Confirm wiring is T-391. |
 | `ModuleTool` (id `module`) | Queue of module types for one operation. Ghost follows the cursor. Q/E rotate 15° (Shift 1°). Sends `PlaceModule` or `RemoveModule`. |
 | `Shared/PressTracker` | Click, drag and double-click. 4 px drag threshold, 6 px double-click radius. |
 | `Shared/SnapPicker` | Best candidate by kind order within a pixel limit: area vertex, road side, area edge. |
