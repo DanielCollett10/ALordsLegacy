@@ -28,6 +28,11 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HM-14 | Deconstructing a house (CN-50..57) makes its family Homeless again, with a tent back at the camp | PROPOSED |
 | HM-14b | The plot goes with its house: when the house's deconstruction finishes (or an unbuilt house site is cancelled), the plot area is removed too. CN-58's refusal is for **operation** areas only. Right-click delete of a plot that still has a house is refused: *Deconstruct the house first* | PROPOSED |
 
+> Implementation note (HM-14): the family goes back to the camp fire as its home point, not to a tent spot. The tent
+> spot is not saved, so the evicted family's tent is drawn at the fire. Owner to decide whether the tent should return to
+> its old spot (needs a saved spot) or the fire is fine.
+> Implementation note (HM-11): a family with no members never moves in (not in the design). Owner to confirm.
+
 ## What the player sees
 
 | ID | Rule | Tag |
@@ -35,6 +40,10 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HM-20 | A house site shows the scaffold (CN-42); a built house shows a placeholder house model | DECIDED |
 | HM-21 | Clicking a house or its plot opens the **house panel**: state (*Delivering*, *Building n%*, *Built*), the household name and members, or *Empty*, plus High priority while unbuilt and Deconstruct | PROPOSED |
 | HM-22 | The citizen panel shows *Home: <family> house* or *Homeless (camp)* | PROPOSED |
+
+> Implementation note (HM-21): an unbuilt house's button reads "Cancel house" (not Deconstruct). After a confirm
+> ("Cancel this unbuilt house? The site and its plot are removed at once.") it removes the site and its plot. The panel
+> also shows *Deconstructing n%*.
 
 ## Not in M13
 

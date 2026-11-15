@@ -14,11 +14,12 @@ Sim's pure validators. Picking and the camera only read the Sim (decision 0017 f
 | `RoadTool` (id `road`) | Draft points and node drag. Calls `RoadValidator`, `PlacementRules`, `SimHost.Execute` (`DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`). |
 | `AreaTool` (ids `test-area`, `test-work-area`, woodcutter ids) | Draft points with edges. Click on an edge inserts a point (max 8). Drag a handle to bend it, double-click to straighten. Snaps when `Snapping` is on. |
 | `OperationDraftTool` (id `woodcutter`) | Places an operation in one go (BT-10..21). Area stage: composes the `AreaTool` `woodcutter-draw`, whose `LockHandler` hands the closed shape over instead of sending `DesignateArea`. Module stage: palette (`pick:<typeId>` actions with costs), ghost follows the cursor (Q/E 15°, Shift 1°, side snap), left click adds a ghost (red + Sim reason if refused), right click removes the ghost under it, Esc drops the module then cancels. Confirm sends one `DesignateOperation`. Expand: `ToolController.BeginExpandModules` starts it in the module stage on the existing area (no hut offered if one exists) and Confirm sends `PlaceModules`. |
+| `PlotTool` (id `house`) | Build bar "House plot" (HM-01..05). Composes an `AreaTool` (plot type, via its `LockHandler`) to draw, shows the house ghost from `HousePlacement`, and on Confirm sends one `DesignatePlot`. Refusals come from the Sim. |
 | `OperationDraft` | Plain C# draft state (`Assets/Game/Tools/`): stage, ghosts, running cost, `MissingText`, `CanConfirm`. Calls `DraftModulePlacement` and `BuildCost`; sends nothing. |
 | `Shared/PressTracker` | Click, drag and double-click. 4 px drag threshold, 6 px double-click radius. |
 | `Shared/SnapPicker` | Best candidate by kind order within a pixel limit: area vertex, road side, area edge. |
 | `Shared/SnapMarkers`, `ToolHitTester`, `ModuleSnap` | Snap markers (AR-22), draft point hits, module side snap (3 mm inset). |
-| `AgentPicker` | Left click (no tool, not over UI) selects a citizen or ox by screen distance, else a module, the building area, or a linked work area (`TryPickOperation`). |
+| `AgentPicker` | Left click (no tool, not over UI) selects a citizen or ox by screen distance, else a house or its plot (`HasHouse`), a module, the building area, or a linked work area (`TryPickOperation`). |
 | `GroundPicker` | Ray from the camera → x/z only. Height and slope from `World.Terrain`, never the collider. `ReadAt(x, z)` reads without a ray. |
 | `GroundReadoutView` | One label of the ground sample each frame. |
 | `CameraRig` | Pan, scroll zoom, middle-drag orbit (pitch 10–85°), held above terrain. Refuses left and right mouse while a tool is active. |
@@ -50,6 +51,6 @@ Sim's pure validators. Picking and the camera only read the Sim (decision 0017 f
 
 ## Tests
 
-`Assets/Tests/PlayMode/`: `ToolControllerTests`, `RoadToolTests`, `RoadToolCursorTests`, `AreaToolTests`, `AreaCursorGhostTests`,
+`Assets/Tests/PlayMode/`: `ToolControllerTests`, `PlotToolTests`, `RoadToolTests`, `RoadToolCursorTests`, `AreaToolTests`, `AreaCursorGhostTests`,
 `OperationDraftToolTests`, `CameraRigTests`, `GroundPickerTests`, `CitizenPanelTests`, `DebugSendTests`, `CursorMarkerTests`.
 EditMode: `ToolInputTests`, `OperationDraftTests`.

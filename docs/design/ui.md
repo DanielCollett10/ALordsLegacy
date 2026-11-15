@@ -18,6 +18,8 @@ wireframes come later. UI Toolkit only. The UI reads Sim state and sends command
 
 > Implementation note (UIB-02, M8): **Woodcutter** is enabled (`ToolEntry.Defaults`, tooltip "Draw the woodcutter's area, then
 > place its modules"). Storage yard, House and Granary are still greyed "Coming later".
+> Implementation note (UIB-02, M13): **House plot** is enabled (T-408), gated on the house's log cost. Storage yard and Granary
+> are still greyed. This note replaces the M8 line above for House.
 | UIB-03 | Clicking a button activates its tool and highlights the button. Clicking the active button again, or Escape with nothing in progress, deactivates it. Only one tool is active at a time | DECIDED |
 | UIB-04 | Switching tools discards any unconfirmed draft | DECIDED |
 | UIB-06 | **Escape** goes to the active tool first. If the tool has a draft, it cancels the draft and Escape stops there. Only when the tool reports it is idle does the ToolController deactivate the tool | DECIDED |

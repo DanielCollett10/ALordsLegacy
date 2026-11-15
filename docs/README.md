@@ -31,6 +31,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Footprints | Placed buildings and stands: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
 | Inventory | Ledger of logs by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
 | Construction | Sites that take delivered logs and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
+| Homes | House plots along roads, a house built from logs, one homeless family moves in and out. | [systems/homes.md](systems/homes.md) | `Assets/Sim/Homes`, `Assets/Sim/Commands/DesignatePlot.cs`, `Assets/Sim/Areas/HousePlacement.cs` |
 | Start layout | The first camp, built through the normal commands. | [systems/start-layout.md](systems/start-layout.md) | `Assets/Sim/Start`, `Assets/Game/Config` |
 | Save and load | Byte-exact save sections, map check, Esc menu, autosave, scene reload. | [systems/save.md](systems/save.md) | `Assets/Sim/Save`, `Assets/Game/Saving`, `Assets/Game/UI/GameMenu` |
 | Unity host | `SimHost` owns the world and pacer; SimConfig and start-layout assets. | [systems/unity-host.md](systems/unity-host.md) | `Assets/Game/Bootstrap`, `Assets/Game/Config` |

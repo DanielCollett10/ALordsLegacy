@@ -10,7 +10,7 @@
 | Type | Role |
 |---|---|
 | `Population` | `Family`, `Citizen`, `Ox` records by explicit int id, iterated in id order. Ids never reused. `Version` bumps on add or remove. |
-| `Family` | Members, home (tent spot), `WorkplaceId` (= operation id, or none). |
+| `Family` | Members, home point (tent spot while Homeless, house access point once housed), `HomeHouseId`, `IsHomeless`, `WorkplaceId` (= operation id, or none). See `homes.md`. |
 | `Citizen` | `IMovable`. `AgeYears(nowTick, SimTuning.AgeingRate)`, `Activity`, `DebugSend`, the routine and work state. |
 | `Ox` | `IMovable`. `State` (`OxState`: Free, Reserved(task), Led(citizen), Resting(spot, stand id)). |
 | `RoutineSystem` | Routine phase, before movement. Per-citizen state Asleep, Milling, GoingHome. Issues `MoveOrder`s only. |
@@ -23,6 +23,7 @@
 - **Routine:** at sunrise plus a seeded 0 to `WakeStaggerMaxMinutes` delay, a sleeper mills: walks to a seeded walkable
   point within `MillRadiusM` of the camp fire (family home if no camp), stays `MillStayMinMinutes` to `MillStayMaxMinutes`,
   repeats. At sunset citizens walk home and become Sleeping on arrival. Oxen stay Waiting. Random choices use `SimRandom`.
+- **Housed:** a housed family mills about its house access point (not the fire), and its members commute from there.
 - **Busy skip:** a citizen with a move order set by someone else is skipped until it finishes. Later phases (work, debug
   send) can take over. Children mill around the fire too (PPL-30 to 32).
 - **Working day (`WorkDay`):** adult members of families with a `WorkplaceId` get a shift. Everyone else is always on shift.

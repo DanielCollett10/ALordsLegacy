@@ -12,8 +12,10 @@
 | `CommandLog`, `CommandLogEntry` | `Commands/` | Append-only `(tick, command, result)`. Not saved. |
 
 Commands are in `Assets/Sim/Commands/`: `DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`, `DesignateArea`, `DeleteArea`,
-`PlaceModule`, `RemoveModule`, `AssignFamily`, `UnassignFamily`, `AssignOx`, `UnassignOx`, `SetSitePriority`,
-`SendCitizenTo`, plus `OperationSettings` (pause, resume, work area, use default area).
+`DesignatePlot`, `DesignateOperation`, `DeconstructOperation`, `PlaceModule(s)`, `RemoveModule`, `MarkForDeconstruction`,
+`CancelDeconstruction`, `AssignFamily`, `UnassignFamily`, `AssignOx`, `UnassignOx`, `SetSitePriority`, `SendCitizenTo`,
+plus `OperationSettings` (pause, resume, work area, use default area).
+`DesignatePlot` makes the plot area, the house site and an Empty home in one all-or-nothing Apply (HM-05, decision 0037 pattern).
 
 ## Flow
 
@@ -34,6 +36,7 @@ paused and never changes `Tick`. Unity calls it only through `SimHost.Execute`.
 - Preview queries (`RoadValidator`, `AreaValidator`, `ModulePlacement.Preview`) are pure. The command re-runs them, so
   the result is the same as the preview.
 - `RemovedTreeIds` tells the view which trees went; trees do not return on `DeleteArea`.
+- `DeleteArea` refuses a plot that still has a home ("Deconstruct the house first", HM-14b). Deconstruct the house to remove it.
 
 ## Tests
 
