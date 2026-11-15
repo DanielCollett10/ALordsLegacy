@@ -39,6 +39,9 @@ namespace LordsLegacy.Game
         /// <summary>Path of the last file written, or null.</summary>
         public string LastSavedPath { get; private set; }
 
+        /// <summary>Raised after a manual save succeeds (the autosave timer restarts on it, SV-11).</summary>
+        public event Action Saved;
+
         /// <summary>Sets the SimHost (for code that adds the component at run time).</summary>
         public void SetHost(SimHost host) { _host = host; }
 
@@ -83,6 +86,7 @@ namespace LordsLegacy.Game
                 byte[] bytes = SimSave.Write(host.World, name, Clock(), host.Map.MapId, host.Map.ContentHash);
                 LastSavedPath = (Store ?? (Store = SaveStore.Default())).WriteNew(name, bytes);
                 _note.text = "Saved";
+                Saved?.Invoke();
                 return true;
             }
             catch (Exception e)

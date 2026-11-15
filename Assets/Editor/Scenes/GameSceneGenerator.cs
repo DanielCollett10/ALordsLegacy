@@ -301,6 +301,9 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(savePanel, "_host", host);
             var loadPanel = menuGo.AddComponent<LoadPanelController>();
             SetRef(loadPanel, "_host", host);
+            var autosaveGo = CreateUiDocument("Autosave", null);
+            var autosave = autosaveGo.AddComponent<LordsLegacy.Game.AutosaveController>();
+            SetRef(autosave, "_host", host);
             var path = new GameObject("DebugPathOverlay").AddComponent<DebugPathOverlay>();
             SetRef(path, "_host", host);
             SetRef(path, "_agents", agents);
