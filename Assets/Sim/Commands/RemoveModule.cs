@@ -3,6 +3,7 @@ using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Operations;
 
@@ -10,7 +11,8 @@ namespace LordsLegacy.Sim.Commands
 {
     /// <summary>
     /// Removes a placed module (footprint id) from its operation and the footprint registry. Unknown id →
-    /// <see cref="CommandRejectCode.NotFound"/>. Trees it cleared do not come back. Removed ids hold the module id.
+    /// <see cref="CommandRejectCode.NotFound"/>. Trees it cleared do not come back. Removed ids hold the module id; an unbuilt
+    /// house site also removes its home and plot (HM-14b), and the plot id follows. A built house is not removable here.
     /// </summary>
     public sealed class RemoveModule : ISimCommand
     {
@@ -31,10 +33,15 @@ namespace LordsLegacy.Sim.Commands
             return null;
         }
 
+        // An unbuilt house site has no operation; it is removed with its home and plot (HM-14b). A built house is only
+        // ever taken down by deconstruction (MarkForDeconstruction), so it is not removable here.
+        private bool IsUnbuiltHouse(SimWorld world) => world.Homes.Get(ModuleId) != null && !world.IsBuilt(ModuleId);
+
         /// <inheritdoc />
         public CommandResult Validate(SimWorld world)
         {
-            if (Owner(world) == null) return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
+            if (Owner(world) == null && !IsUnbuiltHouse(world))
+                return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
             LedgerLocation storage = world.Inventory.FindStorage(ModuleId);
             if (storage != null && world.IsBuilt(ModuleId))
                 foreach (ConstructionSite s in world.Construction.Sites)
@@ -82,14 +89,17 @@ namespace LordsLegacy.Sim.Commands
         public CommandResult Apply(SimWorld world)
         {
             Operation op = Owner(world);
-            if (op == null) return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
+            if (op == null && !IsUnbuiltHouse(world)) return CommandResult.Rejected(CommandRejectCode.NotFound, "no module " + ModuleId);
             CommandResult check = Validate(world);
             if (check.IsRejected) return check;
             ConstructionSite site = world.Construction.Get(ModuleId);
             if (site != null) ReleaseSite(world, site, world.Footprints.Get(ModuleId));
-            world.Operations.RemoveModule(op.Id, ModuleId);
+            if (op != null) world.Operations.RemoveModule(op.Id, ModuleId);
             world.Footprints.Remove(ModuleId);
-            return CommandResult.Accepted(removed: new long[] { ModuleId });
+            int? plot = HouseRemoval.RemoveWithPlot(world, ModuleId);
+            return CommandResult.Accepted(removed: plot.HasValue
+                ? new long[] { ModuleId, plot.Value }
+                : new long[] { ModuleId });
         }
     }
 }

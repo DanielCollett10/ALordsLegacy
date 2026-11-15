@@ -47,6 +47,13 @@ namespace LordsLegacy.Sim.Homes
             return null;
         }
 
+        /// <summary>The home whose plot is this area, or null (HM-14b: a plot with a house cannot be deleted).</summary>
+        public HomeRecord FindByPlot(int plotAreaId)
+        {
+            foreach (HomeRecord h in _homes.Values) if (h.PlotAreaId == plotAreaId) return h;
+            return null;
+        }
+
         /// <summary>Adds an Empty home. Throws if the house already has one.</summary>
         public HomeRecord Add(int houseFootprintId, int plotAreaId)
         {
@@ -65,6 +72,23 @@ namespace LordsLegacy.Sim.Homes
             if (home.FamilyId != 0 || !family.IsHomeless) return false;
             home.FamilyId = family.Id;
             family.HomeHouseId = home.HouseFootprintId;
+            Version++;
+            return true;
+        }
+
+        /// <summary>Makes a home Empty (its family link is cleared). The caller clears the family's side (<see cref="HouseRemoval"/>).</summary>
+        public void Vacate(HomeRecord home)
+        {
+            if (home == null) throw new ArgumentNullException(nameof(home));
+            if (home.FamilyId == 0) return;
+            home.FamilyId = 0;
+            Version++;
+        }
+
+        /// <summary>Removes a home record. False if the house has none.</summary>
+        public bool Remove(int houseFootprintId)
+        {
+            if (!_homes.Remove(houseFootprintId)) return false;
             Version++;
             return true;
         }

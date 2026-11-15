@@ -99,15 +99,15 @@ namespace LordsLegacy.Sim.Operations
                 if (fp == null) { world.Deconstruction.Remove(e.FootprintId); continue; }
                 int remaining = DeconstructionWork.Remaining(world, e, fp);
                 if (remaining <= 0) { DeconstructionWork.Finish(world, e.FootprintId); continue; }
-                Operation op = OperationOf(world, e.FootprintId);
-                if (op == null) continue;
+                Operation op = OperationOf(world, e.FootprintId); // null for a house (HM-14): its tasks use HouseOwnerId
+                int owner = op != null ? op.Id : DeconstructionWork.HouseOwnerId;
                 int live = 0;
                 foreach (TaskRecord t in world.Tasks.All)
                     if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeconstructId && t.SiteFootprintId == e.FootprintId) live++;
                 int want = Math.Min(Math.Max(1, world.Tuning.MaxBuildersPerSite), remaining) - live;
                 for (int i = 0; i < want; i++)
                 {
-                    TaskRecord task = world.Tasks.Create(ConstructionTaskDefs.Deconstruct(remaining), op.Id, null,
+                    TaskRecord task = world.Tasks.Create(ConstructionTaskDefs.Deconstruct(remaining), owner, null,
                         TaskPriority.Normal, fp.Type.Id);
                     world.Tasks.SetSite(task.Id, fp.Id);
                 }

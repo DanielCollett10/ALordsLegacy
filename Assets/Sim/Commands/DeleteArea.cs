@@ -23,6 +23,8 @@ namespace LordsLegacy.Sim.Commands
         {
             if (world.Areas.Get(AreaId) == null)
                 return CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId);
+            if (world.Homes.FindByPlot(AreaId) != null)
+                return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Deconstruct the house first"); // HM-14b
             Operation op = world.Operations.FindByArea(AreaId);
             if (op != null && op.ModuleIds.Count > 0)
                 return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Deconstruct its buildings first");

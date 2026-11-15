@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
+using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.Operations;
 
 namespace LordsLegacy.Sim.Commands
@@ -22,8 +23,13 @@ namespace LordsLegacy.Sim.Commands
         /// <inheritdoc />
         public CommandResult Validate(SimWorld world)
         {
-            CommandResult r = new RemoveModule(ModuleId).Validate(world);
-            if (r.IsRejected) return r;
+            // A built house has no operation: it is marked directly (HM-14). Unbuilt ones are checked by RemoveModule.
+            bool builtHouse = world.Homes.Get(ModuleId) != null && world.IsBuilt(ModuleId);
+            if (!builtHouse)
+            {
+                CommandResult r = new RemoveModule(ModuleId).Validate(world);
+                if (r.IsRejected) return r;
+            }
             if (world.Deconstruction.Get(ModuleId) != null)
                 return CommandResult.Rejected(CommandRejectCode.NotAllowed, "already being deconstructed");
             return CommandResult.Accepted();
@@ -47,6 +53,7 @@ namespace LordsLegacy.Sim.Commands
                 var families = new List<int>(op.FamilyIds);
                 foreach (int fid in families) new UnassignFamily(op.Id, fid).Apply(world);
             }
+            HouseRemoval.Evict(world, ModuleId); // no-op for a module that is not a house
             world.Deconstruction.Add(new DeconstructionEntry(ModuleId));
             if (fp != null && DeconstructionWork.TotalMinutes(world, fp) <= 0)
             {
