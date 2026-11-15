@@ -51,6 +51,48 @@ namespace LordsLegacy.Game.Tools
             _type = type ?? throw new ArgumentNullException(nameof(type));
         }
 
+        /// <summary>
+        /// Starts a draft that expands an existing operation (BT-20): already in the module stage on the operation's area,
+        /// its modules counted as existing. Null when the operation or its area is missing or of another type.
+        /// </summary>
+        public static OperationDraft ForExpansion(SimWorld world, OperationTypeDef type, int operationId)
+        {
+            Operation op = world.Operations.Get(operationId);
+            var area = op == null ? null : world.Areas.Get(op.AreaId);
+            if (op == null || area == null || op.TypeId != type.Id) return null;
+            var d = new OperationDraft(world, type) { _expandOperationId = operationId, _polygon = area.Polygon, Stage = DraftStage.ModuleStage };
+            foreach (int id in op.ModuleIds)
+            {
+                Footprint f = world.Footprints.Get(id);
+                if (f != null) d._existing.Add(f);
+            }
+            return d;
+        }
+
+        private int? _expandOperationId;
+        private readonly List<Footprint> _existing = new List<Footprint>();
+
+        /// <summary>True when this draft expands an existing operation instead of placing a new one.</summary>
+        public bool IsExpansion => _expandOperationId.HasValue;
+
+        /// <summary>The operation's modules that already exist (expansion only), drawn solid.</summary>
+        public IReadOnlyList<Footprint> Existing => _existing;
+
+        /// <summary>The polygon of the locked area, or null before it is locked.</summary>
+        public IReadOnlyList<PointMm> AreaPolygon => _polygon;
+
+        /// <summary>True when the type can still take one more module of this id given the existing ones and the ghosts.</summary>
+        public bool CanOffer(string moduleTypeId)
+        {
+            if (moduleTypeId == _type.HutTypeId)
+            {
+                int n = CountOf(moduleTypeId);
+                foreach (Footprint f in _existing) if (f.Type.Id == moduleTypeId) n++;
+                return n < _type.HutCount;
+            }
+            return true;
+        }
+
         /// <summary>Current stage.</summary>
         public DraftStage Stage { get; private set; }
 
@@ -105,7 +147,9 @@ namespace LordsLegacy.Game.Tools
         {
             if (Stage != DraftStage.ModuleStage) { reason = "Lock the area first"; return false; }
             if (ModuleInHand == null) { reason = "Pick a module first"; return false; }
-            ModulePlacementResult r = DraftModulePlacement.Preview(_world, _type, _polygon, _ghosts, ModuleInHand,
+            IReadOnlyList<Footprint> others = _ghosts;
+            if (_existing.Count > 0) { var all = new List<Footprint>(_existing); all.AddRange(_ghosts); others = all; }
+            ModulePlacementResult r = DraftModulePlacement.Preview(_world, _type, _polygon, others, ModuleInHand,
                 centre, rotationDeg, RunningCost);
             reason = r.Text;
             return r.Ok;
@@ -150,6 +194,7 @@ namespace LordsLegacy.Game.Tools
             get
             {
                 if (Stage != DraftStage.ModuleStage) return "Finish the area";
+                if (IsExpansion) return _ghosts.Count == 0 ? "Place at least one module" : string.Empty;
                 if (CountOf(_type.HutTypeId) < _type.HutCount) return "Place a Hut";
                 if (CountOf(_type.LogStorageTypeId) < _type.MinLogStorageCount) return "Place a Log storage";
                 return string.Empty;
@@ -177,5 +222,9 @@ namespace LordsLegacy.Game.Tools
         /// <summary>The one command for Confirm, modules in placement order (BT-16). Null until the area is locked.</summary>
         public DesignateOperation BuildCommand() =>
             _shape == null ? null : new DesignateOperation(_shape, _type.Id, _specs);
+
+        /// <summary>The one command for Confirm of an expansion (BT-21). Null for a new-operation draft.</summary>
+        public PlaceModules BuildExpandCommand() =>
+            _expandOperationId.HasValue ? new PlaceModules(_expandOperationId.Value, _specs) : null;
     }
 }

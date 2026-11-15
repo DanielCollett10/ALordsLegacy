@@ -137,15 +137,12 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(draftTool, "OperationDraftTool missing.");
             Assert.AreEqual("woodcutter", draftTool.Id);
             AssertNoNullRefs(draftTool);
-            var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
-            Assert.IsNotNull(moduleTool, "ModuleTool missing.");
             var moduleRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();
             Assert.IsNotNull(moduleRenderer, "ModuleRenderer missing.");
             AssertNoNullRefs(moduleRenderer);
             var logPileRenderer = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.LogPileRenderer>();
             Assert.IsNotNull(logPileRenderer, "LogPileRenderer missing.");
             AssertNoNullRefs(logPileRenderer);
-            AssertNoNullRefs(moduleTool);
 
             // The overlay's area labels are in the UXML the generator wires (T-116).
             var overlay = Object.FindFirstObjectByType<DebugOverlayView>();
@@ -205,9 +202,6 @@ namespace LordsLegacy.Tests.PlayMode
             var host = Object.FindFirstObjectByType<SimHost>();
             Assert.IsNotNull(host, "SimHost missing.");
 
-            var moduleTool = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ModuleTool>();
-            Assert.IsNotNull(moduleTool, "ModuleTool missing.");
-            AssertNoNullRefs(moduleTool);
             var modules = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.ModuleRenderer>();
             Assert.IsNotNull(modules, "ModuleRenderer missing.");
             AssertNoNullRefs(modules);

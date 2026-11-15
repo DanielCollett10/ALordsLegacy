@@ -14,7 +14,7 @@ Sim's pure validators. Picking and the camera only read the Sim (decision 0017 f
 | `RoadTool` (id `road`) | Draft points and node drag. Calls `RoadValidator`, `PlacementRules`, `SimHost.Execute` (`DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`). |
 | `AreaTool` (ids `test-area`, `test-work-area`, woodcutter ids) | Draft points with edges. Click on an edge inserts a point (max 8). Drag a handle to bend it, double-click to straighten. Snaps when `Snapping` is on. |
 | `OperationDraftTool` (id `woodcutter`) | Build entry for an operation placed in one go (BT-10..18). Area stage: composes the `AreaTool` `woodcutter-draw`, whose `LockHandler` hands the closed shape over instead of sending `DesignateArea`. Module stage: palette (`pick:<typeId>` actions with costs), ghost follows the cursor (Q/E 15°, Shift 1°, side snap), left click adds a ghost (red + Sim reason if refused), right click removes the ghost under it, Esc drops the module then cancels. Rules live in `OperationDraft`. Confirm wiring is T-391. |
-| `ModuleTool` (id `module`) | Queue of module types for one operation. Ghost follows the cursor. Q/E rotate 15° (Shift 1°). Sends `PlaceModule` or `RemoveModule`. |
+| `OperationDraftTool` (id `woodcutter`) | New operation: area stage then module stage, one `DesignateOperation` on Confirm. Expand: the operation panel's "Expand modules" calls `ToolController.BeginExpandModules`; the tool starts in the module stage on the existing area (existing modules solid, no hut offered if one exists) and Confirm sends `PlaceModules`. `ModuleTool` was removed in T-392: nothing used it any more. |
 | `Shared/PressTracker` | Click, drag and double-click. 4 px drag threshold, 6 px double-click radius. |
 | `Shared/SnapPicker` | Best candidate by kind order within a pixel limit: area vertex, road side, area edge. |
 | `Shared/SnapMarkers`, `ToolHitTester`, `ModuleSnap` | Snap markers (AR-22), draft point hits, module side snap (3 mm inset). |
@@ -51,5 +51,4 @@ Sim's pure validators. Picking and the camera only read the Sim (decision 0017 f
 ## Tests
 
 `Assets/Tests/PlayMode/`: `ToolControllerTests`, `RoadToolTests`, `RoadToolCursorTests`, `AreaToolTests`, `AreaCursorGhostTests`,
-`CameraRigTests`, `GroundPickerTests`, `CitizenPanelTests`, `DebugSendTests`, `CursorMarkerTests`. No test file covers `ModuleTool` (none exists in `Assets/Tests/`).
-EditMode: `ToolInputTests`.
+`CameraRigTests`, `GroundPickerTests`, `CitizenPanelTests`, `DebugSendTests`, `CursorMarkerTests`.EditMode: `ToolInputTests`.
