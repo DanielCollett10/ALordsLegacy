@@ -8,7 +8,9 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>The assigned family first, then helpers when the family cannot.</summary>
         AssignedThenHelpers,
         /// <summary>Helpers only.</summary>
-        HelpersOnly
+        HelpersOnly,
+        /// <summary>An adult of the family named by the owner id (the Sunday food trip). Handed out by the dispatcher's trip pass, not the worker passes.</summary>
+        OwnerFamily
     }
 
     /// <summary>How urgently the dispatcher hands a task out (CN-30). Set at creation; High is taken before Normal.</summary>
@@ -45,7 +47,13 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Work for unload minutes, then move logs from the ox's carrier to a ledger location.</summary>
         UnloadOx,
         /// <summary>Lead the ox to its rest spot and let go.</summary>
-        ReturnOx
+        ReturnOx,
+        /// <summary>Walk on foot to the step's point (Sunday food trip).</summary>
+        WalkTo,
+        /// <summary>Transfer the family's reserved allotment from the market stock to its carrier.</summary>
+        CollectFood,
+        /// <summary>Transfer the carrier's food to the family's larder.</summary>
+        DepositFood
     }
 
     /// <summary>Lifecycle of a task: Open, Assigned, Active, Done, or Cancelled from any live state.</summary>

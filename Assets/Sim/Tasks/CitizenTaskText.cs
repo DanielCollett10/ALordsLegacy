@@ -25,6 +25,7 @@ namespace LordsLegacy.Sim.Tasks
             List<TaskRecord> live = world.Tasks.ByAssignee(c.Id);
             if (live.Count == 0) return ActivityText(c.Activity);
             TaskRecord t = live[0];
+            if (t.Def.Id == Food.FoodTripSystem.FetchFoodTaskId) return "Fetching food";
 
             if (!world.WorkDay.OnShift(world, c))
                 return world.WorkDay.IsWorkingDaylight(world) ? "Walking to work" : "Paused for the night";

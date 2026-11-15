@@ -146,6 +146,9 @@ namespace LordsLegacy.Sim.Save.Sections
                 case (int)StepKind.LoadOx: return TaskStep.LoadOx(loc, count, dur, heavy);
                 case (int)StepKind.UnloadOx: return TaskStep.UnloadOx(loc, count, dur, heavy);
                 case (int)StepKind.ReturnOx: return TaskStep.ReturnOx();
+                case (int)StepKind.WalkTo: return TaskStep.WalkTo(new PathPoint(x, z));
+                case (int)StepKind.CollectFood: return TaskStep.CollectFood();
+                case (int)StepKind.DepositFood: return TaskStep.DepositFood();
                 default: throw new SaveFormatException("Bad task step kind " + kind + ".");
             }
         }

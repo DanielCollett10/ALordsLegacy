@@ -60,6 +60,15 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Lead the ox to its rest spot and detach it.</summary>
         public static TaskStep ReturnOx() => new TaskStep(StepKind.ReturnOx, 0, false, null);
 
+        /// <summary>Walk to a point on foot (the Sunday food trip, FD-14).</summary>
+        public static TaskStep WalkTo(PathPoint point) => new TaskStep(StepKind.WalkTo, 0, false, null, point.X, point.Z);
+
+        /// <summary>Collect the household's reserved allotment from the market stock into its carrier (FD-14).</summary>
+        public static TaskStep CollectFood() => new TaskStep(StepKind.CollectFood, 0, false, null);
+
+        /// <summary>Move everything the carrier holds into the household's larder (FD-14).</summary>
+        public static TaskStep DepositFood() => new TaskStep(StepKind.DepositFood, 0, false, null);
+
         /// <summary>A walk to the task target.</summary>
         public static TaskStep MoveTo(bool heavy = false) => new TaskStep(StepKind.MoveTo, 0, heavy, null);
 

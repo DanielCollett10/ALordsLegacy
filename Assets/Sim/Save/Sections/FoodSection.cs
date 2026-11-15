@@ -7,7 +7,7 @@ using LordsLegacy.Sim.People;
 namespace LordsLegacy.Sim.Save.Sections
 {
     /// <summary>
-    /// The Food save section (T-415, decision 0034, id 9, version 8; T-417 adds each family's Sunday allotment reservation ids; T-416 adds each family's carried rations and Hungry flag): the camp food store location id, each family's
+    /// The Food save section (T-415, decision 0034, id 9, version 9; T-418 adds each family's Sunday trip carrier id; T-417 adds each family's Sunday allotment reservation ids; T-416 adds each family's carried rations and Hungry flag): the camp food store location id, each family's
     /// larder id and each house's larder id. The food itself is in the Ledger section; this only links to it.
     /// Read after Homes (houses) and Population (families); ids are checked to be FoodStore locations.
     /// </summary>
@@ -25,7 +25,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(world.Camp?.FoodStoreLocation?.Id ?? 0);
             var fams = new List<Family>(world.People.Families);
             w.WriteInt32(fams.Count);
-            foreach (Family f in fams) { w.WriteInt32(f.Id); w.WriteInt32(f.LarderLocationId); w.WriteDouble(f.CarriedRations); w.WriteBool(f.IsHungry);
+            foreach (Family f in fams) { w.WriteInt32(f.Id); w.WriteInt32(f.LarderLocationId); w.WriteDouble(f.CarriedRations); w.WriteBool(f.IsHungry); w.WriteInt32(f.TripCarrierId);
                 w.WriteInt32(f.AllotmentReservationIds.Count);
                 foreach (int rid in f.AllotmentReservationIds) w.WriteInt32(rid);
             }
@@ -48,6 +48,9 @@ namespace LordsLegacy.Sim.Save.Sections
                 int id = r.ReadInt32(), loc = r.ReadInt32();
                 double carried = r.ReadDouble();
                 bool hungry = r.ReadBool();
+                int tripCarrier = r.ReadInt32();
+                if (tripCarrier != 0 && world.Inventory.Get(tripCarrier)?.Kind != LocationKind.Carrier)
+                    throw new SaveFormatException("Family " + id + " trip carrier " + tripCarrier + " is not a carrier.");
                 if (double.IsNaN(carried) || carried < 0) throw new SaveFormatException("Family " + id + " has bad carried rations.");
                 Family f = world.People.FindFamily(id);
                 if (f == null) throw new SaveFormatException("Larder for missing family " + id + ".");
@@ -63,6 +66,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 f.LarderLocationId = loc;
                 f.CarriedRations = carried;
                 f.IsHungry = hungry;
+                f.TripCarrierId = tripCarrier;
             }
             int nh = r.ReadCount(8);
             for (int i = 0; i < nh; i++)

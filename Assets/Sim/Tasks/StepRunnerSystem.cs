@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Operations;
@@ -44,6 +45,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             Citizen c = t.AssigneeId.HasValue ? world.People.FindCitizen(t.AssigneeId.Value) : null;
             if (c == null) { Fail(world, t, null); return; }
+            if (t.Def.Id == FoodTripSystem.FetchFoodTaskId) { StepFoodTrip(world, t, c); return; }
             Ox ox = null;
             if (t.OxId.HasValue && !CheckOx(world, t, c, out ox)) { Fail(world, t, c); return; }
             if (!world.WorkDay.OnShift(world, c))
@@ -175,6 +177,7 @@ namespace LordsLegacy.Sim.Tasks
             _orders.Remove(t.Id);
             _returning.Remove(t.Id);
             _drop.Remove(t.Id);
+            if (t.Def.Id == FoodTripSystem.FetchFoodTaskId) FailFoodTrip(world, t, c);
             ReleaseOx(world, t, c);
             world.Tasks.Cancel(t.Id);
             if (c != null)

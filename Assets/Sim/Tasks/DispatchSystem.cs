@@ -33,6 +33,7 @@ namespace LordsLegacy.Sim.Tasks
             if (world.Tick % interval != 0) return;
             if (world.Tasks.InState(TaskState.Open).Count == 0) return;
 
+            RunFamilyTrips(world);
             bool oxOpen = OxTasksOpen(world);
             if (oxOpen) CancelTasksOfGoneOxen(world);
             RunPass(world, helpers: false, oxOpen);
@@ -181,8 +182,29 @@ namespace LordsLegacy.Sim.Tasks
                     return !helpers && f.WorkplaceId == t.OwnerOperationId;
                 case EligibilityPolicy.AssignedThenHelpers:
                     return helpers || f.WorkplaceId == t.OwnerOperationId;
+                case EligibilityPolicy.OwnerFamily:
+                    return false; // handed out by RunFamilyTrips
                 default:
                     return helpers;
+            }
+        }
+
+        // Sunday food trip (FD-14): each Open owner-family task goes to the lowest-id awake, idle adult of that family.
+        private static void RunFamilyTrips(SimWorld world)
+        {
+            foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
+            {
+                if (t.Def.Eligibility != EligibilityPolicy.OwnerFamily) continue;
+                Family f = Food.FoodTripSystem.FamilyOf(world, t);
+                if (f == null) { world.Tasks.Cancel(t.Id); continue; }
+                foreach (int id in f.MemberIds)
+                {
+                    Citizen c = world.People.FindCitizen(id);
+                    if (c == null || c.Activity == Activity.Sleeping || !IsIdle(world, c)) continue;
+                    if (c.AgeYears(world.Tick, world.Tuning.AgeingRate) < OperationStatus.WorkingAgeYears) continue;
+                    if (world.Tasks.Assign(t.Id, c.Id)) world.Tasks.Start(t.Id);
+                    break;
+                }
             }
         }
 
