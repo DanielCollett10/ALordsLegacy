@@ -32,6 +32,20 @@ namespace LordsLegacy.Sim.Save
         }
 
         /// <summary>
+        /// Reads the format version from the start of save bytes without refusing it, so a caller can tell an old or new
+        /// save from a corrupt one (SV-34). Returns false when the bytes are too short or do not start with the save magic.
+        /// </summary>
+        public static bool TryReadFormatVersion(byte[] bytes, out int version)
+        {
+            version = 0;
+            if (bytes == null || bytes.Length < 8) return false;
+            for (int i = 0; i < 4; i++)
+                if (bytes[i] != SaveWriter.Magic[i]) return false;
+            version = bytes[4] | (bytes[5] << 8) | (bytes[6] << 16) | (bytes[7] << 24);
+            return true;
+        }
+
+        /// <summary>
         /// Checks magic and version, reads the header and returns a reader positioned at the first section.
         /// Throws <see cref="SaveFormatException"/> for bad magic, an unknown version or truncation.
         /// </summary>

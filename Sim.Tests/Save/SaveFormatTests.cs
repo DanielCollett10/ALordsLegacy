@@ -77,6 +77,24 @@ namespace LordsLegacy.Sim.Tests.Save
         }
 
         [Test]
+        public void TryReadFormatVersion_OlderVersionBytes_ReturnsThatVersion()
+        {
+            var bytes = new SaveWriter(Header()).ToArray();
+            BitConverter.GetBytes(SaveWriter.CurrentVersion - 1).CopyTo(bytes, 4);
+            Assert.That(SaveReader.TryReadFormatVersion(bytes, out int version), Is.True);
+            Assert.That(version, Is.EqualTo(SaveWriter.CurrentVersion - 1));
+            Assert.That(() => SaveReader.ReadHeaderOnly(bytes), Throws.TypeOf<SaveFormatException>());
+        }
+
+        [Test]
+        public void TryReadFormatVersion_NotASave_ReturnsFalse()
+        {
+            Assert.That(SaveReader.TryReadFormatVersion(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, out _), Is.False);
+            Assert.That(SaveReader.TryReadFormatVersion(new byte[] { (byte)'L', (byte)'L', (byte)'S', (byte)'V' }, out _), Is.False);
+            Assert.That(SaveReader.TryReadFormatVersion(null, out _), Is.False);
+        }
+
+        [Test]
         public void HeaderOnly_ReadsAllFields_WithoutSections()
         {
             var h = SaveReader.ReadHeaderOnly(SaveWithSections());

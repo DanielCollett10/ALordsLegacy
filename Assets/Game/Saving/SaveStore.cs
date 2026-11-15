@@ -6,16 +6,41 @@ using LordsLegacy.Sim.Save;
 
 namespace LordsLegacy.Game
 {
-    /// <summary>One save file found by <see cref="SaveStore.List"/>: its path and header (saving.md SV-13, SV-20).</summary>
+    /// <summary>One save file found by <see cref="SaveStore.List"/>: its path and header (saving.md SV-13, SV-20, SV-34).</summary>
     public sealed class SaveEntry
     {
         /// <summary>Full path of the file.</summary>
         public string Path { get; }
-        /// <summary>The header, read without the sections.</summary>
+        /// <summary>The header, read without the sections. Null when the save is unreadable.</summary>
         public SaveHeader Header { get; }
+        /// <summary>Why this save can't be loaded (SV-34), e.g. <c>Made with an older version of the game</c>. Null when readable.</summary>
+        public string UnreadableReason { get; }
+        /// <summary>True when the save can be loaded.</summary>
+        public bool IsReadable => UnreadableReason == null;
+        /// <summary>Name to show: the header name, or the file name without extension for an unreadable save.</summary>
+        public string Name { get; }
+        /// <summary>Unix seconds used to order the list: the header's real time, or the file's write time when unreadable.</summary>
+        public long SortTime { get; }
 
-        /// <summary>Creates an entry.</summary>
-        public SaveEntry(string path, SaveHeader header) { Path = path; Header = header; }
+        /// <summary>Creates an entry for a readable save.</summary>
+        public SaveEntry(string path, SaveHeader header)
+        {
+            Path = path;
+            Header = header ?? throw new ArgumentNullException(nameof(header));
+            Name = header.Name;
+            SortTime = header.CreatedRealTime;
+        }
+
+        private SaveEntry(string path, string reason, long sortTime)
+        {
+            Path = path;
+            UnreadableReason = reason ?? throw new ArgumentNullException(nameof(reason));
+            Name = System.IO.Path.GetFileNameWithoutExtension(path);
+            SortTime = sortTime;
+        }
+
+        /// <summary>Creates an entry for a save this build can't read (SV-34).</summary>
+        public static SaveEntry Unreadable(string path, string reason, long sortTime) => new SaveEntry(path, reason, sortTime);
     }
 
     /// <summary>
@@ -86,25 +111,33 @@ namespace LordsLegacy.Game
             return true;
         }
 
-        /// <summary>Every readable save, newest first by real creation time (ties: file path, descending). Reads headers only.</summary>
+        /// <summary>
+        /// Every save in the folder, newest first (ties: file path, descending). Readable saves come with their header.
+        /// Saves in another format version come back as unreadable entries with a reason (SV-34) so the player can still
+        /// delete them. Files that are not saves at all (bad magic, truncated) are skipped. Reads headers only.
+        /// </summary>
         public List<SaveEntry> List()
         {
             var result = new List<SaveEntry>();
             if (!Directory.Exists(Folder)) return result;
             foreach (string path in Directory.GetFiles(Folder, "*" + Extension))
             {
-                var header = TryReadHeader(path);
-                if (header != null) result.Add(new SaveEntry(path, header));
+                var entry = TryReadEntry(path);
+                if (entry != null) result.Add(entry);
             }
             result.Sort((a, b) =>
             {
-                int c = b.Header.CreatedRealTime.CompareTo(a.Header.CreatedRealTime);
+                int c = b.SortTime.CompareTo(a.SortTime);
                 return c != 0 ? c : string.CompareOrdinal(b.Path, a.Path);
             });
             return result;
         }
 
-        private static SaveHeader TryReadHeader(string path)
+        /// <summary>Reason shown for a save whose format version differs from this build (SV-33, SV-34).</summary>
+        public static string ReasonForVersion(int version) =>
+            version < SaveWriter.CurrentVersion ? "Made with an older version of the game" : "Made with a newer version of the game";
+
+        private static SaveEntry TryReadEntry(string path)
         {
             try
             {
@@ -121,8 +154,15 @@ namespace LordsLegacy.Game
                         got += r;
                     }
                 }
-                try { return SaveReader.ReadHeaderOnly(prefix); }
-                catch (SaveFormatException) { return SaveReader.ReadHeaderOnly(File.ReadAllBytes(path)); }
+                if (SaveReader.TryReadFormatVersion(prefix, out int version) && version != SaveWriter.CurrentVersion)
+                {
+                    long written = new DateTimeOffset(File.GetLastWriteTimeUtc(path)).ToUnixTimeSeconds();
+                    return SaveEntry.Unreadable(path, ReasonForVersion(version), written);
+                }
+                SaveHeader header;
+                try { header = SaveReader.ReadHeaderOnly(prefix); }
+                catch (SaveFormatException) { header = SaveReader.ReadHeaderOnly(File.ReadAllBytes(path)); }
+                return new SaveEntry(path, header);
             }
             catch (Exception e) when (e is SaveFormatException || e is IOException || e is UnauthorizedAccessException)
             {
