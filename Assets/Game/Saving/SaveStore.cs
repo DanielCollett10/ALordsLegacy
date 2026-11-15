@@ -78,6 +78,14 @@ namespace LordsLegacy.Game
         /// <summary>Reads the bytes of a save file.</summary>
         public byte[] ReadAll(string path) => File.ReadAllBytes(path);
 
+        /// <summary>Deletes a save file (SV-23). Returns false when the file was already gone.</summary>
+        public bool Delete(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
+            File.Delete(path);
+            return true;
+        }
+
         /// <summary>Every readable save, newest first by real creation time (ties: file path, descending). Reads headers only.</summary>
         public List<SaveEntry> List()
         {

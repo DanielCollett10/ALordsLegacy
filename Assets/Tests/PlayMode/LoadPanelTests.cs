@@ -7,6 +7,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace LordsLegacy.Tests.PlayMode
 {
@@ -68,6 +69,50 @@ namespace LordsLegacy.Tests.PlayMode
                 Assert.IsFalse(PendingLoad.HasPending, "A mismatch must set nothing.");
                 Assert.IsNull(reloaded, "A mismatch must not reload the scene.");
             }
+            menu.Close();
+        }
+
+        [UnityTest]
+        public IEnumerator BinOnEveryRowOpensCentredConfirmAndDeletes()
+        {
+            yield return LoadGame();
+            var host = Object.FindFirstObjectByType<SimHost>();
+            var panel = Object.FindFirstObjectByType<LoadPanelController>();
+            var store = new SaveStore(_folder);
+            panel.Store = store;
+            host.World.Pause();
+            byte[] bytes = SimSave.Write(host.World, "Mine", 100, host.Map.MapId, host.Map.ContentHash);
+            store.WriteNew("Mine", bytes);
+            store.WriteAutosave(bytes);
+
+            var menu = panel.GetComponent<GameMenuView>();
+            menu.Open();
+            menu.ClickLoad();
+            Assert.AreEqual(2, panel.Rows.Count);
+            foreach (var row in panel.Rows)
+                Assert.IsNotNull(row.parent.Q<UnityEngine.UIElements.Button>("load-delete"), "Each row has a bin.");
+
+            // A synthetic ClickEvent does not trigger Button.clickable (it listens to pointer events), so call the
+            // handler the bin button is wired to.
+            panel.RequestDelete(store.List()[0]);
+            Assert.IsTrue(ConfirmDialog.IsOpen);
+            yield return null;
+            yield return null;
+            var doc = Object.FindFirstObjectByType<ConfirmDialogHost>().GetComponent<UnityEngine.UIElements.UIDocument>();
+            var label = doc.rootVisualElement.Q<UnityEngine.UIElements.Label>("confirm-dialog-message");
+            StringAssert.StartsWith("Delete \"", label.text);
+            StringAssert.Contains("can't be undone", label.text);
+            var dlg = doc.rootVisualElement.Q("confirm-dialog");
+            Assert.Greater(dlg.worldBound.width, 0f);
+            Assert.AreEqual(doc.rootVisualElement.worldBound.center.x, dlg.worldBound.center.x, 2f, "Centred horizontally.");
+            Assert.AreEqual(doc.rootVisualElement.worldBound.center.y, dlg.worldBound.center.y, 2f, "Centred vertically.");
+
+            ConfirmDialog.Cancel();
+            Assert.AreEqual(2, store.List().Count, "Cancel keeps the file.");
+            panel.RequestDelete(store.List()[0]);
+            ConfirmDialog.Confirm();
+            Assert.AreEqual(1, store.List().Count, "Confirm deletes the file.");
+            Assert.AreEqual(1, panel.Rows.Count, "The row is gone.");
             menu.Close();
         }
 
