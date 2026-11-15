@@ -28,6 +28,7 @@ namespace LordsLegacy.Game
         private bool _hasSelection;
         private AgentRef _selected;
         private int? _operationId;
+        private int? _houseId;
 
         /// <summary>Raised when the selection changes (select, clear).</summary>
         public event Action SelectionChanged;
@@ -79,10 +80,54 @@ namespace LordsLegacy.Game
             var host = Host();
             bool exists = host != null && host.IsInitialized && host.World.Operations.Get(operationId) != null;
             if (!exists) { ClearOperation(); return; }
-            bool changed = _hasSelection || _operationId != operationId;
+            bool changed = _hasSelection || _houseId.HasValue || _operationId != operationId;
             _hasSelection = false;
+            _houseId = null;
             _operationId = operationId;
             if (changed) SelectionChanged?.Invoke();
+        }
+
+        /// <summary>True when a house (or its plot) is selected (HM-21).</summary>
+        public bool HasHouse => _houseId.HasValue;
+
+        /// <summary>Footprint id of the selected house (only meaningful when <see cref="HasHouse"/>).</summary>
+        public int SelectedHouseId => _houseId ?? -1;
+
+        /// <summary>Selects a house by footprint id and clears the agent and operation selections. Unknown ids clear the house selection.</summary>
+        public void SelectHouse(int houseFootprintId)
+        {
+            var host = Host();
+            bool exists = host != null && host.IsInitialized && host.World.Homes.Get(houseFootprintId) != null
+                && host.World.Footprints.Get(houseFootprintId) != null;
+            if (!exists) { ClearHouse(); return; }
+            bool changed = _hasSelection || _operationId.HasValue || _houseId != houseFootprintId;
+            _hasSelection = false;
+            _operationId = null;
+            _houseId = houseFootprintId;
+            if (changed) SelectionChanged?.Invoke();
+        }
+
+        /// <summary>Clears the house selection.</summary>
+        public void ClearHouse()
+        {
+            if (!_houseId.HasValue) return;
+            _houseId = null;
+            SelectionChanged?.Invoke();
+        }
+
+        /// <summary>The house a click at the ground point would select: the house footprint, else its plot. False when none.</summary>
+        public static bool TryPickHouse(SimWorld world, PointMm ground, out int houseFootprintId)
+        {
+            houseFootprintId = 0;
+            var fp = world.Footprints.FindAt(ground);
+            if (fp != null && world.Homes.Get(fp.Id) != null) { houseFootprintId = fp.Id; return true; }
+            var plot = world.Areas.FindAt(ground, AreaKind.Building);
+            if (plot != null)
+            {
+                var home = world.Homes.FindByPlot(plot.Id);
+                if (home != null) { houseFootprintId = home.HouseFootprintId; return true; }
+            }
+            return false;
         }
 
         /// <summary>Clears the operation selection.</summary>
@@ -162,7 +207,16 @@ namespace LordsLegacy.Game
             if (TryPick(screenPos, out var agent))
             {
                 _operationId = null;
+                _houseId = null;
                 Select(agent);
+            }
+            else if (host != null && host.IsInitialized && Picker() != null
+                && Picker().TryPickScreen(screenPos, out var hg) && hg.HasValue
+                && TryPickHouse(host.World, PointMm.FromMetres(hg.X, hg.Z), out int houseId))
+            {
+                Clear();
+                ClearOperation();
+                SelectHouse(houseId);
             }
             else if (host != null && host.IsInitialized && Picker() != null
                 && Picker().TryPickScreen(screenPos, out var ground) && ground.HasValue
@@ -175,6 +229,7 @@ namespace LordsLegacy.Game
             {
                 Clear();
                 ClearOperation();
+                ClearHouse();
             }
             return true;
         }
@@ -189,6 +244,9 @@ namespace LordsLegacy.Game
             }
             if (_operationId.HasValue && host != null && host.IsInitialized && host.World.Operations.Get(_operationId.Value) == null)
                 ClearOperation();
+            if (_houseId.HasValue && host != null && host.IsInitialized
+                && (host.World.Homes.Get(_houseId.Value) == null || host.World.Footprints.Get(_houseId.Value) == null))
+                ClearHouse();
             if (!ReadMouse) return;
             var mouse = Mouse.current;
             if (mouse != null && mouse.leftButton.wasPressedThisFrame) ClickAt(mouse.position.ReadValue());
