@@ -3,6 +3,12 @@
 Implements tech spec section 17 (UI-01..08) and the mockups in `source/`. Layout and style are placeholders;
 wireframes come later. UI Toolkit only. The UI reads Sim state and sends commands only (UI-07).
 
+> Implementation note (code-built panels): `CitizenPanelView` and `OperationPanelView` build their whole UI in code.
+> They have no UXML and no StyleSheet field, so CLAUDE.md's ".uxml/.uss" rule is not met for them. `TopBarController`,
+> `ToolPanelView`, `GameMenuView` and `DebugOverlayView` take a UXML and StyleSheet when one is assigned, and build the
+> same element names in code when none is (their own comments say so). Owner to decide whether the two code-only panels
+> should move to UXML.
+
 ## Build bar (bottom of the screen)
 
 | ID | Rule | Tag |

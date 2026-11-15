@@ -5,7 +5,7 @@ and the Esc menu with Save and Load. All UI Toolkit, and none of it holds rules 
 
 ## Key types and files
 
-`Assets/Game/UI/` and subfolders. Panels are either UXML/USS or built in code (`CitizenPanelView`, `OperationPanelView`).
+`Assets/Game/UI/` and subfolders. Most panels take a UXML and StyleSheet when assigned and build their elements in code when not. `CitizenPanelView` and `OperationPanelView` are code-only (no UXML). See the note in `design/ui.md`.
 
 | Type | Folder | Role |
 |---|---|---|

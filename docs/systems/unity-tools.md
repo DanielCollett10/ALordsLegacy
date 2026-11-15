@@ -50,6 +50,5 @@ Sim's pure validators. Picking and the camera only read the Sim (decision 0017 f
 ## Tests
 
 `Assets/Tests/PlayMode/`: `ToolControllerTests`, `RoadToolTests`, `RoadToolCursorTests`, `AreaToolTests`, `AreaCursorGhostTests`,
-`CameraRigTests`, `GroundPickerTests`, `CitizenPanelTests`, `DebugSendTests`, `CursorMarkerTests`. No ModuleTool test file is listed
-here; check before relying on one.
+`CameraRigTests`, `GroundPickerTests`, `CitizenPanelTests`, `DebugSendTests`, `CursorMarkerTests`. No test file covers `ModuleTool` (none exists in `Assets/Tests/`).
 EditMode: `ToolInputTests`.

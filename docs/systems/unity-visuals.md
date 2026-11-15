@@ -25,7 +25,7 @@
 | `VisualRegistry` | `VisualRegistry.asset`. `TryGet(id)`, `Get(id)` (logs an error, returns a placeholder). `IsPlaceholder`. |
 | `VisualDefinition` | Mesh and materials for one id. |
 | `VisualSizes` | Box sizes for placeholder art. |
-| `CursorMarker` | 0.6 m sphere at the snapped ground point (AR-20). |
+| `CursorMarker` | Ground cursor at the snapped point: a 0.6 m sphere for areas (AR-20) or a road-width ring for roads (RD-18). The tool shows or hides it (PL-06). |
 | `SelectionRing` | Ring under the selected agent. |
 | `SunLightModel` | Pure maths: `GameTime` + `Daylight` → elevation, azimuth, colour, intensity. |
 | `SunLightController` | Writes the model to the directional light and ambient in `LateUpdate`. Steady light is `ViewSettings.SteadyLight`. |

@@ -13,3 +13,9 @@ accepting the point and refusing the finished shape later. This applies to every
 | PL-05 | **The check comes after snapping:** the snapped position is what's tested. With snapping off, the raw cursor point is tested | DECIDED |
 | PL-06 | **Not placeable means:** the click does nothing, and the **cursor marker (ring or sphere) is hidden**, so no marker means you can't place there. While dragging a point or node, it stays at its **last placeable position** and only follows the cursor again once the cursor is back on placeable ground | DECIDED |
 | PL-07 | The Sim answers these questions (`PlacementRules`, pure, no state change), and the tools only ask. The shape checks (AR-15, AR-16, RD-13) still run on the finished shape, because edges can cross things even when every point is fine | DECIDED |
+
+> Implementation note (PL-06, dragging a point): the cursor marker is hidden whenever the cursor is over unplaceable
+> ground, including during a drag of a placed point (`AreaTool.PointerMove` and `RoadTool.PointerMove` both call
+> `UpdateCursor`, which hides it). The dragged point does stay at its last placeable position. Node drags do keep the
+> road ring on the last placeable target (`RoadTool.MoveDraggedNode`), as the rule says. So a dragged point hides its
+> marker, while a dragged node keeps one. Owner to decide which behaviour is wanted for points.

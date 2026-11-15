@@ -21,8 +21,8 @@ layout means no camp. Starting oxen come from `OxCount`, not from `SimTuning.Sta
 
 When a game is loaded from a save, the layout is not applied (`ForRestore`). The camp and stockpile come back through the save.
 
-Menu `LordsLegacy/Map/Generate Start Layout` (`StartLayoutGenerator`) writes the asset. It picks a flat spot at most 5° west of
-the forest edge, with 50+ trees within 50 m and a north-south trunk road past the camp. It is idempotent.
+Menu `LordsLegacy/Map/Generate Start Layout` (`StartLayoutGenerator`) writes the asset. It picks a flat spot (slope at most 5°) just outside
+the forest edge, with 50+ trees within 50 m and a trunk road past the camp. It is idempotent.
 
 ## Extending
 
