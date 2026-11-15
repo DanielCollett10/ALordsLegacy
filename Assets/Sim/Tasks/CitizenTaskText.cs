@@ -69,7 +69,7 @@ namespace LordsLegacy.Sim.Tasks
         private static string VerbOf(TaskRecord t)
         {
             if (t.Def.Id == WoodcuttingSystem.FellTaskId) return FellVerb;
-            return ConstructionTaskDefs.VerbFor(t.Def.Id, t.Subject) ?? "Working";
+            return ConstructionTaskDefs.VerbFor(t.Def.Id, Footprints.ModuleTypes.DisplayName(t.Subject)) ?? "Working";
         }
 
         private static string OperationName(string typeId)

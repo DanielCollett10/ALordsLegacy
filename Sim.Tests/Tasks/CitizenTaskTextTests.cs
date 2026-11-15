@@ -157,6 +157,18 @@ namespace LordsLegacy.Sim.Tests.Tasks
         }
 
         [Test]
+        public void DeconstructTask_WithModuleTypeId_ShowsDeconstructingHut()
+        {
+            var w = NewWorld(12);
+            Citizen c = SetUpHelper(w);
+            TaskRecord t = w.Tasks.Create(ConstructionTaskDefs.Deconstruct(30), 9, null, TaskPriority.Normal,
+                LordsLegacy.Sim.Footprints.ModuleTypes.WoodcuttingHutId);
+            w.Tasks.Assign(t.Id, c.Id);
+            w.Tasks.Start(t.Id);
+            Assert.AreEqual("Deconstructing Hut", CitizenTaskText.Task(w, c));
+        }
+
+        [Test]
         public void ConstructionTask_WithNoModuleName_OmitsTheModule()
         {
             var w = NewWorld(12);

@@ -16,11 +16,32 @@ namespace LordsLegacy.Game
         private Label _message;
         private Button _cancel;
         private Button _confirm;
+        private VisualElement _dialog;
+        private float _layoutW = -1f;
+        private float _layoutH = -1f;
 
         /// <summary>Creates the PanelSettings used by the dialog's UIDocument. Drawn above the other UI documents.</summary>
         public static PanelSettings CreatePanelSettings()
         {
-            var ps = ScriptableObject.CreateInstance<PanelSettings>();
+            // A PanelSettings with no theme stylesheet has no default font, so labels and buttons draw no text. Copy the
+            // shared PanelSettings (it carries the runtime theme) from any UIDocument already in the scene.
+            PanelSettings ps = null;
+            foreach (var other in Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None))
+            {
+                if (other.panelSettings != null && other.panelSettings.themeStyleSheet != null)
+                {
+                    ps = Object.Instantiate(other.panelSettings);
+                    break;
+                }
+            }
+            if (ps == null)
+            {
+                ps = ScriptableObject.CreateInstance<PanelSettings>();
+#if UNITY_EDITOR
+                ps.themeStyleSheet = UnityEditor.AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(
+                    "Assets/UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss");
+#endif
+            }
             ps.sortingOrder = 1000f;
 #if UNITY_EDITOR
             // Everything is styled in code, so the missing-theme warning is noise (same switch as the test PanelSettings).
@@ -42,6 +63,31 @@ namespace LordsLegacy.Game
             _message.text = message;
             _confirm.text = confirmText;
             _backdrop.style.display = DisplayStyle.Flex;
+            ApplyLayout();
+        }
+
+        // Centres the dialog on the screen: root and backdrop get the screen size in pixels, the dialog sits at the middle
+        // and is shifted back by half its own size.
+        private void ApplyLayout()
+        {
+            if (_backdrop == null || _dialog == null) return;
+            var scale = GetComponent<UIDocument>().panelSettings != null ? Mathf.Max(0.01f, GetComponent<UIDocument>().panelSettings.scale) : 1f;
+            float w = Screen.width / scale;
+            float h = Screen.height / scale;
+            if (Mathf.Approximately(w, _layoutW) && Mathf.Approximately(h, _layoutH)) return;
+            _layoutW = w;
+            _layoutH = h;
+            var root = _backdrop.parent;
+            if (root != null)
+            {
+                root.style.width = w;
+                root.style.height = h;
+            }
+            _backdrop.style.width = w;
+            _backdrop.style.height = h;
+            _dialog.style.left = w * 0.5f;
+            _dialog.style.top = h * 0.5f;
+            _dialog.style.translate = new Translate(new Length(-50, LengthUnit.Percent), new Length(-50, LengthUnit.Percent));
         }
 
         /// <summary>Hides the dialog.</summary>
@@ -64,6 +110,7 @@ namespace LordsLegacy.Game
         private void Update()
         {
             var kb = Keyboard.current;
+            if (ConfirmDialog.IsOpen) ApplyLayout();
             if (ConfirmDialog.IsOpen && kb != null && kb.escapeKey.wasPressedThisFrame) ConfirmDialog.CancelWithEscape();
         }
 
@@ -78,19 +125,35 @@ namespace LordsLegacy.Game
 
         private void Build(VisualElement root)
         {
+            // The UIDocument root can collapse to its content height, which put the centred dialog at the top of the
+            // screen. Make the root fill the panel explicitly so the backdrop's centring is relative to the whole screen.
+            root.style.position = Position.Absolute;
+            root.style.left = 0;
+            root.style.right = 0;
+            root.style.top = 0;
+            root.style.bottom = 0;
+            root.style.width = new Length(100, LengthUnit.Percent);
+            root.style.height = new Length(100, LengthUnit.Percent);
+            root.pickingMode = PickingMode.Ignore;
+            _layoutW = _layoutH = -1f;
+
             _backdrop = new VisualElement { name = "confirm-dialog-backdrop" };
             _backdrop.style.position = Position.Absolute;
+            _backdrop.style.width = new Length(100, LengthUnit.Percent);
+            _backdrop.style.height = new Length(100, LengthUnit.Percent);
             _backdrop.style.left = 0;
             _backdrop.style.right = 0;
             _backdrop.style.top = 0;
             _backdrop.style.bottom = 0;
             _backdrop.style.backgroundColor = new Color(0f, 0f, 0f, 0.45f);
-            _backdrop.style.justifyContent = Justify.Center;
-            _backdrop.style.alignItems = Align.Center;
             _backdrop.pickingMode = PickingMode.Position;
             _backdrop.style.display = DisplayStyle.None;
 
+            // Positioned in pixels from the screen size (see ApplyLayout), not by flex centring, so it cannot depend on
+            // how the UIDocument root is sized.
             var panel = new VisualElement { name = "confirm-dialog" };
+            _dialog = panel;
+            panel.style.position = Position.Absolute;
             panel.style.width = 420;
             panel.style.flexDirection = FlexDirection.Column;
             panel.style.paddingLeft = panel.style.paddingRight = panel.style.paddingTop = panel.style.paddingBottom = 16;

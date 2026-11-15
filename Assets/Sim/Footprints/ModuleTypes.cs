@@ -15,6 +15,18 @@ namespace LordsLegacy.Sim.Footprints
         /// <summary>Id of the oxen stand module.</summary>
         public const string OxenStandId = "module.oxen_stand";
 
+        /// <summary>Short player-facing name of a module type id ("Hut", "Log storage", "Oxen stand"); other ids pass through.</summary>
+        public static string DisplayName(string typeId)
+        {
+            switch (typeId)
+            {
+                case WoodcuttingHutId: return "Hut";
+                case LogStorageId: return "Log storage";
+                case OxenStandId: return "Oxen stand";
+                default: return typeId;
+            }
+        }
+
         /// <summary>Woodcutting hut: 6 × 4 m, blocks movement, clears trees (WC-02, WC-06, WC-08).</summary>
         public static readonly FootprintTypeDef WoodcuttingHut =
             new FootprintTypeDef(WoodcuttingHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 960));

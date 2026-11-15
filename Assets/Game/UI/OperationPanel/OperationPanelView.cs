@@ -32,7 +32,8 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel, _familyBox, _pickerBox;
-        private VisualElement _oxenBox, _priorityBox;
+        private VisualElement _oxenBox, _priorityBox, _deconBox;
+        private string _deconSignature = "";
         private string _prioritySignature = "";
         private Label _title, _status, _modules, _workers, _logs, _trees, _workArea, _message, _stock;
         private Button _pause, _close, _oxenTab;
@@ -202,6 +203,7 @@ namespace LordsLegacy.Game
             _status.text = "Status: " + StateText(OperationStatus.Reported(world, op));
             _modules.text = ModuleText(world, op);
             RebuildPriority(world, op);
+            RebuildDeconstruct(world, op);
             RebuildFamilies(world, op, def);
             _workers.text = WorkerText(world, op);
             _logs.text = "Logs waiting at tree sites: " + GroundLogs(world, op);
@@ -344,6 +346,14 @@ namespace LordsLegacy.Game
         /// <summary>Construction state of a module from <see cref="ConstructionProgress.Of"/> (CN-40).</summary>
         public static string BuildStateText(Sim.Core.SimWorld world, int footprintId)
         {
+            var decon = world.Deconstruction.Get(footprintId);
+            var dfp = world.Footprints.Get(footprintId);
+            if (decon != null && dfp != null)
+            {
+                int total = DeconstructionWork.TotalMinutes(world, dfp);
+                int pct = total <= 0 ? 100 : Mathf.Clamp(decon.ProgressMinutes * 100 / total, 0, 100);
+                return "Deconstructing " + pct + "%";
+            }
             var p = ConstructionProgress.Of(world, footprintId);
             if (p == null) return "Built";
             if (p.State == ConstructionState.Delivering) return "Delivering " + p.LogsDelivered + " / " + p.LogsNeeded + " logs";
@@ -399,6 +409,88 @@ namespace LordsLegacy.Game
                 _priorityBox.Add(b);
             }
             UiFocusRules.Apply(_priorityBox);
+        }
+
+        /// <summary>Text of the confirm dialog for deconstructing one module: the refund, and the hut's family warning (CN-51, CN-56).</summary>
+        public static string ConfirmTextForModule(Sim.Core.SimWorld world, Operation op, int footprintId)
+        {
+            Footprint fp = world.Footprints.Get(footprintId);
+            if (fp == null) return "";
+            string name = ModuleTypes.DisplayName(fp.Type.Id);
+            if (!world.IsBuilt(footprintId)) return "Cancel the unbuilt " + name + "? The site is removed at once.";
+            return "Deconstruct the " + name + "?\nReturns " + DeconstructionWork.RefundLogs(world, fp) + " logs.";
+        }
+
+        /// <summary>Text of the confirm dialog for deconstructing a whole operation.</summary>
+        public static string ConfirmTextForOperation(Sim.Core.SimWorld world, Operation op)
+        {
+            int logs = 0;
+            foreach (int id in op.ModuleIds)
+            {
+                Footprint fp = world.Footprints.Get(id);
+                if (fp == null) continue;
+                if (world.IsBuilt(id) && world.Deconstruction.Get(id) == null) logs += DeconstructionWork.RefundLogs(world, fp);
+            }
+            return "Deconstruct the whole operation?\nReturns " + logs + " logs.";
+        }
+
+        /// <summary>A module row's Deconstruct button: asks to confirm, then sends MarkForDeconstruction. While the
+        /// module is being deconstructed it sends CancelDeconstruction (after a confirm too).</summary>
+        public void ClickDeconstructModule(int footprintId)
+        {
+            var host = Host();
+            int? opId = OperationId();
+            if (host == null || !host.IsInitialized || !opId.HasValue) return;
+            var world = host.World;
+            var op = world.Operations.Get(opId.Value);
+            if (op == null || world.Footprints.Get(footprintId) == null) return;
+            if (world.Deconstruction.Get(footprintId) != null)
+                ConfirmDialog.Show("Cancel the deconstruction? Its progress is lost and the module works again.",
+                    "Cancel deconstruction", () => Run(new CancelDeconstruction(footprintId)));
+            else
+                ConfirmDialog.Show(ConfirmTextForModule(world, op, footprintId), "Deconstruct",
+                    () => Run(new MarkForDeconstruction(footprintId)));
+        }
+
+        /// <summary>Deconstruct operation button: asks to confirm, then sends DeconstructOperation.</summary>
+        public void ClickDeconstructOperation()
+        {
+            var host = Host();
+            int? opId = OperationId();
+            if (host == null || !host.IsInitialized || !opId.HasValue) return;
+            var op = host.World.Operations.Get(opId.Value);
+            if (op == null) return;
+            int id = opId.Value;
+            ConfirmDialog.Show(ConfirmTextForOperation(host.World, op), "Deconstruct operation",
+                () => Run(new DeconstructOperation(id)));
+        }
+
+        private void RebuildDeconstruct(Sim.Core.SimWorld world, Operation op)
+        {
+            var sb = new StringBuilder();
+            sb.Append(op.Id);
+            foreach (int id in op.ModuleIds)
+                sb.Append(',').Append(id).Append(world.Deconstruction.Get(id) != null ? 'D' : 'n');
+            string sig = sb.ToString();
+            if (sig == _deconSignature) return;
+            _deconSignature = sig;
+            _deconBox.Clear();
+            foreach (int id in op.ModuleIds)
+            {
+                Footprint fp = world.Footprints.Get(id);
+                if (fp == null) continue;
+                int fid = id;
+                bool going = world.Deconstruction.Get(id) != null;
+                var b = new Button
+                {
+                    name = "deconstruct-" + fid,
+                    text = going ? "Cancel deconstruction: " + ModuleTypes.DisplayName(fp.Type.Id)
+                                 : "Deconstruct " + ModuleTypes.DisplayName(fp.Type.Id)
+                };
+                b.clicked += () => ClickDeconstructModule(fid);
+                _deconBox.Add(b);
+            }
+            UiFocusRules.Apply(_deconBox);
         }
 
         private static int GroundLogs(Sim.Core.SimWorld world, Operation op)
@@ -614,6 +706,8 @@ namespace LordsLegacy.Game
             _modules = MakeLabel("operation-modules", 12, "");
             _priorityBox = new VisualElement { name = "operation-priority" };
             _prioritySignature = "";
+            _deconBox = new VisualElement { name = "operation-deconstruct" };
+            _deconSignature = "";
             _familyBox = new VisualElement { name = "operation-families" };
             _pickerBox = new VisualElement { name = "operation-assign-list" };
             _pickerBox.style.display = DisplayStyle.None;
@@ -632,6 +726,8 @@ namespace LordsLegacy.Game
 
             _pause = new Button { name = "pause-resume", text = "Pause" };
             _pause.clicked += ClickPauseResume;
+            var deconOp = new Button { name = "deconstruct-operation", text = "Deconstruct operation" };
+            deconOp.clicked += ClickDeconstructOperation;
             var expand = new Button { name = "expand-modules", text = "Expand modules" };
             expand.clicked += ClickExpandModules;
 
@@ -647,12 +743,12 @@ namespace LordsLegacy.Game
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
-            _panel.Add(_title); _panel.Add(_status); _panel.Add(_modules); _panel.Add(_priorityBox);
+            _panel.Add(_title); _panel.Add(_status); _panel.Add(_modules); _panel.Add(_priorityBox); _panel.Add(_deconBox);
             _panel.Add(MakeLabel("operation-families-heading", 12, "Families"));
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(MakeLabel("operation-workers-heading", 12, "Workers"));
             _panel.Add(_workers); _panel.Add(_logs); _panel.Add(_trees); _panel.Add(_workArea);
-            _panel.Add(areaRow); _panel.Add(expand); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
+            _panel.Add(areaRow); _panel.Add(expand); _panel.Add(deconOp); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
             _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);
