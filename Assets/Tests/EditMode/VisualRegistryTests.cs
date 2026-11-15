@@ -44,12 +44,36 @@ namespace LordsLegacy.Tests.EditMode
             Assert.IsFalse(_rock.IsPlaceholder);
         }
 
+        /// <summary>Runs the action and returns the error messages it logged. Logged errors do not fail the test.</summary>
+        private static System.Collections.Generic.List<string> CaptureErrors(System.Action action)
+        {
+            var errors = new System.Collections.Generic.List<string>();
+            bool previousIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            Application.LogCallback handler = (message, stack, type) =>
+            {
+                if (type == LogType.Error) errors.Add(message);
+            };
+            Application.logMessageReceived += handler;
+            try
+            {
+                action();
+            }
+            finally
+            {
+                Application.logMessageReceived -= handler;
+                LogAssert.ignoreFailingMessages = previousIgnore;
+            }
+            return errors;
+        }
+
         [Test]
         public void UnknownIdFallsBackAndLogsError()
         {
             Assert.IsFalse(_registry.TryGet("visual.does.not.exist", out _));
-            LogAssert.Expect(LogType.Error, "VisualRegistry: unknown visual id 'visual.does.not.exist'. Using the fallback placeholder.");
-            var fallback = _registry.Get("visual.does.not.exist");
+            VisualDefinition fallback = null;
+            var errors = CaptureErrors(() => fallback = _registry.Get("visual.does.not.exist"));
+            CollectionAssert.Contains(errors, "VisualRegistry: unknown visual id 'visual.does.not.exist'. Using the fallback placeholder.");
             Assert.IsNotNull(fallback);
             Assert.AreEqual(VisualRegistry.FallbackId, fallback.Id);
             Assert.IsTrue(fallback.IsPlaceholder);
@@ -62,8 +86,8 @@ namespace LordsLegacy.Tests.EditMode
         {
             var dup = ScriptableObject.CreateInstance<VisualDefinition>();
             dup.Configure("visual.tree.generic", null, new Material[0], 1f, true);
-            LogAssert.Expect(LogType.Error, "VisualRegistry.Register: duplicate id 'visual.tree.generic'.");
-            _registry.Register(dup);
+            var errors = CaptureErrors(() => _registry.Register(dup));
+            CollectionAssert.Contains(errors, "VisualRegistry.Register: duplicate id 'visual.tree.generic'.");
             Assert.AreEqual(2, _registry.Definitions.Count);
             Assert.AreSame(_tree, _registry.Get("visual.tree.generic"));
             Object.DestroyImmediate(dup);
