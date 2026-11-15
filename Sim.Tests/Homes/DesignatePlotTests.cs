@@ -256,9 +256,9 @@ namespace LordsLegacy.Sim.Tests.Homes
         }
 
         [Test]
-        public void SaveVersion_IsSeven_VersionFourBytesAreRefused()
+        public void SaveVersion_IsEight_VersionFourBytesAreRefused()
         {
-            Assert.AreEqual(7, SaveWriter.CurrentVersion);
+            Assert.AreEqual(8, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 4, 0, 0, 0, 0, 0, 0, 0 };
             Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
         }

@@ -46,6 +46,15 @@ namespace LordsLegacy.Sim.People
         /// <summary>True when the family's larder could not cover its last daily need (FD-15). No effect on work (FD-16).</summary>
         public bool IsHungry { get; internal set; }
 
+        /// <summary>Ledger reservation ids of this week's Sunday allotment on the market stock (FD-13). Saved by the Food section.</summary>
+        public IReadOnlyList<int> AllotmentReservationIds => _allotment;
+
+        internal void AddAllotment(int reservationId) => _allotment.Add(reservationId);
+
+        internal void ClearAllotment() => _allotment.Clear();
+
+        private readonly List<int> _allotment = new List<int>();
+
         /// <summary>True while the family has no house (it lives at the camp).</summary>
         public bool IsHomeless => !HomeHouseId.HasValue;
 
