@@ -10,7 +10,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | FD-01 | Food items: **meat** (3 rations), **berries** and **mushrooms** (1 ration per basket) (FOOD-A1, A1b). Adults need 1 ration a day, children under 14 need 0.5 | DECIDED (values PLACEHOLDER) |
-| FD-02 | Food lives in the same ledger as logs, by item id (the ledger already keys by item, `Items`), so food and logs never mix (MVP-2-04). A log storage only takes logs; a granary and a larder only take food | PROPOSED |
+| FD-02 | Food lives in the same ledger as logs, by item id (the ledger already keys by item, `Items`), so food and logs never mix (MVP-2-04). A log storage only takes logs; a granary and a larder only take food. A location that declares no categories accepts anything (ground piles, carriers). The camp has **two separate locations**: the log stockpile and the camp food store | PROPOSED |
 | FD-03 | Start: **400 meat** in the camp food store (FOOD-A1b) | PLACEHOLDER |
 | FD-04 | Top bar: **Food: N days** (village food ÷ daily need, FOOD-A3), raw counts in the tooltip | PROPOSED |
 

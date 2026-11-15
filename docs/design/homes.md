@@ -26,6 +26,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HM-12 | Moving in changes the family's **home** (PPL-11): its members sleep there, mill about near it (PPL-30) and commute from it (PPL-25). Their tent at the camp is removed. Someone mid-walk carries on and uses the new home from their next routine change | PROPOSED |
 | HM-13 | A family with a house is no longer **Homeless** (POP-A1) | DECIDED |
 | HM-14 | Deconstructing a house (CN-50..57) makes its family Homeless again, with a tent back at the camp | PROPOSED |
+| HM-14b | The plot goes with its house: when the house's deconstruction finishes (or an unbuilt house site is cancelled), the plot area is removed too. CN-58's refusal is for **operation** areas only. Right-click delete of a plot that still has a house is refused: *Deconstruct the house first* | PROPOSED |
 
 ## What the player sees
 
