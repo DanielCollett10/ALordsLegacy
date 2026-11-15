@@ -42,6 +42,16 @@ MonoBehaviour:
   slopeSampleGridM: 2
   overlapToleranceM2: 0.1
   spatialIndexCellM: 32
+  startingMeat: 400
+  adultRations: 1
+  childRations: 0.5
+  marketRangeM: 630
+  bushBaskets: 3
+  bushRegrowDays: 14
+  foragerMinAge: 8
+  foragerHutCapacity: 30
+  gatherMinutesPerBasket: 30
+  handCarryItems: 10
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
