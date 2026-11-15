@@ -22,6 +22,10 @@ namespace LordsLegacy.Sim.Operations
         TooMany,
         /// <summary>The settlement cannot pay the recipe's logs (CN-10).</summary>
         NotEnoughMaterials,
+        /// <summary>Overlaps a footprint already in the world (draft preview, BT-12).</summary>
+        OverlapsFootprint,
+        /// <summary>Overlaps a road corridor (draft preview, BT-12).</summary>
+        OverlapsRoad,
     }
 
     /// <summary>Result of <see cref="ModulePlacement.Preview"/>. Immutable.</summary>
@@ -73,14 +77,13 @@ namespace LordsLegacy.Sim.Operations
             var fp = new Footprint(0, type, centre, rotationDeg);
             var area = world.Areas.Get(op.AreaId);
             if (area == null) return Refuse(ModuleRefusal.OutsideArea, "The operation's area is gone");
-            double fpArea = Polygons.SignedAreaM2(fp.Polygon);
-            if (fpArea - PolygonOverlap.AreaM2(fp.Polygon, area.Polygon) > ToleranceM2 || CornerOutside(fp, area.Polygon))
+            if (!FitsInside(fp, area.Polygon))
                 return Refuse(ModuleRefusal.OutsideArea, "Must sit fully inside the area");
 
             foreach (int id in op.ModuleIds)
             {
                 Footprint other = world.Footprints.Get(id);
-                if (other != null && PolygonOverlap.Overlaps(fp.Polygon, other.Polygon, ToleranceM2))
+                if (other != null && Overlaps(fp, other))
                     return Refuse(ModuleRefusal.OverlapsModule, "Overlaps another module");
             }
             int need = type.ConstructionRecipe.Logs;
@@ -92,6 +95,17 @@ namespace LordsLegacy.Sim.Operations
             }
             return new ModulePlacementResult(ModuleRefusal.None, string.Empty);
         }
+
+        /// <summary>True if the rectangle lies fully inside the polygon (edge contact is fine). Shared with draft previews.</summary>
+        internal static bool FitsInside(Footprint fp, System.Collections.Generic.IReadOnlyList<PointMm> poly)
+        {
+            double fpArea = Polygons.SignedAreaM2(fp.Polygon);
+            return !(fpArea - PolygonOverlap.AreaM2(fp.Polygon, poly) > ToleranceM2 || CornerOutside(fp, poly));
+        }
+
+        /// <summary>True if two footprints overlap by more than the tolerance. Shared with draft previews.</summary>
+        internal static bool Overlaps(Footprint a, Footprint b) =>
+            PolygonOverlap.Overlaps(a.Polygon, b.Polygon, ToleranceM2);
 
         /// <summary>True if a corner lies outside the polygon by more than <see cref="CornerToleranceMm"/> (catches thin corner pokes).</summary>
         private static bool CornerOutside(Footprint fp, System.Collections.Generic.IReadOnlyList<PointMm> poly)
