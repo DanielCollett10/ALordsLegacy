@@ -67,6 +67,7 @@ namespace LordsLegacy.Game.Visuals
             var ids = new List<int>();
             foreach (var op in world.Operations.All) ids.AddRange(op.ModuleIds);
             foreach (var home in world.Homes.All) ids.Add(home.HouseFootprintId); // houses are not operation modules (HM-20)
+            foreach (var f in world.Footprints.All) if (f.Type.IsStandalone) ids.Add(f.Id); // granary: one piece, in no operation (FD-30)
             {
                 foreach (int id in ids)
                 {
