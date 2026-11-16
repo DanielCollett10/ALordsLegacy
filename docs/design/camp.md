@@ -19,12 +19,13 @@ MVP-1-01 where they disagree.
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| CMP-20 | **Food handover:** once a **built granary supplies the market** (markets.md MK-10), the camp stops being a food supply. From the next Sunday, households get food only from the market (MKT-05) | DECIDED (trigger detail PROPOSED) |
+| CMP-20 | **Food handover:** once a **built granary supplies the market** (markets.md MK-10), the camp stops being a food supply. From the next Sunday, households get food only from the market (MKT-05) | DECIDED (owner 16/11/2026: switch at once, no waiting for stock) |
 | CMP-21 | After the handover the camp **no longer stores food**: granary families carry what is left in the camp food store into a granary, as from a forager hut (MK-24 step 2). Once empty, the camp food store is removed | DECIDED |
 | CMP-22 | The handover never reverses: switching the granary off, or losing it, does not make the camp a supply again | PROPOSED |
 | CMP-23 | **Camp removal:** when **every family has a house** (no Homeless family) **and** the food handover has happened, the camp is removed: tents, fire, food store and footprint go | DECIDED (needs handover PROPOSED) |
-| CMP-24 | Left-over camp logs at removal: odd-jobbers haul them by ox to the nearest log storage with room as a normal haul; the log pile stays drawn until it is empty, then goes. Oxen at the camp stand move to the nearest oxen stand, or rest where they are | PROPOSED |
-| CMP-25 | **Homeless after removal** (a house deconstructed later, an arrival whose house was lost, GR-24): the family **sleeps rough** at the market centre, or at the old camp fire spot if there's no market. No tent is drawn; it shows *Homeless (sleeping rough)*. The camp never comes back | PROPOSED |
+| CMP-24 | Anything left in the camp at removal (logs in the stockpile, any food) is **dropped as an unowned ground pile** at the stockpile spot (like CN-54). Unowned log piles are construction sources (CN-11), so the logs get used. The pile blocks building over it while it holds items (PL-15). Oxen at the camp stand move to the nearest oxen stand, or rest where they are | DECIDED (owner 16/11/2026) |
+| CMP-25 | **Homeless after removal** (a house deconstructed later, an arrival whose house was lost, GR-24): the family **dosses about the town** until a house is free: it mills about and sleeps rough around the market centre (the old camp fire spot if there's no market). No tent is drawn; it shows *Homeless (sleeping rough)*. HM-11 moves it into the next free house as usual. The camp never comes back | DECIDED (owner 16/11/2026; spot PROPOSED) |
+| CMP-26 | Future (not M15): a family homeless for **30 days** (default, matching GR-03) leaves town as in `growth.md` GR-10..13 | DECIDED (future) |
 
 > Implementation note (CMP-06, CMP-01): the start layout's `Stock` (default 40 `item.log`, T-287) is produced into a
 > ledger `Stockpile` location at the stockpile spot, with no capacity limit. It landed in M9, while CMP-06 says M8.

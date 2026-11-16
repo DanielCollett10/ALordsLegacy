@@ -23,6 +23,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | GR-11 | Its members drop anything they carry where they stand, then **walk to the nearest map exit along the road network** (DECIDED). A map exit is a point where a road meets the map edge. With no road exit, they walk to the nearest map edge point | DECIDED (fallback PROPOSED) |
 | GR-12 | Larder food stays in the house larder for the next family | PROPOSED |
 | GR-13 | While walking out they show *Leaving (hungry)*, cannot be assigned, and take no tasks. Each member is removed when they reach the exit; the family record goes with its last member | PROPOSED |
+| GR-13b | Future: a family **homeless for 30 days** leaves the same way (`camp.md` CMP-26). Not in M16 unless the owner pulls it in | DECIDED (future) |
 | GR-14 | A message line reads *The <name> family is leaving: hungry for 30 days* (GR-30) | PROPOSED |
 
 ## Arrivals

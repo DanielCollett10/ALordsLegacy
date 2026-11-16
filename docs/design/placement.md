@@ -22,7 +22,8 @@ standalone structures (the granary's building plus 5 m yard, FD-30b).
 | ID | Rule | Tag |
 | --- | --- | --- |
 | PL-10 | A fixed structure's plot is a **real plot outline** in the Sim, like a drawn area, so every overlap check and snap that applies to areas applies to it too | DECIDED |
-| PL-11 | **No plot may overlap another plot.** Touching (a shared edge) is allowed (AR-15). Bug today: a house plot can be drawn over the granary's yard; it must be refused with *Overlaps Granary <id>* | DECIDED |
+| PL-11 | **No plot may overlap another plot.** Touching (a shared edge) is allowed (AR-15). Bug today: a house plot can be drawn over the granary's yard; it must be refused with *Overlaps Granary <id>* | DECIDED (owner 16/11/2026: bug) |
+| PL-15 | **Ground piles block building.** A ground pile that holds items (any owner: unowned piles, operation log piles, dropped food) covers a **circle of 2 m radius** (PLACEHOLDER) around its point. No building area, plot, module or fixed structure may overlap that circle: *Items on the ground here*. Roads and work areas may. The circle goes when the pile is empty. It is derived from the ledger, so no new save state | DECIDED (owner 16/11/2026; radius and scope PROPOSED) |
 | PL-12 | While any placing tool is active (area, plot, market, granary or a module ghost), **every existing plot's outline is shown**, with its corners marked as snap points | DECIDED |
 | PL-13 | Area and plot vertices snap to fixed-plot corners and edges, the same as to other areas (snap order in `areas.md`), so a house plot can be butted against the granary yard | DECIDED |
 | PL-14 | A fixed structure's ghost **snaps flush** to a nearby plot edge or road side within the snap distance (12 px): it turns to lie parallel to that edge and slides so its plot edge touches it. Q/E rotation still works when it isn't snapped. Snapping off: no snap (shared toggle) | PROPOSED |

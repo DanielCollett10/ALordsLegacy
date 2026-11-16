@@ -141,6 +141,7 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Stall capacity | 30 | food items | MK-22 |
 | Stall slot cell | 4 × 5 | m (stall 3 × 2, 1 m side gap, 3 m aisle) | MK-05 |
 | Markets per town | 1 | | MK-04 |
+| Ground pile no-build circle | 2 | m radius around a pile with items | PL-15 |
 | Store-family worker age | 8+ | years (light work) | MK-24 |
 | Hungry days before leaving | 30 | days in a row | GR-03 |
 | Arrival food surplus | 30 | days of food incl. the new family | GR-21 |
