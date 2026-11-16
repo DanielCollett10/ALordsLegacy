@@ -10,7 +10,7 @@
 | Type | Role |
 |---|---|
 | `Population` | `Family`, `Citizen`, `Ox` records by explicit int id, iterated in id order. Ids never reused. `Version` bumps on add or remove. |
-| `Family` | Members, home point (tent spot while Homeless, house access point once housed), `HomeHouseId`, `IsHomeless`, `WorkplaceId` (= operation id, or none). See `homes.md`. |
+| `Family` | Members, home point (tent spot while Homeless, house access point once housed), `HomeHouseId`, `IsHomeless`, `WorkplaceId` (= operation id, or none). Food: `LarderLocationId`, `CarriedRations`, `IsHungry`, `TripCarrierId`, allotment reservations (`food.md`). See `homes.md`. |
 | `Citizen` | `IMovable`. `AgeYears(nowTick, SimTuning.AgeingRate)`, `Activity`, `DebugSend`, the routine and work state. |
 | `Ox` | `IMovable`. `State` (`OxState`: Free, Reserved(task), Led(citizen), Resting(spot, stand id)). |
 | `RoutineSystem` | Routine phase, before movement. Per-citizen state Asleep, Milling, GoingHome. Issues `MoveOrder`s only. |

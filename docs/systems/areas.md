@@ -9,7 +9,7 @@ Folder `Assets/Sim/Areas/` (`LordsLegacy.Sim.Areas`).
 | Type | Role |
 |---|---|
 | `AreaShape` | Vertices plus one `AreaEdge` per vertex: Straight, Bent (quadratic handle), FollowsRoad, NearRoad (AR-24), NearArea (AR-25). |
-| `AreaTypeDef`, `AreaTypes`, `AreaTypeCatalog` | Types: `area.test` (Building), `area.test_work` (Work), `area.woodcutting` (Building, 150–5,000 m²), `area.work_woodcutting` (Work), `area.plot` (Building, 60–400 m², needs road frontage; M13). Limits per `docs/design/tuning.md`. |
+| `AreaTypeDef`, `AreaTypes`, `AreaTypeCatalog` | Types: `area.test` (Building), `area.test_work` (Work), `area.woodcutting` (Building, 150–5,000 m²), `area.work_woodcutting` (Work), `area.plot` (Building, 60–400 m², needs road frontage; M13), `area.foraging` (Building, 100–5,000 m², clears trees) and `area.work_foraging` (Work, 100–400,000 m²; M14). Limits per `docs/design/tuning.md`. |
 | `HousePlacement` | Pure. Puts the 6 × 8 m house on a plot's longest frontage edge, 1 m back (HM-04). Used by `DesignatePlot` and the plot tool's ghost. See `homes.md`. |
 | `AreaFlattener` | `Flatten(shape, roads, areas, spacing)`: a CCW `PointMm` outline that passes through every vertex in order (AR-30). Helpers `NearRoadGeometry`, `NearAreaGeometry`. |
 | `AreaValidator` | Pure. `Validate(world, shape, typeId)` → `AreaPreview` (outline, m², `AreaRefusal`, neighbour names). |

@@ -29,6 +29,9 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   logged. A rejected command changes nothing. A change with several parts is one batch command that validates
   all parts first (`DesignateOperation`, `PlaceModules`, decision 0037).
 - **Homes** (`systems/homes.md`): `DesignatePlot` makes the plot, house site and an Empty `HomeRegistry` record in one Apply; `MoveInSystem` (operations phase) moves Homeless families into Built houses (HM-11). Saved by `HomesSection`. `HouseRemoval` evicts the family when a house is marked and removes home and plot when it goes (HM-14, HM-14b; decision 0040).
+- **Food and foraging** (`systems/food.md`, `systems/foraging.md`): food is ledger stock in larders and food stores. The
+  Sunday allotment is a reservation, and the fetch trip is a task (decision 0042). Foragers deliver to the nearest store
+  with room, never the camp (decision 0043). Routine phase: eating, the Sunday allotment and the Sunday trip. Operations phase: bush regrowth and foraging.
 - **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.
 - **Queries:** tools and views ask pure queries before committing (`RoadValidator.Validate`,
   `AreaValidator.Validate`, `ModulePlacement.Preview`, `PlacementRules`). They return previews and refusal
@@ -48,8 +51,8 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
 ## Data flow
 
 Startup: `SimHost.Start` reads `StreamingAssets/Maps/testmap.lsmap` → `MapDataIO.Read` →
-`SimWorld.FromMapData(map, tuning, catalogs)` → `StartLayoutApplier` applies the camp, trunk road, families and oxen
-(via `Execute`).
+`SimWorld.FromMapData(map, tuning, catalogs)` → `StartLayoutApplier` applies the camp, trunk road, families, oxen and
+starting meat (via `Execute`). A new game also scatters forage bushes (`BushScatter`); a load replaces them from the save.
 
 Each frame: `TickPacer.Advance(real seconds)` → `SimWorld.Step(n)` → systems run each tick → views read state.
 
@@ -108,6 +111,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-Food, markets and the wider economy; the granary (MVP-2); extra houses and backyards; artisan build steps (PPL-42); a walk-to-site
-step for builders; clearing trees as a job (BLD-10-C). The design status is in
-`docs/design/`.
+Markets and stall families (M15); granary work and a family assign control for the granary (MKT-03b, FD-31/32); extra houses
+and backyards; artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
+status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.

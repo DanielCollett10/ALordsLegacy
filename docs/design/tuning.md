@@ -55,6 +55,9 @@ Derived (walking, off-road): 104 m per game hour, a quarter day ≈ 625 m, a hal
 a full day ≈ 2.5 km. Crossing a 25 km world ≈ 10 game days. A 300 m commute ≈ 2.9 h (2.3 h on a road).
 If walk speed or day length changes, recompute these numbers and the tables below.
 
+> Implementation note (Meals every, PPL-21, PPL-23): no code reads this row. Daily eating (FD-15, `EatingSystem`, at
+> midnight) replaced the weekly meal in M14. Owner to decide whether the row is removed.
+
 ## Roads and areas
 
 | Value | Default | Unit | Rule |
@@ -91,6 +94,9 @@ editable in the Unity Inspector on one `SimConfig` asset that `SimHost` reads. T
 asset's defaults equal the code defaults. Edits made during Play take effect the next time Play starts (the world is
 built once, at start). Presentation values (snap distances, sphere, dots) stay on `ViewSettings`.
 
+> Implementation note (module recipes, decision 0019): the `SimConfig` module recipe fields are marked "NOT YET APPLIED".
+> The Sim still reads `ModuleTypes` in code, so editing a recipe in the asset (granary, forager hut) changes nothing.
+
 ## Population and oxen
 
 | Value | Default | Unit | Rule |
@@ -104,8 +110,10 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 
 > Implementation note (Starting oxen): `SimTuning.StartingOxen` (2) is not read. The start layout's `OxCount` (2) creates the oxen.
 >
-> Implementation note (Light work from age 8, POP-A2; Adult, may marry from 18, POP-17): neither age is in code. The only
-> working age is `OperationStatus.WorkingAgeYears` (14), and no light task exists, so children do no work. Nothing marries.
+> Implementation note (Light work from age 8, POP-A2): `SimTuning.ForagerMinAge` (8) is read by foraging dispatch only (FD-23).
+> Foraging is the only light task, so other children still do no work. Heavy work uses `OperationStatus.WorkingAgeYears` (14).
+>
+> Implementation note (Adult, may marry from 18, POP-17): not in code. Nothing marries.
 
 ## Food
 
@@ -182,6 +190,9 @@ PLACEHOLDER until playtested.
 | Default work radius | 420 | m from the hut | WC-11 |
 | Hut / log storage / oxen stand | 6×4 / 8×6 / 3×3 | m | WC-02 |
 
+> Implementation note (Granary recipe, CON-A1 and FD-30): `ModuleTypes.Granary` uses 8 logs and 600 worker-minutes, as FD-30
+> says. The Granary row above says 6 logs. Owner to confirm which, then fix the other.
+>
 > Implementation note (Trunk length and tree density, TMB-06, DEF-03): the 12–20 m trunk range is in both
 > `SimTuning` (`TrunkLengthMinM`/`MaxM`, read by nothing) and `ForestScatter` (`MinTrunkM`/`MaxTrunkM`, which the
 > scatter actually uses). Tree density (493 per hectare) and the seed are editor constants in `ForestScatter`, not in

@@ -28,10 +28,10 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 2. **Build:** the house is a construction site with logs reserved. Its deliver and build tasks use owner `HouseOwnerId` (-1)
    and pool oxen (`construction.md`).
 3. **Move in:** when the house is Built, `MoveInSystem` picks a Homeless family with members. Families with a workplace
-   come first, nearest workplace to the house; else the lowest family id. The family's home point becomes the house's access point.
+   come first, nearest workplace to the house; else the lowest family id. Home point becomes the house access point; larder food moves in (`Larders.OnMoveIn`).
 4. **Live:** the routine has a housed family mill about its house access point, not the camp (`RoutineSystem`), and commute
    from it (`WorkDay`). `CampRenderer` draws a tent only for Homeless families.
-5. **Deconstruct:** marking a built house evicts its family at once (`HouseRemoval.Evict`, home point to the camp fire).
+5. **Deconstruct:** marking a built house evicts its family at once (`HouseRemoval.Evict`: home point to the fire, larder food back via `Larders.OnEvict`).
    Finishing the deconstruction, or cancelling an unbuilt site (`RemoveModule`), calls `RemoveWithPlot`: home and plot go.
 6. **Delete plot:** `DeleteArea` refuses a plot that still has a home: "Deconstruct the house first".
 

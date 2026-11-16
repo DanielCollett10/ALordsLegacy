@@ -45,7 +45,16 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | FD-30 | A separate building with a **fixed size**, placed as one piece with no drawn area (GDD section 5). Building **8 × 6 m**, capacity **100 items** (FOOD-04), recipe **8 logs, 600** min (CON-A1) | DECIDED (owner 15/11/2026; values PLACEHOLDER) |
 | FD-30b | The granary's **plot is the building plus 5 m on every side** (18 × 16 m for an 8 × 6 m building). The whole plot must be clear of other footprints, areas and roads, and clears trees. Only the building blocks walking; the 5 m yard is walkable. The placement ghost shows both building and yard. It rotates with Q/E like a module | DECIDED (owner 15/11/2026: 5 m, yard walkable; rotation PROPOSED) |
 
-> Future (owner 15/11/2026): most 3D models should block pathing across their whole footprint, except open structures
-> on posts. Not in M14. Today only some footprint types block (WC-06, decision 0018).
 | FD-31 | Panel: title "Granary <id>", state (Under construction / Built), stock by type with the total against capacity, the assigned families (FD-32) with an Assign / Unassign control, and Deconstruct (contents become a ground pile at the site, CN-55) | PROPOSED |
 | FD-32 | Placing a granary also creates an `operation.granary` operation with no area that owns the footprint. It has **2 family slots** (PLACEHOLDER), assigned with the existing Assign / Unassign family commands. Assignment needs the granary **built** ("Hut not built yet"). Removing the granary removes the operation and frees its families. **No granary work in M14**: assigned families do nothing there yet; store families come in M15 (MKT-03b). See decision 0041 | PROPOSED |
+
+> Future (owner 15/11/2026, FD-30b): most 3D models should block pathing across their whole footprint, except open
+> structures on posts. Not in M14. Today only some footprint types block (WC-06, decision 0018).
+>
+> Implementation note (FD-31, granary panel): the title is "Granary" with no id. States read "Delivering n / m logs",
+> "Building n%", "Built" or "Deconstructing n%". The panel shows stock by type and "Stored: n / cap". It has no family list
+> and no Assign or Unassign control. Deconstruct, or Cancel while unbuilt, goes through a confirm dialog.
+>
+> Implementation note (FD-32, assignment): `operation.granary` exists with 2 slots, and `AssignFamily` / `UnassignFamily`
+> accept it. No UI reaches it, because picking a granary opens the granary panel, not the operation panel. So a player cannot
+> assign families yet. Owner to decide where the control goes.

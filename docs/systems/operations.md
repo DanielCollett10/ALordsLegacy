@@ -1,7 +1,8 @@
-# Operations (woodcutting)
+# Operations
 
-**Purpose:** an operation is a workplace: a building area with a hut, log storage and optional oxen stand, families assigned to
-it, and a work area in which it fells trees. It creates the tasks its families do and tracks the logs it makes (WC-*, decision 0031).
+**Purpose:** an operation is a workplace: a building area with a hut, families assigned to it, and a work area. Woodcutting
+fells trees and keeps log storage; foraging picks bushes (`foraging.md`); the granary is an area-less operation (decision 0041).
+It creates the tasks its families do and tracks the logs it makes (WC-*, decision 0031).
 
 ## Key types and files
 
@@ -21,12 +22,11 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 | `OxPool` | `FindFor(opId, from)`: assigned oxen first, then the nearest free pool ox. Stand occupancy, rest spots (WC-31/32). |
 | `Processes/` | `ProcessDef` (ordered `StageDef`s), `ProcessDefs.Timber`. `EffectiveStages` moves a disabled stage's time to the next. |
 
-## Foraging camp (T-423, FD-22..24, FD-23b)
+## Foraging camp and granary
 
-`OperationTypes.Foraging` (`area.foraging`): mandatory `module.forager_hut` (8 logs/480 min; also a food-only store of 30, made by
-`PlaceModule`, used once built), no log storage, 300 m circle. `ForagingSystem` opens one `task.forage` per idle forager aged 8+: reserve
-the nearest bush, pick up to `HandCarryItems` baskets (1 item each), deliver to the nearest store with room (`ForagingStores`: own hut or
-built granary, never the camp). `ForagingStatus` adds `NoBushes`; every store full = StorageFull.
+- **Foraging camp** (`OperationTypes.Foraging`, `area.foraging`): a forager hut, no log storage, 300 m work circle (`foraging.md`).
+- **Granary** (`OperationTypes.Granary`): no area (`AreaId` 0). The granary footprint is its hut and it has 2 family slots.
+  It has no work yet (`food.md`).
 
 ## Lifecycle
 

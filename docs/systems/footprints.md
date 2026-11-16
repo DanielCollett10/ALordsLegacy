@@ -13,8 +13,8 @@ rectangle with an access point. It blocks or clears movement and holds a constru
 | `Footprint` | Oriented rectangle: CCW `Polygon`, centre, rotation, `AccessPoint` 1 m outside the front edge (local −Z). Type id. |
 | `FootprintTypeDef` | Size, `BlocksMovement`, `ClearsTrees`, `LogCapacity`, `OxCapacity` (both 0 by default), `ConstructionRecipe`. |
 | `FootprintRegistry` (`SimWorld.Footprints`) | `FindAt`, `QueryRect`, `Ids`, `NextId()`, `Version` (bumps on add or remove). |
-| `ModuleTypes` | Module types (`All`): woodcutting hut 6×4 m (blocks), log storage 8×6 m (20 logs), oxen stand 3×3 m (1 ox), house 6×8 m (blocks, 10 logs / 720 min; M13). |
-| `ConstructionRecipe` | Item counts and build worker-minutes. Hut 8 logs / 960 min, oxen stand 1 / 60, house 10 / 720, log storage and camp empty (built at placement). |
+| `ModuleTypes` | Module types (`All`): woodcutting hut 6×4 m (blocks), log storage 8×6 m (20 logs), oxen stand 3×3 m (1 ox), house 6×8 m (blocks, M13), granary 8×6 m standalone with a 5 m yard (food store 100, M14), forager hut 6×4 m (food store 30, M14). |
+| `ConstructionRecipe` | Item counts and build worker-minutes. Hut 8 logs / 960 min, oxen stand 1 / 60, house 10 / 720, granary 8 / 600, forager hut 8 / 480, log storage and camp empty (built at placement). |
 
 `footprint.camp` is 24×16 m, walkable, and clears trees.
 
@@ -43,3 +43,4 @@ not in the placement code.
 ## Tests
 
 `Sim.Tests/FootprintTests.cs`, `Sim.Tests/Operations/PlaceRemoveConstructionTests.cs`, `Sim.Tests/Save/StructuresSectionTests.cs`.
+Standalone granary: `Sim.Tests/Placement/GranaryPlacementTests.cs`, `Sim.Tests/Operations/GranaryOperationTests.cs`.

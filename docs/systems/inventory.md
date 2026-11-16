@@ -1,6 +1,6 @@
 # Inventory (ledger)
 
-**Purpose:** every physical item (logs for now) has a location and a count. Items enter only by production and leave only by
+**Purpose:** every physical item (logs and food) has a location and a count. Items enter only by production and leave only by
 transfer or consumption, so nothing appears from nowhere (decision 0032, decision 0035).
 
 ## Key types and files
@@ -9,18 +9,18 @@ transfer or consumption, so nothing appears from nowhere (decision 0032, decisio
 
 | Type | Role |
 |---|---|
-| `Ledger` | Locations, counts, reservations, journals (produced, consumed), `Version`, `Audit()`. |
+| `Ledger` | Locations, counts, reservations, journals (produced, consumed), `Version`, `Audit()`. `AddCarrier`, `AddFoodStore`, `FindFoodStore`. |
 | `Ledger.Reservations.cs`, `Ledger.Restore.cs` | Reservation methods and internal restore methods for the save reader. |
-| `LedgerLocation`, `LocationKind` | `GroundPile` (point, optional owner operation id), `Storage` (module id, capacity from the type), `Carrier` (an ox, capacity), `Stockpile` (unlimited, camp), `Site` (construction site, footprint id). |
+| `LedgerLocation`, `LocationKind` | `GroundPile` (point, optional owner operation id), `Storage` (module id, capacity from the type), `Carrier` (capacity; an ox, or a person's trip or forage carrier), `Stockpile` (unlimited, camp logs), `Site` (construction site, footprint id), `FoodStore` (food only; refuses non-food; larders, the camp food store, hut and granary stores). |
 | `Reservation` | Id, location, item, count, owner, kind (stock or capacity). |
-| `ItemDef`, `ItemCategory`, `Items` | `Items.Log` is `item.log`, category Log. |
+| `ItemDef`, `ItemCategory`, `Items` | `Items.Log` (`item.log`, Log). `Meat` (3 rations), `Berries` and `Mushrooms` (1 ration each), all category Food. `Items.All` lists them. |
 | `OperationPool` | `SimWorld.OperationPool(opId, item)` sums the operation's own storage modules only. |
 
 ## Operations
 
 - `Produce(location, item, n)` / `ProduceOnGround` merge into the nearest same-owner pile within 1 m. `Produce` throws past capacity.
 - `Transfer(from, to, item, n, owner?)` is atomic: false and no change on failure. It consumes the matching reservations.
-- `Consume` removes items for good (construction uses it), and is journalled.
+- `Consume` removes items for good (construction and eating use it), and is journalled.
 - `ReserveStock` / `ReserveCapacity(loc, item, n, owner)` return a reservation id (0 = refused). `Release(id)`, `CancelOwner(owner)`.
 - Per location and item: `TotalOf`, `ReservedOf`, `IncomingOf`, `AvailableOf` (total − reserved), `FreeSpace` (capacity − total − incoming).
 - `Audit()` returns null when consistent. It checks location sums against the produced and consumed journals, and checks
@@ -35,10 +35,11 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 - Unowned ground piles are construction sources. Site-owned piles are not (`construction.md`).
 - `Storage` capacity comes from the module type. A removed storage's logs stay in the ledger; `RemoveModule` refuses a storage
   with logs reserved for a site.
-- `GranaryReport.Of(world, id)` (`Sim/Food`) is the read model for the granary panel: state, progress, stock per food, total/reserved/capacity, deconstruct refund and drop; `ConfirmText` gives the dialog text (T-448).
+- A food store's capacity comes from its type, or from `ForagerHutCapacity` for the forager hut. `FoodStats` and the granary panel read counts through the ledger.
 - The save stores both counters and journals; `Audit` runs on load and throws `SaveFormatException` if they disagree.
 
 ## Tests
 
-`Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`.
+`Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`,
+`Sim.Tests/Save/LedgerFoodTests.cs`. Food stores: `Sim.Tests/Food/FoodStoreTests.cs`.
 Unity: `Assets/Tests/PlayMode/LogStacksTests.cs`.
