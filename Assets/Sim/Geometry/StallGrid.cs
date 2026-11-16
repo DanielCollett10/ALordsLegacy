@@ -28,6 +28,8 @@ namespace LordsLegacy.Sim.Geometry
         public const double StallWidthMm = 3000;
         /// <summary>Stall footprint depth in mm (2 m, MK-21).</summary>
         public const double StallDepthMm = 2000;
+        /// <summary>Clear padding kept between every cell and the market edge, in mm (2 m, PLACEHOLDER).</summary>
+        public const double EdgePaddingMm = 2000;
 
         /// <summary>
         /// Slots aligned to the polygon's longest edge (first one on a tie), keeping only cells wholly inside.
@@ -71,16 +73,22 @@ namespace LordsLegacy.Sim.Geometry
 
             PointMm centre = CentreOf(polygon);
             var found = new List<(long dist, int j, int i, StallSlot slot)>();
-            // 5 mm slack: vertices are rounded to mm, so an exact fit may measure a hair short.
-            int cols = (int)Math.Floor((sMax - sMin + 5) / cellW), rows = (int)Math.Floor((tMax - tMin + 5) / cellD);
+            // The grid lives in the extent shrunk by the edge padding and is centred in it, so slots sit in the
+            // middle of the market. A cell must also keep the padding clear of every edge (checked with the
+            // cell grown by the padding less 5 mm, so mm rounding cannot reject a fit; real clearance >= 1.995 m).
+            double usableS = sMax - sMin - 2 * EdgePaddingMm, usableT = tMax - tMin - 2 * EdgePaddingMm;
+            if (usableS < cellW || usableT < cellD) return result;
+            int cols = (int)Math.Floor(usableS / cellW), rows = (int)Math.Floor(usableT / cellD);
+            double sStart = sMin + EdgePaddingMm + (usableS - cols * cellW) / 2;
+            double tStart = tMin + EdgePaddingMm + (usableT - rows * cellD) / 2;
+            double check = EdgePaddingMm - 5;
             for (int j = 0; j < rows; j++)
             {
                 for (int i = 0; i < cols; i++)
                 {
-                    double s0 = sMin + i * cellW, t0 = tMin + j * cellD;
+                    double s0 = sStart + i * cellW, t0 = tStart + j * cellD;
                     PointMm[] cell = Rect(origin, ux, uz, vx, vz, s0, t0, cellW, cellD);
-                    // Test a cell inset by 2 mm so mm rounding on a shared boundary never rejects an exact fit.
-                    if (!WhollyInside(polygon, Rect(origin, ux, uz, vx, vz, s0 + 2, t0 + 2, cellW - 4, cellD - 4))) continue;
+                    if (!WhollyInside(polygon, Rect(origin, ux, uz, vx, vz, s0 - check, t0 - check, cellW + 2 * check, cellD + 2 * check))) continue;
                     PointMm[] stall = Rect(origin, ux, uz, vx, vz, s0 + (cellW - stallW) / 2, t0, stallW, stallD);
                     PointMm c = Pt(origin, ux, uz, vx, vz, s0 + cellW / 2, t0 + stallD / 2);
                     PointMm d = c - centre;
