@@ -27,6 +27,8 @@ namespace LordsLegacy.Sim.Save.Sections
         {
             WriteFootprints(world.Footprints, w);
             WriteCamp(world.Camp, w);
+            w.WriteBool(world.RoughSleepSpot.HasValue); // T-468
+            if (world.RoughSleepSpot.HasValue) WritePoint(w, world.RoughSleepSpot.Value);
             WriteOperations(world.Operations, w);
             WriteSites(world.Construction, w);
             WriteDeconstruction(world.Deconstruction, w);
@@ -40,6 +42,7 @@ namespace LordsLegacy.Sim.Save.Sections
             {
                 ReadFootprints(world.Footprints, r);
                 ReadCamp(world, r);
+                world.RoughSleepSpot = r.ReadBool() ? ReadPoint(r) : (PointMm?)null;
                 ReadOperations(world.Operations, r);
                 ReadSites(world, r);
                 ReadDeconstruction(world, r);

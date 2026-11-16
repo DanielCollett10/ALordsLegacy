@@ -163,7 +163,10 @@ namespace LordsLegacy.Sim.Tests.Markets
             StaffAndBuildStall(f);
             int total = 40;
             for (int i = 0; i < 3000 && f.StallStore.Total == 0; i++) f.W.Step(1);
-            Assert.AreEqual(10, f.StallStore.Total, "ten items reached the stall");
+            // The fixture's family is homeless with no camp, so it dosses at the market (CMP-25) and may finish more
+            // than one load before the loop notices: whole loads of ten only.
+            Assert.GreaterOrEqual(f.StallStore.Total, 10, "ten items reached the stall");
+            Assert.AreEqual(0, f.StallStore.Total % 10, "whole loads");
             Assert.AreEqual(total - f.GranaryStore.Total, f.StallStore.Total + CarrierTotal(f.W), "ledger conserved");
             Assert.Greater(f.StallStore.CountOf(Items.Meat.Id), f.StallStore.CountOf(Items.Berries.Id), "meat-heavy stock gives a meat-heavy load");
             Assert.AreEqual("", f.W.Inventory.Audit() ?? "");

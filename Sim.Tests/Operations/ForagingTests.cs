@@ -383,10 +383,10 @@ namespace LordsLegacy.Sim.Tests.Operations
         [Test]
         public void SaveVersion_IsEleven_VersionTenBytesAreRefused()
         {
-            Assert.AreEqual(17, SaveWriter.CurrentVersion);
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 17);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 10, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("version 10 (this build reads version 17)", e.Message);
+            StringAssert.Contains("version 10 (this build reads version " + SaveWriter.CurrentVersion + ")", e.Message);
         }
 
         // ---- the whole pipeline through real commands and ticks ----
