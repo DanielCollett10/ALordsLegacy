@@ -344,6 +344,7 @@ namespace LordsLegacy.Game
                 case OperationState.NoBushes: return "No bushes";
                 case OperationState.StorageFull: return "Storage full";
                 case OperationState.WaitingForOx: return "Waiting for ox";
+                case OperationState.NoRoomAtMarket: return "No room at market";
                 default: return s.ToString();
             }
         }
