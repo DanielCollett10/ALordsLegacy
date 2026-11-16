@@ -43,6 +43,11 @@ namespace LordsLegacy.Sim.Food
         /// <summary>Food items that would become a ground pile on deconstruction (CN-55).</summary>
         public int DropsItems { get; private set; }
 
+        /// <summary>True when the granary's operation supplies the market (MK-14).</summary>
+        public bool SuppliesMarket { get; private set; }
+        /// <summary>"Supplies market: Yes" or "Supplies market: No".</summary>
+        public string SuppliesMarketText => "Supplies market: " + (SuppliesMarket ? "Yes" : "No");
+
         private GranaryReport() { }
 
         /// <summary>The report for a granary footprint, or null when the id is not a granary.</summary>
@@ -89,6 +94,8 @@ namespace LordsLegacy.Sim.Food
             }
             r.RefundLogs = DeconstructionWork.RefundLogs(world, fp);
             r.DropsItems = r.Total;
+            Operations.Operation granaryOp = world.Operations.FindByModule(footprintId);
+            r.SuppliesMarket = granaryOp != null && granaryOp.SuppliesMarket;
             return r;
         }
 

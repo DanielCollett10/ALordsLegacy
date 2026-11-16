@@ -58,6 +58,30 @@ namespace LordsLegacy.Sim.Markets
         }
 
         /// <summary>
+        /// The house panel's "Market access" text (MK-44). Before the food handover a house within walking range of the camp
+        /// fire reads "No (camp supplies)"; otherwise "Yes" when the town's market reaches it, else "No". Not a house: "No".
+        /// </summary>
+        public static string AccessText(SimWorld world, int houseId)
+        {
+            if (world == null) throw new ArgumentNullException(nameof(world));
+            Footprint fp = world.Footprints.Get(houseId);
+            if (fp == null || fp.Type.Id != ModuleTypes.HouseId) return "No";
+            world.Nav.Sync(world);
+            var to = new PathPoint(fp.AccessPoint.XMetres, fp.AccessPoint.ZMetres);
+            double range = world.Tuning.MarketRangeM;
+            if (!world.FoodHandedOver && world.Camp != null)
+            {
+                double dc = AllotmentSystem.WalkingDistanceM(world, new PathPoint(world.Camp.Fire.XMetres, world.Camp.Fire.ZMetres), to);
+                if (dc >= 0 && dc <= range) return "No (camp supplies)";
+            }
+            Market market = world.Markets.Current;
+            if (market == null || world.Areas.Get(market.AreaId) == null) return "No";
+            PointMm centre = CentreOf(world, market);
+            double d = AllotmentSystem.WalkingDistanceM(world, new PathPoint(centre.XMetres, centre.ZMetres), to);
+            return d >= 0 && d <= range ? "Yes" : "No";
+        }
+
+        /// <summary>
         /// The area centre point of a market: the centroid of its area polygon (degenerate shapes use the bounding box
         /// centre). Throws if the market is null or its area is missing from the world.
         /// </summary>
