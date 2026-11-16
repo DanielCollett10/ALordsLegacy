@@ -1,5 +1,6 @@
 using System;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.People;
 
 namespace LordsLegacy.Sim.Homes
@@ -28,10 +29,11 @@ namespace LordsLegacy.Sim.Homes
                 {
                     Food.Larders.OnEvict(world, home, f);
                     f.HomeHouseId = null;
-                    if (world.Camp != null)
+                    PointMm? spot = RoughSleep.HomelessPoint(world); // camp fire, or the rough-sleeping spot (CMP-25)
+                    if (spot.HasValue)
                     {
-                        f.HomeX = world.Camp.Fire.XMetres;
-                        f.HomeZ = world.Camp.Fire.ZMetres;
+                        f.HomeX = spot.Value.XMetres;
+                        f.HomeZ = spot.Value.ZMetres;
                     }
                 }
             }

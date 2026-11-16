@@ -215,7 +215,7 @@ namespace LordsLegacy.Sim.Tests.Markets
             foreach (int s in m.StallFootprintIds) Assert.AreEqual(m.FamilyOf(s), bm.FamilyOf(s));
             Assert.AreEqual(2, bm.FamilyOf(m.StallFootprintIds[0]));
             Assert.AreEqual(0, bm.FamilyOf(m.StallFootprintIds[1]), "unstaffed stall survives the save");
-            Assert.AreEqual(17, SaveWriter.CurrentVersion);
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 17);
         }
     }
 }

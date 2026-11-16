@@ -64,11 +64,11 @@ namespace LordsLegacy.Sim.Food
         /// <summary>
         /// Opens the household's fetch task. Camp-supplied households walk to the camp, collect, walk home, deposit (M14).
         /// Stall-supplied households walk to the nearest reserved stall, collect there, go on to the next nearest, then
-        /// walk home (MK-33). Returns null with no camp.
+        /// walk home (MK-33). With no camp there is no camp supply: only stall stops count, and the result is null when
+        /// the family has no reserved stop at all.
         /// </summary>
         public static TaskRecord OpenTrip(SimWorld world, Family f)
         {
-            if (world.Camp == null) return null;
             var home = new PathPoint(f.HomeX, f.HomeZ);
             var camp = new CampFoodMarket(world).Origin;
             var stops = new List<LedgerLocation>();
@@ -79,9 +79,9 @@ namespace LordsLegacy.Sim.Food
                 LedgerLocation l = r == null ? null : world.Inventory.Get(r.LocationId);
                 if (l == null || stops.Contains(l)) continue;
                 stops.Add(l);
-                if (l != world.Camp.FoodStoreLocation) allCamp = false;
+                if (world.Camp == null || l != world.Camp.FoodStoreLocation) allCamp = false;
             }
-            var steps = new List<TaskStep>();
+            if (world.Camp == null && stops.Count == 0) return null;            var steps = new List<TaskStep>();
             if (allCamp)
             {
                 steps.Add(TaskStep.WalkTo(camp));
@@ -116,7 +116,7 @@ namespace LordsLegacy.Sim.Food
         // The camp store is reached at the fire; a stall store at its footprint (the location's own position is unset).
         private static PathPoint StopPoint(SimWorld world, LedgerLocation l, PathPoint camp)
         {
-            if (l == world.Camp.FoodStoreLocation) return camp;
+            if (world.Camp != null && l == world.Camp.FoodStoreLocation) return camp;
             Footprint fp = l.ModuleId == 0 ? null : world.Footprints.Get(l.ModuleId);
             PointMm p = fp != null ? fp.Centre : l.Position;
             return new PathPoint(p.XMetres, p.ZMetres);

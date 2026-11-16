@@ -43,18 +43,18 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 
 ## Gotchas
 
-- The family's old tent spot is not saved. An evicted family's home point becomes the camp fire, so its tent is drawn at the fire.
+- The tent spot is not saved: an evicted family's home point is the camp fire. With no camp it is `RoughSleep.Spot` (market centre,
+  else the old fire spot `World.RoughSleepSpot`, saved in Structures, v18). Status text `RoughSleep.Status`; the Game panel still says "(camp)".
 - The plot's refusals come from `AreaValidator` ("A plot must face a road", "Too small for a house") before `HousePlacement`
   runs. `HousePlacementResult.Text` is always "No room for the house".
-- `MoveInSystem` retries every tick, so an Empty house fills as soon as a Homeless family exists.
-- Families with no members never move in.
+- `MoveInSystem` retries every tick, so an Empty house fills as soon as a Homeless family exists. Families with no members never move in.
 - Houses are footprints, so `ModuleRenderer` draws them, but they are not operation modules (HM-20).
 - House deconstruct tasks have owner -1, not an operation id. Keep that in mind when reading the task board.
 
 ## Tests
 
 - Sim: `Sim.Tests/Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`
-  (evict, plot refusal, cancel). `Sim.Tests/Areas/HousePlacementTests`, `PlotTypeTests`. `Sim.Tests/People/RoutineSystemTests` (housed mill).
+  (evict, plot refusal, cancel). `Sim.Tests/Areas/HousePlacementTests`, `PlotTypeTests`. `Sim.Tests/People/RoutineSystemTests` (housed mill), `Sim.Tests/Start/NoCampTests` (rough sleep).
 - Unity: EditMode `BuildEntryStateTests`, `VisualRegistryTests`. PlayMode `PlotToolTests`, `HousePanelTests`, `HouseVisualsTests`,
   `ToolControllerTests`, `GameSceneTests` (house wiring).
 - Gap: no round-trip test saves a house with a family (see `save.md`).
