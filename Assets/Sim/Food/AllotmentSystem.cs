@@ -23,8 +23,17 @@ namespace LordsLegacy.Sim.Food
         private readonly Func<SimWorld, IEnumerable<IFoodMarket>> _markets;
         private Daylight _daylight;
 
-        /// <summary>Creates the system with the camp as the only market (FD-12).</summary>
-        public AllotmentSystem() : this(w => new IFoodMarket[] { new CampFoodMarket(w) }) { }
+        /// <summary>Creates the system: the camp until the handover (CMP-20), then only the market stalls (MK-30, MK-31).</summary>
+        public AllotmentSystem() : this(Default) { }
+
+        /// <summary>The markets the Sunday allotment draws from: the camp before the handover, the stall markets after.</summary>
+        public static IEnumerable<IFoodMarket> Default(SimWorld w)
+        {
+            var list = new List<IFoodMarket>();
+            if (!w.FoodHandedOver) list.Add(new CampFoodMarket(w));
+            else foreach (Markets.Market m in w.Markets.All) list.Add(new Markets.StallMarket(w, m));
+            return list;
+        }
 
         /// <summary>Creates the system with a custom market source (M15).</summary>
         public AllotmentSystem(Func<SimWorld, IEnumerable<IFoodMarket>> markets) { _markets = markets; }
@@ -52,9 +61,10 @@ namespace LordsLegacy.Sim.Food
             var families = new List<Family>(world.People.Families);
             foreach (Family f in families) { world.Inventory.CancelOwner(OwnerFor(f.Id)); f.ClearAllotment(); }
             var served = new HashSet<int>();
+            var full = new HashSet<int>();
             foreach (IFoodMarket m in markets)
             {
-                if (m.Stock == null) continue;
+                if (m.Stocks == null || m.Stocks.Count == 0) continue;
                 var queue = new List<KeyValuePair<double, Family>>();
                 foreach (Family f in families)
                 {
@@ -67,9 +77,43 @@ namespace LordsLegacy.Sim.Food
                 {
                     served.Add(e.Value.Id);
                     double deficit = Days * EatingSystem.DailyNeed(world, e.Value) - Held(world, e.Value);
-                    if (deficit > 1e-9) Allot(world, m.Stock, e.Value, deficit);
+                    double left = deficit;
+                    foreach (LedgerLocation stock in FullestFirst(m.Stocks))
+                    {
+                        if (left <= 1e-9) break;
+                        left -= Allot(world, stock, e.Value, left);
+                    }
+                    if (left <= 1e-9) full.Add(e.Value.Id);
                 }
             }
+            int ok = 0, short_ = 0;
+            foreach (Family f in families)
+            {
+                if (EatingSystem.DailyNeed(world, f) <= 0) continue;
+                if (full.Contains(f.Id)) ok++; else short_++;
+            }
+            world.LastAllotmentServed = ok;
+            world.LastAllotmentShort = short_;
+        }
+
+        // FOOD-A8: the stall holding the most rations is drawn on first (ties keep the market's order).
+        private static List<LedgerLocation> FullestFirst(IReadOnlyList<LedgerLocation> stocks)
+        {
+            var keyed = new List<KeyValuePair<double, LedgerLocation>>();
+            foreach (LedgerLocation l in stocks)
+            {
+                if (l == null) continue;
+                double r = 0;
+                foreach (ItemDef item in Items.All)
+                    if (item.Category == ItemCategory.Food) r += l.AvailableOf(item.Id) * item.RationsPerItem;
+                keyed.Add(new KeyValuePair<double, LedgerLocation>(r, l));
+            }
+            var order = new List<int>();
+            for (int i = 0; i < keyed.Count; i++) order.Add(i);
+            order.Sort((x, y) => keyed[x].Key != keyed[y].Key ? keyed[y].Key.CompareTo(keyed[x].Key) : x.CompareTo(y));
+            var result = new List<LedgerLocation>();
+            foreach (int i in order) result.Add(keyed[i].Value);
+            return result;
         }
 
         /// <summary>Walking distance in metres along the path, or -1 when there is no route.</summary>
@@ -96,14 +140,14 @@ namespace LordsLegacy.Sim.Food
             return r;
         }
 
-        private static void Allot(SimWorld world, LedgerLocation stock, Family f, double deficit)
+        private static double Allot(SimWorld world, LedgerLocation stock, Family f, double deficit)
         {
             var foods = new List<ItemDef>();
             foreach (ItemDef item in Items.All)
                 if (item.Category == ItemCategory.Food && item.RationsPerItem > 0 && stock.AvailableOf(item.Id) > 0) foods.Add(item);
             double total = 0;
             foreach (ItemDef i in foods) total += stock.AvailableOf(i.Id) * i.RationsPerItem;
-            if (total <= 0) return;
+            if (total <= 0) return 0;
             double want = Math.Min(deficit, total);
             var take = new int[foods.Count];
             double got = 0;
@@ -124,12 +168,14 @@ namespace LordsLegacy.Sim.Food
                 if (best < 0) break;
                 take[best]++; got += foods[best].RationsPerItem;
             }
+            double reserved = 0;
             for (int i = 0; i < foods.Count; i++)
             {
                 if (take[i] <= 0) continue;
                 int id = world.Inventory.ReserveStock(stock, foods[i], take[i], OwnerFor(f.Id));
-                if (id != 0) f.AddAllotment(id);
+                if (id != 0) { f.AddAllotment(id); reserved += take[i] * foods[i].RationsPerItem; }
             }
+            return reserved;
         }
     }
 }

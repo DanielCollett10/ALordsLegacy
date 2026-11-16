@@ -160,7 +160,7 @@ namespace LordsLegacy.Sim.Tests.Markets
         [Test]
         public void SaveVersion_IsFifteen_VersionFourteenBytesAreRefused()
         {
-            Assert.AreEqual(15, SaveWriter.CurrentVersion);
+            Assert.AreEqual(16, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 14, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
             StringAssert.Contains("Unknown save format version 14", e.Message);
