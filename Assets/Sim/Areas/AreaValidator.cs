@@ -77,6 +77,7 @@ namespace LordsLegacy.Sim.Areas
             AreaRecord other = AreaPlacementChecks.FindOverlappingArea(world, poly);
             if (other != null) { overlapName = other.Name; return AreaRefusal.OverlapsArea; }
             if (AreaPlacementChecks.CrossesRoad(world, poly)) return AreaRefusal.CrossesRoad;
+            if (Placement.PileZones.BlocksPolygon(world, poly)) return AreaRefusal.ItemsOnGround; // PL-15
             // MK-05: a market must fit at least one stall slot, however big its area is (a thin strip has none).
             if (isMarket && StallGrid.Slots(poly, world.Tuning).Count == 0) return AreaRefusal.MarketTooSmall;
             return AreaRefusal.Valid;

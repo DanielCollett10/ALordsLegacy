@@ -10,7 +10,9 @@ namespace LordsLegacy.Sim.Placement
         /// <summary>Inside a road corridor (PL-01).</summary>
         OnRoad = 2,
         /// <summary>Outside the map (PL-04).</summary>
-        OutsideMap = 3
+        OutsideMap = 3,
+        /// <summary>Inside the no-build circle of a ground pile with items (PL-15).</summary>
+        ItemsOnGround = 4
     }
 
     /// <summary>Answer of a <see cref="PlacementRules"/> query: Ok, or a reason. Immutable.</summary>
@@ -44,6 +46,7 @@ namespace LordsLegacy.Sim.Placement
                     case PlacementRefusal.InsideArea: return "inside " + AreaName;
                     case PlacementRefusal.OnRoad: return "on a road";
                     case PlacementRefusal.OutsideMap: return "outside the map";
+                    case PlacementRefusal.ItemsOnGround: return PileZones.Text;
                     default: return "";
                 }
             }
