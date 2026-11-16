@@ -46,7 +46,7 @@ Ledger kind `LocationKind.FoodStore` refuses non-food.
 
 ## Gotchas
 
-- `FoodTripSystem.OpenTrip` always walks to the camp, not to `IFoodMarket.Origin`.
+- Stall trips (T-466): `OpenTrip` builds one `WalkTo` + `CollectFood(stallLocationId)` pair per reserved stall, nearest first from home. A stall whose footprint is gone is skipped and its reservations released. No save change (step `LocationId` was already saved).
 - Allotment and trip owners are `-1000 - familyId`. Keep that range clear of footprint and task ids (`FamilyOf` decodes it).
 - `DaysLeft` = rations ÷ need (children 0.5). The top bar shows "Food: –" when nobody eats.
 - Ration totals include `CarriedRations`. Item counts do not.

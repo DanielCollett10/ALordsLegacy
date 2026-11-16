@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Footprints;
+using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Navigation;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tasks;
@@ -58,17 +61,65 @@ namespace LordsLegacy.Sim.Food
             return false;
         }
 
-        /// <summary>Opens the household's fetch task: walk to the camp, collect, walk home, deposit. Returns null with no camp.</summary>
+        /// <summary>
+        /// Opens the household's fetch task. Camp-supplied households walk to the camp, collect, walk home, deposit (M14).
+        /// Stall-supplied households walk to the nearest reserved stall, collect there, go on to the next nearest, then
+        /// walk home (MK-33). Returns null with no camp.
+        /// </summary>
         public static TaskRecord OpenTrip(SimWorld world, Family f)
         {
             if (world.Camp == null) return null;
+            var home = new PathPoint(f.HomeX, f.HomeZ);
             var camp = new CampFoodMarket(world).Origin;
-            TaskDef def = TaskDefCatalog.Build(FetchFoodTaskId, new[]
+            var stops = new List<LedgerLocation>();
+            bool allCamp = true;
+            foreach (int rid in f.AllotmentReservationIds)
             {
-                TaskStep.WalkTo(camp), TaskStep.CollectFood(),
-                TaskStep.WalkTo(new PathPoint(f.HomeX, f.HomeZ)), TaskStep.DepositFood(),
-            });
+                Reservation r = world.Inventory.GetReservation(rid);
+                LedgerLocation l = r == null ? null : world.Inventory.Get(r.LocationId);
+                if (l == null || stops.Contains(l)) continue;
+                stops.Add(l);
+                if (l != world.Camp.FoodStoreLocation) allCamp = false;
+            }
+            var steps = new List<TaskStep>();
+            if (allCamp)
+            {
+                steps.Add(TaskStep.WalkTo(camp));
+                steps.Add(TaskStep.CollectFood());
+            }
+            else
+            {
+                PathPoint at = home;
+                while (stops.Count > 0)
+                {
+                    int best = 0;
+                    double bestD = double.MaxValue;
+                    for (int i = 0; i < stops.Count; i++)
+                    {
+                        PathPoint p = StopPoint(world, stops[i], camp);
+                        double d = (p.X - at.X) * (p.X - at.X) + (p.Z - at.Z) * (p.Z - at.Z);
+                        if (d < bestD) { bestD = d; best = i; }
+                    }
+                    LedgerLocation s = stops[best];
+                    stops.RemoveAt(best);
+                    at = StopPoint(world, s, camp);
+                    steps.Add(TaskStep.WalkTo(at));
+                    steps.Add(TaskStep.CollectFood(s.Id));
+                }
+            }
+            steps.Add(TaskStep.WalkTo(home));
+            steps.Add(TaskStep.DepositFood());
+            TaskDef def = TaskDefCatalog.Build(FetchFoodTaskId, steps.ToArray());
             return world.Tasks.Create(def, AllotmentSystem.OwnerFor(f.Id));
+        }
+
+        // The camp store is reached at the fire; a stall store at its footprint (the location's own position is unset).
+        private static PathPoint StopPoint(SimWorld world, LedgerLocation l, PathPoint camp)
+        {
+            if (l == world.Camp.FoodStoreLocation) return camp;
+            Footprint fp = l.ModuleId == 0 ? null : world.Footprints.Get(l.ModuleId);
+            PointMm p = fp != null ? fp.Centre : l.Position;
+            return new PathPoint(p.XMetres, p.ZMetres);
         }
 
         /// <summary>The family a fetch task serves, or null.</summary>
