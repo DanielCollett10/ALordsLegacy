@@ -95,6 +95,24 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator NearARoadTheYardEdgeSnapsToTheRoadAndStaysValid()
+        {
+            yield return Setup(40);
+            var w = _host.World;
+            w.Roads.AddSegment(LordsLegacy.Sim.Roads.RoadTypes.DirtPathId, LordsLegacy.Sim.Roads.CurveKind.CatmullRomCentripetal,
+                new[] { PointMm.FromMetres(20, 50), PointMm.FromMetres(180, 50) },
+                new[] { PointMm.FromMetres(20, 50), PointMm.FromMetres(100, 50), PointMm.FromMetres(180, 50) });
+            _tool.PointerMove(Screen(100, 54)); // the plain plot here would sit on the road
+            Assert.IsTrue(_tool.Preview.Ok, _tool.Preview.Text);
+            double minZ = double.MaxValue;
+            foreach (var p in _tool.Preview.Plot) minZ = System.Math.Min(minZ, p.ZMetres);
+            Assert.Greater(minZ, 50.0, "The yard is clear of the road.");
+            Assert.Less(minZ, 53.0, "The yard's edge sits against the road.");
+            Click(100, 54);
+            Assert.AreEqual(1, w.Footprints.All.Count(f => f.Type.Id == ModuleTypes.GranaryId));
+        }
+
+        [UnityTest]
         public IEnumerator RotateKeysTurnGhostAndWrap()
         {
             yield return Setup(40);

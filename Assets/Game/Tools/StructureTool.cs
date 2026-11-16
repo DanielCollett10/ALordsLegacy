@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using LordsLegacy.Game.Tools.Shared;
 using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Placement;
@@ -25,6 +26,11 @@ namespace LordsLegacy.Game.Tools
         /// <summary>Degrees one Shift + Q / E press turns the ghost.</summary>
         public const double FineRotateStepDeg = 1.0;
 
+        /// <summary>How far (m) from a road the cursor still snaps the yard edge to it.</summary>
+        public const double SnapRangeM = 15.0;
+        /// <summary>Sets the view settings (snapping on/off). Without them the top bar's are used.</summary>
+        public void SetViewSettings(ViewSettings settings) { _settings = settings; }
+
         private static readonly Color Ok = new Color(0.3f, 0.85f, 0.35f, 0.6f);
         private static readonly Color Bad = new Color(0.9f, 0.25f, 0.2f, 0.6f);
         private static readonly Color YardOk = new Color(0.3f, 0.85f, 0.35f, 0.9f);
@@ -39,7 +45,8 @@ namespace LordsLegacy.Game.Tools
 
         private readonly PressTracker _press = new PressTracker();
         private bool _active, _hasHover, _subscribed;
-        private PointMm _centre;
+        private PointMm _centre, _raw;
+        private ViewSettings _settings;
         private GhostPart _fill, _yard;
         private string _rejection;
 
@@ -105,9 +112,50 @@ namespace LordsLegacy.Game.Tools
             if (_controller != null && _controller.IsPointerOverUiAt(screenPos)) { _hasHover = false; HideGhost(); return; }
             if (_picker == null || !_picker.TryPickScreen(screenPos, out var g) || !g.HasValue) { _hasHover = false; HideGhost(); return; }
             var c = PointMm.FromMetres(g.X, g.Z);
-            if (_hasHover && c.Equals(_centre)) return;
-            _centre = c; _hasHover = true; _rejection = null;
+            if (_hasHover && c.Equals(_raw)) return;
+            _raw = c; _hasHover = true; _rejection = null;
             Refresh();
+        }
+
+        /// <summary>
+        /// Snapping on and a road within <see cref="SnapRangeM"/> of the cursor: slides the plot away from the road along the
+        /// road's normal until the yard's edge just clears the road corridor (FD-30b stays: the yard is never on a road).
+        /// Presentation only; the Sim still validates the final position.
+        /// </summary>
+        private PointMm Snap(PointMm raw)
+        {
+            if (_host == null || !_host.IsInitialized) return raw;
+            if (_settings == null)
+            {
+                var top = _controller != null ? FindFirstObjectByType<TopBarController>() : null;
+                _settings = top != null ? top.ViewSettings : new ViewSettings();
+            }
+            if (!_settings.Snapping) return raw;
+            var world = _host.World;
+            RoadHit hit = world.Roads.FindNearest(raw, SnapRangeM * PointMm.MmPerMetre);
+            if (hit.Kind == RoadHitKind.None) return raw;
+            double dx = raw.XMetres - hit.Point.XMetres, dz = raw.ZMetres - hit.Point.ZMetres;
+            double len = System.Math.Sqrt(dx * dx + dz * dz);
+            if (len < 1e-6) return raw; // on the centre line: no side to choose
+            dx /= len; dz /= len;
+            var type = ModuleTypes.Find(_typeId);
+            if (type == null) return raw;
+            double step = 0.1;
+            for (double d = 0.5; d <= SnapRangeM + 20.0; d += step)
+            {
+                var c = PointMm.FromMetres(hit.Point.XMetres + dx * d, hit.Point.ZMetres + dz * d);
+                var fp = new Footprint(0, type, c, Rotation);
+                if (StructurePlacement.Preview(world, _typeId, c, Rotation).Refusal != StructureRefusal.OverlapsRoad && Clear(fp.PlotPolygon, hit, dx, dz)) return c;
+            }
+            return raw;
+        }
+
+        // True once every plot corner is on the cursor's side of the road point (the plot has moved fully clear of the road).
+        private static bool Clear(PointMm[] plot, RoadHit hit, double nx, double nz)
+        {
+            foreach (var p in plot)
+                if ((p.XMetres - hit.Point.XMetres) * nx + (p.ZMetres - hit.Point.ZMetres) * nz < 0) return false;
+            return true;
         }
 
         /// <summary>A mouse button went down.</summary>
@@ -155,6 +203,7 @@ namespace LordsLegacy.Game.Tools
         private void Refresh()
         {
             if (!_active || !_hasHover || _host == null || !_host.IsInitialized) return;
+            _centre = Snap(_raw);
             Preview = StructurePlacement.Preview(_host.World, _typeId, _centre, Rotation);
             if (Preview.Building.Length < 3) { HideGhost(); ShowPanel(); return; }
             GhostIsRed = !Preview.Ok;
