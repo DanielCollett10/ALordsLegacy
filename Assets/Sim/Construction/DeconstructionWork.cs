@@ -68,6 +68,22 @@ namespace LordsLegacy.Sim.Construction
             HouseRemoval.RemoveWithPlot(world, footprintId); // HM-14b: a house takes its plot with it (no-op otherwise)
             world.Deconstruction.Remove(footprintId);
             foreach (int opId in owners) CompletePendingOperation(world, opId);
+            RemoveGranaryOperation(world, owners);
+        }
+
+        /// <summary>
+        /// Frees the families of each listed area-less granary operation that has no modules left (WorkplaceId null,
+        /// tasks cancelled like UnassignFamily) and removes the operation (T-447).
+        /// </summary>
+        public static void RemoveGranaryOperation(SimWorld world, IEnumerable<int> operationIds)
+        {
+            foreach (int opId in operationIds)
+            {
+                Operation op = world.Operations.Get(opId);
+                if (op == null || op.TypeId != OperationTypes.GranaryId || op.ModuleIds.Count > 0) continue;
+                foreach (int fid in new List<int>(op.FamilyIds)) new Commands.UnassignFamily(op.Id, fid).Apply(world);
+                world.Operations.Remove(op.Id);
+            }
         }
 
         /// <summary>

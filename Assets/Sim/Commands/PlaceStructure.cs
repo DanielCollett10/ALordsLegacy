@@ -4,6 +4,7 @@ using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
+using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.Placement;
 
 namespace LordsLegacy.Sim.Commands
@@ -57,6 +58,12 @@ namespace LordsLegacy.Sim.Commands
             }
             Footprint fp = world.Footprints.Add(fpId, type, Centre, RotationDegrees);
             if (type.FoodCapacity > 0) world.Inventory.AddFoodStore(type.FoodCapacity, fp.Id);
+
+            if (type.Id == ModuleTypes.GranaryId)
+            {
+                Operation op = world.Operations.Create(OperationTypes.GranaryId, 0);
+                world.Operations.AddModule(op.Id, fp.Id);
+            }
 
             var removed = TreeClearing.RemoveInPolygon(world.Trees, fp.PlotPolygon);
             var trees = new long[removed.Count];

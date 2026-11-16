@@ -47,12 +47,33 @@ namespace LordsLegacy.Sim.Operations
             familySlots: 2,
             defaultWorkRadiusM: 300);
 
+        /// <summary>Id of the granary operation.</summary>
+        public const string GranaryId = "operation.granary";
+
+        /// <summary>
+        /// Granary: an operation without an area (AreaId 0) that owns the granary footprint as its hut. 2 family slots
+        /// (PLACEHOLDER, FD-32), no storage, oxen or work area.
+        /// </summary>
+        public static readonly OperationTypeDef Granary = new OperationTypeDef(
+            GranaryId,
+            buildingAreaTypeId: null,
+            workAreaTypeId: null,
+            hutTypeId: ModuleTypes.GranaryId,
+            hutCount: 1,
+            logStorageTypeId: null,
+            minLogStorageCount: 0,
+            oxenStandTypeId: null,
+            maxOxenStands: 0,
+            familySlots: 2,
+            defaultWorkRadiusM: 0);
+
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)
         {
+            if (areaTypeId == null) return null;
             for (int i = 0; i < All.Count; i++) if (All[i].BuildingAreaTypeId == areaTypeId) return All[i];
             return null;
         }
