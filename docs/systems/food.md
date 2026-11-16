@@ -52,7 +52,6 @@ Ledger kind `LocationKind.FoodStore` refuses non-food.
 - Ration totals include `CarriedRations`. Item counts do not.
 
 Handover (T-464): `SimWorld.FoodHandedOver` is set once a built granary supplies the market, never cleared; the camp store then feeds granary families and is removed when empty (`StoreFamilySystem`).
-
 ## Tests
 
 - Sim: `Sim.Tests/Food/` (Allotment, Eating, FoodTrip, FoodStore, FoodStock, HouseholdLarder, GranaryReport),
