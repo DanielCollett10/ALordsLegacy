@@ -47,5 +47,6 @@ Names are "<prefix> N" with per-type counters that never reuse a number.
 
 `Sim.Tests/Areas/` (`AreaTests`, `AreaValidatorTests`, `AreaPlacementTests`, `AreaTrimTests`, `AreaRoadTrimTests`,
 `AreaUntanglerTests`, `AreaRegistryTests`, `NearAreaEdgeTests`, `NearRoadEdgeTests`, `FlattenInvariantTests`, `AreaCommandTests`,
-`PlotTypeTests`, `HousePlacementTests`).
+`PlotTypeTests`, `HousePlacementTests`, `MarketAreaTests`).
+`area.market` (T-456): no frontage, size from `MarketMin/MaxAreaM2`, refused with no stall slot or a 2nd market; `Sim/Markets`.
 Unity: `Assets/Tests/PlayMode/AreaToolTests.cs`, `AreaRendererTests.cs`, `AreaPlacementTests.cs`.

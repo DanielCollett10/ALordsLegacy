@@ -43,6 +43,7 @@ namespace LordsLegacy.Sim.Commands
             AreaTypeDef type = world.AreaTypes.Find(TypeId);
             var record = new AreaRecord(world.Areas.NextId(), type.Id, world.Areas.NextName(type), Shape, p.Polygon);
             world.Areas.Add(record);
+            if (type.Id == AreaTypes.MarketId) world.Markets.Add(record.Id); // MK-03
             OperationTypeDef opType = OperationTypes.FindByBuildingArea(type.Id);
             if (opType != null) world.Operations.Create(opType.Id, record.Id);
 

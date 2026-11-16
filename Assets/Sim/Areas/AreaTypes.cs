@@ -104,8 +104,15 @@ namespace LordsLegacy.Sim.Areas
         public static readonly AreaTypeDef ForagingWork =
             new AreaTypeDef(ForagingWorkId, "Foraging work area", AreaKind.Work, 4, 8, 100, 400000, null, false, false);
 
+        /// <summary>Id of the market building area (MK-01).</summary>
+        public const string MarketId = "area.market";
+
+        /// <summary>Market: building, 4–8 points, 100–2,000 m² (MK-02; the validator reads the tuning values), 10° max slope, clears trees, blocks roads; no frontage needed.</summary>
+        public static readonly AreaTypeDef Market =
+            new AreaTypeDef(MarketId, "Market", AreaKind.Building, 4, 8, 100, 2000, 10, true, true);
+
         /// <summary>All area types, in definition order.</summary>
-        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot, Foraging, ForagingWork };
+        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot, Foraging, ForagingWork, Market };
 
         /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
         public static readonly AreaTypeCatalog DefaultCatalog = new AreaTypeCatalog(All);

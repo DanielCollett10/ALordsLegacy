@@ -241,6 +241,12 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;
 
+        /// <summary>Smallest market area. Unit: m². Rule: MK-02 (PLACEHOLDER).</summary>
+        public double MarketMinAreaM2 { get; set; } = 100;
+
+        /// <summary>Largest market area. Unit: m². Rule: MK-02 (PLACEHOLDER).</summary>
+        public double MarketMaxAreaM2 { get; set; } = 2000;
+
         /// <summary>Stall slot cell width, along the longest edge. Unit: metres. Rule: MK-05 (PLACEHOLDER).</summary>
         public double StallCellWidthM { get; set; } = 4;
 
