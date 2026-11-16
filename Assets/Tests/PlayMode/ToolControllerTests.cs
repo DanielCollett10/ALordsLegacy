@@ -77,11 +77,9 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_view.GetButton("woodcutter").ClassListContains("build-bar__button--disabled"));
             Assert.AreEqual("House plot", ToolEntry.Defaults()[5].Label);
             Assert.IsFalse(_view.GetButton("house").ClassListContains("build-bar__button--disabled"), "House plot is affordable with 40 logs.");
-            foreach (var id in new[] { "storage-yard", "granary" })
-            {
-                Assert.AreEqual("Coming later", _view.GetButton(id).tooltip, id);
-                Assert.IsTrue(_view.GetButton(id).ClassListContains("build-bar__button--disabled"), id);
-            }
+            Assert.AreEqual("Coming later", _view.GetButton("storage-yard").tooltip);
+            Assert.IsTrue(_view.GetButton("storage-yard").ClassListContains("build-bar__button--disabled"));
+            Assert.IsFalse(_view.GetButton("granary").ClassListContains("build-bar__button--disabled"), "Granary is affordable with 40 logs.");
             foreach (var e in ToolEntry.Defaults()) Assert.IsFalse(_view.GetButton(e.Id).focusable, e.Id);
         }
 
