@@ -38,6 +38,7 @@ namespace LordsLegacy.EditorTools.Scenes
             var cam = CreateCamera().GetComponent<Camera>();
             var light = CreateLight().GetComponent<Light>();
             CreateTreeRenderer(host, cam);
+            SetRef(new GameObject("BushRenderer").AddComponent<LordsLegacy.Game.Visuals.BushRenderer>(), "host", host);
             CreatePeopleRenderers(host);
             CreateGroundPicker(host, cam);
             var topBar = CreateTopBar(host);
@@ -231,14 +232,17 @@ namespace LordsLegacy.EditorTools.Scenes
                 new[] { "TestWorkAreaTool", LordsLegacy.Game.Tools.AreaTool.TestWorkToolId, LordsLegacy.Sim.Areas.AreaTypes.TestWorkId },
                 new[] { "WoodcutterWorkAreaTool", "woodcutter-work", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingWorkId },
                 new[] { "WoodcutterAreaTool", "woodcutter-draw", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
+                new[] { "ForagerWorkAreaTool", "forager-work", LordsLegacy.Sim.Areas.AreaTypes.ForagingWorkId },
+                new[] { "ForagerAreaTool", "forager-draw", LordsLegacy.Sim.Areas.AreaTypes.ForagingId },
             };
             GameObject last = null;
-            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null;
+            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null, foragerDraw = null;
             foreach (var d in defs)
             {
                 last = new GameObject(d[0]);
                 var tool = last.AddComponent<LordsLegacy.Game.Tools.AreaTool>();
                 if (d[1] == "woodcutter-draw") woodcutterDraw = tool;
+                if (d[1] == "forager-draw") foragerDraw = tool;
                 SetString(tool, "_toolId", d[1]);
                 SetString(tool, "_typeId", d[2]);
                 SetRef(tool, "_host", host);
@@ -259,6 +263,17 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(draftTool, "_panel", panel);
             SetRef(draftTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             SetRef(draftTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            // T-425: the "forager" build bar entry runs the same draft tool for the foraging operation (hut only).
+            var foragerTool = new GameObject("ForagerDraftTool").AddComponent<LordsLegacy.Game.Tools.OperationDraftTool>();
+            SetString(foragerTool, "_toolId", LordsLegacy.Game.Tools.OperationDraftTool.ForagerToolId);
+            SetString(foragerTool, "_operationTypeId", LordsLegacy.Sim.Operations.OperationTypes.ForagingId);
+            SetRef(foragerTool, "_host", host);
+            SetRef(foragerTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(foragerTool, "_areaTool", foragerDraw);
+            SetRef(foragerTool, "_areas", ar);
+            SetRef(foragerTool, "_panel", panel);
+            SetRef(foragerTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
+            SetRef(foragerTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             // T-408: the "house" build bar entry draws a plot with the composed plot AreaTool and shows the house ghost.
             var plotArea = new GameObject("PlotAreaTool").AddComponent<LordsLegacy.Game.Tools.AreaTool>();
             SetString(plotArea, "_toolId", "plot-draw");
