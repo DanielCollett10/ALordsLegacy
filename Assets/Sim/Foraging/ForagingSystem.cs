@@ -17,9 +17,8 @@ namespace LordsLegacy.Sim.Foraging
     /// Operations-phase system for foraging camps (FD-22..24, TSK-06). For every Working foraging operation it keeps one
     /// open <c>task.forage</c> per idle forager (age <c>ForagerMinAge</c> or more, light work only). Each task reserves the
     /// nearest free bush in the work region to the hut, plans to pick up to <c>HandCarryItems</c> baskets from it
-    /// (one item per basket, <c>GatherMinutesPerBasket</c> each), and delivers them to the nearest store with room: the
-    /// camp's own hut store or a built granary (never the camp, FD-12). No store with room means no new tasks (Storage
-    /// full). A sweep frees the bush and drops carried food of tasks that ended without delivering. Stateless.
+    /// (one item per basket, <c>GatherMinutesPerBasket</c> each), and delivers them to the camp's own hut store only
+    /// (decision 0044; never a granary, never the camp, FD-12). No hut store with room means no new tasks (Storage full). A sweep frees the bush and drops carried food of tasks that ended without delivering. Stateless.
     /// </summary>
     public sealed class ForagingSystem : ISimSystem
     {
@@ -105,7 +104,7 @@ namespace LordsLegacy.Sim.Foraging
             {
                 BushRecord bush = world.Bushes.NearestAvailable(ax, az, region);
                 if (bush == null) return;
-                LedgerLocation store = ForagingStores.NearestWithRoom(world, op, bush.X, bush.Z, out int room);
+                LedgerLocation store = ForagingStores.HutStoreWithRoom(world, op, out int room);
                 if (store == null) return;
                 int n = Math.Min(Math.Min(bush.Baskets, Math.Max(1, world.Tuning.HandCarryItems)), Math.Min(room, MaxBasketsPerTask));
                 Footprint storeFp = world.Footprints.Get(store.ModuleId);
