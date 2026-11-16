@@ -49,3 +49,4 @@ not in the placement code.
 
 `Sim.Tests/FootprintTests.cs`, `Sim.Tests/Operations/PlaceRemoveConstructionTests.cs`, `Sim.Tests/Save/StructuresSectionTests.cs`.
 Standalone granary: `Sim.Tests/Placement/GranaryPlacementTests.cs`, `Sim.Tests/Operations/GranaryOperationTests.cs`.
+Fixed plot outlines (PL-10..13): `Placement/FixedPlots` reads each standalone footprint's PlotPolygon for area overlap ("Overlaps Granary <id>"), vertex rules and snaps; tests `Sim.Tests/Placement/FixedPlotTests.cs`. Save version 18.
