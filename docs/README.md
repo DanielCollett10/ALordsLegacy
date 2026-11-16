@@ -30,6 +30,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Operations | Workplaces (woodcutting, foraging camp, granary): modules, families, felling, hauling, status. | [systems/operations.md](systems/operations.md) | `Assets/Sim/Operations`, `Assets/Sim/Processes` |
 | Foraging | Forage bushes, foragers aged 8+ picking berries and mushrooms, delivery to stores with room. | [systems/foraging.md](systems/foraging.md) | `Assets/Sim/Foraging`, `Assets/Sim/Core/SimWorld.Foraging.cs` |
 | Food | Larders, the Sunday allotment and fetch trip, daily eating and Hungry, granary food. | [systems/food.md](systems/food.md) | `Assets/Sim/Food` |
+| Markets | Market area, stalls, granary families stocking stalls, camp handover and removal, Sunday allotment from stalls. | [systems/markets.md](systems/markets.md) | `Assets/Sim/Markets`, `Assets/Sim/Food/StallMarket.cs` |
 | Footprints | Placed buildings, stands and standalone structures: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
 | Inventory | Ledger of logs by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
 | Construction | Sites that take delivered logs and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
