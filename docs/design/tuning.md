@@ -135,6 +135,13 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Stall cost | 1 log (later 2 planks) | | MKT-03 |
 | Hand carry per trip (no container) | 10 | items | MKT-03e |
 | Load / unload time per trip | 10 | game minutes | PROPOSED |
+| Market area | 100–2,000 | m² | MK-02 |
+| Stall footprint / recipe | 3 × 2 m / 1 log, 60 | m / worker-minutes | MK-21 |
+| Stall capacity | 30 | food items | MK-22 |
+| Store-family worker age | 8+ | years (light work) | MK-24 |
+| Hungry days before leaving | 30 | days in a row | GR-03 |
+| Arrival food surplus | 30 | days of food incl. the new family | GR-21 |
+| Arrival cooldown | 7 | days | GR-22 |
 
 **Stall throughput.** Rations a stall family delivers per day =
 `working adults × trips per day × items per trip × average rations per item`, where
