@@ -13,7 +13,7 @@
 
 Commands are in `Assets/Sim/Commands/`: `DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`, `DesignateArea`, `DeleteArea`,
 `DesignatePlot`, `DesignateOperation`, `DeconstructOperation`, `PlaceModule(s)`, `PlaceStructure` (granary, FD-30b), `RemoveModule`, `MarkForDeconstruction`,
-`CancelDeconstruction`, `AssignFamily`, `UnassignFamily`, `AssignOx`, `UnassignOx`, `SetSitePriority`, `SendCitizenTo`,
+`CancelDeconstruction`, `DeconstructStall` (unstaffed market stall only, MK-23b), `AssignFamily`, `UnassignFamily`, `AssignOx`, `UnassignOx`, `SetSitePriority`, `SendCitizenTo`,
 plus `OperationSettings` (pause, resume, work area, use default area), `SetGranarySupplies` (granary market flag, T-458).
 `DesignatePlot` makes the plot area, the house site and an Empty home in one all-or-nothing Apply (HM-05, decision 0037 pattern).
 
