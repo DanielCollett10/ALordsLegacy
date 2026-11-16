@@ -10,7 +10,7 @@ All in `Assets/Sim/Geometry/` (`LordsLegacy.Sim.Geometry`).
 |---|---|
 | `PointMm` | Integer-mm point. The unit for polygons and polylines in the Sim. |
 | `Segments` | Exact classify and intersect, `MeetingPoint` for one crossing pair. |
-| `Polygons` | Area, winding, `IsSimple`, `Locate` (point in polygon), bounds, `Crossings` (where non-adjacent edges touch or cross, one point per pair). |
+| `Polygons` | Area, winding, `IsSimple`, `Locate` (point in polygon), bounds, `Centroid` (area centre; bounds centre when degenerate), `Crossings` (where non-adjacent edges touch or cross, one point per pair). |
 | `Polylines` | Length, nearest point, min distance, `PointsEvery(line, spacingM)` at arc length 0, s, 2s…, `PointsEveryWithin(...)` (snap dots, AR-22). Throws for spacing ≤ 0. |
 | `Triangulator` | `EarClip`: n−2 integer-exact triangles. Collinear vertices give zero-area triangles. |
 | `PolygonBoolean` | `Difference(subject, clips, out holes)` via vendored Clipper2 (`Assets/Sim/ThirdParty/Clipper2/`, decision 0021). Clipper types stay private. |

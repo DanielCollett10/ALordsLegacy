@@ -12,7 +12,7 @@ and show Hungry when short. Design: `design/food.md` (FD-*). Foraging supply: `f
 | `Items.Meat`, `Berries`, `Mushrooms` | Food items: 3, 1 and 1 rations (`RationsPerItem`). |
 | `Larders` | Food-only location per family and house, made on first need. `OnMoveIn` and `OnEvict` move food. |
 | `HouseholdLarder` | Read only: counts, rations, days left. Never creates a location. |
-| `IFoodMarket`, `CampFoodMarket` | Where the allotment is reserved: stock, origin, range (630 m). |
+| `IFoodMarket`, `CampFoodMarket` | Where the allotment is reserved: stock, origin, range (630 m). `Markets/MarketRange` gives houses in walking range of a centre, same measure. |
 | `AllotmentSystem` | Routine, Sunday dawn. Tops each household up to 7 days, nearest first. |
 | `FoodTripSystem` | Routine, Sunday morning. Opens `task.fetch_food` for each household with a reservation. |
 | `EatingSystem` | Routine, midnight. Eats from the larder and sets `IsHungry`. `DailyNeed` is pure. |
@@ -54,6 +54,6 @@ Ledger kind `LocationKind.FoodStore` refuses non-food.
 ## Tests
 
 - Sim: `Sim.Tests/Food/` (Allotment, Eating, FoodTrip, FoodStore, FoodStock, HouseholdLarder, GranaryReport),
-  `Save/LedgerFoodTests`, `Placement/GranaryPlacementTests`, `Operations/GranaryOperationTests`.
+  `Save/LedgerFoodTests`, `Placement/GranaryPlacementTests`, `Operations/GranaryOperationTests`, `Markets/MarketRangeTests`.
 - Unity PlayMode: `TopBarTests`, `CitizenPanelTests`, `HousePanelTests`, `GranaryPanelTests`, `StructureToolTests`.
 - Gaps: no `FoodSectionTests`. The save round trip has no food case (decision 0034).

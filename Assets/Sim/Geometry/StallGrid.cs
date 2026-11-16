@@ -71,7 +71,7 @@ namespace LordsLegacy.Sim.Geometry
                 if (t > tMax) tMax = t;
             }
 
-            PointMm centre = CentreOf(polygon);
+            PointMm centre = Polygons.Centroid(polygon);
             var found = new List<(long dist, int j, int i, StallSlot slot)>();
             // The grid lives in the extent shrunk by the edge padding and is centred in it, so slots sit in the
             // middle of the market. A cell must also keep the padding clear of every edge (checked with the
@@ -128,26 +128,6 @@ namespace LordsLegacy.Sim.Geometry
                     if (Segments.Classify(a, b, cell[k], cell[(k + 1) % 4]) == SegmentRelation.Crossing) return false;
             }
             return true;
-        }
-
-        private static PointMm CentreOf(IReadOnlyList<PointMm> poly)
-        {
-            int n = poly.Count;
-            double a2 = 0, cx = 0, cz = 0;
-            PointMm o = poly[0];
-            for (int i = 0; i < n; i++)
-            {
-                PointMm p = poly[i] - o, q = poly[(i + 1) % n] - o;
-                double cr = (double)p.X * q.Z - (double)q.X * p.Z;
-                a2 += cr; cx += (p.X + q.X) * cr; cz += (p.Z + q.Z) * cr;
-            }
-            if (a2 == 0)
-            {
-                BoundsMm b = Polygons.Bounds(poly);
-                return new PointMm((b.Min.X + b.Max.X) / 2, (b.Min.Z + b.Max.Z) / 2);
-            }
-            return new PointMm(o.X + (long)Math.Round(cx / (3 * a2), MidpointRounding.AwayFromZero),
-                               o.Z + (long)Math.Round(cz / (3 * a2), MidpointRounding.AwayFromZero));
         }
     }
 }
