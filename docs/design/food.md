@@ -47,4 +47,5 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 > Future (owner 15/11/2026): most 3D models should block pathing across their whole footprint, except open structures
 > on posts. Not in M14. Today only some footprint types block (WC-06, decision 0018).
-| FD-31 | Panel: stock by type and capacity, state, Deconstruct (contents become a ground pile at the site, CN-55) | PROPOSED |
+| FD-31 | Panel: title "Granary <id>", state (Under construction / Built), stock by type with the total against capacity, the assigned families (FD-32) with an Assign / Unassign control, and Deconstruct (contents become a ground pile at the site, CN-55) | PROPOSED |
+| FD-32 | Placing a granary also creates an `operation.granary` operation with no area that owns the footprint. It has **2 family slots** (PLACEHOLDER), assigned with the existing Assign / Unassign family commands. Assignment needs the granary **built** ("Hut not built yet"). Removing the granary removes the operation and frees its families. **No granary work in M14**: assigned families do nothing there yet; store families come in M15 (MKT-03b). See decision 0041 | PROPOSED |

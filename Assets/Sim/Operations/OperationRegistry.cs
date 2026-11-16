@@ -24,9 +24,17 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>The operation with this id, or null.</summary>
         public Operation Get(int id) => _byId.TryGetValue(id, out var o) ? o : null;
 
-        /// <summary>The operation living in this area, or null.</summary>
+        /// <summary>The operation that lists this module (footprint id) among its modules, or null.</summary>
+        public Operation FindByModule(int footprintId)
+        {
+            foreach (var o in _byId.Values) if (o.ModuleIdList.Contains(footprintId)) return o;
+            return null;
+        }
+
+        /// <summary>The operation living in this area, or null. Area id 0 means no area and never matches.</summary>
         public Operation FindByArea(int areaId)
         {
+            if (areaId == 0) return null; // 0 means "no area" (granary operation)
             foreach (var o in _byId.Values) if (o.AreaId == areaId) return o;
             return null;
         }

@@ -135,7 +135,8 @@ namespace LordsLegacy.Sim.Operations
         private static int OwnerOf(SimWorld world, int footprintId)
         {
             Operation op = OperationOf(world, footprintId);
-            return op != null ? op.Id : DeconstructionWork.HouseOwnerId;
+            // A granary operation has no area: its tasks stay helpers-only like a house's.
+            return op != null && op.TypeId != OperationTypes.GranaryId ? op.Id : DeconstructionWork.HouseOwnerId;
         }
 
         private static TaskStep StepOf(TaskRecord t, StepKind kind, out int index)

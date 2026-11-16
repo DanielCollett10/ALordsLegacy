@@ -9,7 +9,7 @@ it, and a work area in which it fells trees. It creates the tasks its families d
 
 | Type | Role |
 |---|---|
-| `OperationTypeDef`, `OperationTypes` | Static types: `Woodcutting` (hut, log storage, optional oxen stand, family slots, work radius). Not on a catalog (decision 0019; open). |
+| `OperationTypeDef`, `OperationTypes` | Static types: `Woodcutting`, `Foraging`, `Granary` (area-less, `AreaId` 0, 2 slots, decision 0041; `FindByModule`). Not on a catalog (decision 0019). |
 | `Operation`, `OperationRegistry` | Id, type, area, module footprints, families, oxen, work area, paused flag. Every change bumps `Version`. |
 | `OperationStatus` | `Of(world, op)`, computed never stored: Working / Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull. `Reported` adds WaitingForOx (display only). |
 | `WoodcuttingSystem` | Operations phase. Keeps one Open `task.fell_tree` per idle adult worker, aimed at the nearest free standing tree in the work region. |

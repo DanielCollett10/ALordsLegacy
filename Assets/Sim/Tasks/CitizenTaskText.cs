@@ -77,6 +77,7 @@ namespace LordsLegacy.Sim.Tasks
         private static string OperationName(string typeId)
         {
             if (typeId == OperationTypes.ForagingId) return "Foraging camp";
+            if (typeId == OperationTypes.GranaryId) return "Granary";
             return typeId == OperationTypes.WoodcuttingId ? "Woodcutter" : "Operation";
         }
 
