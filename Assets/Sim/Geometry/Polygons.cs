@@ -125,6 +125,33 @@ namespace LordsLegacy.Sim.Geometry
         /// <summary>True if the point is inside or on the boundary.</summary>
         public static bool Contains(IReadOnlyList<PointMm> poly, PointMm p) => Locate(poly, p) != PointLocation.Outside;
 
+        /// <summary>
+        /// Area centroid of the polygon, rounded to the nearest mm. A degenerate polygon (zero area: a single point,
+        /// repeated points, collinear or overlapping vertices) gives the centre of its bounding box instead.
+        /// Throws if empty.
+        /// </summary>
+        public static PointMm Centroid(IReadOnlyList<PointMm> poly)
+        {
+            if (poly == null) throw new ArgumentNullException(nameof(poly));
+            int n = poly.Count;
+            if (n == 0) throw new ArgumentException("No points.", nameof(poly));
+            double a2 = 0, cx = 0, cz = 0;
+            PointMm o = poly[0];
+            for (int i = 0; i < n; i++)
+            {
+                PointMm p = poly[i] - o, q = poly[(i + 1) % n] - o;
+                double cr = (double)p.X * q.Z - (double)q.X * p.Z;
+                a2 += cr; cx += (p.X + q.X) * cr; cz += (p.Z + q.Z) * cr;
+            }
+            if (a2 == 0)
+            {
+                BoundsMm b = Bounds(poly);
+                return new PointMm((b.Min.X + b.Max.X) / 2, (b.Min.Z + b.Max.Z) / 2);
+            }
+            return new PointMm(o.X + (long)Math.Round(cx / (3 * a2), MidpointRounding.AwayFromZero),
+                               o.Z + (long)Math.Round(cz / (3 * a2), MidpointRounding.AwayFromZero));
+        }
+
         /// <summary>Bounding box of the vertices. Throws if empty.</summary>
         public static BoundsMm Bounds(IReadOnlyList<PointMm> pts)
         {
