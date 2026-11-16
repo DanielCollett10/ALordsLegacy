@@ -110,11 +110,11 @@ namespace LordsLegacy.Sim.Tests.Food
         [Test]
         public void DaysLeft_ChildTurns14_CountsAsAdult()
         {
-            var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning { StartingMeat = 0 });
+            var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning { StartingMeat = 0, AgeingRate = 200 });
             w.People.AddFamily(1, "F", 0, 0);
             w.People.AddCitizen(1, "Kid", Sex.Male, 0, 1, 0, 0);
             Assert.AreEqual(0.5, FoodStats.DailyNeed(w), 1e-9);
-            w.Step(60 * 24 * 365 * 8); // 8 calendar years x 2 ageing = 16 years
+            w.Step(60 * 24 * 30); // 30 calendar days x 200 ageing rate = ~16 years (fast: keeps the suite from timing out)
             Assert.AreEqual(1.0, FoodStats.DailyNeed(w), 1e-9);
         }
 
