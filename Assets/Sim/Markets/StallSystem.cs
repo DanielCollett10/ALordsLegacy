@@ -45,7 +45,7 @@ namespace LordsLegacy.Sim.Markets
             foreach (int familyId in families)
             {
                 if (market.StallOf(familyId) != 0) continue;
-                int unstaffed = FirstUnstaffed(market);
+                int unstaffed = FirstUnstaffed(world, market);
                 if (unstaffed != 0) { market.SetFamily(unstaffed, familyId); continue; }
                 if (slots == null)
                 {
@@ -121,9 +121,11 @@ namespace LordsLegacy.Sim.Markets
             return result;
         }
 
-        private static int FirstUnstaffed(Market market)
+        // A stall marked for deconstruction (MK-23b) is never reused.
+        private static int FirstUnstaffed(SimWorld world, Market market)
         {
-            foreach (int id in market.StallFootprintIds) if (market.FamilyOf(id) == 0) return id;
+            foreach (int id in market.StallFootprintIds)
+                if (market.FamilyOf(id) == 0 && world.Deconstruction.Get(id) == null) return id;
             return 0;
         }
 
