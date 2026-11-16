@@ -118,6 +118,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.StallCellDepthM);
             w.WriteDouble(t.MarketMinAreaM2);
             w.WriteDouble(t.MarketMaxAreaM2);
+            w.WriteDouble(t.PileClearanceM);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -184,6 +185,7 @@ namespace LordsLegacy.Sim.Save.Sections
             t.StallCellDepthM = r.ReadDouble();
             t.MarketMinAreaM2 = r.ReadDouble();
             t.MarketMaxAreaM2 = r.ReadDouble();
+            t.PileClearanceM = r.ReadDouble();
             return t;
         }
 

@@ -31,7 +31,10 @@ namespace LordsLegacy.Sim.Placement
             if (type.Kind == AreaKind.Work) return PlacementResult.Allowed;
             AreaRecord area = StrictlyInsideBuildingArea(world, point);
             if (area != null) return PlacementResult.InsideArea(area.Name);
+            Footprints.Footprint plot = FixedPlots.FindStrictlyInside(world, point);
+            if (plot != null) return PlacementResult.InsideArea(FixedPlots.NameOf(plot));
             if (StrictlyInsideRoad(world, point)) return PlacementResult.Refused(PlacementRefusal.OnRoad);
+            if (PileZones.BlocksPoint(world, point)) return PlacementResult.Refused(PlacementRefusal.ItemsOnGround);
             return PlacementResult.Allowed;
         }
 
