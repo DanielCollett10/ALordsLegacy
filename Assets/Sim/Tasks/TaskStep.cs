@@ -63,8 +63,9 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Walk to a point on foot (the Sunday food trip, FD-14).</summary>
         public static TaskStep WalkTo(PathPoint point) => new TaskStep(StepKind.WalkTo, 0, false, null, point.X, point.Z);
 
-        /// <summary>Collect the household's reserved allotment from the market stock into its carrier (FD-14).</summary>
-        public static TaskStep CollectFood() => new TaskStep(StepKind.CollectFood, 0, false, null);
+        /// <summary>Collect the household's reserved allotment into its carrier (FD-14). A non-zero
+        /// <paramref name="locationId"/> collects only the reservations on that stall store (MK-33); zero collects from all.</summary>
+        public static TaskStep CollectFood(int locationId = 0) => new TaskStep(StepKind.CollectFood, 0, false, null, 0, 0, locationId);
 
         /// <summary>Move everything the carrier holds into the household's larder (FD-14).</summary>
         public static TaskStep DepositFood() => new TaskStep(StepKind.DepositFood, 0, false, null);
