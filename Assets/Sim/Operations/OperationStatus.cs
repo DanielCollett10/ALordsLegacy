@@ -30,6 +30,8 @@ namespace LordsLegacy.Sim.Operations
         WaitingForOx = 7,
         /// <summary>No bush with baskets left in the work region (foraging, FD-22).</summary>
         NoBushes = 8,
+        /// <summary>A granary family needs a stall but the market has no free slot (MK-21, MK-42).</summary>
+        NoRoomAtMarket = 9,
     }
 
     /// <summary>Computes operation status from world state. Nothing here is stored (GDD section 5).</summary>
@@ -43,6 +45,7 @@ namespace LordsLegacy.Sim.Operations
         {
             if (op.TypeId == OperationTypes.ForagingId) return Foraging.ForagingStatus.Of(world, op);
             if (op.Paused) return OperationState.Paused;
+            if (op.TypeId == OperationTypes.GranaryId && HasNoRoomFamily(world, op)) return OperationState.NoRoomAtMarket;
             if (Hut(world, op) == null) return OperationState.MissingHut;
             if (StorageModules(world, op).Count == 0) return OperationState.MissingStorage;
             if (!HasWorker(world, op)) return OperationState.NoWorkers;
@@ -62,6 +65,14 @@ namespace LordsLegacy.Sim.Operations
             OperationState s = Of(world, op);
             if (s != OperationState.Working && s != OperationState.StorageFull) return s;
             return IsWaitingForOx(world, op) ? OperationState.WaitingForOx : s;
+        }
+
+        private static bool HasNoRoomFamily(SimWorld world, Operation op)
+        {
+            Markets.Market m = world.Markets.Current;
+            if (m == null) return false;
+            foreach (int fid in op.FamilyIds) foreach (int n in m.NoRoomFamilyIds) if (n == fid) return true;
+            return false;
         }
 
         /// <summary>True when any unfinished task of the operation needs an ox and has none.</summary>

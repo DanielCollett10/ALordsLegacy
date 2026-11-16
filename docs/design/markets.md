@@ -66,7 +66,7 @@ town's one market during the week. On Sunday, households in range are allotted f
 | MK-40 | **Market panel** (click the area or a stall): name "Market <id>", food on stalls by type and total, stalls built / slots (family or *Unstaffed*, items on it), supplying granaries, households served last Sunday and how many were short, Deconstruct | PROPOSED |
 | MK-44 | The **house panel** shows **Market access: Yes / No** (owner 16/11/2026). Before the handover, a house in camp range reads *No (camp supplies)* | DECIDED (camp wording PROPOSED) |
 | MK-41 | **Range preview:** while placing or when selected, houses in range are tinted green and out-of-range houses red. A ground overlay of reachable land (MKT-06) is later | PROPOSED |
-| MK-42 | Citizen panel task lines: *Carrying food to stall*, *Fetching food from forager camp* | PROPOSED |
+| MK-42 | Citizen panel task lines: *Carrying food to stall*, *Collecting food* (a trip into the granary) | PROPOSED |
 | MK-43 | Stalls draw as a placeholder table; food on a stall shows as a few coloured boxes (placeholder, see `placeholder-art.md`) | PROPOSED |
 
 ## Not in M15
