@@ -73,11 +73,13 @@ namespace LordsLegacy.Tests.PlayMode
                 // GroundReadoutView clones its UXML from its own _visualTree field, so its UIDocument has none.
                 // CitizenPanelView builds its panel in code (T-263).
                 // OperationPanelView builds its panel in code too (T-281).
-                if (doc.name != "GroundReadout" && doc.name != "CitizenPanel" && doc.name != "OperationPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                // HousePanelView and GranaryPanelView build theirs in code (T-410, T-449).
+                if (doc.name != "GroundReadout" && doc.name != "CitizenPanel" && doc.name != "OperationPanel"
+                    && doc.name != "HousePanel" && doc.name != "GranaryPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GroundReadout", "OperationPanel", "ToolPanel", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GranaryPanel", "GroundReadout", "HousePanel", "OperationPanel", "ToolPanel", "TopBar" }, names);
         }
 
         [UnityTest]
@@ -149,6 +151,19 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(overlay, "DebugOverlayView missing.");
             Assert.AreEqual("Areas --", overlay.TextOf(DebugOverlayView.AreaCountName), "Area count label missing from the overlay.");
             Assert.AreEqual("Area --", overlay.TextOf(DebugOverlayView.AreaNameName), "Area name label missing from the overlay.");
+        }
+
+        [UnityTest]
+        public IEnumerator GameSceneHasGranaryPanel()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+            var panel = Object.FindFirstObjectByType<GranaryPanelView>();
+            Assert.IsNotNull(panel, "GranaryPanelView missing.");
+            AssertNoNullRefs(panel);
+            Assert.IsNotNull(panel.GetComponent<UnityEngine.UIElements.UIDocument>(), "GranaryPanel has no UIDocument.");
         }
 
         [UnityTest]

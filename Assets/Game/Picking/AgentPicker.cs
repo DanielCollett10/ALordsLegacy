@@ -2,6 +2,7 @@ using System;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.People;
 using UnityEngine;
@@ -29,6 +30,7 @@ namespace LordsLegacy.Game
         private AgentRef _selected;
         private int? _operationId;
         private int? _houseId;
+        private int? _granaryId;
 
         /// <summary>Raised when the selection changes (select, clear).</summary>
         public event Action SelectionChanged;
@@ -57,6 +59,7 @@ namespace LordsLegacy.Game
             if (!exists) { Clear(); return; }
             _hasSelection = true;
             _houseId = null;
+            _granaryId = null;
             _selected = agent;
             SelectionChanged?.Invoke();
         }
@@ -81,9 +84,10 @@ namespace LordsLegacy.Game
             var host = Host();
             bool exists = host != null && host.IsInitialized && host.World.Operations.Get(operationId) != null;
             if (!exists) { ClearOperation(); return; }
-            bool changed = _hasSelection || _houseId.HasValue || _operationId != operationId;
+            bool changed = _hasSelection || _houseId.HasValue || _granaryId.HasValue || _operationId != operationId;
             _hasSelection = false;
             _houseId = null;
+            _granaryId = null;
             _operationId = operationId;
             if (changed) SelectionChanged?.Invoke();
         }
@@ -101,9 +105,10 @@ namespace LordsLegacy.Game
             bool exists = host != null && host.IsInitialized && host.World.Homes.Get(houseFootprintId) != null
                 && host.World.Footprints.Get(houseFootprintId) != null;
             if (!exists) { ClearHouse(); return; }
-            bool changed = _hasSelection || _operationId.HasValue || _houseId != houseFootprintId;
+            bool changed = _hasSelection || _operationId.HasValue || _granaryId.HasValue || _houseId != houseFootprintId;
             _hasSelection = false;
             _operationId = null;
+            _granaryId = null;
             _houseId = houseFootprintId;
             if (changed) SelectionChanged?.Invoke();
         }
@@ -129,6 +134,44 @@ namespace LordsLegacy.Game
                 if (home != null) { houseFootprintId = home.HouseFootprintId; return true; }
             }
             return false;
+        }
+
+        /// <summary>True when a granary is selected (T-449).</summary>
+        public bool HasGranary => _granaryId.HasValue;
+
+        /// <summary>Footprint id of the selected granary (only meaningful when <see cref="HasGranary"/>).</summary>
+        public int SelectedGranaryId => _granaryId ?? -1;
+
+        /// <summary>Selects a granary by footprint id and clears the agent, operation and house selections. Unknown ids clear the granary selection.</summary>
+        public void SelectGranary(int footprintId)
+        {
+            var host = Host();
+            var fp = host != null && host.IsInitialized ? host.World.Footprints.Get(footprintId) : null;
+            if (fp == null || fp.Type.Id != ModuleTypes.GranaryId) { ClearGranary(); return; }
+            bool changed = _hasSelection || _operationId.HasValue || _houseId.HasValue || _granaryId != footprintId;
+            _hasSelection = false;
+            _operationId = null;
+            _houseId = null;
+            _granaryId = footprintId;
+            if (changed) SelectionChanged?.Invoke();
+        }
+
+        /// <summary>Clears the granary selection.</summary>
+        public void ClearGranary()
+        {
+            if (!_granaryId.HasValue) return;
+            _granaryId = null;
+            SelectionChanged?.Invoke();
+        }
+
+        /// <summary>The granary footprint under the ground point, if any.</summary>
+        public static bool TryPickGranary(SimWorld world, PointMm ground, out int footprintId)
+        {
+            footprintId = 0;
+            var fp = world.Footprints.FindAt(ground);
+            if (fp == null || fp.Type.Id != ModuleTypes.GranaryId) return false;
+            footprintId = fp.Id;
+            return true;
         }
 
         /// <summary>Clears the operation selection.</summary>
@@ -209,6 +252,7 @@ namespace LordsLegacy.Game
             {
                 _operationId = null;
                 _houseId = null;
+                _granaryId = null;
                 Select(agent);
             }
             else if (host != null && host.IsInitialized && Picker() != null
@@ -218,6 +262,15 @@ namespace LordsLegacy.Game
                 Clear();
                 ClearOperation();
                 SelectHouse(houseId);
+            }
+            else if (host != null && host.IsInitialized && Picker() != null
+                && Picker().TryPickScreen(screenPos, out var gg) && gg.HasValue
+                && TryPickGranary(host.World, PointMm.FromMetres(gg.X, gg.Z), out int granaryId))
+            {
+                Clear();
+                ClearOperation();
+                ClearHouse();
+                SelectGranary(granaryId);
             }
             else if (host != null && host.IsInitialized && Picker() != null
                 && Picker().TryPickScreen(screenPos, out var ground) && ground.HasValue
@@ -231,6 +284,7 @@ namespace LordsLegacy.Game
                 Clear();
                 ClearOperation();
                 ClearHouse();
+                ClearGranary();
             }
             return true;
         }
@@ -248,6 +302,8 @@ namespace LordsLegacy.Game
             if (_houseId.HasValue && host != null && host.IsInitialized
                 && (host.World.Homes.Get(_houseId.Value) == null || host.World.Footprints.Get(_houseId.Value) == null))
                 ClearHouse();
+            if (_granaryId.HasValue && host != null && host.IsInitialized && host.World.Footprints.Get(_granaryId.Value) == null)
+                ClearGranary();
             if (!ReadMouse) return;
             var mouse = Mouse.current;
             if (mouse != null && mouse.leftButton.wasPressedThisFrame) ClickAt(mouse.position.ReadValue());
