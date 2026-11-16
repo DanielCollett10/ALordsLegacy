@@ -75,6 +75,11 @@ namespace LordsLegacy.Game
         private (bool Enabled, string Tooltip) Evaluate(ToolEntry e)
         {
             if (!e.Enabled) return (false, e.Tooltip);
+            if (e.DisabledReason != null && _host != null && _host.IsInitialized)
+            {
+                string reason = e.DisabledReason(_host.World);
+                if (!string.IsNullOrEmpty(reason)) return (false, reason);
+            }
             if (e.CostLogs == null) return (true, e.Tooltip);
             var gate = BuildEntryState.Of(e.CostLogs(), AvailableNow());
             return gate.Enabled ? (true, e.Tooltip) : (false, gate.Tooltip);

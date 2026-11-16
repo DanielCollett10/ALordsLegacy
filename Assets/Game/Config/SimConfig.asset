@@ -143,6 +143,18 @@ MonoBehaviour:
     clearsTrees: 0
     blocksRoads: 0
     nearRoadReachM: 10
+  - id: area.market
+    namePrefix: Market
+    kind: 0
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 2000
+    limitSlope: 1
+    maxSlopeDegrees: 10
+    clearsTrees: 1
+    blocksRoads: 1
+    nearRoadReachM: 10
   moduleRecipes:
   - moduleId: module.woodcutting_hut
     logs: 8

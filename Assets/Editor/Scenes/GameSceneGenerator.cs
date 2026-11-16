@@ -290,6 +290,22 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(plotTool, "_areaTool", plotArea);
             SetRef(plotTool, "_panel", panel);
             SetRef(plotTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            // T-474: the "market" build bar entry draws a market area with its own area tool; slots and house range are previewed.
+            var marketArea = new GameObject("MarketAreaTool").AddComponent<LordsLegacy.Game.Tools.AreaTool>();
+            SetString(marketArea, "_toolId", "market-draw");
+            SetString(marketArea, "_typeId", LordsLegacy.Sim.Areas.AreaTypes.MarketId);
+            SetRef(marketArea, "_host", host);
+            SetRef(marketArea, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(marketArea, "_areas", ar);
+            SetRef(marketArea, "_panel", panel);
+            SetRef(marketArea, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            SetRef(marketArea, "_topBar", Object.FindFirstObjectByType<TopBarController>());
+            var marketTool = new GameObject("MarketTool").AddComponent<LordsLegacy.Game.Tools.MarketTool>();
+            SetString(marketTool, "_toolId", LordsLegacy.Game.ToolEntry.MarketToolId);
+            SetRef(marketTool, "_host", host);
+            SetRef(marketTool, "_areaTool", marketArea);
+            SetRef(marketTool, "_panel", panel);
+            SetRef(marketTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             // T-424: the "granary" build bar entry places one rotatable structure with its yard outline.
             var structureTool = new GameObject("GranaryTool").AddComponent<LordsLegacy.Game.Tools.StructureTool>();
             SetString(structureTool, "_toolId", LordsLegacy.Game.Tools.StructureTool.GranaryToolId);
