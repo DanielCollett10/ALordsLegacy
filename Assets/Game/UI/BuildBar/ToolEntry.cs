@@ -1,4 +1,6 @@
 using System;
+using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Markets;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Operations;
@@ -23,11 +25,20 @@ namespace LordsLegacy.Game
         /// Minimum logs the entry needs (for example <see cref="BuildCost.MinimumFor"/>), read live. Null means no cost gate.
         /// </summary>
         public Func<int> CostLogs { get; }
+        /// <summary>
+        /// Live gate on Sim state: returns the reason the entry cannot be used now (shown as its tooltip) or an empty
+        /// string when it can. Null means no such gate. The market uses it for MK-04.
+        /// </summary>
+        public Func<SimWorld, string> DisabledReason { get; }
+
+        /// <summary>Build bar id of the Market entry (MK-01).</summary>
+        public const string MarketToolId = "market";
 
         /// <summary>Creates an entry. Pass <paramref name="costLogs"/> to gate it on available logs.</summary>
-        public ToolEntry(string id, string label, bool enabled, string tooltip = "", Func<int> costLogs = null)
+        public ToolEntry(string id, string label, bool enabled, string tooltip = "", Func<int> costLogs = null,
+            Func<SimWorld, string> disabledReason = null)
         {
-            Id = id; Label = label; Enabled = enabled; Tooltip = tooltip ?? ""; CostLogs = costLogs;
+            Id = id; Label = label; Enabled = enabled; Tooltip = tooltip ?? ""; CostLogs = costLogs; DisabledReason = disabledReason;
         }
 
         /// <summary>The M3 entry list (ui.md UIB-02).</summary>
@@ -47,6 +58,8 @@ namespace LordsLegacy.Game
                     () => ModuleTypes.House.ConstructionRecipe.Logs),
                 new ToolEntry("granary", "Granary", true, "Place a granary with its 5 m yard",
                     () => ModuleTypes.Granary.ConstructionRecipe.Logs),
+                new ToolEntry(MarketToolId, "Market", true, "Draw the town's market; its stall slots are shown (free)",
+                    null, MarketRules.CanPlaceMarket),
             };
         }
     }

@@ -31,6 +31,22 @@ namespace LordsLegacy.Game.Visuals
         public static readonly Color WorkOutline = new Color(0.25f, 0.55f, 1f, 1f);
         /// <summary>Fill tint of a work area.</summary>
         public static readonly Color WorkFill = new Color(0.25f, 0.55f, 1f, 0.15f);
+        /// <summary>Outline colour of a market area (MK-05).</summary>
+        public static readonly Color MarketOutline = new Color(0.55f, 0.85f, 0.45f, 1f);
+        /// <summary>Fill tint of a market area, distinct from other building areas.</summary>
+        public static readonly Color MarketFill = new Color(0.55f, 0.85f, 0.45f, 0.2f);
+        /// <summary>Colour of an empty stall slot outline.</summary>
+        public static readonly Color SlotOutline = new Color(1f, 1f, 1f, 0.85f);
+        /// <summary>Slot outline ribbon width in metres.</summary>
+        public const float SlotOutlineWidthM = 0.12f;
+
+        /// <summary>Adds a closed outline per stall slot (the stall footprint) to a mesh (MK-05).</summary>
+        public void AddSlotOutlines(DrapeMesh b, IReadOnlyList<StallSlot> slots, float lift)
+        {
+            foreach (var s in slots)
+                b.Append(TerrainDrape.Ribbon(Ground, Plan(s.Stall), SlotOutlineWidthM, lift, SlotOutline, true, false));
+        }
+
         /// <summary>Colour of an invalid draft (outline, dots, handles).</summary>
         public static readonly Color InvalidColor = new Color(0.9f, 0.1f, 0.1f, 1f);
         /// <summary>Fill tint of an invalid draft.</summary>
@@ -106,8 +122,10 @@ namespace LordsLegacy.Game.Visuals
                 bool work = type != null && type.Kind == AreaKind.Work;
                 if (work) _workIds.Add(a.Id);
                 var b = new DrapeMesh();
-                AddFill(b, a.Polygon, work ? WorkFill : BuildingFill, HeightOffsetM);
-                AddOutline(b, a.Polygon, true, OutlineWidthM, work ? WorkOutline : BuildingOutline, HeightOffsetM + 0.01f, work);
+                bool market = a.TypeId == AreaTypes.MarketId;
+                AddFill(b, a.Polygon, work ? WorkFill : market ? MarketFill : BuildingFill, HeightOffsetM);
+                AddOutline(b, a.Polygon, true, OutlineWidthM, work ? WorkOutline : market ? MarketOutline : BuildingOutline, HeightOffsetM + 0.01f, work);
+                if (market) AddSlotOutlines(b, StallGrid.Slots(a.Polygon, host.World.Tuning), HeightOffsetM + 0.02f);
                 var go = new GameObject(a.Name);
                 go.transform.SetParent(transform, false);
                 go.AddComponent<MeshFilter>().sharedMesh = b.ToMesh(a.Name);
