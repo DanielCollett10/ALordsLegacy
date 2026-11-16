@@ -275,6 +275,14 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(plotTool, "_areaTool", plotArea);
             SetRef(plotTool, "_panel", panel);
             SetRef(plotTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            // T-424: the "granary" build bar entry places one rotatable structure with its yard outline.
+            var structureTool = new GameObject("GranaryTool").AddComponent<LordsLegacy.Game.Tools.StructureTool>();
+            SetString(structureTool, "_toolId", LordsLegacy.Game.Tools.StructureTool.GranaryToolId);
+            SetString(structureTool, "_typeId", LordsLegacy.Sim.Footprints.ModuleTypes.GranaryId);
+            SetRef(structureTool, "_host", host);
+            SetRef(structureTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(structureTool, "_panel", panel);
+            SetRef(structureTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             return last;
         }
 

@@ -43,7 +43,8 @@ namespace LordsLegacy.Game
                 new ToolEntry("storage-yard", "Storage yard", false, "Coming later"),
                 new ToolEntry("house", "House plot", true, "Draw a plot on a road; odd-jobbers build the house",
                     () => ModuleTypes.House.ConstructionRecipe.Logs),
-                new ToolEntry("granary", "Granary", false, "Coming later"),
+                new ToolEntry("granary", "Granary", true, "Place a granary with its 5 m yard",
+                    () => ModuleTypes.Granary.ConstructionRecipe.Logs),
             };
         }
     }
