@@ -330,6 +330,11 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(housePanel, "_host", host);
             SetRef(housePanel, "_agents", agents);
             SetRef(housePanel, "_controller", controller);
+            var granaryGo = CreateUiDocument("GranaryPanel", null);
+            var granaryPanel = granaryGo.AddComponent<GranaryPanelView>();
+            SetRef(granaryPanel, "_host", host);
+            SetRef(granaryPanel, "_agents", agents);
+            SetRef(granaryPanel, "_controller", controller);
             var menuGo = CreateUiDocument("GameMenu", "Assets/Game/UI/GameMenu/GameMenu.uxml");
             var menu = menuGo.AddComponent<GameMenuView>();
             SetRef(menu, "_host", host);
