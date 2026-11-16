@@ -247,6 +247,9 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Largest market area. Unit: m². Rule: MK-02 (PLACEHOLDER).</summary>
         public double MarketMaxAreaM2 { get; set; } = 2000;
 
+        /// <summary>Radius of the no-build circle around a ground pile with items. Unit: metres. Rule: PL-15 (PLACEHOLDER).</summary>
+        public double PileClearanceM { get; set; } = 2;
+
         /// <summary>Stall slot cell width, along the longest edge. Unit: metres. Rule: MK-05 (PLACEHOLDER).</summary>
         public double StallCellWidthM { get; set; } = 4;
 

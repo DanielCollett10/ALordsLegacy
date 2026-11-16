@@ -64,6 +64,9 @@ namespace LordsLegacy.Sim.Operations
                     return Refuse(ModuleRefusal.OverlapsRoad, "Overlaps a road");
             }
 
+            if (Placement.PileZones.BlocksPolygon(world, fp.Polygon))
+                return Refuse(ModuleRefusal.ItemsOnGround, Placement.PileZones.Text);
+
             int need = type.ConstructionRecipe.Logs;
             if (need > 0)
             {

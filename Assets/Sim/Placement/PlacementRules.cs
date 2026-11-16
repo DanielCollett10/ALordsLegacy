@@ -34,6 +34,7 @@ namespace LordsLegacy.Sim.Placement
             Footprints.Footprint plot = FixedPlots.FindStrictlyInside(world, point);
             if (plot != null) return PlacementResult.InsideArea(FixedPlots.NameOf(plot));
             if (StrictlyInsideRoad(world, point)) return PlacementResult.Refused(PlacementRefusal.OnRoad);
+            if (PileZones.BlocksPoint(world, point)) return PlacementResult.Refused(PlacementRefusal.ItemsOnGround);
             return PlacementResult.Allowed;
         }
 

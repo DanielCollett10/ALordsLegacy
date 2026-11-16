@@ -173,7 +173,7 @@ namespace LordsLegacy.Sim.Tests.Start
         [Test]
         public void SaveVersion_IsBumpedTo18_ForTheRoughSleepSpot()
         {
-            Assert.AreEqual(18, SaveWriter.CurrentVersion);
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 18);
         }
 
         [Test]

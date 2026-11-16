@@ -24,6 +24,8 @@ namespace LordsLegacy.Sim.Placement
         OverlapsRoad,
         /// <summary>The settlement cannot pay the recipe's logs.</summary>
         NotEnoughMaterials,
+        /// <summary>The plot overlaps the no-build circle of a ground pile with items (PL-15).</summary>
+        ItemsOnGround,
     }
 
     /// <summary>Answer of <see cref="StructurePlacement.Preview"/>. Immutable.</summary>
@@ -79,6 +81,8 @@ namespace LordsLegacy.Sim.Placement
             { r = StructureRefusal.OverlapsArea; text = "Overlaps an area"; }
             if (r == StructureRefusal.None && AreaPlacementChecks.CrossesRoad(world, plot))
             { r = StructureRefusal.OverlapsRoad; text = "Overlaps a road"; }
+            if (r == StructureRefusal.None && PileZones.BlocksPolygon(world, plot))
+            { r = StructureRefusal.ItemsOnGround; text = PileZones.Text; }
             if (r == StructureRefusal.None)
             {
                 int need = type.ConstructionRecipe.Logs, have = Construction.ConstructionSources.Available(world, Items.Log);

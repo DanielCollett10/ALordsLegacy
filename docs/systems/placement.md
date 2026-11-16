@@ -16,6 +16,11 @@ before they draw (decision 0028, `docs/design/placement.md`).
 
 - "Inside" means strictly inside. A point within `BoundaryToleranceMm` (50 mm) of an area edge or road side line is on the
   boundary and is Ok.
+- Ground piles block building (PL-15, T-472): `PileZones.Of(world)` gives a `SimTuning.PileClearanceM` (2 m) circle for every
+  ground pile with items, any owner, derived from the ledger (no saved state; the circle goes when the pile empties).
+  Building-area vertices (`ItemsOnGround`), building areas, plots and markets (`AreaRefusal.ItemsOnGround`), modules
+  (`ModuleRefusal.ItemsOnGround`, also draft preview) and structure plots (`StructureRefusal.ItemsOnGround`) are refused:
+  "Items on the ground here". Roads and work areas are not.
 - Work-area vertices are Ok anywhere on the map.
 - Building-area vertices are refused inside a road corridor (`OnRoad`).
 - Road points are refused only inside a building area.
@@ -27,4 +32,4 @@ Add a reason to `PlacementResult` with its text, and keep the rule pure. Tests g
 
 ## Tests
 
-`Sim.Tests/PlacementRulesTests.cs`. Structures: `Sim.Tests/Placement/GranaryPlacementTests.cs`.
+`Sim.Tests/PlacementRulesTests.cs`, `Sim.Tests/Placement/PileZoneTests.cs`. Structures: `Sim.Tests/Placement/GranaryPlacementTests.cs`.

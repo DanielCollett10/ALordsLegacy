@@ -38,6 +38,8 @@ namespace LordsLegacy.Sim.Areas
         MarketTooSmall = 14,
         /// <summary>The town already has a market (MK-04).</summary>
         OnlyOneMarket = 15,
+        /// <summary>A ground pile with items lies inside, or within its no-build circle of, the area (PL-15).</summary>
+        ItemsOnGround = 16,
     }
 
     /// <summary>Result of <see cref="AreaValidator.Validate"/>. Immutable.</summary>
@@ -77,6 +79,7 @@ namespace LordsLegacy.Sim.Areas
                     case AreaRefusal.PlotTooSmall: return "Too small for a house";
                     case AreaRefusal.MarketTooSmall: return "Too small for a market";
                     case AreaRefusal.OnlyOneMarket: return "Only one market per town";
+                    case AreaRefusal.ItemsOnGround: return Placement.PileZones.Text;
                     default: return string.Empty;
                 }
             }

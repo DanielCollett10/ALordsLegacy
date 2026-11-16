@@ -26,6 +26,8 @@ namespace LordsLegacy.Sim.Operations
         OverlapsFootprint,
         /// <summary>Overlaps a road corridor (draft preview, BT-12).</summary>
         OverlapsRoad,
+        /// <summary>Overlaps the no-build circle of a ground pile with items (PL-15).</summary>
+        ItemsOnGround,
     }
 
     /// <summary>Result of <see cref="ModulePlacement.Preview"/>. Immutable.</summary>
@@ -86,6 +88,8 @@ namespace LordsLegacy.Sim.Operations
                 if (other != null && Overlaps(fp, other))
                     return Refuse(ModuleRefusal.OverlapsModule, "Overlaps another module");
             }
+            if (Placement.PileZones.BlocksPolygon(world, fp.Polygon))
+                return Refuse(ModuleRefusal.ItemsOnGround, Placement.PileZones.Text);
             int need = type.ConstructionRecipe.Logs;
             if (need > 0)
             {
