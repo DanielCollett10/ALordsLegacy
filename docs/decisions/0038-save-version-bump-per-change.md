@@ -14,6 +14,8 @@ then fail half-way through a section with a confusing error, or load wrongly.
 - No migrations before the first player build (SV-33). Old dev saves are throwaway (SV-32).
 - The Load list must show a refused save as a disabled row with the reason, so the player can still delete it (SV-23).
 - Because these tasks all touch `Assets/Sim/Save/SaveWriter.cs`, they run one at a time. That is accepted.
+- Plan tasks never name the target number. A task bumps by one **from the value on main when it starts**; if a
+  merge conflicts on the number, the later merge takes the next number and fixes its refusal test (lead, 16/11/2026).
 - A new section gets its own file in `Assets/Sim/Save/Sections/`, is registered in `SaveSections.cs`, and goes at the
   end of the 0034 read order unless it must come earlier. The task notes the position in 0034.
 

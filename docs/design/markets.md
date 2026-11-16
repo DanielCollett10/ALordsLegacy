@@ -37,7 +37,8 @@ town's one market during the week. On Sunday, households in range are allotted f
 | MK-20 | Each family assigned to a **linked** granary gets **one stall** at that market (MKT-03b). Assigning the family, or linking a granary that already has families, queues the stall as an ordinary construction site | DECIDED |
 | MK-21 | Stall: **3 × 2 m** footprint, recipe **1 log, 60** worker-minutes (MKT-03, PLACEHOLDER until planks). Built on the **free slot nearest the market centre** (MK-05). All slots taken: the family shows *No room at the market* and does nothing until a slot frees | DECIDED (owner 16/11/2026; values PLACEHOLDER) |
 | MK-22 | A stall holds **30 food items** (MKT-08, PLACEHOLDER). Food only | DECIDED (PLACEHOLDER) |
-| MK-23 | When the family is unassigned or the link changes, its stall becomes **unstaffed**: it keeps its food (still sold on Sunday) and is reused by the next family that needs a stall at that market. The player can deconstruct a stall from the market panel | PROPOSED |
+| MK-23 | When the family is unassigned or the link changes, its stall becomes **unstaffed**: it keeps its food (still sold on Sunday) and is reused by the next family that needs a stall at that market. The player can deconstruct a stall from the market panel (MK-23b) | PROPOSED |
+| MK-23b | **Deconstructing a stall** is offered only for an **unstaffed** stall; a staffed one shows *Staffed by <family>: unassign them first*, so StallSystem never rebuilds a stall the player just removed. It follows CN-50..57 (mark, then work): refund round down(1 log × 50%) = **0 logs**, food on it drops as a ground pile at the stall (PL-15), and its slot becomes free | PROPOSED |
 
 ## Store-family work (weekdays and Sunday)
 
@@ -53,7 +54,7 @@ town's one market during the week. On Sunday, households in range are allotted f
 | ID | Rule | Tag |
 | --- | --- | --- |
 | MK-30 | The camp is **not a marketplace**: it is the stop-gap supply for its own food store only (FD-12, FOOD-A10b), **until the handover** (`camp.md` CMP-20..25) | DECIDED |
-| MK-31 | **Before the handover** every household draws from the camp, if in camp range (as M14). The market sells nothing to households yet; its stalls can still be stocked. **After the handover** (a built granary supplies the market) every household draws from the market if in range, otherwise gets nothing (MKT-05). There is never a mix of the two (owner 16/11/2026) | DECIDED |
+| MK-31 | **Before the handover** every household draws from the camp, if in camp range (as M14). Stalls only appear once a granary supplies the market (MK-20), which is also the handover, so the **first Sunday after switching on may be short** if the stalls aren't built and stocked yet; the switch-on confirm warns the player. **After the handover** (a built granary supplies the market) every household draws from the market if in range, otherwise gets nothing (MKT-05). There is never a mix of the two (owner 16/11/2026) | DECIDED |
 | MK-32 | A market's stock is the food on its stalls (MKT-03c); granary stock never counts. The allotment reserves item by item on the stalls, fullest stall first, mixed in proportion (FOOD-A8). Households are served nearest first (FOOD-A6) | DECIDED |
 | MK-33 | The trip walks to the supply point: the household's adult walks to the nearest reserved stall, collects from every reserved stall, then walks home | PROPOSED |
 | MK-34 | Range is a walking distance (MKT-06, 630 m) from the market area's centre point to the house access point | PROPOSED |
