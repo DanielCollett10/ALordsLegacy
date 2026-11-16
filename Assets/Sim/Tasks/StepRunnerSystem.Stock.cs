@@ -52,7 +52,8 @@ namespace LordsLegacy.Sim.Tasks
         {
             LedgerLocation granary = world.Inventory.Get(step.LocationId);
             LedgerLocation stall = StallOf(world, t);
-            if (granary == null || stall == null || !world.IsWorking(granary.ModuleId) || !world.IsWorking(stall.ModuleId)) return false;
+            // A source without a module (the camp food store, CMP-21) is always usable.
+            if (granary == null || stall == null || (granary.ModuleId != 0 && !world.IsWorking(granary.ModuleId)) || !world.IsWorking(stall.ModuleId)) return false;
             int owner = StoreFamilySystem.OwnerFor(t.Id);
             int room = stall.FreeSpace; // already net of items other trips have reserved room for
             int n = System.Math.Min(System.Math.Min(step.Count, room), System.Math.Max(1, world.Tuning.HandCarryItems));

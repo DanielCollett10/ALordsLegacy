@@ -219,6 +219,19 @@ namespace LordsLegacy.Sim.Inventory
             return null;
         }
 
+        /// <summary>
+        /// Removes an empty location with nothing reserved or incoming (the emptied camp food store, CMP-21).
+        /// Returns false and changes nothing when it is unknown or still holds or has promised anything.
+        /// </summary>
+        public bool RemoveEmptyLocation(int id)
+        {
+            if (!_locations.TryGetValue(id, out LedgerLocation l)) return false;
+            if (l.Total != 0 || l.ReservedCounts.Count != 0 || l.IncomingCounts.Count != 0) return false;
+            _locations.Remove(id);
+            Version++;
+            return true;
+        }
+
         private LedgerLocation Add(LedgerLocation l)
         {
             _locations.Add(l.Id, l);
