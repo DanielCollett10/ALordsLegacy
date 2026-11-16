@@ -35,8 +35,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | FD-21 | A bush holds **3 baskets** (berries or mushrooms by bush kind). Picked empty, it regrows to full after **14 days** (FOOD-06; no seasons yet) | PLACEHOLDER |
 | FD-22 | The foraging camp is an area operation (building-tool.md): core **forager hut** (8 logs, 480 min; logs DECIDED owner 15/11/2026, minutes PLACEHOLDER), no storage module. Work area: default circle, 300 m (PLACEHOLDER), or drawn (WC-12) | PROPOSED |
 | FD-23 | Foraging is **light work** (POP-A3): family members **8+** forage (the first light step, POP-A2) | DECIDED (owner 15/11/2026; age PLACEHOLDER) |
-| FD-23b | **A forager camp stores food locally.** The forager hut holds **30 items** (PLACEHOLDER; food only). A forager camp works with no granary at all. When its store and every reachable granary are full it shows *Storage full* and stops gathering | DECIDED (owner 15/11/2026: stored in the hut itself for now, no separate module) |
-| FD-24 | A forager picks the nearest bush with baskets left (30 min per basket, PLACEHOLDER), carries up to **10 items** by hand (MKT-03e), then walks to the **nearest store with room**: its own hut store or any built granary, whichever is nearer. Foragers never deliver to the camp (FD-12) | PROPOSED |
+| FD-23b | **A forager camp stores food locally.** The forager hut holds **30 items** (PLACEHOLDER; food only). A forager camp works with no granary at all. When its store is full it shows *Storage full* and stops gathering until granary families collect (decision 0044) | DECIDED (owner 15/11/2026: stored in the hut itself for now, no separate module) |
+| FD-24 | A forager picks the nearest bush with baskets left (30 min per basket, PLACEHOLDER), carries up to **10 items** by hand (MKT-03e), then walks to **its own hut store** only. Foragers never deliver to a granary or the camp; granary families collect from the hut (owner 16/11/2026, decision 0044, `markets.md` MK-24) | DECIDED |
 
 ## Granary
 

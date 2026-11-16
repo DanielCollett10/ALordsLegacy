@@ -137,11 +137,15 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Load / unload time per trip | 10 | game minutes | PROPOSED |
 | Market area | 100–2,000 | m² | MK-02 |
 | Stall footprint / recipe | 3 × 2 m / 1 log, 60 | m / worker-minutes | MK-21 |
+| Granary families collect from forager huts | any distance, fullest first | | MK-24 |
 | Stall capacity | 30 | food items | MK-22 |
+| Stall slot cell | 4 × 5 | m (stall 3 × 2, 1 m side gap, 3 m aisle) | MK-05 |
+| Markets per town | 1 | | MK-04 |
 | Store-family worker age | 8+ | years (light work) | MK-24 |
 | Hungry days before leaving | 30 | days in a row | GR-03 |
 | Arrival food surplus | 30 | days of food incl. the new family | GR-21 |
 | Arrival cooldown | 7 | days | GR-22 |
+| Arrival food | 30 | days of the arriving family's need (as meat) | GR-22b |
 
 **Stall throughput.** Rations a stall family delivers per day =
 `working adults × trips per day × items per trip × average rations per item`, where
