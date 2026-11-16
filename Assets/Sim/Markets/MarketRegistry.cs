@@ -13,6 +13,31 @@ namespace LordsLegacy.Sim.Markets
         /// <summary>Footprint ids of the built or planned stalls, in creation order. Empty until mkt-3.</summary>
         public List<int> StallFootprintIds { get; } = new List<int>();
 
+        private readonly Dictionary<int, int> _familyByStall = new Dictionary<int, int>();
+        private readonly SortedSet<int> _noRoom = new SortedSet<int>();
+
+        /// <summary>Family staffing this stall (MK-20), or 0 when the stall is unstaffed (MK-23) or unknown.</summary>
+        public int FamilyOf(int stallFootprintId) => _familyByStall.TryGetValue(stallFootprintId, out int f) ? f : 0;
+
+        /// <summary>The stall staffed by this family, or 0.</summary>
+        public int StallOf(int familyId)
+        {
+            if (familyId == 0) return 0;
+            foreach (int s in StallFootprintIds) if (FamilyOf(s) == familyId) return s;
+            return 0;
+        }
+
+        /// <summary>Families that need a stall but found no free slot (MK-21), ascending. Recomputed every tick, not saved.</summary>
+        public IReadOnlyCollection<int> NoRoomFamilyIds => _noRoom;
+
+        internal void SetFamily(int stallFootprintId, int familyId)
+        {
+            if (familyId == 0) _familyByStall.Remove(stallFootprintId); else _familyByStall[stallFootprintId] = familyId;
+        }
+
+        internal void ClearNoRoom() => _noRoom.Clear();
+        internal void AddNoRoom(int familyId) => _noRoom.Add(familyId);
+
         internal Market(int id, int areaId) { Id = id; AreaId = areaId; }
     }
 

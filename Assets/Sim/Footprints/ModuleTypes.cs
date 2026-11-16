@@ -32,6 +32,7 @@ namespace LordsLegacy.Sim.Footprints
                 case HouseId: return "House";
                 case GranaryId: return "Granary";
                 case ForagerHutId: return "Forager hut";
+                case MarketStallId: return "Market stall";
                 default: return typeId;
             }
         }
@@ -71,8 +72,18 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef ForagerHut =
             new FootprintTypeDef(ForagerHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 480), foodCapacity: 30);
 
+        /// <summary>Id of the market stall (MK-21).</summary>
+        public const string MarketStallId = "module.market_stall";
+
+        /// <summary>
+        /// Market stall: 3 × 2 m open table that does not block movement (MK-03), 1 log / 60 worker-minutes, and a food-only
+        /// store of 30 items (MK-21, MK-22). It has no operation: it stands on a market slot (<c>StallSystem</c>).
+        /// </summary>
+        public static readonly FootprintTypeDef MarketStall =
+            new FootprintTypeDef(MarketStallId, 3000, 2000, false, false, recipe: new ConstructionRecipe(1, 60), foodCapacity: 30);
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)

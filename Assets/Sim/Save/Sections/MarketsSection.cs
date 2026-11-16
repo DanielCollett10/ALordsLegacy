@@ -26,7 +26,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(m.Id);
                 w.WriteInt32(m.AreaId);
                 w.WriteInt32(m.StallFootprintIds.Count);
-                foreach (int s in m.StallFootprintIds) w.WriteInt32(s);
+                foreach (int s in m.StallFootprintIds) { w.WriteInt32(s); w.WriteInt32(m.FamilyOf(s)); } // stall, staffing family (0 = unstaffed)
             }
         }
 
@@ -44,12 +44,16 @@ namespace LordsLegacy.Sim.Save.Sections
                 Market m;
                 try { m = reg.Restore(id, area); }
                 catch (System.ArgumentException e) { throw new SaveFormatException(e.Message); }
-                int stalls = r.ReadCount(4);
+                int stalls = r.ReadCount(8);
                 for (int k = 0; k < stalls; k++)
                 {
                     int fp = r.ReadInt32();
+                    int family = r.ReadInt32();
                     if (world.Footprints.Get(fp) == null) throw new SaveFormatException("Market " + id + " has missing stall " + fp + ".");
+                    if (family != 0 && world.People.FindFamily(family) == null)
+                        throw new SaveFormatException("Stall " + fp + " has missing family " + family + ".");
                     m.StallFootprintIds.Add(fp);
+                    m.SetFamily(fp, family);
                 }
             }
             if (reg.Count > 1) throw new SaveFormatException("More than one market.");
