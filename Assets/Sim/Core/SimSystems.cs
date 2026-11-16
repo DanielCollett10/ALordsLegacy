@@ -55,6 +55,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Foraging.ForagingSystem(),
                 new LordsLegacy.Sim.Markets.StallSystem(),
                 new LordsLegacy.Sim.Markets.StoreFamilySystem(),
+                new LordsLegacy.Sim.Start.CampRemovalSystem(),
             };
         }
     }
