@@ -22,13 +22,15 @@ One line per system. The doc says how it fits together; folders are where the co
 | Commands | The only way to change Sim state: validate, apply, log. | [systems/commands.md](systems/commands.md) | `Assets/Sim/Commands` |
 | Roads | Freeform road network, validation, cutting and node moves. | [systems/roads.md](systems/roads.md) | `Assets/Sim/Roads` |
 | Areas | Drawn building and work areas, flattening, trimming, snapping. | [systems/areas.md](systems/areas.md) | `Assets/Sim/Areas` |
-| Placement | Pure yes or no for placing an area vertex or road point. | [systems/placement.md](systems/placement.md) | `Assets/Sim/Placement` |
+| Placement | Pure yes or no for placing an area vertex, a road point or a standalone structure (granary). | [systems/placement.md](systems/placement.md) | `Assets/Sim/Placement` |
 | Forestry | Standing trees, felling state, reservations, clearing. | [systems/forestry.md](systems/forestry.md) | `Assets/Sim/Forestry` |
 | Navigation | Walkable grid, A* pathfinding, movement orders, ox following. | [systems/navigation.md](systems/navigation.md) | `Assets/Sim/Navigation` |
 | People | Families, citizens, oxen, daily routine, working day, debug send. | [systems/people.md](systems/people.md) | `Assets/Sim/People` |
 | Tasks | Work units with steps and states; dispatch and step running. | [systems/tasks.md](systems/tasks.md) | `Assets/Sim/Tasks` |
-| Operations | Woodcutting workplaces: modules, families, felling, hauling, status. | [systems/operations.md](systems/operations.md) | `Assets/Sim/Operations`, `Assets/Sim/Processes` |
-| Footprints | Placed buildings and stands: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
+| Operations | Workplaces (woodcutting, foraging camp, granary): modules, families, felling, hauling, status. | [systems/operations.md](systems/operations.md) | `Assets/Sim/Operations`, `Assets/Sim/Processes` |
+| Foraging | Forage bushes, foragers aged 8+ picking berries and mushrooms, delivery to stores with room. | [systems/foraging.md](systems/foraging.md) | `Assets/Sim/Foraging`, `Assets/Sim/Core/SimWorld.Foraging.cs` |
+| Food | Larders, the Sunday allotment and fetch trip, daily eating and Hungry, granary food. | [systems/food.md](systems/food.md) | `Assets/Sim/Food` |
+| Footprints | Placed buildings, stands and standalone structures: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
 | Inventory | Ledger of logs by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
 | Construction | Sites that take delivered logs and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
 | Homes | House plots along roads, a house built from logs, one homeless family moves in and out. | [systems/homes.md](systems/homes.md) | `Assets/Sim/Homes`, `Assets/Sim/Commands/DesignatePlot.cs`, `Assets/Sim/Areas/HousePlacement.cs` |

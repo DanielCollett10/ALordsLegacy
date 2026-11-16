@@ -33,10 +33,11 @@ last log is in and the work is done, the site becomes a built footprint (decisio
    A 0-minute recipe (log storage) is removed when marked; an unbuilt module is cancelled at once. Cancelling a mark loses
    its progress. Marking a hut unassigns its families (CN-56).
 7. **Houses (T-407, 0040):** a marked house evicts its family to the camp fire; finish or unbuilt cancel removes its plot (HM-14b). Deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`) and pool oxen; the house is built like any module.
+8. **Granary (M14, 0041):** tasks use owner -1 like a house's. Its deconstruction removes its operation (`food.md`).
 
 ## Rules
 
-- Builders work where they stand; there is no walk-to-site step yet. Dispatch breaks ties by distance to the site.
+- Builders work where they stand (no walk-to-site step yet). Dispatch breaks ties by distance to the site.
 - A Build is not re-offered until more logs arrive. Unfinished progress is kept overnight. Odd-jobbers follow the working day (`people.md`).
 - At sunset a deliver still under way is wound down as a site-owned pile where the ox stands. Build does not wind down.
   Site-owned piles are not construction sources for other sites.
@@ -50,8 +51,7 @@ rules (`save.md`). Progress rules belong in `ConstructionProgress`, not the step
 ## Gotchas
 
 - Footprint and operation ids share the ledger owner field. A pile owned by a site has the site's footprint id as owner.
-- Removing an **unbuilt** site (`RemoveModule`) drops its logs with no refund. Only built modules refund (50%). Shares are
-  tuning saved in Core. Not built: artisan build steps (PPL-42), walk-to-site.
+- Removing an **unbuilt** site drops its logs with no refund; built modules refund 50%. Artisan steps (PPL-42) are not built.
 
 ## Tests
 

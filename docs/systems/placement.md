@@ -9,6 +9,8 @@ before they draw (decision 0028, `docs/design/placement.md`).
 
 - `PlacementRules.CanPlaceAreaVertex(world, areaTypeId, point)` and `CanPlaceRoadPoint(world, point)`.
 - `PlacementResult`: `Ok`, or `Reason` (`InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`) and `Text` for the UI.
+- `StructurePlacement.Preview(world, typeId, centre, rotation)` (M14): for a standalone structure such as the granary. Checks the
+  whole plot (building plus yard) is clear of footprints, areas and roads. Used by `PlaceStructure` and the structure tool.
 
 ## Rules
 
@@ -25,4 +27,4 @@ Add a reason to `PlacementResult` with its text, and keep the rule pure. Tests g
 
 ## Tests
 
-`Sim.Tests/PlacementRulesTests.cs`.
+`Sim.Tests/PlacementRulesTests.cs`. Structures: `Sim.Tests/Placement/GranaryPlacementTests.cs`.

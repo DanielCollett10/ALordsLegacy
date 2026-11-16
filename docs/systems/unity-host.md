@@ -11,7 +11,7 @@ between real time and ticks. Everything else in the Unity layer reaches the Sim 
 |---|---|---|
 | `SimHost` | `Bootstrap/SimHost.cs` | MonoBehaviour in the Game scene. Owns `SimWorld` (`World`), `TickPacer` (`Pacer`), `MapData` (`Map`). Exposes `TickFraction`, `Stats`, `Execute`, `TogglePause`. |
 | `SimStats` | `Bootstrap/SimStats.cs` | Unity-side measurement: `LastStepMs`, `TicksPerSecond`. Sim code never reads it. |
-| `SimConfig` | `Config/SimConfig.cs` | Serialized ScriptableObject (`Assets/Game/Config/SimConfig.asset`). Builds `SimTuning` and the road and area catalogs. |
+| `SimConfig` | `Config/SimConfig.cs` | Serialized ScriptableObject (`Assets/Game/Config/SimConfig.asset`). Builds `SimTuning` and the road and area catalogs. Its "Food and foraging" group holds the M14 food and bush values (T-426). |
 | `StartLayoutConfig` | `Config/StartLayoutConfig.cs` | ScriptableObject. `ToLayout()` → Sim `StartLayout`. |
 | `PendingLoad` | `Assets/Game/Saving/` | Static holder for save bytes handed across a scene reload. |
 
