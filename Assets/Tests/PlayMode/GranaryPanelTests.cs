@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using LordsLegacy.Game;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
@@ -10,6 +11,7 @@ using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace LordsLegacy.Tests.PlayMode
 {
