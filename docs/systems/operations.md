@@ -26,7 +26,7 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 
 - **Foraging camp** (`OperationTypes.Foraging`, `area.foraging`): a forager hut, no log storage, 300 m work circle (`foraging.md`).
 - **Granary** (`OperationTypes.Granary`): no area (`AreaId` 0). The granary footprint is its hut and it has 2 family slots.
-  It has no work yet (`food.md`).
+  `SetGranarySupplies` sets `Operation.SuppliesMarket` (MK-10..12, T-458). It has no work yet (`food.md`).
 
 ## Lifecycle
 

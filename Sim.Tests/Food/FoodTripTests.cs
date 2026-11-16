@@ -120,10 +120,10 @@ namespace LordsLegacy.Sim.Tests.Food
         [Test]
         public void SaveVersion_IsNine_VersionEightBytesAreRefused()
         {
-            Assert.AreEqual(12, SaveWriter.CurrentVersion);
+            Assert.AreEqual(13, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 8, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("Unknown save format version 8 (this build reads version 12).", e.Message);
+            StringAssert.Contains("Unknown save format version 8 (this build reads version 13).", e.Message);
         }
     }
 }

@@ -116,13 +116,14 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteBool(o.WorkAreaId.HasValue);
                 w.WriteInt32(o.WorkAreaId ?? 0);
                 w.WriteBool(o.Paused);
+                w.WriteBool(o.SuppliesMarket);
             }
         }
 
         private static void ReadOperations(OperationRegistry ops, SaveReader r)
         {
             int next = r.ReadInt32();
-            int count = r.ReadCount(26);
+            int count = r.ReadCount(27);
             for (int i = 0; i < count; i++)
             {
                 int id = r.ReadInt32();
@@ -132,7 +133,8 @@ namespace LordsLegacy.Sim.Save.Sections
                 bool hasWork = r.ReadBool();
                 int work = r.ReadInt32();
                 bool paused = r.ReadBool();
-                ops.RestoreOperation(id, type, area, modules, families, oxen, hasWork ? work : (int?)null, paused);
+                bool supplies = r.ReadBool();
+                ops.RestoreOperation(id, type, area, modules, families, oxen, hasWork ? work : (int?)null, paused, supplies);
             }
             ops.RestoreNextId(next);
         }
