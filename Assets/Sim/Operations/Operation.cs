@@ -28,6 +28,8 @@ namespace LordsLegacy.Sim.Operations
         public int? WorkAreaId { get; internal set; }
         /// <summary>True when the player paused the operation.</summary>
         public bool Paused { get; internal set; }
+        /// <summary>True when a built granary supplies the town's market (MK-10, markets.md). Only granaries use it.</summary>
+        public bool SuppliesMarket { get; internal set; }
 
         internal Operation(int id, string typeId, int areaId)
         {

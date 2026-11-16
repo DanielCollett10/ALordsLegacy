@@ -40,7 +40,9 @@ namespace LordsLegacy.Sim.Commands
                 return CommandResult.Rejected(CommandRejectCode.NotFound, "no area " + AreaId);
             foreach (Operation linked in new System.Collections.Generic.List<Operation>(world.Operations.All))
                 if (linked.WorkAreaId == AreaId) world.Operations.SetWorkArea(linked.Id, null);
-            world.Markets.RemoveByArea(AreaId); // stall removal comes in mkt-3
+            if (world.Markets.RemoveByArea(AreaId)) // stall removal comes in mkt-3
+                foreach (Operation granary in new System.Collections.Generic.List<Operation>(world.Operations.All))
+                    if (granary.SuppliesMarket) world.Operations.SetSuppliesMarket(granary.Id, false); // no market, no supply
             Operation op = world.Operations.FindByArea(AreaId);
             if (op != null)
             {

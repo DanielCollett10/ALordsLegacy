@@ -52,12 +52,12 @@ namespace LordsLegacy.Sim.Operations
 
         /// <summary>Adds an operation with all its saved state when loading a save.</summary>
         internal void RestoreOperation(int id, string typeId, int areaId, IEnumerable<int> modules, IEnumerable<int> families,
-            IEnumerable<int> oxen, int? workAreaId, bool paused)
+            IEnumerable<int> oxen, int? workAreaId, bool paused, bool suppliesMarket)
         {
             if (typeId == null) throw new ArgumentNullException(nameof(typeId));
             if (_byId.ContainsKey(id)) throw new InvalidOperationException("Operation id already restored: " + id);
             if (FindByArea(areaId) != null) throw new InvalidOperationException("Area already has an operation: " + areaId);
-            var o = new Operation(id, typeId, areaId) { WorkAreaId = workAreaId, Paused = paused };
+            var o = new Operation(id, typeId, areaId) { WorkAreaId = workAreaId, Paused = paused, SuppliesMarket = suppliesMarket };
             o.ModuleIdList.AddRange(modules);
             o.FamilyIdList.AddRange(families);
             o.OxIdList.AddRange(oxen);
@@ -128,6 +128,16 @@ namespace LordsLegacy.Sim.Operations
             Operation o = Get(operationId);
             if (o == null || o.Paused == paused) return false;
             o.Paused = paused;
+            Version++;
+            return true;
+        }
+
+        /// <summary>Switches a granary's market supply on or off (MK-10). False if unknown op or unchanged.</summary>
+        public bool SetSuppliesMarket(int operationId, bool on)
+        {
+            Operation o = Get(operationId);
+            if (o == null || o.SuppliesMarket == on) return false;
+            o.SuppliesMarket = on;
             Version++;
             return true;
         }
