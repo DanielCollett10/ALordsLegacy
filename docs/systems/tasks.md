@@ -14,7 +14,8 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 | `ConstructionTaskDefs` | `task.deliver_materials`, `task.build`, `task.deconstruct` (all HelpersOnly; heavy steps). |
 | `FoodTripSystem` (`Food/`) | `task.fetch_food` (OwnerFamily, owner `-1000 - familyId`), opened each Sunday morning. Ignores shifts. See `food.md`. |
 | `ForagingSystem` (`Foraging/`) | `task.forage` (AssignedFamilyOnly, owner = operation, age 8+), holds a bush and a carrier. See `foraging.md`. |
-| `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, and `DepositForage`. |
+| `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectStock` (reserved, in proportion, never allotted food), walk, unload 10 min, `DepositStock`. Source: `ChooseStockSource`. |
+| `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, `CollectStock`, `DepositStock`. |
 | `TaskRecord`, `TaskPriority` | Id, def, state, owner, assignee, priority (Normal or High, set by `TaskBoard.SetPriority`), target, step index, ox, site, `BushId`, `CarrierId`. |
 | `DispatchSystem` | Dispatch phase. Hands Open tasks to idle workers, and runs the Sunday family trips (`RunFamilyTrips`). |
 | `StepRunnerSystem` (+ `.Ox.cs`, `.Food.cs`, `.Forage.cs`) | Steps phase. Runs Active tasks in id order. Each partial owns one family of steps. |
@@ -45,8 +46,7 @@ Haul and construction tasks carry extra rules (wind-down at the end of work, ear
 
 ## Extending
 
-- A new task type is a `TaskDef` in code, with explicit steps. Add its id and policy to `TaskDefCatalog` so saves load.
-- A new step kind is a `TaskStep` factory and a branch in a step runner partial. Save its state or rebuild it on load.
+- A new task type is a `TaskDef` with explicit steps; add its id and policy to `TaskDefCatalog` so saves load. A new step kind is a `TaskStep` factory, a `TasksSection.ReadStep` case and a step runner branch.
 
 ## Gotchas
 

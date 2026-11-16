@@ -58,6 +58,7 @@ namespace LordsLegacy.Sim.Tasks
                 return;
             }
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) { StepForage(world, t, c); return; }
+            if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) { StepStock(world, t, c); return; }
             if (t.Target.HasValue)
             {
                 if (!world.Trees.TryGet(t.Target.Value, out TreeRecord tree) || tree.State == TreeState.Stump)
@@ -180,6 +181,7 @@ namespace LordsLegacy.Sim.Tasks
             _drop.Remove(t.Id);
             if (t.Def.Id == FoodTripSystem.FetchFoodTaskId) FailFoodTrip(world, t, c);
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) FailForage(world, t, c);
+            if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) FailStock(world, t, c);
             ReleaseOx(world, t, c);
             world.Tasks.Cancel(t.Id);
             if (c != null)

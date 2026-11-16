@@ -77,6 +77,20 @@ namespace LordsLegacy.Sim.Tasks
             return new TaskStep(StepKind.DepositForage, 0, false, null, 0, 0, storeLocationId, count);
         }
 
+        /// <summary>Take up to <paramref name="count"/> items from granary store <paramref name="granaryLocationId"/> onto the carrier (MK-25).</summary>
+        public static TaskStep CollectStock(int granaryLocationId, int count)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+            return new TaskStep(StepKind.CollectStock, 0, false, null, 0, 0, granaryLocationId, count);
+        }
+
+        /// <summary>Put what the carrier holds (planned <paramref name="count"/> items) onto stall store <paramref name="stallLocationId"/> (MK-25).</summary>
+        public static TaskStep DepositStock(int stallLocationId, int count)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+            return new TaskStep(StepKind.DepositStock, 0, false, null, 0, 0, stallLocationId, count);
+        }
+
         /// <summary>A walk to the task target.</summary>
         public static TaskStep MoveTo(bool heavy = false) => new TaskStep(StepKind.MoveTo, 0, heavy, null);
 

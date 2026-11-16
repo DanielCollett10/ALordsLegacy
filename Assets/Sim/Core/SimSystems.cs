@@ -54,6 +54,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Foraging.BushRegrowSystem(),
                 new LordsLegacy.Sim.Foraging.ForagingSystem(),
                 new LordsLegacy.Sim.Markets.StallSystem(),
+                new LordsLegacy.Sim.Markets.StoreFamilySystem(),
             };
         }
     }

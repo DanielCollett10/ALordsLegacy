@@ -20,6 +20,7 @@ namespace LordsLegacy.Sim.Tasks
                 { ConstructionTaskDefs.DeconstructId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
                 { Foraging.ForagingSystem.ForageTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { Food.FoodTripSystem.FetchFoodTaskId, (EligibilityPolicy.OwnerFamily, RequiredResource.None) },
+                { Markets.StoreFamilySystem.StockStallTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
             };
 
         /// <summary>The policy and resource of a known task def id; false for an unknown id.</summary>
