@@ -12,7 +12,7 @@ and show Hungry when short. Design: `design/food.md` (FD-*). Foraging supply: `f
 | `Items.Meat`, `Berries`, `Mushrooms` | Food items: 3, 1 and 1 rations (`RationsPerItem`). |
 | `Larders` | Food-only location per family and house, made on first need. `OnMoveIn` and `OnEvict` move food. |
 | `HouseholdLarder` | Read only: counts, rations, days left. Never creates a location. |
-| `IFoodMarket`, `CampFoodMarket` | Where the allotment is reserved: stock, origin, range (630 m). `Markets/MarketRange` gives houses in walking range of a centre, same measure. |
+| `IFoodMarket`, `CampFoodMarket`, `StallMarket` | Allotment source: several stock locations, origin, range (630 m). Camp before `FoodHandedOver`, built stalls after (never granaries). Fullest stall first; counts in `LastAllotmentServed/Short`. |
 | `AllotmentSystem` | Routine, Sunday dawn. Tops each household up to 7 days, nearest first. |
 | `FoodTripSystem` | Routine, Sunday morning. Opens `task.fetch_food` for each household with a reservation. |
 | `EatingSystem` | Routine, midnight. Eats from the larder and sets `IsHungry`. `DailyNeed` is pure. |

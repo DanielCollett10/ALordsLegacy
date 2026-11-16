@@ -13,5 +13,11 @@ namespace LordsLegacy.Sim.Core
         /// store is emptied into granaries (CMP-21). Set once, never cleared (CMP-22). Saved in the Food section.
         /// </summary>
         public bool FoodHandedOver { get; internal set; }
+
+        /// <summary>Households fully topped up at the last Sunday allotment (T-465). Saved in the Food section.</summary>
+        public int LastAllotmentServed { get; internal set; }
+
+        /// <summary>Eating households left short (out of range, or stock ran out) at the last Sunday allotment. Saved in the Food section.</summary>
+        public int LastAllotmentShort { get; internal set; }
     }
 }

@@ -7,7 +7,7 @@ using LordsLegacy.Sim.People;
 namespace LordsLegacy.Sim.Save.Sections
 {
     /// <summary>
-    /// The Food save section (T-415, decision 0034, id 9, version 9; T-464 adds the FoodHandedOver flag after the camp store id; T-418 adds each family's Sunday trip carrier id; T-417 adds each family's Sunday allotment reservation ids; T-416 adds each family's carried rations and Hungry flag): the camp food store location id, each family's
+    /// The Food save section (T-415, decision 0034, id 9, version 9; T-464 adds the FoodHandedOver flag after the camp store id; T-418 adds each family's Sunday trip carrier id; T-417 adds each family's Sunday allotment reservation ids; T-465 adds the last Sunday served/short counts after that flag; T-416 adds each family's carried rations and Hungry flag): the camp food store location id, each family's
     /// larder id and each house's larder id. The food itself is in the Ledger section; this only links to it.
     /// Read after Homes (houses) and Population (families); ids are checked to be FoodStore locations.
     /// </summary>
@@ -24,6 +24,8 @@ namespace LordsLegacy.Sim.Save.Sections
         {
             w.WriteInt32(world.Camp?.FoodStoreLocation?.Id ?? 0);
             w.WriteBool(world.FoodHandedOver); // T-464
+            w.WriteInt32(world.LastAllotmentServed); // T-465
+            w.WriteInt32(world.LastAllotmentShort);
             var fams = new List<Family>(world.People.Families);
             w.WriteInt32(fams.Count);
             foreach (Family f in fams) { w.WriteInt32(f.Id); w.WriteInt32(f.LarderLocationId); w.WriteDouble(f.CarriedRations); w.WriteBool(f.IsHungry); w.WriteInt32(f.TripCarrierId);
@@ -39,6 +41,8 @@ namespace LordsLegacy.Sim.Save.Sections
         {
             int camp = r.ReadInt32();
             world.FoodHandedOver = r.ReadBool();
+            world.LastAllotmentServed = r.ReadInt32();
+            world.LastAllotmentShort = r.ReadInt32();
             if (camp != 0)
             {
                 if (world.Camp == null) throw new SaveFormatException("Food store " + camp + " saved without a camp.");

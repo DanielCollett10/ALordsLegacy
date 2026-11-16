@@ -15,7 +15,7 @@
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 14; every change bumps it, decision 0038), the header, then
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 16; every change bumps it, decision 0038), the header, then
 sections, each as int32 id + length. `SimSave.Read` requires the exact list order. Homes (id 8) and Food (id 9) sit between Population and Movement (decision 0034).
 
 | Order | Id | Section | Holds |

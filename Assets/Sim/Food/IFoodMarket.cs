@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Navigation;
@@ -10,8 +11,8 @@ namespace LordsLegacy.Sim.Food
     /// </summary>
     public interface IFoodMarket
     {
-        /// <summary>The ledger location the allotment is reserved on. Null when the market has no stock location.</summary>
-        LedgerLocation Stock { get; }
+        /// <summary>The ledger locations the allotment is reserved on (the stalls, MK-32). Empty when the market has none.</summary>
+        IReadOnlyList<LedgerLocation> Stocks { get; }
 
         /// <summary>Where walking distance is measured from, in metres.</summary>
         PathPoint Origin { get; }
@@ -29,7 +30,8 @@ namespace LordsLegacy.Sim.Food
         public CampFoodMarket(SimWorld world) { _world = world; }
 
         /// <inheritdoc />
-        public LedgerLocation Stock => _world.Camp?.FoodStoreLocation;
+        public IReadOnlyList<LedgerLocation> Stocks =>
+            _world.Camp?.FoodStoreLocation == null ? new LedgerLocation[0] : new[] { _world.Camp.FoodStoreLocation };
 
         /// <inheritdoc />
         public PathPoint Origin => _world.Camp == null ? new PathPoint(0, 0) : new PathPoint(_world.Camp.Fire.XMetres, _world.Camp.Fire.ZMetres);
