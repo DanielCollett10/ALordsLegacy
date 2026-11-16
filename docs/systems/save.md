@@ -15,7 +15,7 @@
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 11; every change bumps it, decision 0038), the header, then
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 12; every change bumps it, decision 0038), the header, then
 sections, each as int32 id + length. `SimSave.Read` requires the exact list order. Homes (id 8) and Food (id 9) sit between Population and Movement (decision 0034).
 
 | Order | Id | Section | Holds |
@@ -31,7 +31,7 @@ sections, each as int32 id + length. `SimSave.Read` requires the exact list orde
 | 9 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
 | 10 | 7 | Tasks | Task records (by def id) and their steps, with bush and carrier ids (T-423). |
 
-Version history: 9 added Food (T-415..418), 10 added Bushes (T-421), 11 added forager tuning and task bush and carrier ids (T-423).
+Version history: 9 added Food (T-415..418), 10 added Bushes (T-421), 11 added forager tuning and task bush and carrier ids (T-423), 12 added Markets (id 11, after Homes) and market tuning (T-456).
 
 ## How data moves
 

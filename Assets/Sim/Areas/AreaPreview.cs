@@ -34,6 +34,10 @@ namespace LordsLegacy.Sim.Areas
         NoFrontage = 12,
         /// <summary>A plot is under its minimum size (HM-03).</summary>
         PlotTooSmall = 13,
+        /// <summary>A market is under its minimum size or fits no stall slot (MK-02, MK-05).</summary>
+        MarketTooSmall = 14,
+        /// <summary>The town already has a market (MK-04).</summary>
+        OnlyOneMarket = 15,
     }
 
     /// <summary>Result of <see cref="AreaValidator.Validate"/>. Immutable.</summary>
@@ -71,6 +75,8 @@ namespace LordsLegacy.Sim.Areas
                     case AreaRefusal.CrossesRoad: return "crosses road";
                     case AreaRefusal.NoFrontage: return "A plot must face a road";
                     case AreaRefusal.PlotTooSmall: return "Too small for a house";
+                    case AreaRefusal.MarketTooSmall: return "Too small for a market";
+                    case AreaRefusal.OnlyOneMarket: return "Only one market per town";
                     default: return string.Empty;
                 }
             }

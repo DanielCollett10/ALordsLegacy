@@ -45,6 +45,8 @@ namespace LordsLegacy.Sim.Areas
             int n = shape.Vertices.Count;
             if (n < type.MinPoints) return AreaRefusal.TooFewPoints;
             if (n > type.MaxPoints) return AreaRefusal.TooManyPoints;
+            bool isMarket = type.Id == AreaTypes.MarketId;
+            if (isMarket && world.Markets.Count > 0) return AreaRefusal.OnlyOneMarket;
             if (!RoadEdgesOk(world, shape, type)) return AreaRefusal.NotOnRoad;
             if (type.RequiresRoadFrontage && !HasFrontage(shape)) return AreaRefusal.NoFrontage;
             if (HasZeroLengthEdge(shape) || !Polygons.IsSimple(poly)) return AreaRefusal.EdgesCross;
@@ -63,14 +65,18 @@ namespace LordsLegacy.Sim.Areas
                 if (fit == AreaTrim.FitResult.CrossesRoad) return AreaRefusal.CrossesRoad;
                 if (fitted.Count > 0) { poly = trimmed; area = Math.Abs(Polygons.SignedAreaM2(poly)); }
             }
-            if (area < type.MinAreaM2) return type.RequiresRoadFrontage ? AreaRefusal.PlotTooSmall : AreaRefusal.TooSmall;
-            if (area > type.MaxAreaM2) return AreaRefusal.TooLarge;
+            double minM2 = isMarket ? world.Tuning.MarketMinAreaM2 : type.MinAreaM2;
+            double maxM2 = isMarket ? world.Tuning.MarketMaxAreaM2 : type.MaxAreaM2;
+            if (area < minM2) return isMarket ? AreaRefusal.MarketTooSmall : type.RequiresRoadFrontage ? AreaRefusal.PlotTooSmall : AreaRefusal.TooSmall;
+            if (area > maxM2) return AreaRefusal.TooLarge;
             if (type.Kind != AreaKind.Building) return AreaRefusal.Valid; // work areas skip checks 6-8
             if (type.MaxSlopeDegrees.HasValue && AreaPlacementChecks.TooSteep(world, poly, type.MaxSlopeDegrees.Value))
                 return AreaRefusal.TooSteep;
             AreaRecord other = AreaPlacementChecks.FindOverlappingArea(world, poly);
             if (other != null) { overlapName = other.Name; return AreaRefusal.OverlapsArea; }
             if (AreaPlacementChecks.CrossesRoad(world, poly)) return AreaRefusal.CrossesRoad;
+            // MK-05: a market must fit at least one stall slot, however big its area is (a thin strip has none).
+            if (isMarket && StallGrid.Slots(poly, world.Tuning).Count == 0) return AreaRefusal.MarketTooSmall;
             return AreaRefusal.Valid;
         }
 

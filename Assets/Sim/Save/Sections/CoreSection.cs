@@ -116,6 +116,8 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.HandCarryItems);
             w.WriteDouble(t.StallCellWidthM);
             w.WriteDouble(t.StallCellDepthM);
+            w.WriteDouble(t.MarketMinAreaM2);
+            w.WriteDouble(t.MarketMaxAreaM2);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -180,6 +182,8 @@ namespace LordsLegacy.Sim.Save.Sections
             t.HandCarryItems = r.ReadInt32();
             t.StallCellWidthM = r.ReadDouble();
             t.StallCellDepthM = r.ReadDouble();
+            t.MarketMinAreaM2 = r.ReadDouble();
+            t.MarketMaxAreaM2 = r.ReadDouble();
             return t;
         }
 
