@@ -114,6 +114,8 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.ForagerHutCapacity);
             w.WriteInt32(t.GatherMinutesPerBasket);
             w.WriteInt32(t.HandCarryItems);
+            w.WriteDouble(t.StallCellWidthM);
+            w.WriteDouble(t.StallCellDepthM);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -176,6 +178,8 @@ namespace LordsLegacy.Sim.Save.Sections
             t.ForagerHutCapacity = r.ReadInt32();
             t.GatherMinutesPerBasket = r.ReadInt32();
             t.HandCarryItems = r.ReadInt32();
+            t.StallCellWidthM = r.ReadDouble();
+            t.StallCellDepthM = r.ReadDouble();
             return t;
         }
 

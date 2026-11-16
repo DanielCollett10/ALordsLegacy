@@ -241,6 +241,12 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;
 
+        /// <summary>Stall slot cell width, along the longest edge. Unit: metres. Rule: MK-05 (PLACEHOLDER).</summary>
+        public double StallCellWidthM { get; set; } = 4;
+
+        /// <summary>Stall slot cell depth (stall plus aisle). Unit: metres. Rule: MK-05 (PLACEHOLDER).</summary>
+        public double StallCellDepthM { get; set; } = 5;
+
         /// <summary>Youngest age that takes forage tasks. Unit: years. Rule: FD-23, POP-A2 (PLACEHOLDER).</summary>
         public int ForagerMinAge { get; set; } = 8;
 
