@@ -174,10 +174,10 @@ namespace LordsLegacy.Sim.Tests.Save
         [Test]
         public void SaveVersion_IsTwelve_VersionTenBytesAreRefused()
         {
-            Assert.AreEqual(17, SaveWriter.CurrentVersion);
+            Assert.AreEqual(18, SaveWriter.CurrentVersion);
             byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 10, 0, 0, 0, 0, 0, 0, 0 };
             var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
-            StringAssert.Contains("Unknown save format version 10 (this build reads version 17).", e.Message);
+            StringAssert.Contains("Unknown save format version 10 (this build reads version 18).", e.Message);
         }
 
         [Test]

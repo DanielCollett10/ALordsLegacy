@@ -25,10 +25,13 @@ namespace LordsLegacy.Sim.Areas
         /// <summary>Distance from the query point to <see cref="Point"/>, in millimetres.</summary>
         public double DistanceMm { get; }
 
+        /// <summary>True when <see cref="AreaId"/> is a fixed structure's footprint id (its plot outline), not an area (PL-13).</summary>
+        public bool IsFixedPlot { get; }
+
         /// <summary>Creates a snap hit.</summary>
-        public AreaSnapHit(AreaSnapKind kind, int areaId, int index, PointMm point, double distanceMm)
+        public AreaSnapHit(AreaSnapKind kind, int areaId, int index, PointMm point, double distanceMm, bool isFixedPlot = false)
         {
-            Kind = kind; AreaId = areaId; Index = index; Point = point; DistanceMm = distanceMm;
+            Kind = kind; AreaId = areaId; Index = index; Point = point; DistanceMm = distanceMm; IsFixedPlot = isFixedPlot;
         }
     }
 }

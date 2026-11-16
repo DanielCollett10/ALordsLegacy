@@ -218,7 +218,7 @@ namespace LordsLegacy.Sim.Tests.Markets
         [Test]
         public void SaveVersion_IsBumpedTo13_ForTheSuppliesFlag()
         {
-            Assert.AreEqual(17, SaveWriter.CurrentVersion);
+            Assert.AreEqual(18, SaveWriter.CurrentVersion);
         }
 
         [Test]

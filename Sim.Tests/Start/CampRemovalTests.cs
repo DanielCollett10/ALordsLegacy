@@ -210,7 +210,7 @@ namespace LordsLegacy.Sim.Tests.Start
         [Test]
         public void SaveVersion_IsBumpedTo17()
         {
-            Assert.AreEqual(17, SaveWriter.CurrentVersion);
+            Assert.AreEqual(18, SaveWriter.CurrentVersion);
         }
     }
 }
