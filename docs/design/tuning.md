@@ -145,7 +145,7 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Hungry days before leaving | 30 | days in a row | GR-03 |
 | Arrival food surplus | 30 | days of food incl. the new family | GR-21 |
 | Arrival cooldown | 7 | days | GR-22 |
-| Arrival food | 30 | days of the arriving family's need (as meat) | GR-22b |
+| Arrival food | 30 | days of the arriving family's need (equal rations of meat, berries, mushrooms) | GR-22b |
 
 **Stall throughput.** Rations a stall family delivers per day =
 `working adults × trips per day × items per trip × average rations per item`, where

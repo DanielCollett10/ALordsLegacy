@@ -15,6 +15,17 @@ MVP-1-01 where they disagree.
 | CMP-08 | The test map's layout is written by an editor script that finds a flat spot at the forest edge, so it can be regenerated with the map | PROPOSED |
 | CMP-09 | Placeholder look: a few tents, a fire, a log pile and a tie post | DECIDED |
 
+## The camp hands over and goes (owner 16/11/2026, M15)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| CMP-20 | **Food handover:** once a **built granary supplies the market** (markets.md MK-10), the camp stops being a food supply. From the next Sunday, households get food only from the market (MKT-05) | DECIDED (trigger detail PROPOSED) |
+| CMP-21 | After the handover the camp **no longer stores food**: granary families carry what is left in the camp food store into a granary, as from a forager hut (MK-24 step 2). Once empty, the camp food store is removed | DECIDED |
+| CMP-22 | The handover never reverses: switching the granary off, or losing it, does not make the camp a supply again | PROPOSED |
+| CMP-23 | **Camp removal:** when **every family has a house** (no Homeless family) **and** the food handover has happened, the camp is removed: tents, fire, food store and footprint go | DECIDED (needs handover PROPOSED) |
+| CMP-24 | Left-over camp logs at removal: odd-jobbers haul them by ox to the nearest log storage with room as a normal haul; the log pile stays drawn until it is empty, then goes. Oxen at the camp stand move to the nearest oxen stand, or rest where they are | PROPOSED |
+| CMP-25 | **Homeless after removal** (a house deconstructed later, an arrival whose house was lost, GR-24): the family **sleeps rough** at the market centre, or at the old camp fire spot if there's no market. No tent is drawn; it shows *Homeless (sleeping rough)*. The camp never comes back | PROPOSED |
+
 > Implementation note (CMP-06, CMP-01): the start layout's `Stock` (default 40 `item.log`, T-287) is produced into a
 > ledger `Stockpile` location at the stockpile spot, with no capacity limit. It landed in M9, while CMP-06 says M8.
 > Owner to decide whether the milestone label should change. No operation storage counts it (WC-37).

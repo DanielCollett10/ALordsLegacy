@@ -14,6 +14,19 @@ accepting the point and refusing the finished shape later. This applies to every
 | PL-06 | **Not placeable means:** the click does nothing, and the **cursor marker (ring or sphere) is hidden**, so no marker means you can't place there. While dragging a point or node, it stays at its **last placeable position** and only follows the cursor again once the cursor is back on placeable ground | DECIDED |
 | PL-07 | The Sim answers these questions (`PlacementRules`, pure, no state change), and the tools only ask. The shape checks (AR-15, AR-16, RD-13) still run on the finished shape, because edges can cross things even when every point is fine | DECIDED |
 
+## Plots fit together (owner 16/11/2026, M15)
+
+A **plot** is any building-type outline: drawn areas (woodcutting, forager, house plot, market) and the fixed plots of
+standalone structures (the granary's building plus 5 m yard, FD-30b).
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| PL-10 | A fixed structure's plot is a **real plot outline** in the Sim, like a drawn area, so every overlap check and snap that applies to areas applies to it too | DECIDED |
+| PL-11 | **No plot may overlap another plot.** Touching (a shared edge) is allowed (AR-15). Bug today: a house plot can be drawn over the granary's yard; it must be refused with *Overlaps Granary <id>* | DECIDED |
+| PL-12 | While any placing tool is active (area, plot, market, granary or a module ghost), **every existing plot's outline is shown**, with its corners marked as snap points | DECIDED |
+| PL-13 | Area and plot vertices snap to fixed-plot corners and edges, the same as to other areas (snap order in `areas.md`), so a house plot can be butted against the granary yard | DECIDED |
+| PL-14 | A fixed structure's ghost **snaps flush** to a nearby plot edge or road side within the snap distance (12 px): it turns to lie parallel to that edge and slides so its plot edge touches it. Q/E rotation still works when it isn't snapped. Snapping off: no snap (shared toggle) | PROPOSED |
+
 > Implementation note (PL-06, dragging a point): the cursor marker is hidden whenever the cursor is over unplaceable
 > ground, including during a drag of a placed point (`AreaTool.PointerMove` and `RoadTool.PointerMove` both call
 > `UpdateCursor`, which hides it). The dragged point does stay at its last placeable position. Node drags do keep the
