@@ -1,7 +1,7 @@
 # Foraging
 
-**Purpose:** foragers aged 8+ pick berries and mushrooms from bushes in a work area and carry them to a store with room
-(the forager hut or a built granary). Design: `design/food.md` (FD-20..24).
+**Purpose:** foragers aged 8+ pick berries and mushrooms from bushes in a work area and carry them to their own forager
+hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043, 0044 (hut store only).
 
 ## Key types and files
 
@@ -14,7 +14,7 @@
 | `BushRegistry` | All bushes (`SimWorld.Bushes`). Reserve, take a basket, nearest available, regrow. `Version` ignores reservations. |
 | `BushScatter`, `BushRegrowSystem` | New-game scatter with the seeded random. Operations phase: regrow after 14 days. |
 | `ForagingSystem` | Operations phase. Per Working camp: sweep, one open `task.forage` per idle forager, reserve a bush, plan baskets. Stateless. |
-| `ForagingStores` | Candidate stores (own hut, built granaries; never the camp) and room after pending deposits. |
+| `ForagingStores` | The own hut store only (0044; never a granary or the camp) and room after pending deposits. |
 | `ForagingStatus` | Computed status: Working, Paused, MissingHut, NoWorkers, NoBushes, StorageFull. |
 | `StepRunnerSystem.Forage.cs` | Steps: `WalkTo` bush, `Work` per basket (`PickBasket` makes one item on the carrier), `WalkTo` store, `DepositForage`. |
 
@@ -23,7 +23,7 @@
 1. The camp (`operation.foraging`) needs a built forager hut (6 × 4 m, 8 logs, 480 min, food store 30), a work region
    (300 m circle or drawn), and a family member aged 8+.
 2. `ForagingSystem` opens `task.forage` per idle forager (owner = operation, `AssignedFamilyOnly`, light). It reserves the
-   nearest bush and plans `min(bush baskets, 10 hand-carry, store room, 20)` baskets.
+   nearest bush and plans `min(bush baskets, 10 hand-carry, hut store room, 20)` baskets.
 3. `DispatchSystem` offers it only to a forager aged `ForagerMinAge` (8) or more. Travel is measured to the bush.
 4. Steps: walk to the bush; each basket is 30 minutes of work, then one item on a ledger carrier; walk to the store;
    `DepositForage` moves everything carried, if the store still works and has room.
@@ -32,14 +32,14 @@
 
 ## Rules
 
-- Never the camp food store (FD-12). Candidates are the camp's hut store and built granaries.
-- Room = free space minus items promised to unfinished forage tasks. No store with room means no new tasks.
+- Only the camp's own hut store (0044). Never a granary (store families collect later), never the camp food store (FD-12).
+- Room = free space minus items promised to unfinished forage tasks. Hut full means Storage full and no new tasks (FD-23b).
 - A granary operation has no work region, so foraging skips it by type.
 
 ## How to extend
 
 - **New bush kind:** add it to `BushKind`, map it in `PickBasket`, and update the kind check in `BushesSection`.
-- **New store type:** give it a food capacity and a standalone footprint, or extend `ForagingStores.Candidates`.
+- **Store families (not built yet):** they will collect from the hut store into granaries (0044). Foragers stay hut-only.
 - **Balancing:** `SimTuning` `BushBaskets`, `BushRegrowDays`, `ForagerMinAge`, `ForagerHutCapacity`,
   `GatherMinutesPerBasket`, `HandCarryItems`. All are placeholders until playtested.
 
