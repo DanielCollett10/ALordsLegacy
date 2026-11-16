@@ -27,6 +27,8 @@ namespace LordsLegacy.Sim.Tasks
             TaskRecord t = live[0];
             if (t.Def.Id == Food.FoodTripSystem.FetchFoodTaskId) return "Fetching food";
 
+            if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) return StockTripText(world, t);
+
             if (!world.WorkDay.OnShift(world, c))
                 return world.WorkDay.IsWorkingDaylight(world) ? "Walking to work" : "Paused for the night";
             if (t.State != TaskState.Active || c.Activity == Activity.Walking) return "Walking to work";
@@ -65,6 +67,19 @@ namespace LordsLegacy.Sim.Tasks
                 case Activity.Waiting: return "Waiting";
                 default: return a.ToString();
             }
+        }
+
+        // MK-42: a trip that ends on a stall carries food to it; one that ends in a granary is collecting food for it.
+        private static string StockTripText(SimWorld world, TaskRecord t)
+        {
+            foreach (TaskStep s in t.Def.Steps)
+            {
+                if (s.Kind != StepKind.DepositStock) continue;
+                Inventory.LedgerLocation to = world.Inventory.Get(s.LocationId);
+                Footprints.Footprint fp = to == null ? null : world.Footprints.Get(to.ModuleId);
+                return fp != null && fp.Type.Id == Footprints.ModuleTypes.MarketStallId ? "Carrying food to stall" : "Collecting food";
+            }
+            return "Collecting food";
         }
 
         private static string VerbOf(TaskRecord t)
