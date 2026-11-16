@@ -55,19 +55,13 @@ namespace LordsLegacy.Sim.Areas
                 if (!world.Terrain.Contains((float)poly[i].XMetres, (float)poly[i].ZMetres)) return AreaRefusal.OutsideMap;
             if (type.Kind == AreaKind.Building)
             {
-                // PL-11: a fixed plot (granary yard) is never trimmed around; overlapping it is refused. Touching is fine.
-                Footprint plot = Placement.FixedPlots.FindOverlapping(world, poly);
-                if (plot != null)
-                {
-                    overlapName = Placement.FixedPlots.NameOf(plot);
-                    return AreaRefusal.OverlapsArea;
-                }
-                // AR-34: fit around neighbouring building areas, before size/slope/overlap/road checks.
+                // AR-34 / PL-11: fit around neighbouring building areas and fixed plots (granary yard), before
+                // size/slope/overlap/road checks. A fit that cannot keep every player point is refused.
                 AreaTrim.FitResult fit = AreaTrim.Fit(world, shape, poly, out PointMm[] trimmed, out fitted,
-                    out AreaRecord first);
+                    out string first);
                 if (fit == AreaTrim.FitResult.OverlapsArea)
                 {
-                    overlapName = first.Name;
+                    overlapName = first;
                     return AreaRefusal.OverlapsArea;
                 }
                 if (fit == AreaTrim.FitResult.CrossesRoad) return AreaRefusal.CrossesRoad;

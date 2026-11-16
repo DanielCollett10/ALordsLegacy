@@ -33,14 +33,36 @@ namespace LordsLegacy.Sim.Tests.Placement
             AreaShape.Straight(new[] { M(x0, z0), M(x1, z0), M(x1, z1), M(x0, z1) });
 
         [Test]
-        public void HousePlotOverGranaryYard_IsRefused_OverlapsGranaryWithId()
+        public void HousePlotWithCornerInGranaryYard_IsRefused_OverlapsGranaryWithId()
+        {
+            var (w, _, id) = Make();
+            AreaPreview p = AreaValidator.Validate(w, Rect(55, 45, 75, 65), AreaTypes.TestId);
+            Assert.AreEqual(AreaRefusal.OverlapsArea, p.Reason, "a player point would be lost by trimming");
+            Assert.AreEqual("overlaps Granary " + id, p.ReasonText);
+            CommandResult r = w.Execute(new DesignateArea(Rect(55, 45, 75, 65), AreaTypes.TestId));
+            Assert.IsTrue(r.IsRejected);
+        }
+
+        [Test]
+        public void HousePlotWithAllCornersOutsideButEdgeOverTheYard_IsTrimmedToButtAgainstIt()
         {
             var (w, _, id) = Make();
             AreaPreview p = AreaValidator.Validate(w, Rect(55, 40, 75, 60), AreaTypes.TestId);
-            Assert.AreEqual(AreaRefusal.OverlapsArea, p.Reason);
-            Assert.AreEqual("overlaps Granary " + id, p.ReasonText);
-            CommandResult r = w.Execute(new DesignateArea(Rect(55, 40, 75, 60), AreaTypes.TestId));
-            Assert.IsTrue(r.IsRejected);
+            Assert.AreEqual(AreaRefusal.Valid, p.Reason, p.ReasonText);
+            CollectionAssert.Contains(p.FittedAround, "Granary " + id);
+            Assert.AreEqual(400 - 4 * 16, p.AreaM2, 0.5, "the 4 x 16 m bite of the yard is cut out");
+        }
+
+        [Test]
+        public void HousePlotCuttingAcrossGranaryYard_IsTrimmedAroundIt_AndRecordedAsFittedAround()
+        {
+            var (w, _, id) = Make();
+            AreaPreview p = AreaValidator.Validate(w, Rect(30, 50, 70, 70), AreaTypes.TestId);
+            Assert.AreEqual(AreaRefusal.Valid, p.Reason, p.ReasonText);
+            CollectionAssert.Contains(p.FittedAround, "Granary " + id);
+            Assert.AreEqual(40 * 20 - 18 * 8, p.AreaM2, 0.5, "the 18 x 8 m bite of the yard is cut out");
+            Assert.IsNull(FixedPlots.FindOverlapping(w, System.Linq.Enumerable.ToArray(p.Polygon)), "the trimmed outline only touches the yard");
+            Assert.IsTrue(w.Execute(new DesignateArea(Rect(30, 50, 70, 70), AreaTypes.TestId)).IsAccepted);
         }
 
         [Test]
