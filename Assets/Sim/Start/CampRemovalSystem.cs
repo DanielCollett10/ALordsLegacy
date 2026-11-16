@@ -62,6 +62,7 @@ namespace LordsLegacy.Sim.Start
 
             PointMm stand = camp.OxStand;
             world.Footprints.Remove(camp.FootprintId);
+            world.RoughSleepSpot = camp.Fire;
             world.Camp = null;
 
             var oxPool = new OxPool(world);

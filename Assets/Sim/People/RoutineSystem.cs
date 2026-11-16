@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Navigation;
 
 namespace LordsLegacy.Sim.People
@@ -226,6 +227,7 @@ namespace LordsLegacy.Sim.People
         {
             Family f = world.People.FindFamily(c.FamilyId);
             double hx = f != null ? f.HomeX : c.X, hz = f != null ? f.HomeZ : c.Z;
+            if (Homes.RoughSleep.IsSleepingRough(world, f) && Homes.RoughSleep.Spot(world) is PointMm spot) { hx = spot.XMetres; hz = spot.ZMetres; }
             c.Move = null;
             st.Order = null;
             double dx = hx - c.X, dz = hz - c.Z;
@@ -276,6 +278,7 @@ namespace LordsLegacy.Sim.People
             {
                 Family f = world.People.FindFamily(c.FamilyId);
                 cx = f != null ? f.HomeX : c.X; cz = f != null ? f.HomeZ : c.Z;
+                if (Homes.RoughSleep.IsSleepingRough(world, f) && Homes.RoughSleep.Spot(world) is PointMm spot) { cx = spot.XMetres; cz = spot.ZMetres; }
             }
             double radius = world.Tuning.MillRadiusM;
             NavGrid nav = world.Nav;
