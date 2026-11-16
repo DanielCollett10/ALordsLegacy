@@ -35,6 +35,7 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 - Unowned ground piles are construction sources. Site-owned piles are not (`construction.md`).
 - `Storage` capacity comes from the module type. A removed storage's logs stay in the ledger; `RemoveModule` refuses a storage
   with logs reserved for a site.
+- `GranaryReport.Of(world, id)` (`Sim/Food`) is the read model for the granary panel: state, progress, stock per food, total/reserved/capacity, deconstruct refund and drop; `ConfirmText` gives the dialog text (T-448).
 - The save stores both counters and journals; `Audit` runs on load and throws `SaveFormatException` if they disagree.
 
 ## Tests
