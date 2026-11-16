@@ -154,6 +154,8 @@ namespace LordsLegacy.Sim.Save.Sections
                 case (int)StepKind.CollectFood: return TaskStep.CollectFood();
                 case (int)StepKind.DepositFood: return TaskStep.DepositFood();
                 case (int)StepKind.DepositForage: return TaskStep.DepositForage(loc, count);
+                case (int)StepKind.CollectStock: return TaskStep.CollectStock(loc, count);
+                case (int)StepKind.DepositStock: return TaskStep.DepositStock(loc, count);
                 default: throw new SaveFormatException("Bad task step kind " + kind + ".");
             }
         }

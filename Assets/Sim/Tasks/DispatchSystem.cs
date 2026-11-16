@@ -189,6 +189,7 @@ namespace LordsLegacy.Sim.Tasks
             if (t.State != TaskState.Open) return false;
             if (!adult && HasHeavyStep(t.Def)) return false;
             if (!forager && t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return false; // FD-23: 8 and over
+            if (!forager && t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) return false; // MK-24: 8 and over
             switch (t.Def.Eligibility)
             {
                 case EligibilityPolicy.AssignedFamilyOnly:
