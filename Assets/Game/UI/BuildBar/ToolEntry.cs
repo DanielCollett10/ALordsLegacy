@@ -40,6 +40,8 @@ namespace LordsLegacy.Game
                 new ToolEntry("test-work-area", "Test work area", true),
                 new ToolEntry("woodcutter", "Woodcutter", true, "Draw the woodcutter's area, then place its modules",
                     () => BuildCost.MinimumFor(OperationTypes.Woodcutting)),
+                new ToolEntry("forager", "Forager", true, "Draw the forager camp's area, then place its hut",
+                    () => BuildCost.MinimumFor(OperationTypes.Foraging)),
                 new ToolEntry("storage-yard", "Storage yard", false, "Coming later"),
                 new ToolEntry("house", "House plot", true, "Draw a plot on a road; odd-jobbers build the house",
                     () => ModuleTypes.House.ConstructionRecipe.Logs),

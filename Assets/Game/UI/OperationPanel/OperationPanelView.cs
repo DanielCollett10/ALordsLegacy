@@ -199,18 +199,21 @@ namespace LordsLegacy.Game
             if (op == null) { Hide(); return; }
             var def = OperationTypes.Find(op.TypeId);
 
-            _title.text = "Woodcutter " + op.Id;
+            bool forage = op.TypeId == OperationTypes.ForagingId;
+            _title.text = (forage ? "Forager camp " : "Woodcutter ") + op.Id;
             _status.text = "Status: " + StateText(OperationStatus.Reported(world, op));
             _modules.text = ModuleText(world, op);
             RebuildPriority(world, op);
             RebuildDeconstruct(world, op);
             RebuildFamilies(world, op, def);
             _workers.text = WorkerText(world, op);
-            _logs.text = "Logs waiting at tree sites: " + GroundLogs(world, op);
-            _stock.text = StockText(world, op);
+            _logs.text = forage ? "" : "Logs waiting at tree sites: " + GroundLogs(world, op);
+            _logs.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
+            _stock.text = forage ? HutStoreText(world, op) : StockText(world, op);
             RebuildOxen(world, op);
             var region = OperationStatus.WorkRegion(world, op);
-            _trees.text = "Standing trees in work area: " + (region == null ? 0 : world.Trees.CountStandingIn(region));
+            _trees.text = forage ? BushText(world, region)
+                : "Standing trees in work area: " + (region == null ? 0 : world.Trees.CountStandingIn(region));
             _workArea.text = op.WorkAreaId.HasValue ? "Work area: drawn (area " + op.WorkAreaId.Value + ")"
                 : "Work area: default circle round the hut" + (def != null ? " (" + def.DefaultWorkRadiusM.ToString("0") + " m)" : "");
             _pause.text = op.Paused ? "Resume" : "Pause";
@@ -308,6 +311,26 @@ namespace LordsLegacy.Game
                 + " (total / reserved / available of capacity)";
         }
 
+        /// <summary>Forager hut store line, e.g. "Hut store: 12 / 30" or "Hut store: 30 / 30 - Storage full" (FD-23b).</summary>
+        public static string HutStoreText(Sim.Core.SimWorld world, Operation op)
+        {
+            var hut = OperationStatus.Hut(world, op);
+            var store = hut == null ? null : world.Inventory.FindFoodStore(hut.Id);
+            if (store == null) return "Hut store: none";
+            string s = "Hut store: " + store.Total + " / " + store.Capacity;
+            if (store.FreeSpace <= 0) s += " - Storage full";
+            return s;
+        }
+
+        private static string BushText(Sim.Core.SimWorld world, TreeRegion region)
+        {
+            int full = 0, empty = 0;
+            if (region != null)
+                foreach (var b in world.Bushes.All)
+                    if (region.Contains(b.X, b.Z)) { if (b.Baskets > 0) full++; else empty++; }
+            return "Bushes in work area: " + full + " full, " + empty + " empty";
+        }
+
         private static string StateText(OperationState s)
         {
             switch (s)
@@ -318,6 +341,7 @@ namespace LordsLegacy.Game
                 case OperationState.MissingStorage: return "Missing log storage";
                 case OperationState.NoWorkers: return "No workers";
                 case OperationState.NoTrees: return "No trees";
+                case OperationState.NoBushes: return "No bushes";
                 case OperationState.StorageFull: return "Storage full";
                 case OperationState.WaitingForOx: return "Waiting for ox";
                 default: return s.ToString();
@@ -334,12 +358,12 @@ namespace LordsLegacy.Game
                 Footprint f = world.Footprints.Get(id);
                 if (f == null) continue;
                 string state = " - " + BuildStateText(world, id);
-                if (def != null && f.Type.Id == def.HutTypeId) { hut = true; sb.AppendLine("Hut" + state); }
+                if (def != null && f.Type.Id == def.HutTypeId) { hut = true; sb.AppendLine((def.HutTypeId == ModuleTypes.ForagerHutId ? "Forager hut" : "Hut") + state); }
                 else if (def != null && f.Type.Id == def.LogStorageTypeId) { storage = true; sb.AppendLine("Log storage (" + f.Type.LogCapacity + " logs)" + state); }
                 else sb.AppendLine(f.Type.Id + state);
             }
             if (!hut) sb.AppendLine("Hut: missing");
-            if (!storage) sb.AppendLine("Log storage: missing");
+            if (!storage && def != null && def.LogStorageTypeId != null) sb.AppendLine("Log storage: missing");
             return sb.ToString().TrimEnd();
         }
 
