@@ -1,4 +1,5 @@
 using System.Linq;
+using LordsLegacy.Sim.Calendar;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
@@ -31,10 +32,10 @@ namespace LordsLegacy.Sim.Tests.Markets
             public TaskRecord Task => W.Tasks.All.FirstOrDefault(t => t.Def.Id == StoreFamilySystem.StockStallTaskId && !t.IsFinished);
         }
 
-        private static Fixture Make(int fedMeat, int fedBerries)
+        private static Fixture Make(int fedMeat, int fedBerries, Weekday start = Weekday.Monday)
         {
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
-            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0 });
+            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0, StartWeekday = start });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 40);
             w.People.AddFamily(2, "F2", 40, 40);
             for (int i = 0; i < 2; i++) w.People.AddCitizen(20 + i, "C" + i, Sex.Male, AdultBirth, 2, 40, 40);
@@ -257,6 +258,57 @@ namespace LordsLegacy.Sim.Tests.Markets
             Assert.AreEqual(TaskState.Done, back.Tasks.Get(t.Id).State);
             Assert.GreaterOrEqual(stall.Total, before + 10, "the loaded task delivered its 10 (the other worker's trip may add more)");
             Assert.AreEqual(0, back.Inventory.Get(bt.CarrierId.Value).Total, "carrier empty after unloading");
+        }
+
+        private const long NineBirth = -2_500_000; // about 9.5 game years
+        private const long SevenBirth = -1_900_000; // about 7 game years
+
+        [Test]
+        public void TwoDayRun_SaturdayAndSunday_StoreFamilyStocksTheStallBothDays_AndOthersNeverTakeStockTasks()
+        {
+            Fixture f = Make(300, 0, Weekday.Saturday);
+            f.W.People.AddCitizen(24, "Kid", Sex.Male, NineBirth, 2, 40, 40);
+            f.W.People.AddCitizen(25, "Small", Sex.Male, SevenBirth, 2, 40, 40);
+            StaffAndBuildStall(f);
+            long dayStart = LordsLegacy.Sim.People.WorkDay.DayStart(f.W);
+            int saturdayTotal = -1;
+            bool kidWorked = false, smallWorked = false;
+            while (f.W.Tick < dayStart + 2 * 1440)
+            {
+                f.W.Step(1);
+                if (f.W.Tick == dayStart + 1440)
+                {
+                    saturdayTotal = f.StallStore.Total;
+                    f.W.Inventory.Consume(f.StallStore, Items.Meat, f.StallStore.CountOf(Items.Meat.Id)); // shoppers empty the stall overnight
+                }
+                foreach (TaskRecord t in f.W.Tasks.All)
+                {
+                    if (t.Def.Id != StoreFamilySystem.StockStallTaskId || !t.AssigneeId.HasValue) continue;
+                    int who = t.AssigneeId.Value;
+                    Assert.AreEqual(2, f.W.People.FindCitizen(who).FamilyId, "only the store family takes stock tasks");
+                    kidWorked |= who == 24; smallWorked |= who == 25;
+                }
+            }
+            Assert.Greater(saturdayTotal, 0, "stock moved on Saturday");
+            Assert.Greater(f.StallStore.Total, 0, "the emptied stall was restocked on Sunday (MK-26)");
+            Assert.IsTrue(kidWorked, "a 9 year old takes stock tasks (MK-24, light work)");
+            Assert.IsFalse(smallWorked, "a 7 year old does not");
+            Assert.AreEqual("", f.W.Inventory.Audit() ?? "");
+        }
+
+        [Test]
+        public void SundayRun_NonStoreFamily_NeverTakesAStockTask()
+        {
+            Fixture f = Make(300, 0, Weekday.Sunday);
+            StaffAndBuildStall(f);
+            for (int i = 0; i < 600; i++)
+            {
+                f.W.Step(1);
+                foreach (TaskRecord t in f.W.Tasks.All)
+                    if (t.Def.Id == StoreFamilySystem.StockStallTaskId && t.AssigneeId.HasValue)
+                        Assert.AreNotEqual(3, f.W.People.FindCitizen(t.AssigneeId.Value).FamilyId, "helper family never carries stock");
+            }
+            Assert.Greater(f.StallStore.Total, 0, "the store family still works on Sunday");
         }
 
         [Test]
