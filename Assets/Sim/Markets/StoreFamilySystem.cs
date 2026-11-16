@@ -46,8 +46,9 @@ namespace LordsLegacy.Sim.Markets
             foreach (Operation op in new List<Operation>(world.Operations.All))
             {
                 if (op.TypeId != OperationTypes.GranaryId) continue;
-                if (market == null || !op.SuppliesMarket) { CancelOpen(world, op); continue; }
-                Refill(world, op, market);
+                bool supplies = market != null && op.SuppliesMarket;
+                if (!supplies) CancelOpen(world, op, true);
+                Refill(world, op, supplies ? market : null);
             }
         }
 
@@ -159,10 +160,63 @@ namespace LordsLegacy.Sim.Markets
             return result;
         }
 
-        private static void CancelOpen(SimWorld world, Operation op)
+        // Cancels the op's open stock tasks; with keepCollect, trips that end in the granary itself stay.
+        private static void CancelOpen(SimWorld world, Operation op, bool keepCollect = false)
         {
+            LedgerLocation own = keepCollect ? GranaryStore(world, op) : null;
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
-                if (t.State == TaskState.Open && t.Def.Id == StockStallTaskId) world.Tasks.Cancel(t.Id);
+            {
+                if (t.State != TaskState.Open || t.Def.Id != StockStallTaskId) continue;
+                if (own != null && IsCollectTrip(t, own.Id)) continue;
+                world.Tasks.Cancel(t.Id);
+            }
+        }
+
+        private static bool IsCollectTrip(TaskRecord t, int granaryLocationId)
+        {
+            foreach (TaskStep s in t.Def.Steps)
+                if (s.Kind == StepKind.DepositStock) return s.LocationId == granaryLocationId;
+            return false;
+        }
+
+        /// <summary>The first working food store of a granary operation, or null.</summary>
+        public static LedgerLocation GranaryStore(SimWorld world, Operation granary)
+        {
+            foreach (int m in granary.ModuleIds)
+            {
+                if (!world.IsWorking(m)) continue;
+                LedgerLocation store = world.Inventory.FindFoodStore(m);
+                if (store != null) return store;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// MK-24 step 2: the forager hut store with the most unreserved food beyond what open trips have promised
+        /// (ties: nearest to the granary), at any distance. Null when no hut store has food. <paramref name="available"/>
+        /// is that spare food.
+        /// </summary>
+        public static LedgerLocation ChooseForagerSource(SimWorld world, LedgerLocation granaryStore, out int available)
+        {
+            available = 0;
+            LedgerLocation best = null;
+            double bestDist = 0;
+            Footprint gfp = world.Footprints.Get(granaryStore.ModuleId);
+            foreach (Operation op in world.Operations.All)
+            {
+                if (op.TypeId != OperationTypes.ForagingId) continue;
+                LedgerLocation hut = Foraging.ForagingStores.HutStore(world, op);
+                if (hut == null) continue;
+                int spare = FreeFood(hut) - PendingCollect(world, hut.Id);
+                if (spare <= 0) continue;
+                Footprint hfp = world.Footprints.Get(hut.ModuleId);
+                double d = gfp == null || hfp == null ? 0 : gfp.Centre.DistanceTo(hfp.Centre);
+                if (best == null || spare > available || (spare == available && d < bestDist))
+                {
+                    best = hut; available = spare; bestDist = d;
+                }
+            }
+            return best;
         }
 
         // A stock task that ended (done, or cancelled from outside) leaves nothing behind: reservations freed, carried food dropped.
@@ -197,6 +251,42 @@ namespace LordsLegacy.Sim.Markets
             bool built = false;
             foreach (int m in op.ModuleIds) if (world.IsWorking(m)) built = true;
             if (!built) { CancelOpen(world, op); return; }
+            if (market != null) RefillStalls(world, op, market);
+            CollectFromForagers(world, op);
+        }
+
+        // MK-24 step 2: idle workers still without a trip fetch food from the fullest forager hut store into the granary.
+        private static void CollectFromForagers(SimWorld world, Operation op)
+        {
+            LedgerLocation granary = GranaryStore(world, op);
+            if (granary == null) return;
+            int wanted = -OpenTrips(world, op);
+            foreach (int fid in op.FamilyIds)
+            {
+                Family fam = world.People.FindFamily(fid);
+                if (fam != null) wanted += CountIdleWorkers(world, fam);
+            }
+            for (int i = 0; i < wanted; i++)
+            {
+                int room = granary.FreeSpace - PendingDeposit(world, granary.Id);
+                if (room <= 0) break;
+                LedgerLocation source = ChooseForagerSource(world, granary, out int available);
+                if (source == null) break;
+                int n = Math.Min(Math.Min(Math.Max(1, world.Tuning.HandCarryItems), room), available);
+                world.Tasks.Create(BuildDef(world, source, granary, n), op.Id);
+            }
+        }
+
+        private static int OpenTrips(SimWorld world, Operation op)
+        {
+            int n = 0;
+            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
+                if (t.State == TaskState.Open && t.Def.Id == StockStallTaskId) n++;
+            return n;
+        }
+
+        private static void RefillStalls(SimWorld world, Operation op, Market market)
+        {
             foreach (int fid in op.FamilyIds)
             {
                 Family fam = world.People.FindFamily(fid);
