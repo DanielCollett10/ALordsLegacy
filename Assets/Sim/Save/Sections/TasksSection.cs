@@ -151,7 +151,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 case (int)StepKind.UnloadOx: return TaskStep.UnloadOx(loc, count, dur, heavy);
                 case (int)StepKind.ReturnOx: return TaskStep.ReturnOx();
                 case (int)StepKind.WalkTo: return TaskStep.WalkTo(new PathPoint(x, z));
-                case (int)StepKind.CollectFood: return TaskStep.CollectFood();
+                case (int)StepKind.CollectFood: return TaskStep.CollectFood(loc);
                 case (int)StepKind.DepositFood: return TaskStep.DepositFood();
                 case (int)StepKind.DepositForage: return TaskStep.DepositForage(loc, count);
                 case (int)StepKind.CollectStock: return TaskStep.CollectStock(loc, count);
