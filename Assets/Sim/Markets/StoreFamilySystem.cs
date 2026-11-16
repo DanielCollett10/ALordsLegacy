@@ -43,6 +43,7 @@ namespace LordsLegacy.Sim.Markets
             if (world == null) throw new ArgumentNullException(nameof(world));
             Sweep(world);
             Market market = world.Markets.Current;
+            if (!world.FoodHandedOver && SuppliesBuiltMarket(world, market)) world.FoodHandedOver = true;
             foreach (Operation op in new List<Operation>(world.Operations.All))
             {
                 if (op.TypeId != OperationTypes.GranaryId) continue;
@@ -50,6 +51,27 @@ namespace LordsLegacy.Sim.Markets
                 if (!supplies) CancelOpen(world, op, true);
                 Refill(world, op, supplies ? market : null);
             }
+            RemoveEmptyCampStore(world);
+        }
+
+        // CMP-20: a built granary that supplies the market triggers the handover at once, with no wait for stall stock.
+        private static bool SuppliesBuiltMarket(SimWorld world, Market market)
+        {
+            if (market == null) return false;
+            foreach (Operation op in world.Operations.All)
+            {
+                if (op.TypeId != OperationTypes.GranaryId || !op.SuppliesMarket) continue;
+                foreach (int m in op.ModuleIds) if (world.IsWorking(m)) return true;
+            }
+            return false;
+        }
+
+        // CMP-21: once the camp food store is empty (nothing reserved, no trip still to load from it) it is removed.
+        private static void RemoveEmptyCampStore(SimWorld world)
+        {
+            LedgerLocation camp = world.Camp?.FoodStoreLocation;
+            if (!world.FoodHandedOver || camp == null || camp.Total != 0 || PendingCollect(world, camp.Id) != 0) return;
+            if (world.Inventory.RemoveEmptyLocation(camp.Id)) world.Camp.FoodStoreLocation = null;
         }
 
         /// <inheritdoc />
@@ -216,6 +238,17 @@ namespace LordsLegacy.Sim.Markets
                     best = hut; available = spare; bestDist = d;
                 }
             }
+            LedgerLocation camp = world.FoodHandedOver ? world.Camp?.FoodStoreLocation : null;
+            if (camp != null)
+            {
+                int spare = FreeFood(camp) - PendingCollect(world, camp.Id);
+                // The camp competes like a hut: fullest first; on a tie the nearest wins.
+                double d = gfp == null ? 0 : gfp.Centre.DistanceTo(camp.Position);
+                if (spare > 0 && (best == null || spare > available || (spare == available && d < bestDist)))
+                {
+                    best = camp; available = spare;
+                }
+            }
             return best;
         }
 
@@ -327,9 +360,12 @@ namespace LordsLegacy.Sim.Markets
         {
             Footprint granary = world.Footprints.Get(source.ModuleId);
             Footprint stall = world.Footprints.Get(stallStore.ModuleId);
+            // The camp food store has no footprint: walk to its spot.
+            PathPoint from = granary != null ? new PathPoint(granary.AccessPoint.XMetres, granary.AccessPoint.ZMetres)
+                : new PathPoint(source.Position.XMetres, source.Position.ZMetres);
             var steps = new List<TaskStep>
             {
-                TaskStep.WalkTo(new PathPoint(granary.AccessPoint.XMetres, granary.AccessPoint.ZMetres)),
+                TaskStep.WalkTo(from),
                 TaskStep.Work(LoadMinutes, false, LoadStageId),
                 TaskStep.CollectStock(source.Id, n),
                 TaskStep.WalkTo(new PathPoint(stall.AccessPoint.XMetres, stall.AccessPoint.ZMetres)),
