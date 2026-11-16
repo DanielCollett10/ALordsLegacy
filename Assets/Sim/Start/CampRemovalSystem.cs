@@ -69,6 +69,7 @@ namespace LordsLegacy.Sim.Start
             {
                 if (ox.State.Kind != OxStateKind.Resting || ox.State.StandId != OxState.NoStand) continue;
                 if (ox.State.SpotXMm != stand.X || ox.State.SpotZMm != stand.Z) continue;
+                ox.HomeX = ox.X; ox.HomeZ = ox.Z; // CMP-24: with no camp, an ox without a stand rests (and is homed) where it is; saved with the ox
                 oxPool.Rest(ox);
             }
             return true;

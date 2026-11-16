@@ -117,7 +117,7 @@ namespace LordsLegacy.Sim.Operations
         }
 
         private PointMm CampStand(Ox ox) =>
-            _world.Camp != null ? _world.Camp.OxStand : PointMm.FromMetres(ox.X, ox.Z); // CMP-24: no camp, rest where it is
+            _world.Camp != null ? _world.Camp.OxStand : PointMm.FromMetres(ox.HomeX, ox.HomeZ);
 
         private static double Dist2(Ox ox, PointMm p)
         {

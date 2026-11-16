@@ -26,10 +26,10 @@ namespace LordsLegacy.Sim.People
         public string Name { get; }
 
         /// <summary>Home stand point x in metres.</summary>
-        public double HomeX { get; }
+        public double HomeX { get; internal set; }
 
         /// <summary>Home stand point z in metres.</summary>
-        public double HomeZ { get; }
+        public double HomeZ { get; internal set; }
 
         /// <summary>Position x in metres.</summary>
         public double X { get; set; }

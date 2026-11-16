@@ -148,6 +148,8 @@ namespace LordsLegacy.Sim.Tests.Start
             CampRemovalSystem.TryRemove(w);
             Assert.AreEqual(OxStateKind.Resting, ox.State.Kind);
             Assert.AreEqual(OxState.NoStand, ox.State.StandId);
+            Assert.AreEqual(94.5, ox.HomeX);
+            Assert.AreEqual(100.5, ox.HomeZ);
             Assert.AreEqual(94500, ox.State.SpotXMm);
             Assert.AreEqual(100500, ox.State.SpotZMm);
         }
