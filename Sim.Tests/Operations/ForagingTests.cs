@@ -232,36 +232,41 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void GranaryNearerThanHut_ReceivesTheFood_HutStaysEmpty()
+        public void GranaryNextToTheBush_GetsNothing_HutReceivesTheFood()
         {
             Ctx c = Make(AdultBirth);
             Footprint g = AddGranary(c, 2, 110, 70);
-            c.W.Bushes.Add(112, 60, BushKind.Berries, 3);   // bush sits next to the granary
+            c.W.Bushes.Add(112, 60, BushKind.Berries, 3);   // bush sits next to the granary (decision 0044)
             c.W.Step(500);
-            Assert.AreEqual(3, Foods(c.W.Inventory.FindFoodStore(g.Id)));
-            Assert.AreEqual(0, Foods(c.HutStore));
+            Assert.AreEqual(0, Foods(c.W.Inventory.FindFoodStore(g.Id)), "foragers never carry to a granary");
+            Assert.AreEqual(3, Foods(c.HutStore));
         }
 
         [Test]
-        public void HutNearerThanGranary_ReceivesTheFood()
+        public void TwoGranariesWithRoom_NearerThanHut_GetNothing()
         {
             Ctx c = Make(AdultBirth);
-            AddGranary(c, 2, 160, 160);
-            c.W.Bushes.Add(105, 95, BushKind.Berries, 3);
-            c.W.Step(400);
-            Assert.AreEqual(3, Foods(c.HutStore));
+            AddGranary(c, 2, 110, 70);
+            AddGranary(c, 3, 104, 98);
+            c.W.Bushes.Add(112, 60, BushKind.Berries, 3);
+            c.W.Step(500);
             Assert.AreEqual(0, Foods(c.W.Inventory.FindFoodStore(2)));
+            Assert.AreEqual(0, Foods(c.W.Inventory.FindFoodStore(3)));
+            Assert.AreEqual(3, Foods(c.HutStore));
         }
 
         [Test]
-        public void HutFull_GoesToTheGranary_EvenWhenFarther()
+        public void HutFull_WithGranaryWithRoom_StorageFull_NoNewTasks()
         {
             Ctx c = Make(AdultBirth);
             c.W.Inventory.Produce(c.HutStore, Items.Meat, 30);
             AddGranary(c, 2, 160, 160);
-            c.W.Bushes.Add(105, 95, BushKind.Berries, 3);
+            BushRecord b = c.W.Bushes.Add(105, 95, BushKind.Berries, 3);
             c.W.Step(700);
-            Assert.AreEqual(3, Foods(c.W.Inventory.FindFoodStore(2)));
+            Assert.AreEqual(OperationState.StorageFull, OperationStatus.Of(c.W, c.Op));
+            Assert.AreEqual(0, Forage(c.W).Count, "a granary with room does not open a forage task (FD-23b)");
+            Assert.AreEqual(0, Foods(c.W.Inventory.FindFoodStore(2)));
+            Assert.AreEqual(3, b.Baskets);
         }
 
         [Test]
@@ -287,7 +292,7 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void EveryReachableStoreFull_StorageFull_NoGathering_BushUntouched()
+        public void HutFullAndGranaryFull_StorageFull_NoGathering_BushUntouched()
         {
             Ctx c = Make(AdultBirth);
             c.W.Inventory.Produce(c.HutStore, Items.Meat, 30);
