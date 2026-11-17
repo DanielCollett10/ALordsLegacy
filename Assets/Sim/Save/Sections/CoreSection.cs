@@ -126,6 +126,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.DeconstructTimeShare);
             w.WriteDouble(t.DeconstructRefundShare);
             w.WriteInt32(t.StartingMeat);
+            w.WriteInt32(t.StartingPlanks); // T-513
             w.WriteDouble(t.AdultRations);
             w.WriteDouble(t.ChildRations);
             w.WriteDouble(t.MarketRangeM);
@@ -198,6 +199,7 @@ namespace LordsLegacy.Sim.Save.Sections
             t.DeconstructTimeShare = r.ReadDouble();
             t.DeconstructRefundShare = r.ReadDouble();
             t.StartingMeat = r.ReadInt32();
+            t.StartingPlanks = r.ReadInt32();
             t.AdultRations = r.ReadDouble();
             t.ChildRations = r.ReadDouble();
             t.MarketRangeM = r.ReadDouble();

@@ -112,6 +112,13 @@ namespace LordsLegacy.Sim.Save.Sections
                 if (stock == null) throw new SaveFormatException("Camp stockpile location " + world.Camp.StockpileLocationId + " is missing.");
                 world.Camp.StockpileLocation = stock;
             }
+            if (world.Camp != null && world.Camp.GeneralStoreLocationId != 0)
+            {
+                LedgerLocation general = led.Get(world.Camp.GeneralStoreLocationId);
+                if (general == null || general.Kind != LocationKind.GoodsStore)
+                    throw new SaveFormatException("Camp General store " + world.Camp.GeneralStoreLocationId + " is missing.");
+                world.Camp.GeneralStoreLocation = general;
+            }
             foreach (ConstructionSite s in world.Construction.Sites)
                 if (s.LedgerLocationId != 0 && led.Get(s.LedgerLocationId) == null)
                     throw new SaveFormatException("Construction site " + s.FootprintId + " uses missing location " + s.LedgerLocationId + ".");

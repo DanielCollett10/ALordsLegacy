@@ -44,8 +44,12 @@ namespace LordsLegacy.Sim.Start
             LedgerLocation foodStore = world.Inventory.AddFoodStore(stockpileSpot);
             if (world.Tuning.StartingMeat > 0) world.Inventory.Produce(foodStore, Items.Meat, world.Tuning.StartingMeat);
 
+            LedgerLocation generalStore = world.Inventory.AddGoodsStore(stockpileSpot);
+            if (world.Tuning.StartingPlanks > 0) world.Inventory.Produce(generalStore, Items.Plank, world.Tuning.StartingPlanks);
+
             world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), stockpileSpot,
-                ToWorld(layout, layout.OxStand), stockpile) { FoodStoreLocation = foodStore };
+                ToWorld(layout, layout.OxStand), stockpile)
+            { FoodStoreLocation = foodStore, GeneralStoreLocation = generalStore };
 
             int famId = 1, citId = 1;
             foreach (StartFamily f in layout.Families)

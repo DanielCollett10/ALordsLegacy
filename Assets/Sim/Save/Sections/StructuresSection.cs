@@ -91,6 +91,7 @@ namespace LordsLegacy.Sim.Save.Sections
             WritePoint(w, c.Stockpile);
             WritePoint(w, c.OxStand);
             w.WriteInt32(c.StockpileLocationId);
+            w.WriteInt32(c.GeneralStoreLocationId); // T-513
         }
 
         private static void ReadCamp(SimWorld world, SaveReader r)
@@ -98,9 +99,10 @@ namespace LordsLegacy.Sim.Save.Sections
             if (!r.ReadBool()) { world.Camp = null; return; }
             int fp = r.ReadInt32();
             PointMm fire = ReadPoint(r), stock = ReadPoint(r), stand = ReadPoint(r);
-            int locId = r.ReadInt32();
+            int locId = r.ReadInt32(), generalId = r.ReadInt32();
             if (world.Footprints.Get(fp) == null) throw new SaveFormatException("Camp footprint " + fp + " is missing.");
-            var camp = new CampInfo(fp, fire, stock, stand, world.Inventory.Get(locId)) { StockpileLocationId = locId };
+            var camp = new CampInfo(fp, fire, stock, stand, world.Inventory.Get(locId))
+                { StockpileLocationId = locId, GeneralStoreLocationId = generalId };
             world.Camp = camp;
         }
 

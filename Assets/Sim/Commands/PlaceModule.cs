@@ -51,12 +51,10 @@ namespace LordsLegacy.Sim.Commands
             if (!type.ConstructionRecipe.IsEmpty)
             {
                 var site = new ConstructionSite(fpId, world.Inventory.GetOrAddSite(fpId).Id);
-                if (type.ConstructionRecipe.Logs > 0)
-                {
-                    var ids = ConstructionSources.TryReserve(world, Items.Log, type.ConstructionRecipe.Logs, Centre, fpId);
-                    if (ids == null) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Not enough logs");
-                    site.ReservationIds.AddRange(ids);
-                }
+                var ids = SiteMaterials.TryReserveAll(world, type.ConstructionRecipe, Centre, fpId);
+                if (ids == null)
+                    return CommandResult.Rejected(CommandRejectCode.NotAllowed, SiteMaterials.Shortfall(world, type.ConstructionRecipe) ?? "Not enough materials");
+                site.ReservationIds.AddRange(ids);
                 world.Construction.Add(site);
             }
             Footprint fp = world.Footprints.Add(fpId, type, Centre, RotationDegrees);

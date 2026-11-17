@@ -188,6 +188,7 @@ PLACEHOLDER until playtested.
 | --- | --- | --- | --- |
 | Woodcutting hut | 8 logs, 960 | worker-minutes | CON-A1, WCO-04 |
 | Oxen stand | 1 log, 60 | worker-minutes | CON-A1 |
+| Starting planks | 10 | planks in the camp General goods store (`StartingPlanks`) | PL-14, ST-02 |
 | House (MVP-2) | 10 logs, 720 | worker-minutes | CON-A1, HM-06 |
 | House footprint / plot size | 6 × 8 m / 60–400 m² | m / m² | HM-03, HM-04 |
 | Granary | 6 logs, 600 | worker-minutes | CON-A1 |

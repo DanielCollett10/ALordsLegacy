@@ -33,9 +33,8 @@ namespace LordsLegacy.Sim.Commands
             if (!p.IsValid) return CommandResult.Rejected(CodeFor(p.Reason), p.ReasonText);
             HousePlacementResult h = HousePlacement.Place(Shape, p.Polygon, world.Footprints.All);
             if (!h.Ok) return CommandResult.Rejected(CommandRejectCode.NotAllowed, h.Text);
-            int logs = ModuleTypes.House.ConstructionRecipe.Logs;
-            if (!BuildCost.CanAfford(world, logs))
-                return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Not enough logs");
+            string shortfall = SiteMaterials.Shortfall(world, ModuleTypes.House.ConstructionRecipe);
+            if (shortfall != null) return CommandResult.Rejected(CommandRejectCode.NotAllowed, shortfall);
             return CommandResult.Accepted();
         }
 
@@ -50,8 +49,9 @@ namespace LordsLegacy.Sim.Commands
             FootprintTypeDef type = ModuleTypes.House;
             int fpId = world.Footprints.NextId();
             var site = new ConstructionSite(fpId, world.Inventory.GetOrAddSite(fpId).Id);
-            var ids = ConstructionSources.TryReserve(world, Items.Log, type.ConstructionRecipe.Logs, h.Centre, fpId);
-            if (ids == null) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Not enough logs");
+            var ids = SiteMaterials.TryReserveAll(world, type.ConstructionRecipe, h.Centre, fpId);
+            if (ids == null)
+                return CommandResult.Rejected(CommandRejectCode.NotAllowed, SiteMaterials.Shortfall(world, type.ConstructionRecipe) ?? "Not enough materials");
             site.ReservationIds.AddRange(ids);
 
             CommandResult area = new DesignateArea(Shape, AreaTypes.PlotId).Apply(world);

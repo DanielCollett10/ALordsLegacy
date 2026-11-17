@@ -27,6 +27,7 @@ namespace LordsLegacy.Sim.Tests.Start
             var layout = new StartLayout(M(100, 100), 0, new PointMm(0, 0), new PointMm(6000, 0), new PointMm(-6000, 0),
                 new PointMm[0], new StartFamily[0], 2);
             StartLayoutApplier.Apply(w, layout);
+            NoCampTests.UsePlanksUp(w); // T-513: the General store must be empty before the camp can go (ST-30)
             if (logs > 0) w.Inventory.Produce(w.Camp.StockpileLocation, Items.Log, logs);
             return w;
         }
