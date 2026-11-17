@@ -44,7 +44,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| GR-30 | A small **message log** under the top bar shows the last few arrivals and departures, fading after 30 s real time | DECIDED (owner 17/11/2026) |
+| GR-30 | A small **message log** under the top bar shows the last few arrivals and departures, fading after 30 s real time. No camera ping or edge marker in M16; arrivals and departures are flagged for the future alert system (FG-10) | DECIDED (owner 17/11/2026) |
 | GR-31 | Top bar population shows families and citizens, with the number arriving or leaving in the tooltip | PROPOSED |
 
 Technical shape (passage state, map exits, house reservation, settlement log): decision 0045.

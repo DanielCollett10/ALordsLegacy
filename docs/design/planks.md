@@ -46,7 +46,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| PL-20 | An ox carries **2 logs** per trip (was 4). `SimTuning.OxLoadLogs`, exposed in `SimConfig` | DECIDED (owner 17/11/2026) |
+| PL-20 | An ox carries **1 log** per trip (was 4; briefly 2). `SimTuning.OxLoadLogs`, exposed in `SimConfig` | DECIDED (owner 17/11/2026) |
+| PL-21 | An ox carries **2 beams** per trip (`OxLoadBeams`), unchanged by PL-20 | DECIDED (owner 17/11/2026; to confirm after the 1-log change) |
 
 ## Throughput check
 
