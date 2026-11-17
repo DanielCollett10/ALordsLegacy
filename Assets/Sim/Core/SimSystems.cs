@@ -52,6 +52,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Operations.WoodcuttingSystem(),
                 new LordsLegacy.Sim.Operations.HaulSystem(),
                 new LordsLegacy.Sim.Operations.ConstructionSystem(),
+                new LordsLegacy.Sim.Operations.Workshops.WorkshopSystem(),
                 new LordsLegacy.Sim.Homes.MoveInSystem(),
                 new LordsLegacy.Sim.Foraging.BushRegrowSystem(),
                 new LordsLegacy.Sim.Foraging.ForagingSystem(),

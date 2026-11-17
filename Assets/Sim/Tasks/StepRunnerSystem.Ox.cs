@@ -33,7 +33,8 @@ namespace LordsLegacy.Sim.Tasks
         // worker is then free and the routine walks them home. Returns true when it handled the task this tick.
         private bool TryWindDown(SimWorld world, TaskRecord t, Citizen c, Ox ox)
         {
-            if ((t.Def.Id != HaulSystem.HaulTaskId && t.Def.Id != ConstructionTaskDefs.DeliverId) || ox == null) return false;
+            if ((t.Def.Id != HaulSystem.HaulTaskId && t.Def.Id != ConstructionTaskDefs.DeliverId &&
+                 t.Def.Id != Operations.Workshops.WorkshopSystem.FetchTaskId) || ox == null) return false;
             if (!t.WindingDown)
             {
                 StepKind k = t.Def.Steps[t.CurrentStep].Kind;
