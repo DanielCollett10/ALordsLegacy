@@ -138,6 +138,36 @@ namespace LordsLegacy.Tests.EditMode
         }
 
         [Test]
+        public void GrowthDefaultsEqualSimTuning()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                var t = cfg.BuildTuning();
+                var d = new SimTuning();
+                Assert.AreEqual(d.HungryDaysToLeave, t.HungryDaysToLeave);
+                Assert.AreEqual(d.ArrivalFoodDays, t.ArrivalFoodDays);
+                Assert.AreEqual(d.ArrivalNoHungerDays, t.ArrivalNoHungerDays);
+                Assert.AreEqual(d.ArrivalGapDays, t.ArrivalGapDays);
+                Assert.AreEqual(d.MapEdgeToleranceM, t.MapEdgeToleranceM, Eps);
+                Assert.AreEqual(d.OxLoadLogs, t.OxLoadLogs);
+                Assert.AreEqual(1, t.OxLoadLogs);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
+        public void CommittedAssetHoldsGrowthValues()
+        {
+            var cfg = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath);
+            Assert.IsNotNull(cfg, "Run LordsLegacy/Config/Create default SimConfig");
+            var t = cfg.BuildTuning();
+            Assert.AreEqual(1, t.OxLoadLogs, "SimConfig.asset must hold OxLoadLogs 1");
+            Assert.AreEqual(new SimTuning().HungryDaysToLeave, t.HungryDaysToLeave);
+            Assert.AreEqual(new SimTuning().MapEdgeToleranceM, t.MapEdgeToleranceM, Eps);
+        }
+
+        [Test]
         public void AssetModuleRecipesEqualCodeDefaults()
         {
             var recipes = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath).BuildModuleRecipes();
