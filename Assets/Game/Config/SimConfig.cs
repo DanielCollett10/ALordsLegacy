@@ -107,6 +107,14 @@ namespace LordsLegacy.Game
         [Tooltip("FD-24 game minutes to pick one basket")] [Range(1, 600)] public int gatherMinutesPerBasket = 30;
         [Tooltip("FD-24, MKT-03e most items carried by hand on one trip")] [Range(1, 100)] public int handCarryItems = 10;
 
+        [Header("Growth (GR-03, GR-21, WCO-07; PLACEHOLDER values)")]
+        [Tooltip("GR-03 consecutive Hungry days after which a household leaves")] [Range(1, 3650)] public int hungryDaysToLeave = 30;
+        [Tooltip("GR-21 days of food per household a village must hold for a family to arrive")] [Range(0, 3650)] public int arrivalFoodDays = 30;
+        [Tooltip("GR-21 days with no Hungry household before a family may arrive")] [Range(0, 3650)] public int arrivalNoHungerDays = 7;
+        [Tooltip("GR-21 minimum days between two arrivals")] [Range(0, 3650)] public int arrivalGapDays = 7;
+        [Tooltip("GR-21 tolerance for deciding a point is on the map edge, metres")] [Range(0f, 50f)] public float mapEdgeToleranceM = 2f;
+        [Tooltip("WCO-07 most logs an ox carries per trip")] [Range(1, 100)] public int oxLoadLogs = 1;
+
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
         public sealed class ModuleRecipeConfig
@@ -150,6 +158,9 @@ namespace LordsLegacy.Game
             MarketRangeM = D(marketRangeM), BushBaskets = bushBaskets, BushRegrowDays = bushRegrowDays,
             ForagerMinAge = foragerMinAge, ForagerHutCapacity = foragerHutCapacity,
             GatherMinutesPerBasket = gatherMinutesPerBasket, HandCarryItems = handCarryItems,
+            HungryDaysToLeave = hungryDaysToLeave, ArrivalFoodDays = arrivalFoodDays,
+            ArrivalNoHungerDays = arrivalNoHungerDays, ArrivalGapDays = arrivalGapDays,
+            MapEdgeToleranceM = D(mapEdgeToleranceM), OxLoadLogs = oxLoadLogs,
         };
 
         /// <summary>Builds the road catalog from these values.</summary>

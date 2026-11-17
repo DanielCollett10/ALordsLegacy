@@ -288,6 +288,27 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasGrowth()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var host = Object.FindFirstObjectByType<SimHost>();
+            Assert.IsNotNull(host, "SimHost missing.");
+            Assert.IsNotNull(host.Config, "SimHost has no SimConfig wired.");
+            Assert.AreEqual(host.Config.BuildTuning().HungryDaysToLeave, host.World.Tuning.HungryDaysToLeave,
+                "Growth tuning on the world must come from SimConfig.");
+
+            // The settlement message log shows arrivals and departures (T-508), wired to SimHost by the generator.
+            var log = Object.FindFirstObjectByType<MessageLogView>();
+            Assert.IsNotNull(log, "MessageLogView missing from the Game scene (run LordsLegacy/Scenes/Generate Game scene).");
+            AssertNoNullRefs(log);
+            Assert.IsNotNull(log.GetComponent<UnityEngine.UIElements.UIDocument>(), "MessageLog has no UIDocument.");
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneInitialisesSimFromBakedMap()
         {
             var load = SceneManager.LoadSceneAsync("Game");
