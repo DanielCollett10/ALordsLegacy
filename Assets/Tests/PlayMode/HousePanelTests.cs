@@ -226,5 +226,27 @@ namespace LordsLegacy.Tests.PlayMode
             StringAssert.Contains("Days left: 0.0", _house.LarderText);
             yield return null;
         }
+
+        [UnityTest]
+        public IEnumerator MarketAccessLineFollowsMarketPlacementAndRemoval()
+        {
+            var w = _host.World;
+            _agents.SelectHouse(_houseId);
+            yield return null;
+            Assert.IsTrue(_house.IsShown);
+            // No camp in this fixture and no market yet: the house has no access (MK-44).
+            Assert.AreEqual("Market access: No", _house.MarketAccessText);
+
+            var r = _host.Execute(new DesignateArea(AreaShape.Straight(new[] { M(90, 90), M(130, 90), M(130, 130), M(90, 130) }), AreaTypes.MarketId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+            int areaId = w.Markets.Current.AreaId;
+            yield return null;
+            Assert.AreEqual("Market access: Yes", _house.MarketAccessText, "A market within walking range of the house gives access.");
+
+            r = _host.Execute(new DeleteArea(areaId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+            yield return null;
+            Assert.AreEqual("Market access: No", _house.MarketAccessText, "Removing the market takes access away.");
+        }
     }
 }
