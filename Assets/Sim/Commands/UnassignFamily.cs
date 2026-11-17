@@ -42,13 +42,21 @@ namespace LordsLegacy.Sim.Commands
         {
             CommandResult check = Validate(world);
             if (check.IsRejected) return check;
-            Family f = world.People.FindFamily(FamilyId);
+            Unassign(world, world.People.FindFamily(FamilyId), OperationId);
+            return CommandResult.Accepted();
+        }
+
+        /// <summary>
+        /// Shared by the command and <c>FamilyDeparture.Begin</c>: cancels the operation's unfinished tasks held by the
+        /// family's members, removes the family from the operation and clears its workplace. No validation.
+        /// </summary>
+        internal static void Unassign(SimWorld world, Family f, int operationId)
+        {
             foreach (int memberId in f.MemberIds)
                 foreach (TaskRecord t in world.Tasks.ByAssignee(memberId))
-                    if (t.OwnerOperationId == OperationId) world.Tasks.Cancel(t.Id);
-            world.Operations.UnassignFamily(OperationId, FamilyId);
+                    if (t.OwnerOperationId == operationId) world.Tasks.Cancel(t.Id);
+            world.Operations.UnassignFamily(operationId, f.Id);
             f.WorkplaceId = null;
-            return CommandResult.Accepted();
         }
     }
 }

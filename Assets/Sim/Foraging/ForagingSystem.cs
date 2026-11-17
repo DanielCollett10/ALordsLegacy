@@ -75,18 +75,7 @@ namespace LordsLegacy.Sim.Foraging
                 PointMm at = default;
                 if (t.BushId.HasValue && world.Bushes.TryGet(t.BushId.Value, out BushRecord b)) at = PointMm.FromMetres(b.X, b.Z);
                 else { Footprint hut = OperationStatus.Hut(world, op); if (hut != null) at = hut.Centre; }
-                DropAll(world, carrier, at);
-            }
-        }
-
-        /// <summary>Moves everything a carrier holds onto a ground pile at <paramref name="at"/>.</summary>
-        internal static void DropAll(SimWorld world, LedgerLocation carrier, PointMm at)
-        {
-            LedgerLocation pile = world.Inventory.GetOrAddGroundPile(at, null);
-            foreach (ItemDef item in Items.All)
-            {
-                int n = carrier.CountOf(item.Id);
-                if (n > 0) world.Inventory.Transfer(carrier, pile, item, n);
+                CarrierDrop.DropAll(world, carrier, at);
             }
         }
 

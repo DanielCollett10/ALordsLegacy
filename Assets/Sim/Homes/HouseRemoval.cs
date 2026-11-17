@@ -17,7 +17,10 @@ namespace LordsLegacy.Sim.Homes
         /// camp fire (the tent spot is not saved, so the fire stands in for it). Without a camp the point is kept.
         /// Does nothing for a house with no family.
         /// </summary>
-        public static void Evict(SimWorld world, int houseFootprintId)
+        /// <param name="world">The world.</param>
+        /// <param name="houseFootprintId">The house footprint.</param>
+        /// <param name="keepLarder">When true the house larder food stays in the house (a family leaving, T-501).</param>
+        public static void Evict(SimWorld world, int houseFootprintId, bool keepLarder = false)
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
             HomeRecord home = world.Homes.Get(houseFootprintId);
@@ -27,7 +30,7 @@ namespace LordsLegacy.Sim.Homes
                 Family f = world.People.FindFamily(home.FamilyId);
                 if (f != null && f.HomeHouseId == houseFootprintId)
                 {
-                    Food.Larders.OnEvict(world, home, f);
+                    if (!keepLarder) Food.Larders.OnEvict(world, home, f);
                     f.HomeHouseId = null;
                     PointMm? spot = RoughSleep.HomelessPoint(world); // camp fire, or the rough-sleeping spot (CMP-25)
                     if (spot.HasValue)

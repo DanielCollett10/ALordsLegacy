@@ -264,7 +264,7 @@ namespace LordsLegacy.Sim.Markets
                 if (carrier == null || carrier.Total == 0) continue;
                 Footprint at = FirstStep(t, StepKind.DepositStock, world);
                 PointMm p = at != null ? at.Centre : default;
-                Foraging.ForagingSystem.DropAll(world, carrier, p);
+                Inventory.CarrierDrop.DropAll(world, carrier, p);
             }
         }
 
