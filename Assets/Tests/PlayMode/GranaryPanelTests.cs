@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using LordsLegacy.Game;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
@@ -10,6 +11,7 @@ using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace LordsLegacy.Tests.PlayMode
 {
@@ -172,6 +174,92 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNull(w.Footprints.Get(_granaryId));
             yield return null;
             Assert.IsFalse(_panel.IsShown);
+        }
+
+        private void AddFamily(int id, string surname)
+        {
+            var pop = _host.World.People;
+            pop.AddFamily(id, surname, 100, 100);
+            pop.AddCitizen(id, "Person" + id, LordsLegacy.Sim.People.Sex.Male, -30L * LordsLegacy.Sim.People.Citizen.TicksPerYear / 2, id, 100, 100);
+        }
+
+        private IEnumerator SelectBuilt()
+        {
+            _host.World.Construction.Remove(_granaryId);
+            _agents.SelectGranary(_granaryId);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator BuiltGranaryShowsTwoEmptySlotsWithAssignButtons()
+        {
+            yield return SelectBuilt();
+            Assert.AreEqual("Family 1: empty", _panel.SlotText(0));
+            Assert.AreEqual("Family 2: empty", _panel.SlotText(1));
+            Assert.IsNotNull(_panel.AssignButton(0));
+            Assert.IsNotNull(_panel.AssignButton(1));
+            Assert.AreEqual("Assign", _panel.AssignButton(0).text);
+            Assert.IsTrue(_panel.AssignButton(0).enabledSelf);
+        }
+
+        [UnityTest]
+        public IEnumerator AssignThenRemoveFamilyRoundTrips()
+        {
+            var w = _host.World;
+            AddFamily(1, "Archer");
+            yield return SelectBuilt();
+            int opId = w.Operations.FindByModule(_granaryId).Id;
+            _panel.ClickAssignSlot();
+            yield return null;
+            Assert.IsTrue(_panel.PickerOpen);
+            Assert.IsNotNull(_panel.PanelElement.Q<UnityEngine.UIElements.Button>("assign-family-1"));
+            _panel.ClickAssignFamily(1);
+            yield return null;
+            Assert.AreEqual(opId, w.People.FindFamily(1).WorkplaceId);
+            Assert.AreEqual("Family 1: Archer", _panel.SlotText(0));
+            StringAssert.StartsWith("Person1: ", _panel.MembersText(0));
+            Assert.IsNotNull(_panel.PanelElement.Q<UnityEngine.UIElements.Button>("remove-family-1"));
+            _panel.ClickRemoveFamily(1);
+            yield return null;
+            Assert.IsNull(w.People.FindFamily(1).WorkplaceId);
+            Assert.AreEqual("Family 1: empty", _panel.SlotText(0));
+        }
+
+        [UnityTest]
+        public IEnumerator UnbuiltGranaryDisablesAssignAndSendsNothing()
+        {
+            var w = _host.World;
+            AddFamily(1, "Archer");
+            _agents.SelectGranary(_granaryId);
+            yield return null;
+            var b = _panel.AssignButton(0);
+            Assert.IsNotNull(b);
+            Assert.IsFalse(b.enabledSelf);
+            Assert.AreEqual(GranaryPanelView.NotBuiltText, b.text);
+            _panel.ClickAssignSlot();
+            Assert.IsFalse(_panel.PickerOpen);
+            Assert.AreEqual(GranaryPanelView.NotBuiltText, _panel.MessageText);
+            Assert.IsNull(w.People.FindFamily(1).WorkplaceId);
+        }
+
+        [UnityTest]
+        public IEnumerator FamilyAtAWoodcutterIsNotInTheAssignList()
+        {
+            var w = _host.World;
+            AddFamily(1, "Archer");
+            AddFamily(2, "Brook");
+            var r = w.Execute(new DesignateArea(
+                AreaShape.Straight(new[] { M(40, 40), M(70, 40), M(70, 60), M(40, 60) }), AreaTypes.WoodcuttingId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+            var wood = w.Operations.FindByArea((int)r.Created[0]);
+            w.Footprints.Add(902, ModuleTypes.WoodcuttingHut, M(60, 100), 0);
+            w.Operations.AddModule(wood.Id, 902);
+            Assert.IsTrue(w.Execute(new AssignFamily(wood.Id, 1)).IsAccepted);
+            yield return SelectBuilt();
+            _panel.ClickAssignSlot();
+            yield return null;
+            Assert.IsNull(_panel.PanelElement.Q<UnityEngine.UIElements.Button>("assign-family-1"));
+            Assert.IsNotNull(_panel.PanelElement.Q<UnityEngine.UIElements.Button>("assign-family-2"));
         }
 
         [UnityTest]
