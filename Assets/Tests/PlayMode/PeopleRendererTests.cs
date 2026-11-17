@@ -127,5 +127,48 @@ namespace LordsLegacy.Tests.PlayMode
             camp.Draw();
             Assert.AreEqual(builds + 1, camp.BuildCount, "Rebuilt after FootprintRegistry.Version changed.");
         }
+
+        [UnityTest]
+        public IEnumerator CampRemovalLeavesNoCampPiecesAndTheLogsAreAGroundPile()
+        {
+            var host = MakeHost();
+            var world = host.World;
+            var pt = new System.Func<long, long, LordsLegacy.Sim.Geometry.PointMm>((x, z) => new LordsLegacy.Sim.Geometry.PointMm(x, z));
+            // No families: the camp goes once the handover is set (CMP-23). Logs in the stockpile are left behind (CMP-24).
+            LordsLegacy.Sim.Start.StartLayoutApplier.Apply(world, new LordsLegacy.Sim.Start.StartLayout(
+                pt(100000, 100000), 0, pt(0, 0), pt(4000, 0), pt(-4000, 4000), new LordsLegacy.Sim.Geometry.PointMm[0],
+                new LordsLegacy.Sim.Start.StartFamily[0], 2));
+            world.Inventory.Produce(world.Camp.StockpileLocation, LordsLegacy.Sim.Inventory.Items.Log, 5);
+            int stockId = world.Camp.StockpileLocation.Id;
+
+            _rendGo = new GameObject("CampRenderer");
+            var camp = _rendGo.AddComponent<CampRenderer>();
+            camp.Configure(host, MakeRegistry());
+            var logs = _rendGo.AddComponent<LogPileRenderer>();
+            logs.Configure(host, MakeRegistry());
+            yield return null;
+            camp.Draw();
+            logs.Draw();
+            Assert.AreEqual(3, camp.PieceCount, "Fire, stockpile and tie post while the camp stands.");
+            Assert.AreEqual(5, logs.DrawnFor(stockId), "Stockpile logs drawn while the camp stands.");
+
+            // Handover is normally set by a built granary (CMP-20); its setter is internal to the Sim, so reflection sets it here.
+            typeof(LordsLegacy.Sim.Core.SimWorld)
+                .GetProperty("FoodHandedOver", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public
+                    | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(world, true);
+            int guard = 0;
+            while (world.Camp != null && guard++ < 3000) world.Step(); // removal is checked at midnight
+            Assert.IsNull(world.Camp, "The camp is removed at midnight.");
+
+            camp.Draw();
+            logs.Draw();
+            Assert.AreEqual(0, camp.PieceCount, "Nothing camp-related is drawn once the camp is gone.");
+            Assert.AreEqual(0, camp.TentCount);
+            var pile = System.Linq.Enumerable.Single(world.Inventory.Locations,
+                l => l.Kind == LordsLegacy.Sim.Inventory.LocationKind.GroundPile);
+            Assert.AreEqual(5, logs.DrawnFor(pile.Id), "The leftover logs are drawn as an ordinary ground pile.");
+            Assert.AreEqual(0, logs.DrawnFor(stockId), "The old stockpile location is gone.");
+        }
     }
 }

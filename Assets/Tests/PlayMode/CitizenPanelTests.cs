@@ -199,6 +199,18 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator HomelessFamilyWithNoCampShowsSleepingRough()
+        {
+            // This world has no start layout, so there is no camp (CMP-25): the family dosses about the town.
+            yield return null;
+            Assert.IsNull(_host.World.Camp, "no camp in this test world");
+            _agents.ClickAt(ScreenOf(100, 100));
+            yield return null;
+            Assert.AreEqual("Homeless (sleeping rough)", _view.HomeText);
+            Assert.AreEqual(DisplayStyle.Flex, _uiGo.GetComponent<UIDocument>().rootVisualElement.Q<Label>("citizen-home").style.display.value);
+        }
+
+        [UnityTest]
         public IEnumerator FellingWorkerShowsWorkplaceAndTask()
         {
             var w = _host.World;
