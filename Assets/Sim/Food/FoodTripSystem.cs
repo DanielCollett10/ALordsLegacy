@@ -41,7 +41,7 @@ namespace LordsLegacy.Sim.Food
             // Rank among every household that eats, so a household's start time does not move when others finish their trip.
             var eaters = new List<Family>();
             foreach (Family f in world.People.Families)
-                if (EatingSystem.DailyNeed(world, f) > 0) eaters.Add(f);
+                if (!f.IsInPassage && EatingSystem.DailyNeed(world, f) > 0) eaters.Add(f);
             for (int r = 0; r < eaters.Count; r++)
             {
                 Family f = eaters[r];
