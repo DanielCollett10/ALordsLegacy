@@ -74,8 +74,8 @@ namespace LordsLegacy.Sim.Tasks
             {
                 if (!IsIdle(world, c)) continue;
                 Family f = world.People.FindFamily(c.FamilyId);
-                if (f == null) continue;
-                if (helpers != !f.WorkplaceId.HasValue) continue;
+                if (f == null || f.IsInPassage) continue; // decision 0045, GR-13
+                if (helpers !=!f.WorkplaceId.HasValue) continue;
                 // An odd-jobber off shift is offered nothing (T-346, CN-25); assigned workers may take tomorrow's task.
                 if (helpers && !world.WorkDay.OnShift(world, c)) continue;
                 double age = c.AgeYears(world.Tick, world.Tuning.AgeingRate);
@@ -166,7 +166,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             if (!IsIdle(world, c)) return false;
             Family f = world.People.FindFamily(c.FamilyId);
-            if (f == null || helpers != !f.WorkplaceId.HasValue) return false;
+            if (f == null || f.IsInPassage || helpers != !f.WorkplaceId.HasValue) return false;
             if (helpers && !world.WorkDay.OnShift(world, c)) return false;
             double age = c.AgeYears(world.Tick, world.Tuning.AgeingRate);
             return Eligible(t, f, helpers, age >= OperationStatus.WorkingAgeYears, age >= world.Tuning.ForagerMinAge);
@@ -211,6 +211,7 @@ namespace LordsLegacy.Sim.Tasks
                 if (t.Def.Eligibility != EligibilityPolicy.OwnerFamily) continue;
                 Family f = Food.FoodTripSystem.FamilyOf(world, t);
                 if (f == null) { world.Tasks.Cancel(t.Id); continue; }
+                if (f.IsInPassage) continue; // decision 0045, GR-13
                 foreach (int id in f.MemberIds)
                 {
                     Citizen c = world.People.FindCitizen(id);
