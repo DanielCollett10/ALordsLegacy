@@ -36,7 +36,7 @@ Family fields: `LarderLocationId`, `CarriedRations`, `IsHungry`, `TripCarrierId`
 
 - Before the handover only the camp sells; after it only stalls in range. Never a mix (MK-31). A household out of range gets nothing.
 - Granaries and forager stores never feed households directly. Store families carry their food to stalls (`markets.md`).
-- Hungry changes no work (FD-16).
+- Hungry changes no work (FD-16). A family in passage (Arriving or Leaving) gets no allotment and no food trip (M16, `growth.md`).
 - `PlaceStructure(module.granary)` creates the 8 × 6 m footprint with a 5 m yard, a food store (100), the site and
   `operation.granary` (no area, 2 slots; decision 0041). Deconstruction drops its food. Granary family work is `StoreFamilySystem`.
 

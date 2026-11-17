@@ -195,7 +195,7 @@ PLACEHOLDER until playtested.
 | Demolish refund / rebuild cost | 50% / 50% | of materials | BLD-11, MIL-08 |
 | Standard log length | 4 | m | TMB-04 |
 | Usable trunk length | 12–20 | m (3–5 logs) | TMB-06 |
-| Ox load | 1 (owner 17/11/2026; was 4) | logs per trip (`SimTuning.OxLoadLogs`, saved in Core; to be exposed in `SimConfig`) | WCO-07 |
+| Ox load | 1 (owner 17/11/2026; was 4) | logs per trip (`SimTuning.OxLoadLogs`, saved in Core; exposed in `SimConfig` as `oxLoadLogs`) | WCO-07 |
 | Max builders per site | 4 | odd-jobbers building one site at once (`SimTuning.MaxBuildersPerSite`) | CN-23 |
 | Deconstruct time share | 0.5 | of the recipe's build minutes (hut 480) (`SimTuning.DeconstructTimeShare`, saved in Core) | CN-53 |
 | Deconstruct refund share | 0.5 | of the recipe's logs, rounded down (hut 4, oxen stand 0) (`SimTuning.DeconstructRefundShare`, saved in Core) | CN-54 |

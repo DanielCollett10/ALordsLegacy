@@ -11,7 +11,7 @@
 |---|---|
 | `InstancedDraw` | Shared `Graphics.RenderMeshInstanced` helper, batches of 1023. Used by trees, people, modules, log piles, camp and construction. |
 | `TreeRenderer` | Standing trees from `TreeRegistry`, grouped in 64 m cells, frustum-culled. Also stumps and felled trunks. |
-| `PeopleRenderer` | Citizens (adult or child, by age; a stock carrier holds a food crate) and oxen. Lerps `PreviousX/Z` → `X/Z` by `TickFraction` (current while paused). Yaw from `FacingRad`. |
+| `PeopleRenderer` | Citizens (adult or child, by age; a stock carrier holds a food crate) and oxen. Lerps `PreviousX/Z` → `X/Z` by `TickFraction` (current while paused). Yaw from `FacingRad`. Citizens that arrive or leave appear and vanish with their ids; phase state of removed citizens is dropped (T-509). |
 | `WalkBob` | Placeholder walk bob. Rate depends on metres walked per tick and `ViewSettings.WalkStepsPerMetre`. |
 | `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. One tent per Homeless family; nothing once the camp is removed (CMP-23). Rebuilds on footprint, camp, family or `Homes.Version` changes. |
 | `ModuleRenderer` | Woodcutting modules, forager huts, houses (`visual.module.house`) and standalone structures such as the granary, stretched to the footprint. Market stalls, with food crates by fill. Skips unbuilt footprints. |

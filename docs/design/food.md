@@ -27,6 +27,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | FD-16 | **Hungry** is a status the player sees. It has **no effect on work** for now (overrides FOOD-A2's lower output). A happiness modifier may come later. No deaths or leaving | DECIDED (owner 15/11/2026) |
 | FD-17 | No spoilage in M14 (FOOD-A11 later) | PROPOSED |
 
+> Implementation note (M16): families hungry 30 days in a row now leave (GR-03, `growth.md`), so FD-16's "no leaving" no longer holds. Deaths are still not built.
+
 ## Foraging camp
 
 | ID | Rule | Tag |

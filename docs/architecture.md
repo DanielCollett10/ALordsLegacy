@@ -117,6 +117,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-Storage yard and planks (ST-*, PL-*); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
+Storage yard (ST-*); plank production (PL-*: no sawyer or hewing task yet, planks exist as starting stock and construction items); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
 and backyards; artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
 status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.

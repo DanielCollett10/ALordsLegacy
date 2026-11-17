@@ -33,7 +33,7 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 1. **Designate:** `OperationDraftTool` (area, then module ghosts in `OperationDraft`) → one `DesignateOperation` on Confirm.
 2. **Modules:** Expand (`PlaceModules`) adds modules to an existing operation. Footprint added, trees under it cleared. An
    empty recipe is built at once; else it is a construction site (`construction.md`). `RemoveModule` drops an unbuilt one.
-3. **Assign:** `AssignFamily` sets the family's `WorkplaceId`. Nothing is automatic. Refused for an unbuilt hut (CN-04b).
+3. **Assign:** `AssignFamily` sets the family's `WorkplaceId`. Nothing is automatic. Refused for an unbuilt hut (CN-04b) and for a family in passage (Arriving or Leaving, M16).
    `UnassignFamily` cancels the family's unfinished tasks.
 4. **Work:** felling tasks open per idle worker, then are dispatched and stepped (`tasks.md`). Timber stages come from
    the effective `ProcessDefs.Timber` stages.

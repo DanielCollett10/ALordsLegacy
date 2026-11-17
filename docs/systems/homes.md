@@ -10,7 +10,7 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 | Type | File | Role |
 |---|---|---|
 | `HomeRegistry`, `HomeRecord` | `Homes/HomeRegistry.cs` | One record per house: house footprint id, plot area id, family id (0 = Empty). `SimWorld.Homes`. `Version` bumps on change. |
-| `MoveInSystem` | `Homes/MoveInSystem.cs` | Operations phase, last. Each Empty, Built, unreserved house takes a Homeless family (`Choose`, pure). `HomeRecord.ReservedForFamilyId` (T-504) holds a house for an arriving family; `Growth/ArrivalRules.Check` picks it. |
+| `MoveInSystem` | `Homes/MoveInSystem.cs` | Operations phase, last. Each Empty, Built, unreserved house takes a Homeless family (`Choose`, pure). Skips families in passage. `HomeRecord.ReservedForFamilyId` (T-504) holds a house for an arriving family; `Growth/ArrivalRules.Check` picks it. |
 | `HouseRemoval` | `Homes/HouseRemoval.cs` | `Evict` (family out, house Empty) and `RemoveWithPlot` (home and plot area go). |
 | `Family.HomeHouseId` | `People/Family.cs` | Set by the registry. `IsHomeless` is `!HomeHouseId.HasValue`. |
 | `DesignatePlot` | `Commands/DesignatePlot.cs` | Plot, house site and Empty home in one all-or-nothing `Apply`. |

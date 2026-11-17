@@ -43,6 +43,8 @@
 
 ## Gotchas
 
+- Stall and store-family readers skip families in passage (M16, `growth.md`).
+
 - `StallGrid` lives in `Geometry/`. Its 2 m edge padding is not in the design (note on MK-05).
 - Test houses are built with `Construction.Remove` after releasing the site's log reservations; a leftover reservation on the camp stockpile blocks camp removal for ever.
 - The camp store must fit in the granary (100 items) or the handover never empties it.

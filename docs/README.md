@@ -22,7 +22,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Commands | The only way to change Sim state: validate, apply, log. | [systems/commands.md](systems/commands.md) | `Assets/Sim/Commands` |
 | Roads | Freeform road network, validation, cutting and node moves. | [systems/roads.md](systems/roads.md) | `Assets/Sim/Roads` |
 | Areas | Drawn building and work areas, flattening, trimming, snapping. | [systems/areas.md](systems/areas.md) | `Assets/Sim/Areas` |
-| Growth | Families leave after 30 hungry days and arrive in plenty; read model for panels. | [systems/growth.md](systems/growth.md) | `Assets/Sim/Growth` |
+| Growth | Families walk out after 30 hungry days and walk in when a house and a month of food allow; passage state, settlement log, panel read model. | [systems/growth.md](systems/growth.md) | `Assets/Sim/Growth`, `Assets/Sim/Arrivals`, `Assets/Sim/Roads/MapExits.cs` |
 | Placement | Pure yes or no for placing an area vertex, a road point or a standalone structure (granary). | [systems/placement.md](systems/placement.md) | `Assets/Sim/Placement` |
 | Forestry | Standing trees, felling state, reservations, clearing. | [systems/forestry.md](systems/forestry.md) | `Assets/Sim/Forestry` |
 | Navigation | Walkable grid, A* pathfinding, movement orders, ox following. | [systems/navigation.md](systems/navigation.md) | `Assets/Sim/Navigation` |
@@ -41,7 +41,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Unity host | `SimHost` owns the world and pacer; SimConfig and start-layout assets. | [systems/unity-host.md](systems/unity-host.md) | `Assets/Game/Bootstrap`, `Assets/Game/Config` |
 | Unity visuals | Instanced drawing of Sim state, ground draping, art by id, sun light. | [systems/unity-visuals.md](systems/unity-visuals.md) | `Assets/Game/Visuals`, `Assets/Game/Lighting` |
 | Unity tools and input | Build tools, snapping, picking, camera, debug send. | [systems/unity-tools.md](systems/unity-tools.md) | `Assets/Game/Tools`, `Assets/Game/Picking`, `Assets/Game/Camera`, `Assets/Game/Debugging` |
-| Unity UI | UI Toolkit panels: top bar, build bar, operation and citizen panels, debug overlay. | [systems/unity-ui.md](systems/unity-ui.md) | `Assets/Game/UI` |
+| Unity UI | UI Toolkit panels: top bar, message log, build bar, operation and citizen panels, debug overlay. | [systems/unity-ui.md](systems/unity-ui.md) | `Assets/Game/UI` |
 | Editor tools | Menus that bake, generate and wire assets and scenes. | [systems/editor-tools.md](systems/editor-tools.md) | `Assets/Editor` |
 
 Tests: Sim tests in `Sim.Tests/` (`dotnet test Sim.Tests/Sim.Tests.csproj`). Unity tests in `Assets/Tests/EditMode` and

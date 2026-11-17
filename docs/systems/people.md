@@ -32,6 +32,7 @@
   (working-age, no workplace) follow the same day while they hold or have open construction work (CN-25).
 - **Off shift:** `RoutineSystem` walks the worker home to sleep. The step runner pauses the worker's task (progress and
   reservations kept). On shift it resumes; a task paused mid-work first walks back to its tree.
+- **Passage (M16):** a family with `Passage` Arriving or Leaving is skipped by `WorkDay`, `RoutineSystem` and `DispatchSystem`, and `AssignFamily` refuses it. See `growth.md`.
 - **Debug send:** `SendCitizenTo(id, point)` sets `Citizen.DebugSend`. `RoutineSystem` skips the citizen and drops its
   routine state. On arrival the linger (`DebugLingerMinutes`, 30) starts, then `DebugSend` clears and the routine starts
   afresh. A failed walk ends the send at once. Works while paused.
@@ -50,5 +51,5 @@
 ## Tests
 
 `Sim.Tests/PopulationTests.cs`, `Sim.Tests/People/` (`RoutineSystemTests`, `WorkDayTests`, `OddJobberWorkDayTests`,
-`DebugSendSystemTests`, `FamilyPassageTests`), `Sim.Tests/Commands/SendCitizenToTests.cs`, `Sim.Tests/Save/PopulationSectionTests.cs`.
+`DebugSendSystemTests`, `FamilyPassageTests`, `PassageWorkReadersTests`), `Sim.Tests/Commands/SendCitizenToTests.cs`, `Sim.Tests/Save/PopulationSectionTests.cs`.
 Unity: `Assets/Tests/PlayMode/DebugSendTests.cs`, `PeopleRendererTests.cs`.

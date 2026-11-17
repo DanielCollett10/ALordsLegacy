@@ -26,6 +26,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | GR-13b | Future: a family **homeless for 30 days** leaves the same way (`camp.md` CMP-26). Not in M16 unless the owner pulls it in | DECIDED (future) |
 | GR-14 | A message line reads *The <name> family is leaving: hungry for 30 days* (GR-30) | PROPOSED |
 
+> Implementation note: the leaving line uses the family's actual `HungryDays`, which is 30 at the default tuning.
+
 ## Arrivals
 
 | ID | Rule | Tag |
@@ -40,6 +42,12 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | GR-25 | POP-A6 (adults filling an incomplete family) is **not** in M16; every arrival is a new family | DECIDED (owner 17/11/2026) |
 | GR-26 | Message line: *The <name> family has arrived* | PROPOSED |
 
+> **Implementation notes (M16), for the owner to decide.** The rules above are unchanged.
+> - GR-22b: the month of food is put into the family larder at spawn; the walkers do not carry it in.
+> - GR-24: members walk the shortest walkable path to the house; they are not routed along the trunk road.
+> - GR-23: names and age ranges are defaults in `ArrivalCatalog` (code), not the start-layout name lists.
+> - GR-25 and POP-A6: POP-A6 is not built, so every arrival is a new family. `gdd-amendments.md` still marks POP-A6 DECIDED.
+
 ## What the player sees
 
 | ID | Rule | Tag |
@@ -48,6 +56,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | GR-31 | Top bar population shows families and citizens, with the number arriving or leaving in the tooltip | PROPOSED |
 
 Technical shape (passage state, map exits, house reservation, settlement log): decision 0045.
+
+> Implementation note: the message line fades from 25 s and is gone at 30 s real time (`MessageLogFade`). GR-31: the top bar shows "Citizens: N" and puts families, arriving and leaving in its tooltip, not as a family count in the readout.
 
 ## Not in M16
 
