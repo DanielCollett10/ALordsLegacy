@@ -41,9 +41,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-31 | A **grown grain** (straw, chaff from threshing) toggle on the hut panel, **shown greyed out: "Needs farming"** until fields exist. Straw is a summer source | DECIDED (owner 17/11/2026) |
 | MAT-32 | Cut stalks are tied into bundles and **set upright on the bank to dry**. After a curing time the workers go back, collect the dry sheaves and carry them **home to the hut store** | DECIDED |
 | MAT-33 | Dry sheaves are stored in **ricks** (conical piles) or open-sided shelters so they stay dry | DECIDED (art and storage detail OPEN) |
-| MAT-34 | Reed and rush are cut at **full rate in winter** (Dec–Feb). Outside winter, rush is cut at **1/4 of the winter rate** (each cut takes 4× as long), a trickle that never matches winter. Curing and collecting run in any season | DECIDED (owner 17/11/2026; spring/autumn = summer rate PROPOSED) |
+| MAT-34 | Reed and rush are cut at **full rate in winter** (Dec–Feb). In spring, summer and autumn, rush is cut at **1/4 of the winter rate** (each cut takes 4× as long; the factor is tuning). Curing and collecting run in any season | DECIDED (owner 17/11/2026) |
 | MAT-35 | **1 sheaf = 1 bundle.** Each bundle cures **7 days** where it was set up. A worker carries **1 sheaf per trip** on the shoulder. A cart takes 5 (carts not built yet). Cut minutes per sheaf PLACEHOLDER | DECIDED (owner 17/11/2026) |
-| MAT-36 | A new game starts with **90 thatch sheaves** at the camp (9 houses at 10 each) | DECIDED (owner 17/11/2026) |
+| MAT-36 | A new game starts with **90 thatch sheaves** and **90 wattle panels** in the camp's General store (9 houses at 10 each) | DECIDED (owner 17/11/2026) |
 | MAT-37 | Thatcher families **stay assigned all year** (slow cutting outside winter). Seasonal reassignment is a later feature | DECIDED (owner 17/11/2026) |
 | MAT-38 | The thatcher's hut keeps a small store of sheaves (capacity PLACEHOLDER, e.g. 40) | DECIDED (owner 17/11/2026; amount PROPOSED) |
 
@@ -61,7 +61,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | --- | --- | --- |
 | MAT-50 | A carrier with a willow basket carries **twice as much** food or forage per trip (simple CNT-02) | DECIDED (owner 17/11/2026) |
 | MAT-51 | Baskets **do not wear out** yet. Made at the weaver, they go to general goods: the camp's general store, or the storage yard once one is built (`storage.md`) | DECIDED (owner 17/11/2026) |
-| MAT-52 | A carrier takes one basket from the nearest general store when its family is assigned to foraging or a granary, keeps it while assigned, and returns it on unassign | PROPOSED |
+| MAT-52 | Baskets are **claimed by buildings**, not by people: a forager hut or granary claims baskets into its kit store (`storage.md` ST-20..24), and its carriers use them. A carrier with a basket from its building's kit carries double | DECIDED (owner 17/11/2026) |
 
 ## Gaps (17/11/2026)
 
