@@ -4,6 +4,8 @@ using LordsLegacy.Game;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Game.Tools.Shared;
 using LordsLegacy.Game.Visuals;
+using LordsLegacy.Sim.Areas;
+using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
@@ -143,8 +145,8 @@ namespace LordsLegacy.Tests.PlayMode
             yield return Setup(40);
             _tool.SetViewSettings(new ViewSettings { Snapping = true, SnapDistancePx = 12f });
             var w = _host.World;
-            var house = w.Footprints.Add(901, ModuleTypes.House, PointMm.FromMetres(100, 100), 0);
-            double houseTop = MaxZ(house.PlotPolygon);
+            AddHousePlot();
+            double houseTop = HousePlotTopZ;
             double z = houseTop + GranaryHalfZ() + 0.3; // 30 cm short of flush, well inside 12 px
             _tool.PointerMove(Screen(100, (float)z));
             Assert.IsTrue(_tool.Preview.Ok, _tool.Preview.Text);
@@ -163,8 +165,8 @@ namespace LordsLegacy.Tests.PlayMode
         {
             yield return Setup(40);
             _tool.SetViewSettings(new ViewSettings { Snapping = false });
-            var house = _host.World.Footprints.Add(901, ModuleTypes.House, PointMm.FromMetres(100, 100), 0);
-            double houseTop = MaxZ(house.PlotPolygon);
+            AddHousePlot();
+            double houseTop = HousePlotTopZ;
             double z = houseTop + GranaryHalfZ() + 0.3;
             _tool.PointerMove(Screen(100, (float)z));
             Assert.AreEqual(0.0, _tool.GhostRotation, 1e-9);
@@ -180,11 +182,28 @@ namespace LordsLegacy.Tests.PlayMode
         {
             yield return Setup(40);
             _tool.SetViewSettings(new ViewSettings { Snapping = true });
-            _host.World.Footprints.Add(901, ModuleTypes.House, PointMm.FromMetres(100, 100), 0);
+            AddHousePlot();
             _tool.PointerMove(Screen(100, 140)); // tens of metres from the house
             _tool.Rotate(StructureTool.RotateStepDeg);
             Assert.AreEqual(15.0, _tool.GhostRotation, 1e-9);
             Assert.AreEqual(140.0, _tool.GhostCentre.ZMetres, 0.2, "Out of reach: the ghost is not moved.");
+        }
+
+        /// <summary>
+        /// Top (max z) edge of the house plot drawn by <see cref="AddHousePlot"/>. Snapping reads drawn plot areas and
+        /// standalone yards, not the house building footprint (which has no yard margin, so it is not a snap edge).
+        /// </summary>
+        private const double HousePlotTopZ = 104.0;
+
+        /// <summary>Draws a 6 × 8 m house plot (x 97–103, z 96–104) as a drawn area, the way the player makes one.</summary>
+        private void AddHousePlot()
+        {
+            var shape = AreaShape.Straight(new[]
+            {
+                PointMm.FromMetres(97, 96), PointMm.FromMetres(103, 96), PointMm.FromMetres(103, HousePlotTopZ), PointMm.FromMetres(97, HousePlotTopZ),
+            });
+            var r = _host.Execute(new DesignateArea(shape, AreaTypes.TestId));
+            Assert.IsTrue(r.IsAccepted, r.Text);
         }
 
         private static double MaxZ(PointMm[] pts)
