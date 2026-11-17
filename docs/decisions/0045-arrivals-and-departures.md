@@ -13,9 +13,9 @@ through, and a way to tell the player what happened.
 - **Map edge:** a point within `MapEdgeToleranceM` (tuning, 2 m) of the terrain bounds. A **road exit** is any road
   node (segment end or junction) on the edge. Exits are **derived, never saved** (`MapExits`). With no road exit, the
   nearest walkable edge point.
-- **Entry point:** the trunk road's end on the map edge. If the trunk road does not reach the edge (the M15 test layout
-  stops after 80 m), the entry is the walkable edge point nearest the trunk road's closer end, and arrivals walk overland
-  to the road. The default layout is extended to the edge so the fallback is rare.
+- **Entry point:** the trunk road's end on the map edge. The default layout's 80 m trunk road is extended to the nearest
+  edge (owner, GR-24b); final maps will ship with roads to the edges (FG-09). As a safety net only, if a trunk road does
+  not reach the edge the entry is the walkable edge point nearest its closer end.
 - **System order (routine phase):** `EatingSystem` (midnight) → `DepartureSystem` → `ArrivalSystem` (dawn). Departures are
   decided before arrivals on any tick.
 - An arriving family **reserves** its house in `HomeRegistry` (saved in the Homes section). `MoveInSystem` never gives a
