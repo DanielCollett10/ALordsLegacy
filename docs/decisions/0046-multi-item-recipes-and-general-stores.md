@@ -18,5 +18,10 @@ for General items (INV-A1).
 - **Progress over all items:** build cap = recipe minutes × delivered units ÷ needed units over all items.
   `LogsConsumed` becomes consumed counts per item (saved). Deconstruction refunds each item by `DeconstructRefundShare`.
 
+- **Reservation semantics:** a General item is reserved on the nearest `GoodsStore` with available stock, like logs.
+  Reserved stock still counts in village totals (it is still in the store) but not in `AvailableOf`.
+- **Save versions:** every task that changes the format bumps `SaveWriter.CurrentVersion` by one at merge. Tasks that
+  touch `Assets/Sim/Save/` list `SaveWriter.cs` in their touches, so they never run in parallel.
+
 **Consequences.** New materials are data: an `ItemDef` plus recipe counts. Thatch and panels in M20 need no new
 construction code. Old saves are refused (version bump, decision 0038).

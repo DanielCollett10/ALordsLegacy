@@ -13,6 +13,7 @@ system doc with rules. Source: T-119 notes (M3/M4 play), triaged 07/11/2026.
 | FG-06 | **Buildings block pathing by their model** (owner, 15/11/2026): most 3D models block walking across their whole footprint, except open structures on posts | Needs per-type model shapes and a blocking flag review; today only some footprint types block (decision 0018) | `FootprintTypeDef` blocking flag, `NavGrid` |
 | FG-07 | **World generation settings** (forest and vegetation scatter from Gaea masks, rivers, better forage bush spread) | Planned with the World MVP, after M18 | Map bake, `BushRegistry` scatter, tree scatter |
 | FG-08 | **Far-region simulation** at 50 km (millions of trees; the 50k-tree target is for 2 km) | Needs a decision before the World MVP is broken down | `TreeRegistry`, streaming, Sim LOD |
+| FG-09 | **Pregenerated roads to the map edges and choosing the start** (owner, 17/11/2026): final maps come with roads already leading out to the edges, and the player picks where to settle. Arrivals and departures then use those roads | Needs the World MVP maps (FG-01..03) | Map bake, start layout, `MapExits` |
 
 ## Milestone order (owner, M6 planning)
 
