@@ -49,7 +49,10 @@ namespace LordsLegacy.Sim.Tasks
                 return true;
             }
             LedgerLocation carrier = world.OxCarrier(ox);
-            int carried = carrier.CountOf(Items.Log.Id);
+            ItemDef hauled = Items.Log;
+            foreach (TaskStep st in t.Def.Steps)
+                if (st.Kind == StepKind.LoadOx) { hauled = Items.Find(st.ItemId ?? TaskStep.DefaultOxItemId) ?? Items.Log; break; }
+            int carried = carrier.CountOf(hauled.Id);
             if (carried > 0)
             {
                 c.Activity = Activity.Working;
@@ -59,7 +62,7 @@ namespace LordsLegacy.Sim.Tasks
                 ConstructionSite site = t.Def.Id == ConstructionTaskDefs.DeliverId ? SiteOfDeliver(world, t) : null;
                 int? owner = site != null ? (int?)site.FootprintId : PileOwner(t);
                 LedgerLocation pile = world.Inventory.GetOrAddGroundPile(PointMm.FromMetres(ox.X, ox.Z), owner);
-                world.Inventory.Transfer(carrier, pile, Items.Log, carried);
+                world.Inventory.Transfer(carrier, pile, hauled, carried);
                 // The logs are on the ground now, so the storage room this haul reserved for them is no longer needed.
                 // Releasing it here keeps LogLoad from counting these logs twice while the ox walks back (WC-25).
                 world.Inventory.CancelOwner(t.Id);
@@ -174,9 +177,11 @@ namespace LordsLegacy.Sim.Tasks
             LedgerLocation carrier = world.OxCarrier(ox);
             LedgerLocation other = world.Inventory.Get(step.LocationId);
             if (other == null) return false;
+            ItemDef item = Items.Find(step.ItemId ?? TaskStep.DefaultOxItemId);
+            if (item == null) return false;
             return step.Kind == StepKind.LoadOx
-                ? world.Inventory.Transfer(other, carrier, Items.Log, step.Count, t.Id)
-                : world.Inventory.Transfer(carrier, other, Items.Log, step.Count, t.Id);
+                ? world.Inventory.Transfer(other, carrier, item, step.Count, t.Id)
+                : world.Inventory.Transfer(carrier, other, item, step.Count, t.Id);
         }
 
         // An Active task cancelled from outside the runner (a finished site cancels its deliveries, a removed site...) is

@@ -63,13 +63,13 @@ namespace LordsLegacy.Sim.Construction
             foreach (int id in ids) world.Inventory.Release(id);
         }
 
-        private struct Source
+        internal struct Source
         {
             public LedgerLocation Location;
             public PointMm Position;
         }
 
-        private static List<Source> Sources(SimWorld world, ItemDef item)
+        internal static List<Source> Sources(SimWorld world, ItemDef item)
         {
             // General items (planks, beams) come only from goods stores (decision 0046); logs keep their sources.
             bool general = item.Category == ItemCategory.General;
