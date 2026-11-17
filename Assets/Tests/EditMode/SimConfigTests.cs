@@ -156,6 +156,57 @@ namespace LordsLegacy.Tests.EditMode
             finally { Object.DestroyImmediate(cfg); }
         }
 
+        private static void AssertTimberEquals(SimTuning t, SimTuning d)
+        {
+            Assert.AreEqual(d.StartingPlanks, t.StartingPlanks);
+            Assert.AreEqual(d.HandCarryPlanks, t.HandCarryPlanks);
+            Assert.AreEqual(d.OxLoadBeams, t.OxLoadBeams);
+            Assert.AreEqual(d.HewingBeamsPerLog, t.HewingBeamsPerLog);
+            Assert.AreEqual(d.HewingLogsPerDay, t.HewingLogsPerDay);
+            Assert.AreEqual(d.HewingStockCapacity, t.HewingStockCapacity);
+            Assert.AreEqual(d.HewingStoreCapacity, t.HewingStoreCapacity);
+            Assert.AreEqual(d.SawingPlanksPerBeam, t.SawingPlanksPerBeam);
+            Assert.AreEqual(d.SawingBeamsPerDay, t.SawingBeamsPerDay);
+            Assert.AreEqual(d.SawingStockCapacity, t.SawingStockCapacity);
+            Assert.AreEqual(d.SawingStoreCapacity, t.SawingStoreCapacity);
+            Assert.AreEqual(d.WorkshopShiftMinutes, t.WorkshopShiftMinutes);
+        }
+
+        [Test]
+        public void TimberChainDefaultsEqualSimTuning()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try { AssertTimberEquals(cfg.BuildTuning(), new SimTuning()); }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
+        public void CommittedAssetHoldsTimberChainValues()
+        {
+            var cfg = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath);
+            Assert.IsNotNull(cfg, "Run LordsLegacy/Config/Create default SimConfig");
+            AssertTimberEquals(cfg.BuildTuning(), new SimTuning());
+        }
+
+        [Test]
+        public void TimberChainValuesFlowIntoTuning()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                cfg.startingPlanks = 33; cfg.handCarryPlanks = 4; cfg.oxLoadBeams = 2; cfg.hewingLogsPerDay = 5;
+                cfg.sawingStoreCapacity = 77; cfg.workshopShiftMinutes = 480;
+                var t = cfg.BuildTuning();
+                Assert.AreEqual(33, t.StartingPlanks);
+                Assert.AreEqual(4, t.HandCarryPlanks);
+                Assert.AreEqual(2, t.OxLoadBeams);
+                Assert.AreEqual(5, t.HewingLogsPerDay);
+                Assert.AreEqual(77, t.SawingStoreCapacity);
+                Assert.AreEqual(480, t.WorkshopShiftMinutes);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
         [Test]
         public void CommittedAssetHoldsGrowthValues()
         {

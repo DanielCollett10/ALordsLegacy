@@ -75,11 +75,12 @@ namespace LordsLegacy.Tests.PlayMode
                 // OperationPanelView builds its panel in code too (T-281).
                 // HousePanelView and GranaryPanelView build theirs in code (T-410, T-449).
                 if (doc.name != "GroundReadout" && doc.name != "CitizenPanel" && doc.name != "OperationPanel"
-                    && doc.name != "HousePanel" && doc.name != "GranaryPanel" && doc.name != "MarketPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                    && doc.name != "HousePanel" && doc.name != "GranaryPanel" && doc.name != "MarketPanel"
+                    && doc.name != "WorkshopPanel" && doc.name != "Autosave") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GranaryPanel", "GroundReadout", "HousePanel", "MarketPanel", "OperationPanel", "ToolPanel", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GranaryPanel", "GroundReadout", "HousePanel", "MarketPanel", "MessageLog", "OperationPanel", "ToolPanel", "TopBar", "WorkshopPanel" }, names);
         }
 
         [UnityTest]
@@ -164,6 +165,19 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(panel, "GranaryPanelView missing.");
             AssertNoNullRefs(panel);
             Assert.IsNotNull(panel.GetComponent<UnityEngine.UIElements.UIDocument>(), "GranaryPanel has no UIDocument.");
+        }
+
+        [UnityTest]
+        public IEnumerator GameSceneHasWorkshops()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+            var panel = Object.FindFirstObjectByType<WorkshopPanelView>();
+            Assert.IsNotNull(panel, "WorkshopPanelView missing (run LordsLegacy/Scenes/Generate Game scene).");
+            AssertNoNullRefs(panel);
+            Assert.IsNotNull(panel.GetComponent<UnityEngine.UIElements.UIDocument>(), "WorkshopPanel has no UIDocument.");
         }
 
         [UnityTest]
