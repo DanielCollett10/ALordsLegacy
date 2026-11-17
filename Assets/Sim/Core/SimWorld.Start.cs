@@ -28,5 +28,8 @@ namespace LordsLegacy.Sim.Core
 
         /// <summary>Tick of the latest midnight eating where any household was Hungry (GR-21); null until then. Saved in the Food section.</summary>
         public long? LastHungryTick { get; internal set; }
+
+        /// <summary>Tick the latest family arrived (GR-20); null until then. Saved in the Core section.</summary>
+        public long? LastArrivalTick { get; internal set; }
     }
 }

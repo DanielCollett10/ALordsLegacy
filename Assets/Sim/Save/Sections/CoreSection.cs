@@ -44,6 +44,8 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt64(e.Tick);
                 w.WriteString(e.Text);
             }
+            w.WriteBool(s.LastArrivalTick.HasValue); // T-504
+            w.WriteInt64(s.LastArrivalTick ?? 0);
         }
 
         /// <summary>Reads a section body written by <see cref="WriteBody"/>.</summary>
@@ -66,6 +68,9 @@ namespace LordsLegacy.Sim.Save.Sections
                 string text = r.ReadString();
                 s.SettlementEntries.Add(new SettlementEntry(tick, text));
             }
+            bool hasArrival = r.ReadBool();
+            long arrival = r.ReadInt64();
+            s.LastArrivalTick = hasArrival ? arrival : (long?)null;
             return s;
         }
 

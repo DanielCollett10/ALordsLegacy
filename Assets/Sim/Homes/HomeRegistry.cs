@@ -17,9 +17,13 @@ namespace LordsLegacy.Sim.Homes
         /// <summary>Ledger id of the house's larder (FD-10), or 0 for none yet. Saved by the Food section.</summary>
         public int LarderLocationId { get; internal set; }
 
-        internal HomeRecord(int houseFootprintId, int plotAreaId, int familyId)
+        /// <summary>Id of the arriving family this house is held for (GR-22), or 0 for none. Saved by the Homes section.</summary>
+        public int ReservedForFamilyId { get; internal set; }
+
+        internal HomeRecord(int houseFootprintId, int plotAreaId, int familyId, int reservedForFamilyId = 0)
         {
             HouseFootprintId = houseFootprintId; PlotAreaId = plotAreaId; FamilyId = familyId;
+            ReservedForFamilyId = reservedForFamilyId;
         }
     }
 
@@ -73,10 +77,31 @@ namespace LordsLegacy.Sim.Homes
             if (home == null) throw new ArgumentNullException(nameof(home));
             if (family == null) throw new ArgumentNullException(nameof(family));
             if (home.FamilyId != 0 || !family.IsHomeless) return false;
+            if (home.ReservedForFamilyId != 0 && home.ReservedForFamilyId != family.Id) return false;
+            home.ReservedForFamilyId = 0;
             home.FamilyId = family.Id;
             family.HomeHouseId = home.HouseFootprintId;
             Version++;
             return true;
+        }
+
+        /// <summary>Holds an Empty, unreserved house for an arriving family. False (nothing changed) if it is not free.</summary>
+        public bool Reserve(HomeRecord home, int familyId)
+        {
+            if (home == null) throw new ArgumentNullException(nameof(home));
+            if (familyId <= 0 || home.FamilyId != 0 || home.ReservedForFamilyId != 0) return false;
+            home.ReservedForFamilyId = familyId;
+            Version++;
+            return true;
+        }
+
+        /// <summary>Drops a reservation (no-op if none).</summary>
+        public void ReleaseReservation(HomeRecord home)
+        {
+            if (home == null) throw new ArgumentNullException(nameof(home));
+            if (home.ReservedForFamilyId == 0) return;
+            home.ReservedForFamilyId = 0;
+            Version++;
         }
 
         /// <summary>Makes a home Empty (its family link is cleared). The caller clears the family's side (<see cref="HouseRemoval"/>).</summary>
@@ -97,10 +122,10 @@ namespace LordsLegacy.Sim.Homes
         }
 
         /// <summary>Restore: adds a record with its family; the family's link is set by <see cref="CheckLinks"/>' caller.</summary>
-        internal void Restore(int houseFootprintId, int plotAreaId, int familyId)
+        internal void Restore(int houseFootprintId, int plotAreaId, int familyId, int reservedForFamilyId = 0)
         {
             if (_homes.ContainsKey(houseFootprintId)) throw new ArgumentException("Duplicate house " + houseFootprintId);
-            _homes.Add(houseFootprintId, new HomeRecord(houseFootprintId, plotAreaId, familyId));
+            _homes.Add(houseFootprintId, new HomeRecord(houseFootprintId, plotAreaId, familyId, reservedForFamilyId));
             Version++;
         }
     }
