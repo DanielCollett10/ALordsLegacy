@@ -41,8 +41,8 @@ FG-07): chunk-load the 50 × 50 km Gaea package (`source/gaea-world-data-package
 with world generation settings (forests, vegetation, rivers, foraging spread). The generated 2 km test map stays
 until then (PLT-07 not changed). Placeholder art is tracked in `placeholder-art.md`; the owner makes the final models.
 
-Update 17/11/2026 (owner; **order PROPOSED by the lead, to confirm**): **M16 Growth** (`growth.md`), **M17 Sawpit and
-planks** (MVP-4 part 1: stalls cost 2 planks, one building gets a plank recipe), **M18 Coppice and thatch**
+Update 17/11/2026 (owner, order confirmed): **M16 Growth** (`growth.md`), **M17 Sawpit and
+planks** (`planks.md`: the sawpit is its own building; only stalls use planks for now), **M18 Coppice and thatch**
 (`materials.md`: coppice hut, thatcher's hut, weaver, wattle yard; houses cost 10 logs + 10 thatch), **M19 Tier 1
 houses** (daub, household levels 1–2). Gameplay and tidy-up moves after M19.
 
