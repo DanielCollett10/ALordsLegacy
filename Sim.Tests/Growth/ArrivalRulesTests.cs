@@ -236,6 +236,7 @@ namespace LordsLegacy.Sim.Tests.Growth
         {
             SimWorld w = Ready(out _);
             Assert.IsNull(w.LastHungryTick);
+            w.LastArrivalTick = w.Tick; // keep ArrivalSystem quiet: this test is about the hunger window only (T-505)
             do w.Step(); while (!(w.Now.Hour == 0 && w.Now.Minute == 0));
             Assert.IsNotNull(w.LastHungryTick, "the housed family's larder is empty, so it went hungry");
             Assert.AreEqual("Someone was hungry this week", ArrivalRules.Check(w, Plan(30, 30)).Reason);

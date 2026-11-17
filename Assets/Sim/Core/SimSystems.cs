@@ -38,6 +38,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.People.RoutineSystem(),
                 new LordsLegacy.Sim.Food.EatingSystem(),
                 new LordsLegacy.Sim.Growth.DepartureSystem(),
+                new LordsLegacy.Sim.Growth.ArrivalSystem(),
                 new LordsLegacy.Sim.Food.AllotmentSystem(),
                 new LordsLegacy.Sim.Food.FoodTripSystem(),
                 // dispatch
