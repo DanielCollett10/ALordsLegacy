@@ -154,7 +154,8 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32((int)s.Priority);
                 w.WriteInt32(s.LedgerLocationId);
                 w.WriteInt32(s.ProgressMinutes);
-                w.WriteInt32(s.LogsConsumed);
+                w.WriteInt32(s.Consumed.Count);
+                foreach (KeyValuePair<string, int> kv in s.Consumed) { w.WriteString(kv.Key); w.WriteInt32(kv.Value); }
                 WriteInts(w, s.ReservationIds);
             }
         }
@@ -169,15 +170,22 @@ namespace LordsLegacy.Sim.Save.Sections
                 int prio = r.ReadInt32();
                 int loc = r.ReadInt32();
                 int progress = r.ReadInt32();
-                int consumed = r.ReadInt32();
+                int nConsumed = r.ReadCount(8);
+                var consumed = new List<KeyValuePair<string, int>>();
+                for (int k = 0; k < nConsumed; k++)
+                {
+                    string item = r.ReadString();
+                    consumed.Add(new KeyValuePair<string, int>(item, r.ReadInt32()));
+                }
                 int[] reservations = ReadInts(r);
                 if (state < 0 || state > (int)ConstructionState.Building) throw new SaveFormatException("Bad construction state " + state + ".");
                 if (prio < 0 || prio > (int)ConstructionPriority.High) throw new SaveFormatException("Bad construction priority " + prio + ".");
                 if (world.Footprints.Get(fp) == null) throw new SaveFormatException("Construction site for missing footprint " + fp + ".");
                 var site = new ConstructionSite(fp, loc, (ConstructionPriority)prio)
                 {
-                    State = (ConstructionState)state, ProgressMinutes = progress, LogsConsumed = consumed
+                    State = (ConstructionState)state, ProgressMinutes = progress
                 };
+                foreach (KeyValuePair<string, int> kv in consumed) site.SetConsumed(kv.Key, kv.Value);
                 site.ReservationIds.AddRange(reservations);
                 world.Construction.Add(site);
             }

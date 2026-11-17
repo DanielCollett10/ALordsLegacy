@@ -3,7 +3,9 @@ using System.Linq;
 using LordsLegacy.EditorTools;
 using LordsLegacy.Game;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Map;
+using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Start;
 using LordsLegacy.Sim.Tuning;
@@ -34,6 +36,20 @@ namespace LordsLegacy.Tests.EditMode
             Assert.AreEqual(2, world.People.OxCount);
             Assert.Greater(world.Roads.Segments.Count(), 0);
             Assert.IsNotNull(world.Camp);
+        }
+
+        [Test]
+        public void TrunkRoadReachesMapEdgeAndIsTheEntryPoint()
+        {
+            StartLayout layout = Asset().ToLayout();
+            var world = SimWorld.FromMapData(Map(), new SimTuning());
+            Assert.DoesNotThrow(() => StartLayoutApplier.Apply(world, layout));
+            var trunk = layout.TrunkRoad;
+            PointMm first = trunk[0], last = trunk[trunk.Count - 1];
+            Assert.IsTrue(MapExits.IsOnEdge(world, first) || MapExits.IsOnEdge(world, last), "a trunk end is on the edge");
+            PointMm edgeEnd = MapExits.IsOnEdge(world, first) ? first : last;
+            Assert.IsTrue(world.EntryPoint.HasValue, "entry point set");
+            Assert.AreEqual(edgeEnd, world.EntryPoint.Value, "entry point is the trunk's edge end, not the fallback");
         }
 
         [Test]

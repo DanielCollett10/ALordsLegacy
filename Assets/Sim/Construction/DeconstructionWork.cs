@@ -26,6 +26,18 @@ namespace LordsLegacy.Sim.Construction
         public static int RefundLogs(SimWorld world, Footprint fp) =>
             (int)Math.Floor(fp.Type.ConstructionRecipe.Logs * world.Tuning.DeconstructRefundShare + 1e-9);
 
+        /// <summary>Items returned: each recipe item count × <c>DeconstructRefundShare</c>, rounded down; zero counts are left out.</summary>
+        public static SortedDictionary<string, int> Refunds(SimWorld world, Footprint fp)
+        {
+            var r = new SortedDictionary<string, int>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, int> kv in fp.Type.ConstructionRecipe.Items)
+            {
+                int n = (int)Math.Floor(kv.Value * world.Tuning.DeconstructRefundShare + 1e-9);
+                if (n > 0) r[kv.Key] = n;
+            }
+            return r;
+        }
+
         /// <summary>Worker-minutes still to do, never negative.</summary>
         public static int Remaining(SimWorld world, DeconstructionEntry e, Footprint fp) =>
             Math.Max(0, TotalMinutes(world, fp) - e.ProgressMinutes);
@@ -44,11 +56,11 @@ namespace LordsLegacy.Sim.Construction
                     world.Tasks.Cancel(t.Id);
 
             Ledger inv = world.Inventory;
-            int refund = RefundLogs(world, fp);
+            SortedDictionary<string, int> refunds = Refunds(world, fp);
             LedgerLocation storage = inv.FindStorage(footprintId);
             if (storage == null) storage = inv.FindFoodStore(footprintId); // a granary's food store (CN-55)
             bool hasContents = storage != null && storage.Total > 0;
-            if (refund > 0 || hasContents)
+            if (refunds.Count > 0 || hasContents)
             {
                 LedgerLocation pile = inv.GetOrAddGroundPile(fp.Centre, null);
                 if (hasContents)
@@ -57,7 +69,7 @@ namespace LordsLegacy.Sim.Construction
                         int n = storage.AvailableOf(kv.Key);
                         if (n > 0) inv.Transfer(storage, pile, Items.Find(kv.Key), n);
                     }
-                if (refund > 0) inv.Produce(pile, Items.Log, refund);
+                foreach (KeyValuePair<string, int> kv in refunds) inv.Produce(pile, Items.Find(kv.Key), kv.Value);
             }
 
             var owners = new List<int>();

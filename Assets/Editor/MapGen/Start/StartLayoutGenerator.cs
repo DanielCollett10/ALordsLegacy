@@ -86,12 +86,94 @@ namespace LordsLegacy.EditorTools
                     var cfg = Make(x, z);
                     var road = cfg.trunkRoadM.Select(p => new PointMm((long)(p.x * 1000), (long)(p.y * 1000))).ToList();
                     if (!RoadValidator.Validate(world, road, RoadTypes.DirtPathId).IsValid) continue;
+                    // GR-24b: the trunk road must reach the nearest reachable map edge (it is the incoming road).
+                    if (!ExtendToEdge(world, cfg)) continue;
                     // Final proof: the whole layout applies to a fresh world.
                     StartLayoutApplier.Apply(SimWorld.FromMapData(map, new SimTuning()), cfg.ToLayout());
                     return cfg;
                 }
             }
             throw new InvalidOperationException("No flat spot near the forest edge fits the start layout.");
+        }
+
+        /// <summary>Distance between control points while extending, metres.</summary>
+        private const float ExtendStepM = 40f;
+        /// <summary>The last control point sits this far inside the edge so it stays on the map and within the edge tolerance.</summary>
+        private const float EdgeInsetM = 0.5f;
+        private const int MaxSearchNodes = 20000;
+        private static readonly float[] TurnDeg = { 0f, 15f, -15f, 30f, -30f, 45f, -45f, 60f, -60f, 75f, -75f };
+
+        /// <summary>
+        /// Extends the trunk road from the end nearer a map edge to that edge, bending around ground
+        /// <see cref="RoadValidator"/> refuses. Tries the nearest edge first, then the next nearest. Deterministic.
+        /// Returns false (config unchanged) when no edge can be reached.
+        /// </summary>
+        private static bool ExtendToEdge(SimWorld world, StartLayoutConfig cfg)
+        {
+            var b = world.Terrain.Bounds;
+            float minX = b.MinX + EdgeInsetM, maxX = b.MaxX - EdgeInsetM, minZ = b.MinZ + EdgeInsetM, maxZ = b.MaxZ - EdgeInsetM;
+            var road = cfg.trunkRoadM;
+            // Candidates: (end index, edge direction as unit axis, distance). Each end only heads for edges it does not already run along.
+            var cands = new List<(bool atEnd, int axis, int sign, float dist)>();
+            for (int e = 0; e < 2; e++)
+            {
+                Vector2 p = e == 0 ? road[0] : road[road.Count - 1];
+                cands.Add((e == 1, 0, -1, p.x - minX)); cands.Add((e == 1, 0, 1, maxX - p.x));
+                cands.Add((e == 1, 1, -1, p.y - minZ)); cands.Add((e == 1, 1, 1, maxZ - p.y));
+            }
+            foreach (var c in cands.OrderBy(c => c.dist).ThenBy(c => c.atEnd).ThenBy(c => c.axis).ThenBy(c => c.sign))
+            {
+                Vector2 start = c.atEnd ? road[road.Count - 1] : road[0];
+                float target = c.axis == 0 ? (c.sign < 0 ? minX : maxX) : (c.sign < 0 ? minZ : maxZ);
+                var path = new List<Vector2>();
+                int budget = MaxSearchNodes;
+                if (!Search(world, road, c.atEnd, start, c.axis, c.sign, target, path, ref budget)) continue;
+                if (c.atEnd) road.AddRange(path);
+                else road.InsertRange(0, Enumerable.Reverse(path));
+                return true;
+            }
+            return false;
+        }
+
+        // Depth-first search for control points leading from 'from' to the edge line. 'added' holds the points chosen so far.
+        private static bool Search(SimWorld world, List<Vector2> road, bool atEnd, Vector2 from, int axis, int sign, float target,
+            List<Vector2> added, ref int budget)
+        {
+            if (budget-- <= 0) return false;
+            float remaining = Math.Abs((axis == 0 ? from.x : from.y) - target);
+            var dir0 = axis == 0 ? new Vector2(sign, 0) : new Vector2(0, sign);
+            foreach (float deg in TurnDeg)
+            {
+                float rad = deg * Mathf.Deg2Rad;
+                var dir = new Vector2(dir0.x * Mathf.Cos(rad) - dir0.y * Mathf.Sin(rad), dir0.x * Mathf.Sin(rad) + dir0.y * Mathf.Cos(rad));
+                float progress = axis == 0 ? dir.x * sign : dir.y * sign;
+                Vector2 next;
+                bool last = remaining <= ExtendStepM * progress;
+                if (last)
+                {
+                    float t = remaining / progress;
+                    next = from + dir * t;
+                    // Snap the final point exactly onto the inset edge line.
+                    if (axis == 0) next.x = target; else next.y = target;
+                }
+                else next = from + dir * ExtendStepM;
+                next = new Vector2((float)Math.Round(next.x, 1), (float)Math.Round(next.y, 1));
+                if (last) { if (axis == 0) next.x = target; else next.y = target; }
+
+                added.Add(next);
+                if (RoadValid(world, road, atEnd, added) && (last || Search(world, road, atEnd, next, axis, sign, target, added, ref budget)))
+                    return true;
+                added.RemoveAt(added.Count - 1);
+            }
+            return false;
+        }
+
+        private static bool RoadValid(SimWorld world, List<Vector2> road, bool atEnd, List<Vector2> added)
+        {
+            var pts = new List<Vector2>(road);
+            if (atEnd) pts.AddRange(added); else pts.InsertRange(0, Enumerable.Reverse(added));
+            var mm = pts.Select(p => new PointMm((long)Math.Round(p.x * 1000.0), (long)Math.Round(p.y * 1000.0))).ToList();
+            return RoadValidator.Validate(world, mm, RoadTypes.DirtPathId).IsValid;
         }
 
         private static bool CampFlat(SimWorld world, int cx, int cz)
