@@ -4,6 +4,7 @@ using LordsLegacy.Game.Visuals;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Operations.Workshops;
 using LordsLegacy.Sim.Placement;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,6 +21,10 @@ namespace LordsLegacy.Game.Tools
     {
         /// <summary>Build bar id of the granary entry.</summary>
         public const string GranaryToolId = "granary";
+        /// <summary>Build bar id of the hewing station entry.</summary>
+        public const string HewingToolId = "hewing-station";
+        /// <summary>Build bar id of the sawpit entry.</summary>
+        public const string SawpitToolId = "sawpit";
         /// <summary>Degrees one Q / E press turns the ghost.</summary>
         public const double RotateStepDeg = 15.0;
         /// <summary>Degrees one Shift + Q / E press turns the ghost.</summary>
@@ -206,10 +211,16 @@ namespace LordsLegacy.Game.Tools
         private void ShowPanel()
         {
             if (_panel == null) return;
-            string status = "Granary · " + _ghostRotation.ToString("0") + "°";
+            string status = ModuleTypes.DisplayName(_typeId) + " · " + _ghostRotation.ToString("0") + "°";
             if (!string.IsNullOrEmpty(_rejection)) status += " · " + _rejection;
             else if (Preview != null) status += Preview.Ok ? " · Valid · click to place" : " · " + Preview.Text;
-            _panel.Show(status, "Click places · Q / E turn 15° (Shift 1°) · Right-click or Esc leaves the tool", false);
+            string hint = "Click places · Q / E turn 15° (Shift 1°) · Right-click or Esc leaves the tool";
+            if (_host != null && _host.IsInitialized)
+            {
+                string confirm = WorkshopReport.ConfirmText(_host.World, _typeId); // null for the granary
+                if (confirm != null) hint = confirm.Replace("\n", " ") + " · " + hint;
+            }
+            _panel.Show(status, hint, false);
         }
 
         private void HideGhost() { if (_fill != null) _fill.Hide(); if (_yard != null) _yard.Hide(); }

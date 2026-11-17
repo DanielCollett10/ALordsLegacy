@@ -37,7 +37,7 @@ namespace LordsLegacy.Tests.PlayMode
             if (_panelSettings != null) Object.DestroyImmediate(_panelSettings);
         }
 
-        private IEnumerator Setup(int logs)
+        private IEnumerator Setup(int logs, string toolId = StructureTool.GranaryToolId, string typeId = ModuleTypes.GranaryId)
         {
             _hostGo = new GameObject("SyntheticSimHost");
             _host = _hostGo.AddComponent<SimHost>();
@@ -67,10 +67,57 @@ namespace LordsLegacy.Tests.PlayMode
             _toolGo = new GameObject("GranaryTool");
             _controller = _toolGo.AddComponent<ToolController>();
             _tool = _toolGo.AddComponent<StructureTool>();
-            _tool.Configure(StructureTool.GranaryToolId, ModuleTypes.GranaryId, _host, picker, _panel, _controller);
+            _tool.Configure(toolId, typeId, _host, picker, _panel, _controller);
             _controller.Register(_tool);
             yield return null;
-            _controller.Toggle(StructureTool.GranaryToolId);
+            _controller.Toggle(toolId);
+        }
+
+        /// <summary>T-526: the hewing station is a 6 x 4 m ghost, shows the confirm text, and a click places it.</summary>
+        [UnityTest]
+        public IEnumerator HewingStationGhostPlacesAndShowsConfirmText()
+        {
+            yield return Setup(40, StructureTool.HewingToolId, ModuleTypes.HewingStationId);
+            _tool.PointerMove(Screen(100, 100));
+            Assert.IsTrue(_tool.GhostVisible);
+            Assert.IsFalse(_tool.GhostIsRed, _tool.Preview?.Text);
+            Assert.AreEqual(6.0, Extent(_tool.Preview.Building, true), 0.01);
+            Assert.AreEqual(4.0, Extent(_tool.Preview.Building, false), 0.01);
+            StringAssert.Contains("Build a hewing station?", _panel.Hint);
+            Click(100, 100);
+            Assert.AreEqual(1, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.HewingStationId));
+            Assert.IsNotNull(_host.World.Operations.All.FirstOrDefault(o => o.TypeId == LordsLegacy.Sim.Operations.OperationTypes.HewingId));
+        }
+
+        /// <summary>T-526: the sawpit places like the hewing station.</summary>
+        [UnityTest]
+        public IEnumerator SawpitGhostPlacesAndShowsConfirmText()
+        {
+            yield return Setup(40, StructureTool.SawpitToolId, ModuleTypes.SawpitId);
+            _tool.PointerMove(Screen(100, 100));
+            Assert.IsFalse(_tool.GhostIsRed, _tool.Preview?.Text);
+            StringAssert.Contains("Build a sawpit?", _panel.Hint);
+            Click(100, 100);
+            Assert.AreEqual(1, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.SawpitId));
+        }
+
+        /// <summary>T-526: with no logs the workshop ghost is red with the Sim's text and a click places nothing.</summary>
+        [UnityTest]
+        public IEnumerator UnaffordableWorkshopIsRefusedWithSimText()
+        {
+            yield return Setup(0, StructureTool.SawpitToolId, ModuleTypes.SawpitId);
+            _tool.PointerMove(Screen(100, 100));
+            Assert.IsTrue(_tool.GhostIsRed);
+            StringAssert.Contains("Not enough logs", _panel.Status);
+            Click(100, 100);
+            Assert.AreEqual(0, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.SawpitId));
+        }
+
+        private static double Extent(LordsLegacy.Sim.Geometry.PointMm[] pts, bool x)
+        {
+            double lo = double.MaxValue, hi = double.MinValue;
+            foreach (var p in pts) { double v = x ? p.XMetres : p.ZMetres; lo = System.Math.Min(lo, v); hi = System.Math.Max(hi, v); }
+            return hi - lo;
         }
 
         private Vector2 Screen(float x, float z) => _cam.WorldToScreenPoint(new Vector3(x, 0f, z));
