@@ -32,6 +32,8 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
 - **Food and foraging** (`systems/food.md`, `systems/foraging.md`): food is ledger stock in larders and food stores. The
   Sunday allotment is a reservation, and the fetch trip is a task (decision 0042). Foragers deliver to the nearest store
   with room, never the camp (decision 0043). Routine phase: eating, the Sunday allotment and the Sunday trip. Operations phase: bush regrowth and foraging.
+- **Passage and settlement log** (decision 0045): `Family.Passage` (None, Arriving, Leaving) marks families walking in or out;
+  readers check `IsInPassage`. `SettlementLog` on `SimWorld` keeps the last 20 (tick, text) entries, saved in the Core section.
 - **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.
 - **Queries:** tools and views ask pure queries before committing (`RoadValidator.Validate`,
   `AreaValidator.Validate`, `ModulePlacement.Preview`, `PlacementRules`). They return previews and refusal
