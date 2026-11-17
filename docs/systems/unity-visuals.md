@@ -11,16 +11,16 @@
 |---|---|
 | `InstancedDraw` | Shared `Graphics.RenderMeshInstanced` helper, batches of 1023. Used by trees, people, modules, log piles, camp and construction. |
 | `TreeRenderer` | Standing trees from `TreeRegistry`, grouped in 64 m cells, frustum-culled. Also stumps and felled trunks. |
-| `PeopleRenderer` | Citizens (adult or child, by age) and oxen. Lerps `PreviousX/Z` → `X/Z` by `TickFraction` (current while paused). Yaw from `FacingRad`. |
+| `PeopleRenderer` | Citizens (adult or child, by age; a stock carrier holds a food crate) and oxen. Lerps `PreviousX/Z` → `X/Z` by `TickFraction` (current while paused). Yaw from `FacingRad`. |
 | `WalkBob` | Placeholder walk bob. Rate depends on metres walked per tick and `ViewSettings.WalkStepsPerMetre`. |
-| `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. One tent per Homeless family (no tent once housed). Rebuilds on footprint, camp, family or `Homes.Version` changes. |
-| `ModuleRenderer` | Woodcutting modules, forager huts, houses (`visual.module.house`) and standalone structures such as the granary, stretched to the footprint. Skips unbuilt footprints. |
+| `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. One tent per Homeless family; nothing once the camp is removed (CMP-23). Rebuilds on footprint, camp, family or `Homes.Version` changes. |
+| `ModuleRenderer` | Woodcutting modules, forager huts, houses (`visual.module.house`) and standalone structures such as the granary, stretched to the footprint. Market stalls, with food crates by fill. Skips unbuilt footprints. |
 | `BushRenderer` | Forage bushes from `BushRegistry`, instanced. Rebuilds only on `Bushes.Version` (not on reservations). |
 | `LogPileRenderer` | One log per ledger log in every location. Piles and stockpile stack at their point; storages along the footprint's X; ox carriers drag logs behind the ox. |
 | `ConstructionRenderer` | Scaffold per unbuilt site, height from `ConstructionProgress.Fraction`. |
 | `RoadRenderer` | One mesh per `RoadSegment`, rebuilt on `RoadNetwork.Version`. Preview mesh red where `InvalidRanges` apply. |
-| `AreaRenderer` | Fill and outline per area, from the flattened polygon. Work areas dashed. Colours are constants. |
-| `WorkAreaRenderer` | Work area overlay, added by `OperationPanelView` only when its panel is open. |
+| `AreaRenderer` | Fill and outline per area, from the flattened polygon. Work areas dashed (`WorkAreaRenderer`, shown only while the operation panel is open). Market areas get stall slot outlines (`StallGrid`). |
+| `PlacementOverlay` | While a placing tool is active, outlines every plot, marks its corners as snap points and draws pile circles (PL-12, PL-15). |
 | `TerrainDrape` | Shared ground helper: `Point`, `Ribbon` (polyline, at most 1 m steps), `Fill` (triangles, at most 2 m). Lifts above terrain. |
 | `GroundOverlay` | `Material(texture)` from shader `LordsLegacy/GroundOverlay` (unlit, alpha, depth bias with distance). Cached material. |
 | `VisualRegistry` | `VisualRegistry.asset`. `TryGet(id)`, `Get(id)` (logs an error, returns a placeholder). `IsPlaceholder`. |
@@ -56,5 +56,5 @@
 ## Tests
 
 `Assets/Tests/PlayMode/`: `TreeRendererTests`, `PeopleRendererTests`, `RoadRendererTests`, `AreaRendererTests`, `LogStacksTests`,
-`ConstructionVisualsTests`, `WoodcuttingVisualsTests`, `HouseVisualsTests`, `CursorMarkerTests`, `GroundOverlayTests`, `SunLightControllerTests`.
+`ConstructionVisualsTests`, `WoodcuttingVisualsTests`, `HouseVisualsTests`, `MarketVisualsTests`, `CursorMarkerTests`, `GroundOverlayTests`, `SunLightControllerTests`.
 EditMode: `GroundOverlayBuildTests`, `GroundOverlayTests`, `TerrainDrapeTests`, `VisualRegistryTests`, `SunLightModelTests`, `WalkBobTests`.
