@@ -46,4 +46,10 @@ planks** (`planks.md`: the sawpit is its own building; only stalls use planks fo
 (`materials.md`: coppice hut, thatcher's hut, weaver, wattle yard; houses cost 10 logs + 10 thatch), **M19 Tier 1
 houses** (daub, household levels 1–2). Gameplay and tidy-up moves after M19.
 
+Update 17/11/2026, later (split **PROPOSED by the lead, to confirm**): the storage yard joins and the materials milestone
+is split so each stays small: **M16 Growth**, **M17 Sawpit and planks** (with multi-item recipes, hand delivery, ox
+load 2), **M18 Storage yard** (`storage.md`), **M19 Coppice, weaver and wattle** (stools, rods, baskets that double a
+carry, panels), **M20 Thatch** (reed beds, seasons, curing; houses become 10 logs + 10 thatch + 10 panels), **M21 Tier 1
+houses** (daub, fence, household levels 1–2). Gameplay and tidy-up after M21.
+
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).
