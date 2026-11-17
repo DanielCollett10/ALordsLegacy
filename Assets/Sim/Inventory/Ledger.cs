@@ -101,6 +101,10 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, default, null, 0, capacity));
         }
 
+        /// <summary>Adds an unlimited goods store at a point (the camp General goods store, ST-02).</summary>
+        public LedgerLocation AddGoodsStore(PointMm position) =>
+            Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, position, null, 0));
+
         /// <summary>Finds the Site location of a footprint, or null (never creates).</summary>
         public LedgerLocation FindSite(int footprintId)
         {

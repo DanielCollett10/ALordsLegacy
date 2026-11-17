@@ -14,7 +14,8 @@ namespace LordsLegacy.Sim.Start
     /// happened and no family is Homeless, the camp is removed. Its footprint goes, anything left in the camp stockpile
     /// or food store moves to an unowned ground pile at the stockpile spot (unowned log piles stay construction sources),
     /// and oxen resting at the camp stand move to the nearest oxen stand, or rest where they are. If a camp location
-    /// still has reserved or incoming items the removal waits for the next day. <c>World.Camp</c> becomes null.
+    /// still has reserved or incoming items the removal waits for the next day. The General goods store (ST-02) blocks
+    /// removal while it holds any goods (ST-30); once empty it is dropped with the camp. <c>World.Camp</c> becomes null.
     /// </summary>
     public sealed class CampRemovalSystem : ISimSystem
     {
@@ -43,8 +44,9 @@ namespace LordsLegacy.Sim.Start
         {
             if (!IsDue(world)) return false;
             CampInfo camp = world.Camp;
-            LedgerLocation stock = camp.StockpileLocation, food = camp.FoodStoreLocation;
-            if (Promised(stock) || Promised(food)) return false;
+            LedgerLocation stock = camp.StockpileLocation, food = camp.FoodStoreLocation, general = camp.GeneralStoreLocation;
+            if (Promised(stock) || Promised(food) || Promised(general)) return false;
+            if (general != null && general.Total > 0) return false; // ST-30: the camp stays while the General store holds goods
 
             LedgerLocation pile = null;
             foreach (LedgerLocation from in new[] { stock, food })
@@ -59,6 +61,7 @@ namespace LordsLegacy.Sim.Start
                 }
                 world.Inventory.RemoveEmptyLocation(from.Id);
             }
+            if (general != null) world.Inventory.RemoveEmptyLocation(general.Id);
 
             PointMm stand = camp.OxStand;
             world.Footprints.Remove(camp.FootprintId);

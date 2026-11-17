@@ -34,6 +34,24 @@ namespace LordsLegacy.Sim.Start
         /// <summary>The camp food store (FD-02, FD-03): a food-only ledger location, separate from the log stockpile. Null when none.</summary>
         public LedgerLocation FoodStoreLocation { get; internal set; }
 
+        /// <summary>
+        /// The camp General goods store (ST-02, decision 0046): a <see cref="LocationKind.GoodsStore"/> holding the starting
+        /// planks. Not part of any operation's pool. Null when none. Removal waits while it holds goods (ST-30).
+        /// </summary>
+        public LedgerLocation GeneralStoreLocation { get; internal set; }
+
+        /// <summary>
+        /// Ledger location id of the General store, 0 for none. Same pattern as <see cref="StockpileLocationId"/>: the
+        /// Structures section is read before the Ledger, so the id waits here until <see cref="GeneralStoreLocation"/> is attached.
+        /// </summary>
+        internal int GeneralStoreLocationId
+        {
+            get => GeneralStoreLocation != null ? GeneralStoreLocation.Id : PendingGeneralStoreLocationId;
+            set => PendingGeneralStoreLocationId = value;
+        }
+
+        internal int PendingGeneralStoreLocationId { get; private set; }
+
         /// <summary>Id of the camp footprint in <c>SimWorld.Footprints</c>.</summary>
         public int FootprintId { get; }
         /// <summary>Camp fire, world mm.</summary>

@@ -6,6 +6,7 @@ using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Homes;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Save;
@@ -27,7 +28,16 @@ namespace LordsLegacy.Sim.Tests.Start
             var layout = new StartLayout(M(100, 100), 0, new PointMm(0, 0), new PointMm(6000, 0), new PointMm(-6000, 0),
                 new PointMm[0], new StartFamily[0], 2);
             StartLayoutApplier.Apply(w, layout);
+            UsePlanksUp(w); // T-513: the General store must be empty before the camp can go (ST-30)
             return w;
+        }
+
+        /// <summary>Uses up the starting planks so the camp's General store is empty (T-513).</summary>
+        internal static void UsePlanksUp(SimWorld w)
+        {
+            LedgerLocation general = w.Camp.GeneralStoreLocation;
+            int n = general.CountOf(Items.Plank.Id);
+            if (n > 0) w.Inventory.Consume(general, Items.Plank, n);
         }
 
         private static Family AddFamily(SimWorld w, int id)
