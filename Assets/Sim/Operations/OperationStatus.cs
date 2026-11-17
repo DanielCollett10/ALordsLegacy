@@ -34,6 +34,10 @@ namespace LordsLegacy.Sim.Operations
         NoRoomAtMarket = 9,
         /// <summary>A granary family needs a stall but the camp has fewer than the stall's 2 planks (PL-13, MK-21).</summary>
         WaitingForPlanks = 10,
+        /// <summary>A workshop has no input to work on (T-524, HW-05).</summary>
+        WaitingForInput = 11,
+        /// <summary>A workshop's output store has no room for another input's outputs (T-524, PL-05).</summary>
+        WorkshopStoreFull = 12,
     }
 
     /// <summary>Computes operation status from world state. Nothing here is stored (GDD section 5).</summary>
@@ -46,6 +50,8 @@ namespace LordsLegacy.Sim.Operations
         public static OperationState Of(SimWorld world, Operation op)
         {
             if (op.TypeId == OperationTypes.ForagingId) return Foraging.ForagingStatus.Of(world, op);
+            Workshops.WorkshopDef shop = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
+            if (shop != null) return Workshops.WorkshopStatus.Of(world, op, shop);
             if (op.Paused) return OperationState.Paused;
             if (op.TypeId == OperationTypes.GranaryId && HasNoRoomFamily(world, op)) return OperationState.NoRoomAtMarket;
             if (op.TypeId == OperationTypes.GranaryId && HasNoPlanksFamily(world, op)) return OperationState.WaitingForPlanks;
@@ -66,8 +72,16 @@ namespace LordsLegacy.Sim.Operations
         public static OperationState Reported(SimWorld world, Operation op)
         {
             OperationState s = Of(world, op);
-            if (s != OperationState.Working && s != OperationState.StorageFull) return s;
-            return IsWaitingForOx(world, op) ? OperationState.WaitingForOx : s;
+            if (s != OperationState.Working && s != OperationState.StorageFull && s != OperationState.WaitingForInput) return s;
+            Workshops.WorkshopDef shop = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
+            if (shop != null)
+            {
+                // A shop at work is not waiting; one without input waits for an ox when it has one to wait for (T-524).
+                if (s != OperationState.WaitingForInput) return s;
+                return IsWaitingForOx(world, op) || Workshops.WorkshopStatus.StuckWithoutOx(world, op, shop)
+                    ? OperationState.WaitingForOx : s;
+            }
+            return IsWaitingForOx(world, op) ?OperationState.WaitingForOx : s;
         }
 
         private static bool HasNoRoomFamily(SimWorld world, Operation op)

@@ -207,7 +207,8 @@ namespace LordsLegacy.Sim.Tests.Workshops
             Assert.IsTrue(Fetches(w).Any(t => t.State == TaskState.Cancelled), "sunset cancelled a fetch under way");
             Assert.IsTrue(w.Inventory.Locations.Any(l => l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id && l.CountOf(Items.Log.Id) > 0),
                 "its load stays as a workshop-owned pile");
-            Assert.AreEqual(logsBefore, w.Inventory.TotalOf(Items.Log) + w.Inventory.FindWorkshopStock(fp).Total,
+            // T-524: hewing turns logs into beams (one log consumed per beam).
+            Assert.AreEqual(logsBefore, w.Inventory.TotalOf(Items.Log) + w.Inventory.FindWorkshopStock(fp).Total + w.Inventory.ConsumedOf(Items.Log.Id),
                 "no log is lost or made, wherever the fetches end up");
         }
 

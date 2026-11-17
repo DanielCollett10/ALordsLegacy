@@ -172,6 +172,7 @@ namespace LordsLegacy.Sim.Tasks
             FellingOutcome.OnStepCompleted(world, t, done);
             if (t.State == TaskState.Done)
             {
+                if (t.Def.Id == Operations.Workshops.WorkshopSystem.WorkTaskId) Operations.Workshops.WorkshopSystem.OnWorkDone(world, t);
                 c.Activity = Activity.MillingAbout;
                 _oxTrack.Remove(t.Id);
                 _rest.Remove(t.Id);

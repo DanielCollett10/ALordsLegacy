@@ -41,8 +41,77 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 LedgerLocation stock = world.Inventory.FindWorkshopStock(fp.Id);
                 if (stock == null) continue;
                 AttachOxen(world, op, fp);
+                OpenWork(world, op, def, fp, stock);
                 OpenTasks(world, op, def, fp, stock);
             }
+        }
+
+        /// <summary>Id of the work task definition (T-524, HW-02, PL-05).</summary>
+        public const string WorkTaskId = "task.workshop_work";
+
+        /// <summary>Unfinished work tasks of the operation.</summary>
+        internal static int OpenWorkCount(SimWorld world, Operation op)
+        {
+            int n = 0;
+            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
+                if (t.Def.Id == WorkTaskId && !t.IsFinished) n++;
+            return n;
+        }
+
+        // Families of the operation with a working-age member: each may run one work task at a time.
+        private static int WorkingFamilies(SimWorld world, Operation op)
+        {
+            int n = 0;
+            foreach (int fid in op.FamilyIds)
+            {
+                Family fam = world.People.FindFamily(fid);
+                if (fam == null) continue;
+                foreach (int cid in fam.MemberIds)
+                {
+                    Citizen c = world.People.FindCitizen(cid);
+                    if (c != null && c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears) { n++; break; }
+                }
+            }
+            return n;
+        }
+
+        // One work task per assigned family while the stock holds an input and the store has room for its outputs.
+        // Work minutes per input = shift minutes / inputs per day (HW-02). Progress lives in the task, like a build's.
+        private static void OpenWork(SimWorld world, Operation op, WorkshopDef def, Footprint fp, LedgerLocation stock)
+        {
+            LedgerLocation store = world.Inventory.FindGoodsStore(fp.Id);
+            if (store == null) return;
+            int minutes = Math.Max(1, world.Tuning.WorkshopShiftMinutes / def.InputsPerDayPerFamily);
+            int open = OpenWorkCount(world, op);
+            int families = WorkingFamilies(world, op);
+            while (open < families && stock.AvailableOf(def.Input.Id) >= 1 && store.FreeSpace >= def.OutputsPerInput)
+            {
+                var taskDef = new TaskDef(WorkTaskId, new[] { TaskStep.Work(minutes, true) },
+                    EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None);
+                TaskRecord task = world.Tasks.Create(taskDef, op.Id, null, TaskPriority.Normal);
+                if (world.Inventory.ReserveStock(stock, def.Input, 1, task.Id) == 0 ||
+                    world.Inventory.ReserveCapacity(store, def.Output, def.OutputsPerInput, task.Id) == 0)
+                {
+                    world.Inventory.CancelOwner(task.Id);
+                    world.Tasks.Cancel(task.Id);
+                    return;
+                }
+                open++;
+            }
+        }
+
+        /// <summary>A work task has finished: its reservations end, one input is consumed and the outputs are produced.</summary>
+        internal static void OnWorkDone(SimWorld world, TaskRecord t)
+        {
+            world.Inventory.CancelOwner(t.Id);
+            Operation op = world.Operations.Get(t.OwnerOperationId);
+            WorkshopDef def = op == null ? null : OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
+            Footprint fp = def == null ? null : HutOf(world, op);
+            if (fp == null) return;
+            LedgerLocation stock = world.Inventory.FindWorkshopStock(fp.Id);
+            LedgerLocation store = world.Inventory.FindGoodsStore(fp.Id);
+            if (stock == null || store == null || !world.Inventory.Consume(stock, def.Input, 1)) return;
+            world.Inventory.Produce(store, def.Output, def.OutputsPerInput);
         }
 
         /// <inheritdoc />
@@ -50,7 +119,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         {
         }
 
-        private static Footprint HutOf(SimWorld world, Operation op)
+        internal static Footprint HutOf(SimWorld world, Operation op)
         {
             foreach (int id in op.ModuleIds)
             {
@@ -60,7 +129,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             return null;
         }
 
-        private static bool HasWorker(SimWorld world, Operation op)
+        internal static bool HasWorker(SimWorld world, Operation op)
         {
             foreach (int fid in op.FamilyIds)
             {
@@ -82,7 +151,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             foreach (Reservation r in world.Inventory.Reservations)
             {
                 TaskRecord t = world.Tasks.Get(r.Owner);
-                if (t != null && t.IsFinished && t.Def.Id == FetchTaskId) owners.Add(r.Owner);
+                if (t != null && t.IsFinished && (t.Def.Id == FetchTaskId || t.Def.Id == WorkTaskId)) owners.Add(r.Owner);
             }
             foreach (int owner in owners) world.Inventory.CancelOwner(owner);
             foreach (Ox ox in world.People.Oxen)
