@@ -167,6 +167,29 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM15MarketAndPlotOverlayWired()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var market = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.MarketTool>();
+            Assert.IsNotNull(market, "MarketTool missing.");
+            AssertNoNullRefs(market);
+            Assert.AreEqual(LordsLegacy.Game.ToolEntry.MarketToolId, market.Id);
+
+            var marketPanel = Object.FindFirstObjectByType<MarketPanelView>();
+            Assert.IsNotNull(marketPanel, "MarketPanelView missing.");
+            AssertNoNullRefs(marketPanel);
+            Assert.IsNotNull(marketPanel.GetComponent<UnityEngine.UIElements.UIDocument>(), "MarketPanel has no UIDocument.");
+
+            var overlay = Object.FindFirstObjectByType<LordsLegacy.Game.Visuals.PlacementOverlay>();
+            Assert.IsNotNull(overlay, "PlacementOverlay missing.");
+            AssertNoNullRefs(overlay);
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneHasM7PeopleWired()
         {
             var load = SceneManager.LoadSceneAsync("Game");

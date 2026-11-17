@@ -27,8 +27,8 @@ namespace LordsLegacy.Game.Visuals
 
         private const float Lift = 0.22f, OutlineWidthM = 0.2f, CornerR = 0.3f, SnappedR = 0.6f;
 
-        private SimHost _host;
-        private ToolController _controller;
+        [SerializeField] private SimHost _host;
+        [SerializeField] private ToolController _controller;
         private GameObject _object;
         private Mesh _mesh;
         private Material _material;
