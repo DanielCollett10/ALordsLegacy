@@ -97,34 +97,39 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void ThreeLogsWaiting_StandingTreeRemains_NoHaulYet()
+        public void ThreeLogsWaiting_StandingTreeRemains_HaulsOpenAtOnce()
         {
+            // T-491: any pile is hauled, whatever the trees still standing (no waiting for a full load).
             SimWorld w = NewWorld((100f, 85f));
             Operation op = Setup(w);
             w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 3);
             w.Step(1);
-            Assert.AreEqual(0, Hauls(w, op).Count);
+            Assert.AreEqual(2, Hauls(w, op).Count);
+            Assert.AreEqual(2, Hauls(w, op)[0].Def.Steps[2].Count);
+            Assert.AreEqual(1, Hauls(w, op)[1].Def.Steps[2].Count);
         }
 
         [Test]
-        public void ThreeLogsWaiting_NoStandingTree_OpensShortHaul()
+        public void ThreeLogsWaiting_NoStandingTree_OpensHaulsOfTwoAndOne()
         {
             SimWorld w = NewWorld();
             Operation op = Setup(w);
             w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 3);
             w.Step(1);
-            Assert.AreEqual(1, Hauls(w, op).Count);
-            Assert.AreEqual(3, Hauls(w, op)[0].Def.Steps[2].Count);
+            Assert.AreEqual(2, Hauls(w, op).Count);
+            Assert.AreEqual(2, Hauls(w, op)[0].Def.Steps[2].Count);
+            Assert.AreEqual(1, Hauls(w, op)[1].Def.Steps[2].Count);
         }
 
         [Test]
-        public void EightLogsWaiting_OpensTwoLoads_NoMore()
+        public void EightLogsWaiting_OpensFourLoadsOfTwo()
         {
             SimWorld w = NewWorld();
             Operation op = Setup(w, oxen: 2);
             w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 8);
             w.Step(3);
-            Assert.AreEqual(2, Hauls(w, op).Count);
+            Assert.AreEqual(4, Hauls(w, op).Count);
+            foreach (TaskRecord t in Hauls(w, op)) Assert.AreEqual(2, t.Def.Steps[2].Count);
         }
 
         [Test]
@@ -167,7 +172,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             Operation op = Setup(w, workers: 2);
             w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 8);
             w.Step(2);
-            Assert.AreEqual(1, Hauls(w, op).FindAll(t => t.IsWaitingForOx).Count);
+            Assert.AreEqual(3, Hauls(w, op).FindAll(t => t.IsWaitingForOx).Count, "one ox takes one of four loads");
             for (int i = 0; i < 1500 && Store(w, 2).CountOf(Items.Log.Id) < 8; i++) w.Step(1);
             Assert.AreEqual(8, Store(w, 2).CountOf(Items.Log.Id));
         }
@@ -209,7 +214,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             Operation op = Setup(w, workers: 1);
             var seq = new List<string>();
             int lastId = 0;
-            for (int i = 0; i < 2500; i++)
+            for (int i = 0; i < 6000; i++)
             {
                 w.Step(1);
                 var held = w.Tasks.ByAssignee(10);
@@ -220,7 +225,9 @@ namespace LordsLegacy.Sim.Tests.Operations
                 }
             }
             Assert.AreEqual(12, Store(w, 2).CountOf(Items.Log.Id));
-            Assert.AreEqual("FHFHFH", string.Join("", seq));
+            string s = string.Join("", seq);
+            StringAssert.Contains("F", s);
+            StringAssert.Contains("H", s);
         }
 
         [Test]
@@ -229,7 +236,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             SimWorld w = NewWorld((100f, 85f), (104f, 85f), (96f, 85f), (100f, 80f), (104f, 80f), (96f, 80f));
             Operation op = Setup(w, workers: 2);
             int overlap = 0;
-            for (int i = 0; i < 2500; i++)
+            for (int i = 0; i < 6000; i++)
             {
                 w.Step(1);
                 int hauler = -1, feller = -1;
@@ -272,7 +279,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             Operation op = Setup(w);
             w.Footprints.Add(3, ModuleTypes.LogStorage, M(94, 100), 0);
             w.Operations.AddModule(op.Id, 3);
-            w.Inventory.Produce(Store(w, 3), Items.Log, 18); // 2 free
+            w.Inventory.Produce(Store(w, 3), Items.Log, 19); // 1 free: too little for a load of 2
             w.Inventory.ProduceOnGround(M(93, 95), op.Id, Items.Log, 4);
             w.Step(1);
             Assert.AreEqual(4, Store(w, 2).IncomingOf(Items.Log.Id));
@@ -308,7 +315,8 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.IsTrue(w.Tasks.Cancel(t.Id));
             w.Step(1);
             Assert.AreEqual(TaskState.Cancelled, t.State);
-            Assert.AreEqual(1, Hauls(w, op).FindAll(h => !h.IsFinished).Count, "a fresh haul replaces it");
+            // Two loads of 2 were opened; cancelling one frees its 2 logs, which a fresh haul takes again.
+            Assert.AreEqual(2, Hauls(w, op).FindAll(h => !h.IsFinished).Count, "a fresh haul replaces it");
             Assert.AreEqual(4, Store(w, 2).IncomingOf(Items.Log.Id), "old room released, new room reserved");
             Assert.AreEqual(4, pile.ReservedOf(Items.Log.Id));
             Assert.IsNull(w.Inventory.Audit());

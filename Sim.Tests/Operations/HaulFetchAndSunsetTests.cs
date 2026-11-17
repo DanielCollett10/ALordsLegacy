@@ -17,18 +17,16 @@ using NUnit.Framework;
 
 namespace LordsLegacy.Sim.Tests.Operations
 {
-    /// <summary>Early fetch (WC-23) and hauls cut short at sunset (WC-35), T-291.</summary>
+    /// <summary>Hauls cut short at sunset (WC-35, T-291). Early fetch is off (T-491), so there are no early-fetch tests.</summary>
     public class HaulFetchAndSunsetTests
     {
         private const long AdultBirth = -4_000_000;
 
         private static PointMm M(double x, double z) => PointMm.FromMetres(x, z);
 
-        private static SimWorld NewWorld(int month, int day, int hour, params (float x, float z)[] trees)
+        private static SimWorld NewWorld(int month, int day, int hour)
         {
-            var list = new List<MapTree>();
-            for (int i = 0; i < trees.Length; i++) list.Add(new MapTree(new TreeId(i + 1), trees[i].x, trees[i].z, 16));
-            var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), list.ToArray());
+            var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             return SimWorld.FromMapData(map, new SimTuning
             {
                 StartMonth = month, StartDay = day, StartHour = hour, StartMinute = 0, StartWeekday = Weekday.Monday,
@@ -61,116 +59,17 @@ namespace LordsLegacy.Sim.Tests.Operations
             return r;
         }
 
-        private static TaskRecord Fell(SimWorld w, Operation op)
-        {
-            foreach (TaskRecord t in w.Tasks.ByOwner(op.Id)) if (t.Def.Id == WoodcuttingSystem.FellTaskId) return t;
-            return null;
-        }
-
         private static LedgerLocation Store(SimWorld w) => w.Inventory.GetOrAddStorage(2, w.Footprints.Get(2).Type);
 
-        // ---- early fetch (WC-23) ----
-
-        [Test]
-        public void EarlyFetch_HaulOpensOnlyWhenTreeTimeLeftIsWithinTheTwoWalks_AndOxIsAtThePileWhenItFalls()
-        {
-            SimWorld w = NewWorld(6, 21, 8, (100f, 85f));
-            Operation op = Setup(w, workers: 2, oxX: 160, oxZ: 160);
-            double walk = w.Tuning.WalkSpeedMPerGameMinute;
-            double oxToTree = System.Math.Sqrt(60 * 60 + 75 * 75) / w.Tuning.OxSpeedMPerGameMinute; // led at ox pace
-
-            TaskRecord fell = null;
-            double leftAtStart = -1, leftAtOpen = -1, walksAtOpen = 0;
-            TaskRecord haul = null;
-            long openedAt = 0;
-            for (int i = 0; i < 600 && haul == null; i++)
-            {
-                w.Step(1);
-                fell = fell ?? Fell(w, op);
-                if (fell != null && leftAtStart < 0 && fell.State == TaskState.Active) leftAtStart = HaulSystem.FellMinutesLeft(w, fell);
-                var hauls = Hauls(w, op);
-                if (hauls.Count > 0)
-                {
-                    haul = hauls[0];
-                    openedAt = w.Tick;
-                    leftAtOpen = HaulSystem.FellMinutesLeft(w, fell);
-                    Citizen free = w.People.FindCitizen(fell.AssigneeId.Value == 10 ? 11 : 10);
-                    double toOx = System.Math.Sqrt((free.X - 160) * (free.X - 160) + (free.Z - 160) * (free.Z - 160)) / walk;
-                    walksAtOpen = toOx + oxToTree;
-                }
-            }
-            Assert.IsNotNull(haul, "haul opened while the tree was still being felled");
-            Assert.AreEqual(TaskState.Active, fell.State, "tree not down yet when the haul opens");
-            Assert.Greater(leftAtStart, walksAtOpen + 10, "it did not open at once: the tree had plenty of time left");
-            Assert.That(leftAtOpen, Is.EqualTo(walksAtOpen).Within(4), "opens when time left equals the two walks");
-            Assert.AreEqual(50, haul.OxId.Value);
-            Assert.AreEqual(fell.Id, haul.AwaitsTaskId.Value);
-            Assert.AreEqual(4, Store(w).IncomingOf(Items.Log.Id), "storage room reserved at once");
-
-            // The tree comes down; the ox is already at the pile (or about to load), not still walking from the stand.
-            for (int i = 0; i < 400 && fell.State != TaskState.Done; i++) w.Step(1);
-            Assert.AreEqual(TaskState.Done, fell.State);
-            w.Step(30); // dispatch granularity (10 min) plus path wiggle; unaided the ox would still be about 90 min away
-            Ox oxx = w.People.FindOx(50);
-            Assert.GreaterOrEqual(haul.CurrentStep, 2, "the haul is at LoadOx right after the tree is down; opened at tick " +
-                openedAt + " done at " + w.Tick + " state " + haul.State + " ox " + oxx.X + "," + oxx.Z + " " + oxx.State.Kind +
-                " worker " + haul.AssigneeId);
-            Assert.IsNull(haul.AwaitsTaskId);
-            for (int i = 0; i < 400 && Store(w).CountOf(Items.Log.Id) < 4; i++) w.Step(1);
-            Assert.AreEqual(4, Store(w).CountOf(Items.Log.Id));
-            Assert.AreEqual(1, Hauls(w, op).Count, "no second haul for the same logs");
-            Assert.IsNull(w.Inventory.Audit());
-        }
-
-        [Test]
-        public void EarlyFetch_NoFreeWorker_NoEarlyHaul()
-        {
-            SimWorld w = NewWorld(6, 21, 8, (100f, 85f));
-            Operation op = Setup(w, workers: 1, oxX: 105, oxZ: 104);
-            w.Step(60);
-            Assert.AreEqual(TaskState.Active, Fell(w, op).State);
-            Assert.AreEqual(0, Hauls(w, op).Count, "the only worker is felling");
-        }
-
-        [Test]
-        public void EarlyFetch_TreeYieldingLessThanAFullLoad_NoEarlyHaul()
-        {
-            var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]),
-                new[] { new MapTree(new TreeId(1), 100f, 85f, 8) }); // 2 logs
-            SimWorld w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8 });
-            Operation op = Setup(w, workers: 2, oxX: 105, oxZ: 104);
-            w.Step(80);
-            Assert.AreEqual(0, Hauls(w, op).Count);
-        }
-
-        [Test]
-        public void EarlyFetch_FellTaskCancelled_OpenHaulIsCancelledAndReleased()
-        {
-            SimWorld w = NewWorld(6, 21, 8, (100f, 85f));
-            Operation op = Setup(w, workers: 2, oxX: 105, oxZ: 104);
-            for (int i = 0; i < 300 && Hauls(w, op).Count == 0; i++) w.Step(1);
-            TaskRecord haul = Hauls(w, op)[0];
-            TaskRecord fell = Fell(w, op);
-            Assert.AreEqual(TaskState.Open, haul.State);
-            Assert.AreEqual(4, Store(w).IncomingOf(Items.Log.Id));
-            Assert.IsTrue(w.Tasks.Cancel(fell.Id));
-            w.Step(2);
-            Assert.AreEqual(TaskState.Cancelled, haul.State);
-            Assert.AreEqual(0, Store(w).IncomingOf(Items.Log.Id), "room released");
-            Assert.AreNotEqual(OxStateKind.Reserved, w.People.FindOx(50).State.Kind, "ox released");
-            Assert.IsNull(w.Inventory.Audit());
-        }
-
-        // ---- sunset (WC-35) ----
-
         // Dec 21: sunrise 08:00, sunset 16:00. Jun 21: sunrise 04:00, sunset 20:00. A far pile at (100,190).
+        // The pile holds 2 logs, one ox load (OxLoadLogs), so one haul carries it all.
         [TestCase(12, 21, 13, TestName = "Winter")]
         [TestCase(6, 21, 17, TestName = "Summer")]
         public void SunsetDrop_FarPile_UnloadsWhereItStands_ReturnsOx_ReleasesOldPile_NextDayPicksItUp(int month, int day, int hour)
         {
             SimWorld w = NewWorld(month, day, hour);
             Operation op = Setup(w, workers: 1, oxX: 105, oxZ: 104);
-            LedgerLocation oldPile = w.Inventory.ProduceOnGround(M(100, 190), op.Id, Items.Log, 4);
+            LedgerLocation oldPile = w.Inventory.ProduceOnGround(M(100, 190), op.Id, Items.Log, 2);
             long end = w.WorkDay.WindowOf(w, WorkDay.DayStart(w)).End;
 
             TaskRecord haul = null;
@@ -182,7 +81,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.IsNotNull(haul);
             Assert.AreEqual(TaskState.Active, haul.State, "haul still under way just before sunset");
             Assert.AreEqual(3, haul.CurrentStep, "loaded and leading to storage");
-            Assert.AreEqual(4, w.OxCarrier(w.People.FindOx(50)).CountOf(Items.Log.Id));
+            Assert.AreEqual(2, w.OxCarrier(w.People.FindOx(50)).CountOf(Items.Log.Id));
 
             while (haul.State == TaskState.Active && w.Tick < end + 300) w.Step(1);
             Assert.AreEqual(TaskState.Cancelled, haul.State);
@@ -193,7 +92,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             foreach (LedgerLocation l in w.Inventory.Locations)
                 if (l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id && l.Id != oldPile.Id && l.CountOf(Items.Log.Id) > 0) dropped = l;
             Assert.IsNotNull(dropped, "logs dropped as a new pile");
-            Assert.AreEqual(4, dropped.CountOf(Items.Log.Id));
+            Assert.AreEqual(2, dropped.CountOf(Items.Log.Id));
             Assert.Greater(dropped.Position.DistanceTo(oldPile.Position), 5000, "not at the old pile");
             Assert.Greater(dropped.Position.DistanceTo(M(110, 100)), 5000, "not at the storage");
             Assert.AreEqual(0, oldPile.CountOf(Items.Log.Id));
@@ -212,8 +111,8 @@ namespace LordsLegacy.Sim.Tests.Operations
 
             // Next day a new Haul picks up the dropped pile.
             long nextSunrise = w.WorkDay.WindowOf(w, WorkDay.DayStart(w) + 1440).Sunrise;
-            while (w.Tick < nextSunrise + 600 && Store(w).CountOf(Items.Log.Id) < 4) w.Step(1);
-            Assert.AreEqual(4, Store(w).CountOf(Items.Log.Id), "dropped logs reach storage the next day");
+            while (w.Tick < nextSunrise + 600 && Store(w).CountOf(Items.Log.Id) < 2) w.Step(1);
+            Assert.AreEqual(2, Store(w).CountOf(Items.Log.Id), "dropped logs reach storage the next day");
             Assert.Greater(w.Tick, nextSunrise, "not during the night");
             Assert.AreEqual(0, dropped.CountOf(Items.Log.Id));
             w.Step(150); // the ox walks back to its rest spot

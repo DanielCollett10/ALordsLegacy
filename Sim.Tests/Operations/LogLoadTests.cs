@@ -61,10 +61,11 @@ namespace LordsLegacy.Sim.Tests.Operations
             Ox ox = w.People.AddOx(50, "O", 105, 104);
             Assert.IsTrue(w.Operations.AssignOx(op.Id, ox.Id));
             LedgerLocation carrier = w.OxCarrier(ox);
-            LedgerLocation pile = w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 4);
-            Assert.IsTrue(w.Inventory.Transfer(pile, carrier, Items.Log, 4));
+            // A carrier holds one ox load (OxLoadLogs = 2, T-491).
+            LedgerLocation pile = w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 2);
+            Assert.IsTrue(w.Inventory.Transfer(pile, carrier, Items.Log, 2));
             Assert.AreEqual(0, pile.Total);
-            Assert.AreEqual(4, OperationStatus.LogLoad(w, op), "logs on the carrier are load");
+            Assert.AreEqual(2, OperationStatus.LogLoad(w, op), "logs on the carrier are load");
         }
 
         [Test]
@@ -74,7 +75,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             Operation op = Ready(w, out _);
             Ox stranger = w.People.AddOx(60, "other", 105, 104);
             w.OxCarrier(stranger);
-            w.Inventory.Produce(w.OxCarrier(stranger), Items.Log, 3);
+            w.Inventory.Produce(w.OxCarrier(stranger), Items.Log, 2);
             Assert.AreEqual(0, OperationStatus.LogLoad(w, op));
         }
 
@@ -106,11 +107,11 @@ namespace LordsLegacy.Sim.Tests.Operations
             Ox ox = w.People.AddOx(50, "O", 105, 104);
             Assert.IsTrue(w.Operations.AssignOx(op.Id, ox.Id));
             LedgerLocation carrier = w.OxCarrier(ox);
-            LedgerLocation pile = w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 4);
-            Assert.AreNotEqual(0, w.Inventory.ReserveStock(pile, Items.Log, 4, 999));
-            Assert.AreNotEqual(0, w.Inventory.ReserveCapacity(store, Items.Log, 4, 999));
-            Assert.IsTrue(w.Inventory.Transfer(pile, carrier, Items.Log, 4, 999));
-            Assert.AreEqual(4, OperationStatus.LogLoad(w, op));
+            LedgerLocation pile = w.Inventory.ProduceOnGround(M(95, 95), op.Id, Items.Log, 2);
+            Assert.AreNotEqual(0, w.Inventory.ReserveStock(pile, Items.Log, 2, 999));
+            Assert.AreNotEqual(0, w.Inventory.ReserveCapacity(store, Items.Log, 2, 999));
+            Assert.IsTrue(w.Inventory.Transfer(pile, carrier, Items.Log, 2, 999));
+            Assert.AreEqual(2, OperationStatus.LogLoad(w, op));
             Assert.IsNull(w.Inventory.Audit());
         }
 

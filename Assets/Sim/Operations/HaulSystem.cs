@@ -39,7 +39,6 @@ namespace LordsLegacy.Sim.Operations
                 if (op.TypeId != OperationTypes.WoodcuttingId) continue;
                 if (!CanHaul(world, op)) continue;
                 ResolveAwaiting(world, op);
-                OpenEarly(world, op);
                 OpenTasks(world, op);
                 AttachOxen(world, op);
             }

@@ -74,23 +74,24 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void EightLogs_OpensTwoTasksOfFour_WithCn21Steps_AndLedgerStaysClean()
+        public void EightLogs_OpensFourTasksOfTwo_WithCn21Steps_AndLedgerStaysClean()
         {
+            // T-491: an ox carries OxLoadLogs (2) per trip, so 8 logs are 4 deliveries.
             Ctx c = Build(oxen: 2);
             c.W.Step(1);
             List<TaskRecord> ds = Delivers(c.W);
-            Assert.AreEqual(2, ds.Count);
+            Assert.AreEqual(4, ds.Count);
             foreach (TaskRecord t in ds)
             {
-                Assert.AreEqual(4, t.Def.Steps[2].Count);
+                Assert.AreEqual(2, t.Def.Steps[2].Count);
                 Assert.AreEqual(c.Pile.Id, t.Def.Steps[2].LocationId);
                 Assert.AreEqual(c.Site.LedgerLocationId, t.Def.Steps[4].LocationId);
                 var kinds = t.Def.Steps.Select(s => s.Kind).ToArray();
                 CollectionAssert.AreEqual(new[] { StepKind.FetchOx, StepKind.LeadTo, StepKind.LoadOx, StepKind.LeadTo,
                     StepKind.UnloadOx, StepKind.ReturnOx }, kinds);
                 Assert.AreEqual(TaskPriority.Normal, t.Priority);
-                Assert.IsTrue(t.OxId.HasValue);
             }
+            Assert.AreEqual(2, ds.Count(t => t.OxId.HasValue), "two oxen take two of the four loads");
             Assert.AreEqual(8, Reserved(c.W));
             Assert.AreEqual(0, c.Site.ReservationIds.Sum(i => c.W.Inventory.GetReservation(i).Count));
             Assert.IsNull(c.W.Inventory.Audit());
@@ -125,8 +126,8 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.IsTrue(sawFirstLog);
             c.W.Step(200);
             Assert.AreEqual(8, ConstructionProgress.Of(c.W, c.SiteId).LogsDelivered);
-            Assert.AreEqual(2, Delivers(c.W).Count(t => t.State == TaskState.Done));
-            Assert.AreEqual(2, Delivers(c.W).Count);
+            Assert.AreEqual(4, Delivers(c.W).Count(t => t.State == TaskState.Done));
+            Assert.AreEqual(4, Delivers(c.W).Count);
             Assert.AreEqual(0, Reserved(c.W));
             Assert.AreEqual(0, c.Pile.Total);
             Assert.AreEqual(OxStateKind.Resting, c.W.People.FindOx(50).State.Kind);
@@ -178,7 +179,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             c.W.Step(1);
             Assert.AreEqual(8, Reserved(c.W));
             Assert.IsNull(c.W.Inventory.Audit());
-            Assert.AreEqual(2, Delivers(c.W).Count(t => !t.IsFinished), "a fresh task replaces the cancelled one");
+            Assert.AreEqual(4, Delivers(c.W).Count(t => !t.IsFinished), "a fresh task replaces the cancelled one");
             Ox ox = c.W.People.AddOx(60, "late", 100, 104);
             ox.State = OxState.Resting(100000, 104000);
             for (int i = 0; i < 3000 && c.W.Inventory.Get(c.Site.LedgerLocationId).CountOf(Items.Log.Id) < 8; i++) c.W.Step(1);
