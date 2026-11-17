@@ -25,6 +25,19 @@ namespace LordsLegacy.Sim.Footprints
             BuildWorkerMinutes = buildWorkerMinutes;
         }
 
+        /// <summary>Creates a recipe needing the given item counts (item id to count); non-positive counts are ignored.</summary>
+        public ConstructionRecipe(IEnumerable<KeyValuePair<string, int>> items, int buildWorkerMinutes)
+        {
+            if (items == null) throw new System.ArgumentNullException(nameof(items));
+            if (buildWorkerMinutes < 0) throw new System.ArgumentOutOfRangeException(nameof(buildWorkerMinutes));
+            foreach (var kv in items)
+            {
+                if (string.IsNullOrEmpty(kv.Key)) throw new System.ArgumentException("Item id missing.", nameof(items));
+                if (kv.Value > 0) _items[kv.Key] = kv.Value;
+            }
+            BuildWorkerMinutes = buildWorkerMinutes;
+        }
+
         /// <summary>Item id to count, in id order. Only positive counts.</summary>
         public IReadOnlyDictionary<string, int> Items => _items;
 
