@@ -48,6 +48,11 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 
 ## Top bar addition
 
+- **Resources** (owner 17/11/2026, DECIDED): the top bar shows each resource after the date: *Food: N days*, *Logs: N*
+  (camp stockpile, log storages and unowned ground piles), *Planks: N* (all General goods stores). Each new resource
+  gets its own label for now. Later (direction DECIDED, not scheduled): compress into three hover menus, **Food** (every
+  food type), **Construction goods** (logs, planks, thatch, panels…) and **General** (everything else), to be refined
+  after it is built.
 - **Snapping: On/Off** toggle on the right (UI-02). It is a presentation setting (`ViewSettings`), not Sim state.
   Default On. Pressing **Alt** toggles it, exactly like clicking the button (not a hold).
 

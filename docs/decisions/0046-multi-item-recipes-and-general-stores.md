@@ -13,7 +13,8 @@ for General items (INV-A1).
   nearest source first, all or nothing. All placement paths call it. Refusal text names the first short item
   ("Not enough planks (have 4, need 6)"). `BuildCost.CanAfford` takes a recipe.
 - **Delivery by carry class:** logs keep `task.deliver_materials` by ox. Other items use a new `task.carry_materials`
-  done by hand (odd-jobbers, same eligibility as deliveries), `HandCarry` items per trip from tuning.
+  done by hand, `HandCarry` items per trip from tuning. Who carries depends on the site: odd-jobbers by default (same
+  eligibility as deliveries); a market stall's items are carried by its granary family (`MarketRegistry.FamilyOf`).
 - **Progress over all items:** build cap = recipe minutes × delivered units ÷ needed units over all items.
   `LogsConsumed` becomes consumed counts per item (saved). Deconstruction refunds each item by `DeconstructRefundShare`.
 
