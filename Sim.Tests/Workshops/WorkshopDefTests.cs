@@ -30,7 +30,7 @@ namespace LordsLegacy.Sim.Tests.Workshops
             Assert.AreSame(Items.Beam, s.Input); Assert.AreSame(Items.Plank, s.Output);
             Assert.AreEqual(new[] { 3, 3, 6, 20, 1 },
                 new[] { s.OutputsPerInput, s.InputsPerDayPerFamily, s.InputStockCapacity, s.OutputCapacity, s.OxLoadForInput });
-            Assert.AreEqual(240, t.WorkshopShiftMinutes);
+            Assert.AreEqual(0, t.WorkshopShiftMinutes, "0 = the day's daylight window");
         }
 
         [Test]

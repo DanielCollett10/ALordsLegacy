@@ -58,6 +58,17 @@ namespace LordsLegacy.Sim.Operations.Workshops
             return n;
         }
 
+        /// <summary>
+        /// Minutes in a workshop shift (HW-02): <c>WorkshopShiftMinutes</c> when set above 0, otherwise (the default) the
+        /// length of today's daylight work window, so "per day" means a real working day in every season.
+        /// </summary>
+        public static int ShiftMinutes(SimWorld world)
+        {
+            if (world.Tuning.WorkshopShiftMinutes > 0) return world.Tuning.WorkshopShiftMinutes;
+            WorkDay.Window win = world.WorkDay.WindowOf(world, WorkDay.DayStart(world));
+            return (int)Math.Max(1, win.End - win.Sunrise);
+        }
+
         // Families of the operation with a working-age member: each may run one work task at a time.
         private static int WorkingFamilies(SimWorld world, Operation op)
         {
@@ -81,7 +92,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         {
             LedgerLocation store = world.Inventory.FindGoodsStore(fp.Id);
             if (store == null) return;
-            int minutes = Math.Max(1, world.Tuning.WorkshopShiftMinutes / def.InputsPerDayPerFamily);
+            int minutes = Math.Max(1, ShiftMinutes(world) / def.InputsPerDayPerFamily);
             int open = OpenWorkCount(world, op);
             int families = WorkingFamilies(world, op);
             while (open < families && stock.AvailableOf(def.Input.Id) >= 1 && store.FreeSpace >= def.OutputsPerInput)

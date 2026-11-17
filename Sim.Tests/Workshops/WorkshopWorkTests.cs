@@ -53,15 +53,16 @@ namespace LordsLegacy.Sim.Tests.Workshops
             return w.Inventory.FindGoodsStore(fp).CountOf(output.Id);
         }
 
-        // The shift is a tuning number; the tests set it to the length of the day's daylight window so that "per day"
-        // is one real working day. The family also spends time commuting, so a day makes a little under the rate.
+        // Default tuning: the shift is the day's daylight window, so "per day" is one real working day. The family also
+        // commutes, so a day makes a little under the rate.
         private static void ShiftIsTheDay(SimWorld w)
         {
+            Assert.AreEqual(0, w.Tuning.WorkshopShiftMinutes, "the default shift is the daylight window");
             WorkDay.Window win = w.WorkDay.WindowOf(w, WorkDay.DayStart(w));
-            w.Tuning.WorkshopShiftMinutes = (int)(win.End - win.Sunrise);
+            Assert.AreEqual((int)(win.End - win.Sunrise) / w.Tuning.HewingLogsPerDay, WorkshopSystem.ShiftMinutes(w) / w.Tuning.HewingLogsPerDay);
         }
 
-        private static (SimWorld w, int fp, Operation op) MakeDay(string type, int adults = 1, int days = 3)
+        private static (SimWorld w, int fp, Operation op) MakeDay(string type, int adults = 1)
         {
             var r = Make(type, adults);
             ShiftIsTheDay(r.w);

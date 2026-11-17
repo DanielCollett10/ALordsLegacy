@@ -197,7 +197,7 @@ PLACEHOLDER until playtested.
 | Usable trunk length | 12–20 | m (3–5 logs) | TMB-06 |
 | Ox load | 1 (owner 17/11/2026; was 4) | logs per trip (`SimTuning.OxLoadLogs`, saved in Core; exposed in `SimConfig` as `oxLoadLogs`) | WCO-07 |
 | Workshop rates | hewing 3 logs/day → 1 beam each; sawing 3 beams/day → 3 planks each; stock 6, store 20 | `SimTuning.HewingLogsPerDay`, `HewingBeamsPerLog`, `SawingBeamsPerDay`, `SawingPlanksPerBeam`, `*StockCapacity`, `*StoreCapacity` (saved in Core) | HW-02, HW-05, PL-05 |
-| Workshop shift | 240 (placeholder) | minutes; work minutes per input = shift ÷ inputs per day (`SimTuning.WorkshopShiftMinutes`). Real days are longer, so a family out-makes the "per day" figure until this is set to the day's length | HW-05 |
+| Workshop shift | 0 = today's daylight window | minutes; work minutes per input = shift ÷ inputs per day (`SimTuning.WorkshopShiftMinutes`; >0 overrides). Default gives ~3 a day in every season. A sawpit's 20-plank store holds 18 (3 per beam, 2 slots left over) and then shows Store full | HW-05 |
 | Max builders per site | 4 | odd-jobbers building one site at once (`SimTuning.MaxBuildersPerSite`) | CN-23 |
 | Deconstruct time share | 0.5 | of the recipe's build minutes (hut 480) (`SimTuning.DeconstructTimeShare`, saved in Core) | CN-53 |
 | Deconstruct refund share | 0.5 | of the recipe's logs, rounded down (hut 4, oxen stand 0) (`SimTuning.DeconstructRefundShare`, saved in Core) | CN-54 |
