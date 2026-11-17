@@ -1,7 +1,7 @@
-# Building materials: coppice, thatch, wattle and baskets (M18)
+# Building materials: coppice, thatch, wattle and baskets
 
-Gathering and production buildings for the tier-1 house materials. Owner brief and answers 17/11/2026. M18, after
-M16 Growth and M17 Planks (`future-goals.md`). Builds on GDD CON-14..19, HSE-21..23, POP-A3 (light work), CNT-01..10.
+Gathering and production buildings for the tier-1 house materials. Owner brief and answers 17/11/2026. Milestones
+after Growth, Planks and the Storage yard (`future-goals.md`). Builds on GDD CON-14..19, HSE-21..23, POP-A3 (light work), CNT-01..10.
 
 Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN = not decided.
 
@@ -23,6 +23,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-11 | Workers gather willow and hazel **from the wild, nearest first**, inside the area | DECIDED |
 | MAT-12 | **Dedicated coppice fields** (planting hazel or willow) are not built now; revisit with farms and fields | DECIDED (future) |
 | MAT-13 | They cut from **new hazel and willow stools**, scattered on the map like forage bushes. A cut stool regrows (like `BushRegrowSystem`); trees are untouched | DECIDED (owner 17/11/2026) |
+| MAT-14 | The coppice hut stores up to **40 willow rods and 40 hazel rods** | DECIDED (owner 17/11/2026) |
 
 ## Weaver and wattle yard
 
@@ -40,17 +41,18 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-31 | A **grown grain** (straw, chaff from threshing) toggle on the hut panel, **shown greyed out: "Needs farming"** until fields exist. Straw is a summer source | DECIDED (owner 17/11/2026) |
 | MAT-32 | Cut stalks are tied into bundles and **set upright on the bank to dry**. After a curing time the workers go back, collect the dry sheaves and carry them **home to the hut store** | DECIDED |
 | MAT-33 | Dry sheaves are stored in **ricks** (conical piles) or open-sided shelters so they stay dry | DECIDED (art and storage detail OPEN) |
-| MAT-34 | Reed and rush are cut **in winter only**. Curing and collecting may run past winter's end | DECIDED (owner 17/11/2026) |
-| MAT-35 | Curing time, sheaves per bundle, carry amount | OPEN |
-| MAT-36 | A new game starts with **20 thatch sheaves** at the camp | DECIDED (amount: see gap G-1) |
-| MAT-37 | What a thatcher family does outside winter (odd jobs like unassigned families, or idle) | OPEN |
+| MAT-34 | Reed and rush are cut at **full rate in winter** (Dec–Feb). Outside winter, rush is cut at **1/4 of the winter rate** (each cut takes 4× as long), a trickle that never matches winter. Curing and collecting run in any season | DECIDED (owner 17/11/2026; spring/autumn = summer rate PROPOSED) |
+| MAT-35 | **1 sheaf = 1 bundle.** Each bundle cures **7 days** where it was set up. A worker carries **1 sheaf per trip** on the shoulder. A cart takes 5 (carts not built yet). Cut minutes per sheaf PLACEHOLDER | DECIDED (owner 17/11/2026) |
+| MAT-36 | A new game starts with **90 thatch sheaves** at the camp (9 houses at 10 each) | DECIDED (owner 17/11/2026) |
+| MAT-37 | Thatcher families **stay assigned all year** (slow cutting outside winter). Seasonal reassignment is a later feature | DECIDED (owner 17/11/2026) |
+| MAT-38 | The thatcher's hut keeps a small store of sheaves (capacity PLACEHOLDER, e.g. 40) | DECIDED (owner 17/11/2026; amount PROPOSED) |
 
 ## Houses
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| MAT-40 | A house costs **10 logs + 10 thatch sheaves** (placeholder; replaces HM-06's 10 logs) | DECIDED |
-| MAT-41 | Wattle panels build the plot's perimeter fence, which is **not** required to move in | DECIDED |
+| MAT-40 | A house costs **10 logs + 10 thatch sheaves + 10 wattle panels** (placeholder; replaces HM-06's 10 logs) | DECIDED (owner 17/11/2026) |
+| MAT-41 | Wattle panels also build the plot's perimeter fence (panels by perimeter length, OPEN), which is **not** required to move in | DECIDED (fence with tier-1 houses) |
 | MAT-42 | Daub (earth or clay) and household levels 1–2 come with tier-1 houses (HSE-20..23) | DECIDED (M19) |
 
 ## Baskets
@@ -58,17 +60,16 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | MAT-50 | A carrier with a willow basket carries **twice as much** food or forage per trip (simple CNT-02) | DECIDED (owner 17/11/2026) |
-| MAT-51 | Who takes a basket, from where, and whether baskets wear out (CNT-06) | OPEN |
+| MAT-51 | Baskets **do not wear out** yet. Made at the weaver, they go to general goods: the camp's general store, or the storage yard once one is built (`storage.md`) | DECIDED (owner 17/11/2026) |
+| MAT-52 | A carrier takes one basket from the nearest general store when its family is assigned to foraging or a granary, keeps it while assigned, and returns it on unassign | PROPOSED |
 
-## Gaps found 17/11/2026 (need answers before M18 tasks)
+## Gaps (17/11/2026)
 
-- **G-1 Pacing:** the game starts on 1 March and reed is winter-only, so the first harvest is 9 game months away
-  (about 135 real hours at 1×). 20 starting sheaves house only 2 of the 3 start families, and growth (M16) stops.
-- **G-2 Storage:** only log storage and food stores exist. Rods, sheaves, baskets and panels need a home (hut stores,
-  or the greyed-out storage yard).
-- **G-3 Delivery:** construction only takes logs by ox today. A two-material recipe needs hand delivery of light items
-  (M17 builds the multi-material recipe for planks first).
-- **G-4 Wattle yard:** panels have no use until the fence (M19). Build it in M18 anyway, or in M19 with the fence.
+- **G-1 Pacing:** answered by MAT-34 (summer trickle) and MAT-36 (90 starting sheaves).
+- **G-2 Storage:** each building keeps a small store of its own goods (MAT-14, MAT-38, PL-06); general goods go to the
+  storage yard (`storage.md`).
+- **G-3 Delivery:** construction only takes logs by ox today. Multi-item recipes and hand delivery come in M17 (PL-12).
+- **G-4 Wattle yard:** answered: panels are in the house recipe (MAT-40).
 
 ## Art notes (future, not gameplay)
 
