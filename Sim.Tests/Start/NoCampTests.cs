@@ -190,6 +190,7 @@ namespace LordsLegacy.Sim.Tests.Start
         {
             SimWorld w = CampGone(out Family f);
             HouseRemoval.RemoveWithPlot(w, 900);
+            w.Tuning.HungryDaysToLeave = 1000; // this test is about the empty camp, not a famine departure
             Assert.DoesNotThrow(() => w.Step(60 * 24 * 30));
             Assert.IsTrue(f.IsHomeless);
             Assert.IsNull(w.Camp);
