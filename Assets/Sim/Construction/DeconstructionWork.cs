@@ -59,18 +59,27 @@ namespace LordsLegacy.Sim.Construction
             SortedDictionary<string, int> refunds = Refunds(world, fp);
             LedgerLocation storage = inv.FindStorage(footprintId);
             if (storage == null) storage = inv.FindFoodStore(footprintId); // a granary's food store (CN-55)
-            bool hasContents = storage != null && storage.Total > 0;
+            var sources = new List<LedgerLocation>();
+            if (storage != null) sources.Add(storage);
+            LedgerLocation wStock = inv.FindWorkshopStock(footprintId); // a workshop's input stock and output store (HW-01, PL-01)
+            LedgerLocation wStore = inv.FindGoodsStore(footprintId);
+            if (wStock != null) sources.Add(wStock);
+            if (wStore != null) sources.Add(wStore);
+            bool hasContents = false;
+            foreach (LedgerLocation s in sources) if (s.Total > 0) hasContents = true;
             if (refunds.Count > 0 || hasContents)
             {
                 LedgerLocation pile = inv.GetOrAddGroundPile(fp.Centre, null);
-                if (hasContents)
-                    foreach (KeyValuePair<string, int> kv in new List<KeyValuePair<string, int>>(storage.Counts))
+                foreach (LedgerLocation src in sources)
+                    foreach (KeyValuePair<string, int> kv in new List<KeyValuePair<string, int>>(src.Counts))
                     {
-                        int n = storage.AvailableOf(kv.Key);
-                        if (n > 0) inv.Transfer(storage, pile, Items.Find(kv.Key), n);
+                        int n = src.AvailableOf(kv.Key);
+                        if (n > 0) inv.Transfer(src, pile, Items.Find(kv.Key), n);
                     }
                 foreach (KeyValuePair<string, int> kv in refunds) inv.Produce(pile, Items.Find(kv.Key), kv.Value);
             }
+            if (wStock != null) inv.RemoveEmptyLocation(wStock.Id);
+            if (wStore != null) inv.RemoveEmptyLocation(wStore.Id);
 
             var owners = new List<int>();
             foreach (Operation op in new List<Operation>(world.Operations.All))
@@ -92,7 +101,7 @@ namespace LordsLegacy.Sim.Construction
             foreach (int opId in operationIds)
             {
                 Operation op = world.Operations.Get(opId);
-                if (op == null || op.TypeId != OperationTypes.GranaryId || op.ModuleIds.Count > 0) continue;
+                if (op == null || (op.TypeId != OperationTypes.GranaryId && OperationTypes.WorkshopOf(op.TypeId, world.Tuning) == null) || op.ModuleIds.Count > 0) continue;
                 foreach (int fid in new List<int>(op.FamilyIds)) new Commands.UnassignFamily(op.Id, fid).Apply(world);
                 world.Operations.Remove(op.Id);
             }

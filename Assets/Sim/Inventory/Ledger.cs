@@ -101,6 +101,22 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, default, null, 0, capacity));
         }
 
+        /// <summary>Adds a goods store bound to a footprint (a workshop's output store, decision 0047), holding up to <paramref name="capacity"/> items.</summary>
+        public LedgerLocation AddGoodsStore(int capacity, int moduleId)
+        {
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Must be positive.");
+            return Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, default, null, moduleId, capacity));
+        }
+
+        /// <summary>Finds the goods store bound to a footprint (a workshop's output store), or null (never creates).</summary>
+        public LedgerLocation FindGoodsStore(int moduleId)
+        {
+            if (moduleId == 0) return null;
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.GoodsStore && l.ModuleId == moduleId) return l;
+            return null;
+        }
+
         /// <summary>Adds an unlimited goods store at a point (the camp General goods store, ST-02).</summary>
         public LedgerLocation AddGoodsStore(PointMm position) =>
             Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, position, null, 0));

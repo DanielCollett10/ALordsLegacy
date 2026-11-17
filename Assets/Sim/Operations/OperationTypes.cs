@@ -67,8 +67,41 @@ namespace LordsLegacy.Sim.Operations
             familySlots: 2,
             defaultWorkRadiusM: 0);
 
+        /// <summary>Id of the hewing operation.</summary>
+        public const string HewingId = "operation.hewing";
+        /// <summary>Id of the sawing operation.</summary>
+        public const string SawingId = "operation.sawing";
+
+        /// <summary>Hewing station: an area-less operation that owns the station footprint as its hut, 1 family slot (HW-01).</summary>
+        public static readonly OperationTypeDef Hewing = new OperationTypeDef(
+            HewingId, buildingAreaTypeId: null, workAreaTypeId: null, hutTypeId: ModuleTypes.HewingStationId, hutCount: 1,
+            logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
+            familySlots: 1, defaultWorkRadiusM: 0);
+
+        /// <summary>Sawpit: an area-less operation that owns the sawpit footprint as its hut, 1 family slot (PL-01).</summary>
+        public static readonly OperationTypeDef Sawing = new OperationTypeDef(
+            SawingId, buildingAreaTypeId: null, workAreaTypeId: null, hutTypeId: ModuleTypes.SawpitId, hutCount: 1,
+            logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
+            familySlots: 1, defaultWorkRadiusM: 0);
+
+        /// <summary>The workshop def an operation type carries (decision 0047), or null for a non-workshop type.</summary>
+        public static Workshops.WorkshopDef WorkshopOf(string operationTypeId, Tuning.SimTuning t)
+        {
+            if (operationTypeId == HewingId) return Workshops.WorkshopDef.Hewing(t);
+            if (operationTypeId == SawingId) return Workshops.WorkshopDef.Sawing(t);
+            return null;
+        }
+
+        /// <summary>The operation type id of a workshop module type id, or null.</summary>
+        public static string WorkshopOperationFor(string moduleTypeId)
+        {
+            if (moduleTypeId == ModuleTypes.HewingStationId) return HewingId;
+            if (moduleTypeId == ModuleTypes.SawpitId) return SawingId;
+            return null;
+        }
+
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)

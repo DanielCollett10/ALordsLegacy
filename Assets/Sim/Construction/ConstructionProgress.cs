@@ -100,6 +100,7 @@ namespace LordsLegacy.Sim.Construction
             if (site.ProgressMinutes < recipe.BuildWorkerMinutes || !AllDelivered(world, site, recipe)) return false;
             ConsumeDue(world, site, recipe);
             world.Construction.Remove(site.FootprintId);
+            Operations.Workshops.WorkshopBuildings.OnBuilt(world, world.Footprints.Get(site.FootprintId));
             return true;
         }
 

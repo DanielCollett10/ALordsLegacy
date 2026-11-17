@@ -16,7 +16,9 @@ namespace LordsLegacy.Sim.Placement
         /// <summary>Player-facing name of a fixed plot, e.g. "Granary 4".</summary>
         public static string NameOf(Footprint f)
         {
-            string kind = f.Type.Id == ModuleTypes.GranaryId ? "Granary" : "Structure";
+            string kind = f.Type.Id == ModuleTypes.GranaryId ? "Granary"
+                : f.Type.Id == ModuleTypes.HewingStationId ? "Hewing station"
+                : f.Type.Id == ModuleTypes.SawpitId ? "Sawpit" : "Structure";
             return kind + " " + f.Id;
         }
 

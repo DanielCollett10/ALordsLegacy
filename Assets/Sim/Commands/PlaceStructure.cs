@@ -63,6 +63,14 @@ namespace LordsLegacy.Sim.Commands
                 world.Operations.AddModule(op.Id, fp.Id);
             }
 
+            string workshopOp = OperationTypes.WorkshopOperationFor(type.Id);
+            if (workshopOp != null)
+            {
+                Operation op = world.Operations.Create(workshopOp, 0);
+                world.Operations.AddModule(op.Id, fp.Id);
+                if (type.ConstructionRecipe.IsEmpty) Operations.Workshops.WorkshopBuildings.OnBuilt(world, fp);
+            }
+
             var removed = TreeClearing.RemoveInPolygon(world.Trees, fp.PlotPolygon);
             var trees = new long[removed.Count];
             for (int i = 0; i < trees.Length; i++) trees[i] = removed[i].Value;
