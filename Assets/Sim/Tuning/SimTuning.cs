@@ -232,6 +232,9 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Meat placed in the camp food store at the start. Unit: items. Rule: FD-03 (PLACEHOLDER).</summary>
         public int StartingMeat { get; set; } = 400;
 
+        /// <summary>Planks placed in the camp General goods store at the start (ST-02). Unit: planks. Rule: PL-14.</summary>
+        public int StartingPlanks { get; set; } = 10;
+
         /// <summary>Rations an adult (14+) eats per day. Unit: rations per day. Rule: FD-04.</summary>
         public double AdultRations { get; set; } = 1.0;
 
