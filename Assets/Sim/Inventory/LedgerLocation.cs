@@ -20,6 +20,8 @@ namespace LordsLegacy.Sim.Inventory
         FoodStore = 5,
         /// <summary>A store for General items (planks, beams); refuses logs and food (decision 0046).</summary>
         GoodsStore = 6,
+        /// <summary>A workshop's input stock: holds only its def's input item, is never a construction or haul source and is left out of village totals (decision 0047).</summary>
+        WorkshopStock = 7,
     }
 
     /// <summary>One place that holds items. Counts are owned by the <see cref="Ledger"/>.</summary>
@@ -44,6 +46,9 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>Most items (all kinds together) held here; <see cref="int.MaxValue"/> means no limit.</summary>
         public int Capacity { get; internal set; }
 
+        /// <summary>WorkshopStock only: the one item id this location holds; null for every other kind.</summary>
+        public string InputItemId { get; internal set; }
+
         /// <summary>
         /// Whether a kind of location takes items of a category. Log storage takes only logs, a food store only
         /// food; ground piles, carriers, stockpiles and sites declare nothing and accept anything (FD-02).
@@ -55,6 +60,7 @@ namespace LordsLegacy.Sim.Inventory
                 case LocationKind.Storage: return category == ItemCategory.Log;
                 case LocationKind.FoodStore: return category == ItemCategory.Food;
                 case LocationKind.GoodsStore: return category == ItemCategory.General;
+                case LocationKind.WorkshopStock: return true; // narrowed to one item by Ledger.RefusalReason
                 default: return true;
             }
         }

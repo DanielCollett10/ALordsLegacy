@@ -226,6 +226,36 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Deconstruction takes this share of the recipe's build minutes. Unit: fraction. Rule: CN-53 (PLACEHOLDER).</summary>
         public double DeconstructTimeShare { get; set; } = 0.5;
 
+        /// <summary>Most beams an ox carries per trip. Unit: beams. Rule: PL-21 (PLACEHOLDER).</summary>
+        public int OxLoadBeams { get; set; } = 1;
+
+        /// <summary>Beams a hewing station makes from one log. Unit: beams. Rule: HW-05 (decision 0047).</summary>
+        public int HewingBeamsPerLog { get; set; } = 1;
+
+        /// <summary>Logs one family hews per day. Unit: logs per day. Rule: HW-05.</summary>
+        public int HewingLogsPerDay { get; set; } = 3;
+
+        /// <summary>Most logs waiting in a hewing station's input stock. Unit: logs. Rule: HW-05.</summary>
+        public int HewingStockCapacity { get; set; } = 6;
+
+        /// <summary>Most beams a hewing station's output store holds. Unit: beams. Rule: HW-05.</summary>
+        public int HewingStoreCapacity { get; set; } = 20;
+
+        /// <summary>Planks a sawpit saws from one beam. Unit: planks. Rule: HW-05 (decision 0047).</summary>
+        public int SawingPlanksPerBeam { get; set; } = 3;
+
+        /// <summary>Beams one family saws per day. Unit: beams per day. Rule: HW-05.</summary>
+        public int SawingBeamsPerDay { get; set; } = 3;
+
+        /// <summary>Most beams waiting in a sawpit's input stock. Unit: beams. Rule: HW-05.</summary>
+        public int SawingStockCapacity { get; set; } = 6;
+
+        /// <summary>Most planks a sawpit's output store holds. Unit: planks. Rule: HW-05.</summary>
+        public int SawingStoreCapacity { get; set; } = 20;
+
+        /// <summary>Length of a workshop shift. Unit: game minutes. Rule: HW-05 (PLACEHOLDER).</summary>
+        public int WorkshopShiftMinutes { get; set; } = 240;
+
         /// <summary>Share of the recipe's logs returned as a ground pile, rounded down. Unit: fraction. Rule: CN-54.</summary>
         public double DeconstructRefundShare { get; set; } = 0.5;
 
