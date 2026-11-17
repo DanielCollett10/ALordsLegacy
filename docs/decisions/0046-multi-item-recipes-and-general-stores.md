@@ -20,8 +20,9 @@ for General items (INV-A1).
 
 - **Reservation semantics:** a General item is reserved on the nearest `GoodsStore` with available stock, like logs.
   Reserved stock still counts in village totals (it is still in the store) but not in `AvailableOf`.
-- **Save versions:** every task that changes the format bumps `SaveWriter.CurrentVersion` by one at merge. Tasks that
-  touch `Assets/Sim/Save/` list `SaveWriter.cs` in their touches, so they never run in parallel.
+- **Save versions:** every task that changes the save format bumps `SaveWriter.CurrentVersion` by exactly one. Every
+  such task lists `Assets/Sim/Save/SaveWriter.cs` and `Sim.Tests/Save/SimSaveRoundTripTests.cs` in its touches, so save
+  tasks are **serialized**: never two on parallel branches. A task that does not change the format does not bump.
 
 **Consequences.** New materials are data: an `ItemDef` plus recipe counts. Thatch and panels in M20 need no new
 construction code. Old saves are refused (version bump, decision 0038).
