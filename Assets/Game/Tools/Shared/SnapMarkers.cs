@@ -87,6 +87,25 @@ namespace LordsLegacy.Game.Tools.Shared
                         if (!vertexSet.Contains(p)) result.Add(new SnapMarker(SnapMarkerKind.AreaDot, p, -1, RoadSide.Left, area.Id));
                 }
             }
+            // PL-13: fixed plots (granary yards) snap like areas: corners first, then dots along their edges.
+            foreach (var f in world.Footprints.All)
+            {
+                if (!f.Type.IsStandalone) continue;
+                var plot = f.PlotPolygon;
+                int n = plot.Length;
+                for (int i = 0; i < n; i++)
+                {
+                    vertexSet.Add(plot[i]);
+                    if (plot[i].DistanceTo(centre) <= radiusMm)
+                        result.Add(new SnapMarker(SnapMarkerKind.Corner, plot[i], -1, RoadSide.Left));
+                }
+                for (int i = 0; i < n; i++)
+                {
+                    var run = new List<PointMm> { plot[i], plot[(i + 1) % n] };
+                    foreach (var p in Polylines.PointsEveryWithin(run, spacingM, centre, radiusM))
+                        if (!vertexSet.Contains(p)) result.Add(new SnapMarker(SnapMarkerKind.AreaDot, p, -1, RoadSide.Left));
+                }
+            }
             return result;
         }
     }

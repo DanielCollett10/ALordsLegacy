@@ -169,6 +169,50 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _host.World.Homes.Count);
         }
 
+        // Granary whose yard's west edge is x = minX and whose yard spans z 56.25 .. 72.25 (T-480, PL-13).
+        private double AddGranaryBesideFrontage()
+        {
+            var w = _host.World;
+            var f = w.Footprints.Add(w.Footprints.NextId(), LordsLegacy.Sim.Footprints.ModuleTypes.Granary, PointMm.FromMetres(70, 64.25), 0);
+            double minX = double.MaxValue;
+            foreach (var p in f.PlotPolygon) minX = System.Math.Min(minX, p.XMetres);
+            return minX;
+        }
+
+        [UnityTest]
+        public IEnumerator PlotFlushAgainstAGranaryYardIsAcceptedAndOneOverItIsRefused()
+        {
+            yield return Setup();
+            float edge = (float)AddGranaryBesideFrontage();
+            Click(edge - 15f, 51.25f); Click(edge, 51.25f); Click(edge, 61.25f); Click(edge - 15f, 61.25f);
+            yield return null;
+            Assert.IsTrue(_area.CurrentPreview.IsValid, "Flush against the yard: " + _area.CurrentPreview.ReasonText);
+            _area.Cancel();
+            yield return null;
+            Click(edge - 15f, 51.25f); Click(edge + 3f, 51.25f); Click(edge + 3f, 61.25f); Click(edge - 15f, 61.25f);
+            yield return null;
+            Assert.IsFalse(_area.CurrentPreview.IsValid, "Three metres into the yard must be refused.");
+        }
+
+        [UnityTest]
+        public IEnumerator OverlayShowsOutlinesCornersAndPileCirclesWhileToolIsActive()
+        {
+            yield return Setup();
+            var w = _host.World;
+            AddGranaryBesideFrontage();
+            w.Inventory.Produce(w.Inventory.GetOrAddGroundPile(PointMm.FromMetres(30, 80), null), Items.Log, 2);
+            var overlay = _toolGo.GetComponent<PlacementOverlay>();
+            Assert.IsNotNull(overlay);
+            yield return null; yield return null;
+            Assert.IsTrue(overlay.IsShown, "Plot tool is a placing tool (PL-12).");
+            Assert.AreEqual(1, overlay.OutlineCount, "The granary yard outline.");
+            Assert.AreEqual(4, overlay.CornerCount);
+            Assert.AreEqual(1, overlay.PileCircleCount, "PL-15 circle for the pile with items.");
+            _controller.Deselect();
+            yield return null;
+            Assert.IsFalse(overlay.IsShown, "The overlay goes when the tool closes.");
+        }
+
         [UnityTest]
         public IEnumerator NotEnoughLogsRefusesOnConfirm()
         {
