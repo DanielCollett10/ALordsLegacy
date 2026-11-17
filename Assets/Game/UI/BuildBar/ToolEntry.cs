@@ -60,9 +60,9 @@ namespace LordsLegacy.Game
                     () => ModuleTypes.Granary.ConstructionRecipe.Logs),
                 new ToolEntry(MarketToolId, "Market", true, "Draw the town's market; its stall slots are shown (free)",
                     null, MarketRules.CanPlaceMarket),
-                new ToolEntry("hewing-station", "Hewing station", true, "Place a hewing station: logs into beams",
+                new ToolEntry(LordsLegacy.Game.Tools.StructureTool.HewingToolId,"Hewing station", true, "Place a hewing station: logs into beams",
                     () => ModuleTypes.HewingStation.ConstructionRecipe.Logs),
-                new ToolEntry("sawpit", "Sawpit", true, "Place a sawpit: beams into planks",
+                new ToolEntry(LordsLegacy.Game.Tools.StructureTool.SawpitToolId,"Sawpit", true, "Place a sawpit: beams into planks",
                     () => ModuleTypes.Sawpit.ConstructionRecipe.Logs),
             };
         }

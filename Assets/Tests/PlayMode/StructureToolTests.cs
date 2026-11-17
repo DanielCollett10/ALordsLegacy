@@ -113,6 +113,16 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.SawpitId));
         }
 
+        /// <summary>T-526: stack height is 0 when empty, else 0.25 to 1 of a full stack.</summary>
+        [Test]
+        public void StackFillScalesFromQuarterToFull()
+        {
+            Assert.AreEqual(0f, ModuleRenderer.StackFill(0, 30), 1e-6f);
+            Assert.AreEqual(0.25f + 0.75f / 30f, ModuleRenderer.StackFill(1, 30), 1e-5f);
+            Assert.AreEqual(1f, ModuleRenderer.StackFill(30, 30), 1e-6f);
+            Assert.AreEqual(1f, ModuleRenderer.StackFill(99, 30), 1e-6f);
+        }
+
         private static double Extent(LordsLegacy.Sim.Geometry.PointMm[] pts, bool x)
         {
             double lo = double.MaxValue, hi = double.MinValue;
