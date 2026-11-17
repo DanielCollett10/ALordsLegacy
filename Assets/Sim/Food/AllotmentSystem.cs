@@ -68,7 +68,7 @@ namespace LordsLegacy.Sim.Food
                 var queue = new List<KeyValuePair<double, Family>>();
                 foreach (Family f in families)
                 {
-                    if (served.Contains(f.Id) || EatingSystem.DailyNeed(world, f) <= 0) continue;
+                    if (f.IsInPassage || served.Contains(f.Id) || EatingSystem.DailyNeed(world, f) <= 0) continue;
                     double d = WalkingDistanceM(world, m.Origin, new PathPoint(f.HomeX, f.HomeZ));
                     if (d >= 0 && d <= m.RangeM) queue.Add(new KeyValuePair<double, Family>(d, f));
                 }
@@ -89,7 +89,7 @@ namespace LordsLegacy.Sim.Food
             int ok = 0, short_ = 0;
             foreach (Family f in families)
             {
-                if (EatingSystem.DailyNeed(world, f) <= 0) continue;
+                if (f.IsInPassage || EatingSystem.DailyNeed(world, f) <= 0) continue;
                 if (full.Contains(f.Id)) ok++; else short_++;
             }
             world.LastAllotmentServed = ok;

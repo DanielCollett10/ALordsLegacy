@@ -7,6 +7,7 @@ using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Operations;
+using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tasks;
 
 namespace LordsLegacy.Sim.Markets
@@ -116,7 +117,10 @@ namespace LordsLegacy.Sim.Markets
                 foreach (int m in op.ModuleIds) if (world.IsBuilt(m)) built = true;
                 if (!built) continue;
                 foreach (int fid in op.FamilyIds)
-                    if (world.People.FindFamily(fid) != null && !result.Contains(fid)) result.Add(fid);
+                {
+                    Family f = world.People.FindFamily(fid);
+                    if (f != null && !f.IsInPassage && !result.Contains(fid)) result.Add(fid);
+                }
             }
             return result;
         }

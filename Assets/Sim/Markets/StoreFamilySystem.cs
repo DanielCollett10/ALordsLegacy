@@ -297,7 +297,7 @@ namespace LordsLegacy.Sim.Markets
             foreach (int fid in op.FamilyIds)
             {
                 Family fam = world.People.FindFamily(fid);
-                if (fam != null) wanted += CountIdleWorkers(world, fam);
+                if (fam != null && !fam.IsInPassage) wanted += CountIdleWorkers(world, fam);
             }
             for (int i = 0; i < wanted; i++)
             {
@@ -324,7 +324,7 @@ namespace LordsLegacy.Sim.Markets
             {
                 Family fam = world.People.FindFamily(fid);
                 int stall = market.StallOf(fid);
-                if (fam == null || stall == 0 || !world.IsWorking(stall)) continue;
+                if (fam == null || fam.IsInPassage || stall == 0 || !world.IsWorking(stall)) continue;
                 LedgerLocation stallStore = world.Inventory.FindFoodStore(stall);
                 if (stallStore == null) continue;
                 int wanted = CountIdleWorkers(world, fam) - CountOpen(world, op, fam);
