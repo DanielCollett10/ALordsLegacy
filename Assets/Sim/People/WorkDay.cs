@@ -75,6 +75,12 @@ namespace LordsLegacy.Sim.People
             return false;
         }
 
+        private static bool InPassage(SimWorld world, Citizen c)
+        {
+            Family f = world.People.FindFamily(c.FamilyId);
+            return f != null && f.IsInPassage;
+        }
+
         /// <summary>Sunrise and end-of-work ticks for the day starting at <paramref name="dayStartTick"/> (midnight).</summary>
         public Window WindowOf(SimWorld world, long dayStartTick)
         {
@@ -112,6 +118,7 @@ namespace LordsLegacy.Sim.People
         public bool OnShift(SimWorld world, Citizen c)
         {
             if (!AppliesTo(world, c)) return true;
+            if (InPassage(world, c)) return false; // decision 0045, GR-13: no shift is planned
             long day = DayStart(world);
             Window today = WindowOf(world, day);
             long key = world.Tick >= today.End ? day + TicksPerDay : day;
@@ -122,6 +129,7 @@ namespace LordsLegacy.Sim.People
         /// <summary>The departure tick planned for the citizen's next (or current) shift.</summary>
         public long DepartTick(SimWorld world, Citizen c)
         {
+            if (InPassage(world, c)) return long.MaxValue; // no plan for a family in passage
             long day = DayStart(world);
             Window today = WindowOf(world, day);
             long key = world.Tick >= today.End ? day + TicksPerDay : day;

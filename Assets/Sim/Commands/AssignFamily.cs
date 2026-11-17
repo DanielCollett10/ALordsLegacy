@@ -30,6 +30,10 @@ namespace LordsLegacy.Sim.Commands
             if (op == null) return CommandResult.Rejected(CommandRejectCode.NotFound, "no operation " + OperationId);
             Family f = world.People.FindFamily(FamilyId);
             if (f == null) return CommandResult.Rejected(CommandRejectCode.NotFound, "no family " + FamilyId);
+            if (f.Passage == FamilyPassage.Leaving)
+                return CommandResult.Rejected(CommandRejectCode.NotAllowed, "This family is leaving");
+            if (f.Passage == FamilyPassage.Arriving)
+                return CommandResult.Rejected(CommandRejectCode.NotAllowed, "This family is arriving");
             if (f.WorkplaceId != null)
                 return CommandResult.Rejected(CommandRejectCode.NotAllowed, "family already has a workplace");
             OperationTypeDef type = OperationTypes.Find(op.TypeId);
