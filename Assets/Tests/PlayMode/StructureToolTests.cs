@@ -195,12 +195,15 @@ namespace LordsLegacy.Tests.PlayMode
         /// </summary>
         private const double HousePlotTopZ = 104.0;
 
-        /// <summary>Draws a 6 × 8 m house plot (x 97–103, z 96–104) as a drawn area, the way the player makes one.</summary>
+        /// <summary>
+        /// Draws a 10 x 12 m house plot (x 95 to 105, z 92 to 104, 120 m2) as a drawn area. The test area type needs at
+        /// least 100 m2, and 120 m2 is inside the house plot range of 60 to 400 m2.
+        /// </summary>
         private void AddHousePlot()
         {
             var shape = AreaShape.Straight(new[]
             {
-                PointMm.FromMetres(97, 96), PointMm.FromMetres(103, 96), PointMm.FromMetres(103, HousePlotTopZ), PointMm.FromMetres(97, HousePlotTopZ),
+                PointMm.FromMetres(95, 92), PointMm.FromMetres(105, 92), PointMm.FromMetres(105, HousePlotTopZ), PointMm.FromMetres(95, HousePlotTopZ),
             });
             var r = _host.Execute(new DesignateArea(shape, AreaTypes.TestId));
             Assert.IsTrue(r.IsAccepted, r.Text);
