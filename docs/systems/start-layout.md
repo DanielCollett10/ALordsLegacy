@@ -10,7 +10,7 @@ through the normal commands, so starting state follows the same rules as play (d
 | Type | Role |
 |---|---|
 | `StartLayout` | Pure data. Camp centre and rotation, fire, stockpile, ox stand and tent spots (relative to the camp, rotated with it), trunk road control points, families with citizens, `OxCount`, `Stock` (`StartStock` list, default 40 `item.log`, CMP-06). |
-| `StartLayoutApplier` | `Apply(world, layout)`. Adds the camp footprint (clears trees under it), draws the trunk road with `Execute(DrawRoad)`, adds families (home = tent spot), citizens and oxen, and produces the start stock into the stockpile. Puts `StartingMeat` (400) into the camp food store, `StartingPlanks` (10) into the camp General goods store (`GoodsStore`, no beams), and creates each family's larder (M14). Throws `InvalidOperationException` with the refusal text if a command is refused. |
+| `StartLayoutApplier` | `Apply(world, layout)`. Adds the camp footprint (clears trees under it), draws the trunk road with `Execute(DrawRoad)`, adds families (home = tent spot), citizens and oxen, and produces the start stock into the stockpile. Puts `StartingMeat` (400) into the camp food store, `StartingPlanks` (10) into the camp General goods store (`GoodsStore`, no beams), and creates each family's larder (M14). Sets `SimWorld.EntryPoint` (the trunk road's end on the edge, `MapExits.ComputeEntry`, T-497). Throws `InvalidOperationException` with the refusal text if a command is refused. |
 | `CampInfo` | `SimWorld.Camp`: footprint id, world-space fire, stockpile and stand points, `StockpileLocation`, `FoodStoreLocation`, `GeneralStoreLocation`. Null until applied. |
 | `StartLayoutConfig` (Unity) | ScriptableObject. `ToLayout()` converts it to `StartLayout`. Asset `Assets/Maps/TestMap/StartLayout.asset`. |
 
@@ -22,7 +22,7 @@ layout means no camp. Starting oxen come from `OxCount`, not from `SimTuning.Sta
 When a game is loaded from a save, the layout is not applied (`ForRestore`). The camp and stockpile come back through the save.
 
 Menu `LordsLegacy/Map/Generate Start Layout` (`StartLayoutGenerator`) writes the asset. It picks a flat spot (slope at most 5°) just outside
-the forest edge, with 50+ trees within 50 m and a trunk road past the camp. It is idempotent.
+the forest edge, with 50+ trees within 50 m and a trunk road past the camp. It extends the trunk road to the nearest reachable map edge (GR-24b, T-507), which is where arrivals come in. It is idempotent.
 
 ## Extending
 
@@ -36,5 +36,5 @@ the commands for the camp.
 
 ## Tests
 
-`Sim.Tests/Start/StartLayoutTests.cs`, `Sim.Tests/Scenarios/BuildItFirstScenarioTests.cs`. Unity:
+`Sim.Tests/Start/StartLayoutTests.cs`, `Start/MapExitsTests.cs`, `Start/NoCampTests.cs`, `Sim.Tests/Scenarios/BuildItFirstScenarioTests.cs`. Unity:
 `Assets/Tests/EditMode/StartLayoutConfigTests.cs`, `Assets/Tests/PlayMode/HutFromStartTests.cs`.

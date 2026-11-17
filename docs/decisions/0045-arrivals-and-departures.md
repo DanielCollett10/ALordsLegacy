@@ -9,7 +9,7 @@ through, and a way to tell the player what happened.
   out work, food trips or a house check one helper, `Family.IsInPassage`; `RoutineSystem` leaves its members alone.
 - Leaving starts in one place, `FamilyDeparture.Begin`: shared unassign helper (also used by `UnassignFamily`), each
   open task failed through the step runner's normal fail path (so per-task drops like `FailStock` and `FailFoodTrip`
-  run), the house freed without moving its larder, and carriers emptied with `ForagingSystem.DropAll` (moved to a shared helper).
+  run), the house freed without moving its larder, and carriers emptied with `CarrierDrop.DropAll` (a shared helper).
 - **Map edge:** a point within `MapEdgeToleranceM` (tuning, 2 m) of the terrain bounds. A **road exit** is any road
   node (segment end or junction) on the edge. Exits are **derived, never saved** (`MapExits`). With no road exit, the
   nearest walkable edge point.
