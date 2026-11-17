@@ -132,11 +132,11 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Value | Default | Unit | Rule |
 | --- | --- | --- | --- |
 | Market range | 630 | m walking distance (≈ ¼ day since the 30-minute day; owner kept 630 m on 11/11/2026, to revisit with MVP-2) | MKT-06 |
-| Stall cost | 1 log (later 2 planks) | | MKT-03 |
+| Stall cost | 2 planks, carried by the granary family | | MKT-03, PL-10 |
 | Hand carry per trip (no container) | 10 | items | MKT-03e |
 | Load / unload time per trip | 10 | game minutes | PROPOSED |
 | Market area | 100–2,000 | m² | MK-02 |
-| Stall footprint / recipe | 3 × 2 m / 1 log, 60 | m / worker-minutes | MK-21 |
+| Stall footprint / recipe | 3 × 2 m / 2 planks, 60 | m / worker-minutes | MK-21 |
 | Granary families collect from forager huts | any distance, fullest first | | MK-24 |
 | Stall capacity | 30 | food items | MK-22 |
 | Stall slot cell | 4 × 5 | m (stall 3 × 2, 1 m side gap, 3 m aisle) | MK-05 |

@@ -40,6 +40,7 @@ namespace LordsLegacy.Sim.Tests.Markets
                 new[] { new StartFamily("Ash", P(-8000, -4000), new[] { new StartCitizen("A", Sex.Male, Adult), new StartCitizen("B", Sex.Female, Adult) }) }, 2);
             StartLayoutApplier.Apply(w, layout);
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 80);
+            w.Inventory.Produce(w.Inventory.AddGoodsStore(M(20, 22)), Items.Plank, 10); // stalls cost 2 planks (PL-10)
             Assert.IsTrue(w.Execute(new DesignateArea(AreaShape.Straight(new[] { M(10, 10), M(30, 10), M(30, 30), M(10, 30) }), AreaTypes.MarketId)).IsAccepted);
             CommandResult r = w.Execute(new PlaceStructure(ModuleTypes.GranaryId, M(60, 60), 0));
             Assert.IsTrue(r.IsAccepted, r.Text);

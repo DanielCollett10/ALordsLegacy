@@ -1,0 +1,43 @@
+using System;
+using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Footprints;
+using LordsLegacy.Sim.Inventory;
+using LordsLegacy.Sim.Tasks;
+
+namespace LordsLegacy.Sim.Construction
+{
+    /// <summary>
+    /// The recipe an unbuilt footprint is built to (PL-13). A market stall placed before the plank recipe keeps its log cost:
+    /// its site uses <see cref="ModuleTypes.MarketStallLogRecipe"/> while it holds, reserves or is delivering any log. This
+    /// is derived from the saved site, so no save state is added. Every other footprint uses its type's recipe.
+    /// </summary>
+    public static class SiteRecipe
+    {
+        /// <summary>The recipe to build <paramref name="fp"/> to, from its site's current state.</summary>
+        /// <exception cref="ArgumentNullException">The world or the footprint is null.</exception>
+        public static ConstructionRecipe Of(SimWorld world, Footprint fp)
+        {
+            if (world == null) throw new ArgumentNullException(nameof(world));
+            if (fp == null) throw new ArgumentNullException(nameof(fp));
+            if (fp.Type.Id != ModuleTypes.MarketStallId) return fp.Type.ConstructionRecipe;
+            ConstructionSite site = world.Construction.Get(fp.Id);
+            return site != null && HoldsLogs(world, site) ? ModuleTypes.MarketStallLogRecipe : fp.Type.ConstructionRecipe;
+        }
+
+        // Logs on the site, used up by the build, reserved for it, or on their way to it by a live delivery task.
+        private static bool HoldsLogs(SimWorld world, ConstructionSite site)
+        {
+            if (site.ConsumedOf(Items.Log.Id) > 0) return true;
+            LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
+            if (loc != null && loc.CountOf(Items.Log.Id) > 0) return true;
+            foreach (int id in site.ReservationIds)
+            {
+                Reservation r = world.Inventory.GetReservation(id);
+                if (r != null && r.ItemId == Items.Log.Id) return true;
+            }
+            foreach (TaskRecord t in world.Tasks.All)
+                if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeliverId && t.SiteFootprintId == site.FootprintId) return true;
+            return false;
+        }
+    }
+}

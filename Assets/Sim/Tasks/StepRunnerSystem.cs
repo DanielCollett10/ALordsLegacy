@@ -140,12 +140,12 @@ namespace LordsLegacy.Sim.Tasks
         {
             ConstructionSite site = t.SiteFootprintId.HasValue ? world.Construction.Get(t.SiteFootprintId.Value) : null;
             Footprint fp = site == null ? null : world.Footprints.Get(site.FootprintId);
-            if (fp != null && ConstructionProgress.Work(world, site, fp.Type.ConstructionRecipe))
+            if (fp != null && ConstructionProgress.Work(world, site, SiteRecipe.Of(world, fp)))
             {
                 c.Activity = Activity.Working;
                 world.Tasks.AddProgress(t.Id, 1);
                 if (world.Construction.Get(site.FootprintId) != null &&
-                    ConstructionProgress.Remaining(world, site, fp.Type.ConstructionRecipe) > 0) return; // keep building
+                    ConstructionProgress.Remaining(world, site, SiteRecipe.Of(world, fp)) > 0) return; // keep building
             }
             Advance(world, t, c); // capped, or the site just finished
         }

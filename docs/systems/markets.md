@@ -33,7 +33,7 @@
 - Before `FoodHandedOver` households draw from the camp; after it only from stalls in range, never a mix (MK-31, decision 0049).
 - A late switch-on gives a **short first Sunday**: no stall is built and stocked yet.
 - Stall stock is the market's stock; granary stock never counts (MK-32). Store families never take allotted food (MK-27).
-- Stall: 3 × 2 m, 1 log, 60 min, holds 30 food, does not block movement. Store carry: 10 items, 10 min per load or unload.
+- Stall: 3 × 2 m, 2 planks (granary family carries; `SiteRecipe` keeps the log recipe for an old site holding logs), 60 min, holds 30 food, does not block movement. Store carry: 10 items, 10 min per load or unload.
 - Deleting the market drops stall food as a ground pile. Removing a granary clears its supply flag.
 
 ## How to extend

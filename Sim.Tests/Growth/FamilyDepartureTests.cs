@@ -153,6 +153,7 @@ namespace LordsLegacy.Sim.Tests.Growth
         {
             var w = SimWorld.FromMapData(Flat(), new SimTuning { StartHour = 8, BushCount = 0, StartWeekday = Weekday.Monday });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 40);
+            w.Inventory.Produce(w.Inventory.AddGoodsStore(M(20, 22)), Items.Plank, 10); // stalls cost 2 planks (PL-10)
             w.People.AddFamily(2, "F2", 40, 40);
             for (int i = 0; i < 2; i++) w.People.AddCitizen(20 + i, "C" + i, Sex.Male, Adult, 2, 40, 40);
             w.People.AddFamily(3, "F3", 40, 40);

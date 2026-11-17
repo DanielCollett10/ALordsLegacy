@@ -35,6 +35,7 @@ namespace LordsLegacy.Sim.Tests.Markets
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0 });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 80);
+            w.Inventory.Produce(w.Inventory.AddGoodsStore(M(20, 22)), Items.Plank, 10); // stalls cost 2 planks (PL-10)
             w.People.AddFamily(2, "F2", 40, 40);
             for (int i = 0; i < members; i++) w.People.AddCitizen(20 + i, "C" + i, Sex.Male, AdultBirth, 2, 40, 40);
             w.People.AddFamily(3, "F3", 40, 40);
@@ -120,7 +121,8 @@ namespace LordsLegacy.Sim.Tests.Markets
             }
             Assert.IsTrue(f.W.IsBuilt(stall));
             foreach (TaskRecord t in f.Trips) f.W.Tasks.Cancel(t.Id);
-            f.W.Step(1);
+            // The builders may still be finishing their build task (plank carries make it later): give them a few minutes.
+            for (int i = 0; i < 300 && !f.Trips.Any(); i++) f.W.Step(1);
             Assert.IsNotEmpty(f.Trips);
             Assert.IsTrue(f.Trips.All(t => t.Def.Steps.Last().LocationId == f.W.Inventory.FindFoodStore(stall).Id), "all trips go to the stall");
         }

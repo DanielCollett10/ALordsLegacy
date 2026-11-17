@@ -60,7 +60,7 @@ namespace LordsLegacy.Sim.Tests.Markets
 
             var f = new Fx { W = w, Map = map, GranaryOp = op, Goods = w.Inventory.AddGoodsStore(M(80, 80)) };
             w.Inventory.Produce(f.Goods, Items.Plank, 10);
-            // A stall site made of planks (a stall costs logs today; planks are what this task carries).
+            // A stall site made of planks (a stall costs 2 planks, PL-10; this one has a test-chosen plank count).
             var type = new FootprintTypeDef(ModuleTypes.MarketStallId, 3000, 2000, false, false,
                 recipe: new ConstructionRecipe(new Dictionary<string, int> { { Items.Plank.Id, planks } }, 100000), foodCapacity: 30);
             Footprint fp = w.Footprints.Add(w.Footprints.NextId(), type, M(20, 20), 0);

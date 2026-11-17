@@ -36,7 +36,7 @@ namespace LordsLegacy.Sim.Operations
             {
                 Footprint fp = world.Footprints.Get(site.FootprintId);
                 if (fp == null) continue;
-                ConstructionRecipe recipe = fp.Type.ConstructionRecipe;
+                ConstructionRecipe recipe = SiteRecipe.Of(world, fp);
                 LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
                 if (loc == null) continue;
                 if (site.State == ConstructionState.Delivering && AnyDelivered(world, site, recipe))
@@ -80,7 +80,7 @@ namespace LordsLegacy.Sim.Operations
         // more than there are minutes left. Open ones are withdrawn when the site is capped.
         private static void ManageBuilders(SimWorld world, ConstructionSite site, Footprint fp, int owner)
         {
-            int remaining = ConstructionProgress.Remaining(world, site, fp.Type.ConstructionRecipe);
+            int remaining = ConstructionProgress.Remaining(world, site, SiteRecipe.Of(world, fp));
             int live = 0;
             foreach (TaskRecord t in new List<TaskRecord>(world.Tasks.All))
             {

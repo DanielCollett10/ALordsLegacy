@@ -32,6 +32,8 @@ namespace LordsLegacy.Sim.Operations
         NoBushes = 8,
         /// <summary>A granary family needs a stall but the market has no free slot (MK-21, MK-42).</summary>
         NoRoomAtMarket = 9,
+        /// <summary>A granary family needs a stall but the camp has fewer than the stall's 2 planks (PL-13, MK-21).</summary>
+        WaitingForPlanks = 10,
     }
 
     /// <summary>Computes operation status from world state. Nothing here is stored (GDD section 5).</summary>
@@ -40,12 +42,13 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>Age in years at which a citizen can work.</summary>
         public const double WorkingAgeYears = 14;
 
-        /// <summary>Working, or the first cause in order: Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull.</summary>
+        /// <summary>Working, or the first cause in order: Paused, NoRoomAtMarket, WaitingForPlanks (granary), MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull.</summary>
         public static OperationState Of(SimWorld world, Operation op)
         {
             if (op.TypeId == OperationTypes.ForagingId) return Foraging.ForagingStatus.Of(world, op);
             if (op.Paused) return OperationState.Paused;
             if (op.TypeId == OperationTypes.GranaryId && HasNoRoomFamily(world, op)) return OperationState.NoRoomAtMarket;
+            if (op.TypeId == OperationTypes.GranaryId && HasNoPlanksFamily(world, op)) return OperationState.WaitingForPlanks;
             if (Hut(world, op) == null) return OperationState.MissingHut;
             if (StorageModules(world, op).Count == 0) return OperationState.MissingStorage;
             if (!HasWorker(world, op)) return OperationState.NoWorkers;
@@ -72,6 +75,14 @@ namespace LordsLegacy.Sim.Operations
             Markets.Market m = world.Markets.Current;
             if (m == null) return false;
             foreach (int fid in op.FamilyIds) foreach (int n in m.NoRoomFamilyIds) if (n == fid) return true;
+            return false;
+        }
+
+        private static bool HasNoPlanksFamily(SimWorld world, Operation op)
+        {
+            Markets.Market m = world.Markets.Current;
+            if (m == null) return false;
+            foreach (int fid in op.FamilyIds) foreach (int n in m.NoPlanksFamilyIds) if (n == fid) return true;
             return false;
         }
 

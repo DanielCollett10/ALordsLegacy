@@ -13,10 +13,10 @@ rectangle with an access point. It blocks or clears movement and holds a constru
 | `Footprint` | Oriented rectangle: CCW `Polygon`, centre, rotation, `AccessPoint` 1 m outside the front edge (local −Z). Type id. |
 | `FootprintTypeDef` | Size, `BlocksMovement`, `ClearsTrees`, `LogCapacity`, `OxCapacity` (both 0 by default), `ConstructionRecipe`. |
 | `FootprintRegistry` (`SimWorld.Footprints`) | `FindAt`, `QueryRect`, `Ids`, `NextId()`, `Version` (bumps on add or remove). |
-| `ModuleTypes` | Module types (`All`): woodcutting hut 6×4 m (blocks), log storage 8×6 m (20 logs), oxen stand 3×3 m (1 ox), house 6×8 m (blocks, M13), granary 8×6 m standalone with a 5 m yard (food store 100, M14), forager hut 6×4 m (food store 30, M14), market stall 3×2 m (1 log, 60 min, food store 30, no blocking; M15). |
+| `ModuleTypes` | Module types (`All`): woodcutting hut 6×4 m (blocks), log storage 8×6 m (20 logs), oxen stand 3×3 m (1 ox), house 6×8 m (blocks, M13), granary 8×6 m standalone with a 5 m yard (food store 100, M14), forager hut 6×4 m (food store 30, M14), market stall 3×2 m (2 planks, 60 min, food store 30, no blocking; M15). |
 | `ConstructionRecipe` | Item counts and build worker-minutes. Hut 8 logs / 960 min, oxen stand 1 / 60, house 10 / 720, granary 8 / 600, forager hut 8 / 480, log storage and camp empty (built at placement). |
 
-`module.market_stall` (T-459): 3×2 m, non-blocking, 1 log / 60 min, food store 30. No operation: `Markets/StallSystem` (operations
+`module.market_stall` (T-459): 3×2 m, non-blocking, 2 planks / 60 min (T-519), food store 30. No operation: `Markets/StallSystem` (operations
 phase) queues one per store family on the free `StallGrid` slot nearest the centre, reusing an unstaffed stall first (MK-20..23).
 `Market.FamilyOf(stall)` is the staffing family (0 = unstaffed, saved); `NoRoomFamilyIds` is recomputed each tick. Deleting the market
 drops stall food as ground piles. Its site tasks use owner -1 like a house. Tests: `Markets/StallSystemTests.cs`.

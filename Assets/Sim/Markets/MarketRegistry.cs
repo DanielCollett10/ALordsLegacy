@@ -15,6 +15,7 @@ namespace LordsLegacy.Sim.Markets
 
         private readonly Dictionary<int, int> _familyByStall = new Dictionary<int, int>();
         private readonly SortedSet<int> _noRoom = new SortedSet<int>();
+        private readonly SortedSet<int> _noPlanks = new SortedSet<int>();
 
         /// <summary>Family staffing this stall (MK-20), or 0 when the stall is unstaffed (MK-23) or unknown.</summary>
         public int FamilyOf(int stallFootprintId) => _familyByStall.TryGetValue(stallFootprintId, out int f) ? f : 0;
@@ -35,8 +36,13 @@ namespace LordsLegacy.Sim.Markets
             if (familyId == 0) _familyByStall.Remove(stallFootprintId); else _familyByStall[stallFootprintId] = familyId;
         }
 
+        /// <summary>Families whose stall is waiting for planks (PL-13: fewer than the stall's 2 planks in the camp). Recomputed every tick, not saved.</summary>
+        public IReadOnlyCollection<int> NoPlanksFamilyIds => _noPlanks;
+
         internal void ClearNoRoom() => _noRoom.Clear();
         internal void AddNoRoom(int familyId) => _noRoom.Add(familyId);
+        internal void ClearNoPlanks() => _noPlanks.Clear();
+        internal void AddNoPlanks(int familyId) => _noPlanks.Add(familyId);
 
         internal Market(int id, int areaId) { Id = id; AreaId = areaId; }
     }
