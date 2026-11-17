@@ -46,6 +46,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | GR-30 | A small **message log** under the top bar shows the last few arrivals and departures, fading after 30 s real time | PROPOSED |
 | GR-31 | Top bar population shows families and citizens, with the number arriving or leaving in the tooltip | PROPOSED |
 
+Technical shape (passage state, map exits, house reservation, settlement log): decision 0045.
+
 ## Not in M16
 
 Deaths, births (POP-A4), coming of age forming families (POP-A8, POP-19), happiness, household levels (M17).
