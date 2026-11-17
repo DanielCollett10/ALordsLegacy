@@ -1,4 +1,6 @@
 using LordsLegacy.Game.Tools;
+using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tasks;
 using UnityEngine;
@@ -117,7 +119,7 @@ namespace LordsLegacy.Game
                 int age = (int)System.Math.Floor(c.AgeYears(world.Tick, world.Tuning.AgeingRate));
                 _age.text = "Age: " + age;
                 _family.text = "Family: " + (family != null ? family.Surname : "none");
-                _home.text = HomeLine(family);
+                _home.text = HomeLine(world, family);
                 _home.style.display = DisplayStyle.Flex;
                 // FD-16: Hungry is shown only while the family is short; it changes nothing else.
                 _hungry.text = "Hungry";
@@ -133,10 +135,14 @@ namespace LordsLegacy.Game
             _panel.style.display = DisplayStyle.Flex;
         }
 
-        /// <summary>The citizen panel's home line (HM-22): the family's house, or Homeless (camp).</summary>
-        public static string HomeLine(Family family)
+        /// <summary>
+        /// The citizen panel's home line: the family's house, or Homeless (camp) (HM-22) while the camp stands, or
+        /// Homeless (sleeping rough) once it has gone (CMP-25). Text comes from the Sim's <see cref="RoughSleep"/>.
+        /// </summary>
+        public static string HomeLine(SimWorld world, Family family)
         {
-            if (family == null || family.IsHomeless) return "Homeless (camp)";
+            if (family == null || family.IsHomeless)
+                return world.Camp == null ? RoughSleep.StatusText : RoughSleep.CampStatusText;
             return "Home: " + family.Surname + " house";
         }
 

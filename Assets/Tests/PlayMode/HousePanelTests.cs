@@ -183,7 +183,7 @@ namespace LordsLegacy.Tests.PlayMode
             yield return null;
             Assert.IsFalse(_house.IsShown);
             Assert.AreEqual("Homeless (camp)", _citizen.HomeText, "Marking the house evicts the family (HM-14).");
-            Assert.AreEqual("Home: Archer house", CitizenPanelView.HomeLine(HomedFamily()));
+            Assert.AreEqual("Home: Archer house", CitizenPanelView.HomeLine(w, HomedFamily()));
         }
 
         [UnityTest]

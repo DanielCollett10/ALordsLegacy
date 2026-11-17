@@ -47,7 +47,10 @@ namespace LordsLegacy.Game.Visuals
 
         private void Update() { Draw(); }
 
-        /// <summary>Rebuilds if the Sim camp changed, then draws.</summary>
+        /// <summary>
+        /// Rebuilds if the Sim camp changed, then draws. Draws nothing once <c>World.Camp</c> is null (CMP-23); the
+        /// leftover logs of a removed camp are a ground pile, drawn by <see cref="LogPileRenderer"/> (CMP-24).
+        /// </summary>
         public void Draw()
         {
             if (host == null || !host.IsInitialized || registry == null) return;
