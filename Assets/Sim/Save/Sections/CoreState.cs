@@ -24,5 +24,8 @@ namespace LordsLegacy.Sim.Save.Sections
         public AreaTypeCatalog AreaTypes { get; set; }
         /// <summary>The saved map entry point, or null.</summary>
         public LordsLegacy.Sim.Geometry.PointMm? EntryPoint { get; set; }
+        /// <summary>The settlement log entries, oldest first (T-498). Never null.</summary>
+        public System.Collections.Generic.List<LordsLegacy.Sim.Core.SettlementEntry> SettlementEntries { get; set; }
+            = new System.Collections.Generic.List<LordsLegacy.Sim.Core.SettlementEntry>();
     }
 }

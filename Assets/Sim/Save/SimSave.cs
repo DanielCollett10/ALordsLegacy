@@ -31,7 +31,8 @@ namespace LordsLegacy.Sim.Save
                 Tuning = world.Tuning,
                 RoadTypes = world.RoadTypes,
                 AreaTypes = world.AreaTypes,
-                EntryPoint = world.EntryPoint
+                EntryPoint = world.EntryPoint,
+                SettlementEntries = new List<SettlementEntry>(world.SettlementLog.Entries)
             });
             for (int i = 0; i < sections.Count; i++)
             {

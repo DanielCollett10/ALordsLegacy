@@ -21,6 +21,7 @@ namespace LordsLegacy.Sim.Core
             world.Tick = core.Tick;
             world.Paused = core.Paused;
             world.EntryPoint = core.EntryPoint;
+            world.SettlementLog.Restore(core.SettlementEntries);
             world.Random.Restore(core.RandomState);
             return world;
         }

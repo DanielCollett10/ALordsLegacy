@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Tuning;
 
@@ -37,6 +38,12 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteBool(s.EntryPoint.HasValue); // T-497
             w.WriteInt64(s.EntryPoint?.X ?? 0);
             w.WriteInt64(s.EntryPoint?.Z ?? 0);
+            w.WriteInt32(s.SettlementEntries.Count); // T-498, decision 0045
+            foreach (SettlementEntry e in s.SettlementEntries)
+            {
+                w.WriteInt64(e.Tick);
+                w.WriteString(e.Text);
+            }
         }
 
         /// <summary>Reads a section body written by <see cref="WriteBody"/>.</summary>
@@ -52,6 +59,13 @@ namespace LordsLegacy.Sim.Save.Sections
             bool hasEntry = r.ReadBool();
             long ex = r.ReadInt64(), ez = r.ReadInt64();
             if (hasEntry) s.EntryPoint = new LordsLegacy.Sim.Geometry.PointMm(ex, ez);
+            int ne = r.ReadCount(12);
+            for (int i = 0; i < ne; i++)
+            {
+                long tick = r.ReadInt64();
+                string text = r.ReadString();
+                s.SettlementEntries.Add(new SettlementEntry(tick, text));
+            }
             return s;
         }
 
