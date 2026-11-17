@@ -59,7 +59,11 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Reserve and move food from a granary store onto the carrier, in proportion to its stock (MK-25).</summary>
         CollectStock,
         /// <summary>Put what the carrier holds onto the stall's store (MK-25).</summary>
-        DepositStock
+        DepositStock,
+        /// <summary>Move the step's count of the step's item from a ledger location onto the task's person carrier (T-517).</summary>
+        CollectItems,
+        /// <summary>Move the step's count of the step's item from the task's carrier into a ledger location (T-517).</summary>
+        DepositItems
     }
 
     /// <summary>Lifecycle of a task: Open, Assigned, Active, Done, or Cancelled from any live state.</summary>

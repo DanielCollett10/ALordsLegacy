@@ -53,6 +53,7 @@ namespace LordsLegacy.Sim.Tasks
             if (!world.WorkDay.OnShift(world, c))
             {
                 if (TryWindDown(world, t, c, ox)) return; // haul under way at sunset (WC-35)
+                if (TryWindDownCarry(world, t, c)) return; // hand carry under way at sunset (T-517)
                 // Night, or not yet time to leave (PPL-24): keep progress and reservations; the routine walks the worker home.
                 _orders.Remove(t.Id);
                 // A task with no tree target (a build) has nowhere to walk back to yet: it resumes where the worker stands.
@@ -61,6 +62,7 @@ namespace LordsLegacy.Sim.Tasks
             }
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) { StepForage(world, t, c); return; }
             if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) { StepStock(world, t, c); return; }
+            if (t.Def.Id == ConstructionTaskDefs.CarryId) { StepCarry(world, t, c); return; }
             if (t.Target.HasValue)
             {
                 if (!world.Trees.TryGet(t.Target.Value, out TreeRecord tree) || tree.State == TreeState.Stump)
@@ -191,6 +193,7 @@ namespace LordsLegacy.Sim.Tasks
             if (t.Def.Id == FoodTripSystem.FetchFoodTaskId) FailFoodTrip(world, t, c);
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) FailForage(world, t, c);
             if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) FailStock(world, t, c);
+            if (t.Def.Id == ConstructionTaskDefs.CarryId) FailCarry(world, t, c);
             ReleaseOx(world, t, c);
             world.Tasks.Cancel(t.Id);
             if (c != null)

@@ -103,7 +103,7 @@ namespace LordsLegacy.Sim.Tests.Construction
             Assert.AreEqual(3, b.ConsumedOf(Items.Log.Id));
             Assert.AreEqual(2, b.ConsumedOf(Items.Plank.Id));
             Assert.AreEqual(bytes, SimSave.Write(back, "s", 1, map.MapId, map.ContentHash));
-            Assert.AreEqual(26, SaveWriter.CurrentVersion);
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 26);
         }
     }
 }

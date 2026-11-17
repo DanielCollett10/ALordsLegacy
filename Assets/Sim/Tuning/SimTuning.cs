@@ -286,6 +286,9 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Most items a person carries by hand on one trip. Unit: items. Rule: FD-24, MKT-03e (PLACEHOLDER).</summary>
         public int HandCarryItems { get; set; } = 10;
 
+        /// <summary>Planks (or other light non-log materials) an odd-jobber carries to a site per trip. Unit: items. Rule: PL-16, decision 0046 (PLACEHOLDER).</summary>
+        public int HandCarryPlanks { get; set; } = 2;
+
         /// <summary>Baskets a forage bush holds when full. Unit: baskets. Rule: FD-21 (PLACEHOLDER).</summary>
         public int BushBaskets { get; set; } = 3;
 

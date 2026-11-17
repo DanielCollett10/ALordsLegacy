@@ -22,11 +22,12 @@ last log is in and the work is done, the site becomes a built footprint (decisio
 1. **Place:** `PlaceModule` checks the recipe (`ModulePlacement` refuses "Not enough logs (have N, need M)"). Footprint,
    Delivering site and reservations (owner = footprint id) are added in one `Apply`.
 2. **Deliver:** `ConstructionSystem` opens `task.deliver_materials` for logs reserved to the site: up to `OxLoadLogs` (1) per trip.
-   Open tasks ask `OxPool.FindFor` each tick. The site turns Building at its first log on site.
+   Open tasks ask `OxPool.FindFor` each tick. Other items (planks) get `task.carry_materials`, `HandCarryPlanks` (2) per trip on foot
+   (`StepRunnerSystem.Carry.cs`); a failed or sunset carry drops a site-owned pile. The site turns Building at its first item.
 3. **Build:** up to `MaxBuildersPerSite` (4) `task.build` tasks at once. Each builder adds a minute per tick
    (`StepBuild` → `ConstructionProgress.Work`). Cap = recipe minutes × delivered units ÷ needed units over all items (on site + `Consumed`).
 4. **Built:** at the full total the site record is removed and the footprint counts as built (`world.IsBuilt`).
-5. **Cancel:** a cancelled deliver hands its logs back. A removed site cancels its tasks; its logs go to an unowned pile.
+5. **Cancel:** a cancelled deliver/carry hands its items back. A removed site cancels its tasks; its logs go to an unowned pile.
 6. **Deconstruct (T-393, T-394; decision 0039):** a marked built module gets up to 4 `task.deconstruct` tasks (HelpersOnly,
    heavy Work = recipe minutes × `DeconstructTimeShare`; hut 480). `DeconstructionWork.Finish` removes the footprint and
    drops floor(recipe logs × `DeconstructRefundShare`) logs, plus storage contents, as one unowned pile at the site.
@@ -45,8 +46,7 @@ last log is in and the work is done, the site becomes a built footprint (decisio
 
 ## Extending
 
-A new recipe item is data on the footprint type. A new site step needs a task def, a line in `ConstructionSystem` and save
-rules (`save.md`). Progress rules belong in `ConstructionProgress`, not the step runner.
+A new recipe item is data on the footprint type. A new site step needs a task def, a line in `ConstructionSystem` and save rules (`save.md`). Progress rules belong in `ConstructionProgress`.
 
 ## Gotchas
 

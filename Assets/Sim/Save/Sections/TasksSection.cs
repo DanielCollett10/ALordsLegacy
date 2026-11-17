@@ -131,6 +131,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(s.Z);
             w.WriteInt32(s.LocationId);
             w.WriteInt32(s.Count);
+            WriteOptString(w, s.ItemId); // T-517
         }
 
         private static TaskStep ReadStep(SaveReader r)
@@ -141,6 +142,7 @@ namespace LordsLegacy.Sim.Save.Sections
             string stage = ReadOptString(r);
             double x = r.ReadDouble(), z = r.ReadDouble();
             int loc = r.ReadInt32(), count = r.ReadInt32();
+            string itemId = ReadOptString(r);
             switch (kind)
             {
                 case (int)StepKind.MoveTo: return TaskStep.MoveTo(heavy);
@@ -156,6 +158,12 @@ namespace LordsLegacy.Sim.Save.Sections
                 case (int)StepKind.DepositForage: return TaskStep.DepositForage(loc, count);
                 case (int)StepKind.CollectStock: return TaskStep.CollectStock(loc, count);
                 case (int)StepKind.DepositStock: return TaskStep.DepositStock(loc, count);
+                case (int)StepKind.CollectItems:
+                    if (itemId == null) throw new SaveFormatException("Collect step without an item.");
+                    return TaskStep.CollectItems(loc, itemId, count, heavy);
+                case (int)StepKind.DepositItems:
+                    if (itemId == null) throw new SaveFormatException("Deposit step without an item.");
+                    return TaskStep.DepositItems(loc, itemId, count, heavy);
                 default: throw new SaveFormatException("Bad task step kind " + kind + ".");
             }
         }

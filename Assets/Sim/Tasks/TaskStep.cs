@@ -26,11 +26,32 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>LoadOx / UnloadOx: number of logs moved.</summary>
         public readonly int Count;
 
+        /// <summary>CollectItems / DepositItems: id of the item moved (e.g. "item.plank"), or null.</summary>
+        public readonly string ItemId;
+
         private TaskStep(StepKind kind, int durationTicks, bool heavy, string stageId,
-            double x = 0, double z = 0, int locationId = 0, int count = 0)
+            double x = 0, double z = 0, int locationId = 0, int count = 0, string itemId = null)
         {
             Kind = kind; DurationTicks = durationTicks; Heavy = heavy; StageId = stageId;
-            X = x; Z = z; LocationId = locationId; Count = count;
+            X = x; Z = z; LocationId = locationId; Count = count; ItemId = itemId;
+        }
+
+        /// <summary>Take <paramref name="count"/> of <paramref name="itemId"/> from ledger location
+        /// <paramref name="locationId"/> onto the person carrier (T-517; any item, by hand).</summary>
+        public static TaskStep CollectItems(int locationId, string itemId, int count, bool heavy = false)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+            if (string.IsNullOrEmpty(itemId)) throw new ArgumentException("Item id missing.", nameof(itemId));
+            return new TaskStep(StepKind.CollectItems, 0, heavy, null, 0, 0, locationId, count, itemId);
+        }
+
+        /// <summary>Put <paramref name="count"/> of <paramref name="itemId"/> from the carrier into ledger location
+        /// <paramref name="locationId"/> (T-517).</summary>
+        public static TaskStep DepositItems(int locationId, string itemId, int count, bool heavy = false)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+            if (string.IsNullOrEmpty(itemId)) throw new ArgumentException("Item id missing.", nameof(itemId));
+            return new TaskStep(StepKind.DepositItems, 0, heavy, null, 0, 0, locationId, count, itemId);
         }
 
         /// <summary>Walk to the task's ox and attach it (ox state Led).</summary>

@@ -16,6 +16,7 @@ namespace LordsLegacy.Sim.Tasks
                 { WoodcuttingSystem.FellTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { HaulSystem.HaulTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.Ox) },
                 { ConstructionTaskDefs.DeliverId, (EligibilityPolicy.HelpersOnly, RequiredResource.Ox) },
+                { ConstructionTaskDefs.CarryId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
                 { ConstructionTaskDefs.BuildId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
                 { ConstructionTaskDefs.DeconstructId, (EligibilityPolicy.HelpersOnly, RequiredResource.None) },
                 { Foraging.ForagingSystem.ForageTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },

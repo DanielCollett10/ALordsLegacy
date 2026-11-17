@@ -12,6 +12,25 @@ namespace LordsLegacy.Sim.Tasks
         /// <summary>Id of the deliver-materials task definition: an ox carries logs from a pile to a site.</summary>
         public const string DeliverId = "task.deliver_materials";
 
+        /// <summary>Id of the carry-materials task definition: a person carries light items (planks) to a site on foot (PL-16).</summary>
+        public const string CarryId = "task.carry_materials";
+
+        /// <summary>
+        /// Carry <paramref name="count"/> of <paramref name="itemId"/> by hand: walk to the source, collect, walk to the
+        /// site, deposit. Helpers only like Deliver, but it needs no ox. Collect and deposit are flagged heavy so the
+        /// eligibility matches Deliver (a child under 14 cannot take it, PPL-44).
+        /// </summary>
+        public static TaskDef Carry(PathPoint source, int sourceLocationId, string itemId, PathPoint site, int siteLocationId, int count)
+        {
+            return new TaskDef(CarryId, new[]
+            {
+                TaskStep.WalkTo(source),
+                TaskStep.CollectItems(sourceLocationId, itemId, count, heavy: true),
+                TaskStep.WalkTo(site),
+                TaskStep.DepositItems(siteLocationId, itemId, count, heavy: true),
+            }, EligibilityPolicy.HelpersOnly);
+        }
+
         /// <summary>Id of the build task definition: a worker builds a site.</summary>
         public const string BuildId = "task.build";
 
@@ -61,7 +80,7 @@ namespace LordsLegacy.Sim.Tasks
         }
 
         /// <summary>True for the construction task definitions (deliver, build and deconstruct).</summary>
-        public static bool IsConstruction(string defId) => defId == DeliverId || defId == BuildId || defId == DeconstructId;
+        public static bool IsConstruction(string defId) => defId == DeliverId || defId == CarryId || defId == BuildId || defId == DeconstructId;
 
         /// <summary>The citizen-panel verb for a construction task, given the module it serves. Null when the
         /// definition is not a construction task.</summary>
@@ -69,6 +88,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             bool named = !string.IsNullOrEmpty(moduleName);
             if (defId == DeliverId) return named ? "Delivering logs to " + moduleName : "Delivering logs";
+            if (defId == CarryId) return named ? "Carrying materials to " + moduleName : "Carrying materials";
             if (defId == BuildId) return named ? "Building " + moduleName : "Building";
             if (defId == DeconstructId) return named ? "Deconstructing " + moduleName : "Deconstructing";
             return null;
