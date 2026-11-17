@@ -237,6 +237,8 @@ namespace LordsLegacy.Tests.PlayMode
             yield return null;
             Assert.AreEqual("", _house.HungryText);
             LordsLegacy.Sim.Growth.FamilyDeparture.Begin(w, family.Id);
+            // Begin evicts the family from its house (the panel then rightly shows Empty), so put it back to read the status.
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
             yield return null;
             Assert.AreEqual("Leaving (hungry)", _house.HungryText);
         }
