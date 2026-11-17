@@ -253,8 +253,8 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Most planks a sawpit's output store holds. Unit: planks. Rule: HW-05.</summary>
         public int SawingStoreCapacity { get; set; } = 20;
 
-        /// <summary>Length of a workshop shift. Unit: game minutes. Rule: HW-05 (PLACEHOLDER).</summary>
-        public int WorkshopShiftMinutes { get; set; } = 240;
+        /// <summary>Length of a workshop shift. 0 (default) = today's daylight work window, so rates are per working day all year. Unit: game minutes. Rule: HW-05.</summary>
+        public int WorkshopShiftMinutes { get; set; } = 0;
 
         /// <summary>Share of the recipe's logs returned as a ground pile, rounded down. Unit: fraction. Rule: CN-54.</summary>
         public double DeconstructRefundShare { get; set; } = 0.5;
