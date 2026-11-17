@@ -29,10 +29,10 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | --- | --- | --- |
 | HL-20 | The level is stored on the **household** (the family). It starts at 1 and never drops (HSE-10). Moving house keeps it | PROPOSED |
 | HL-21 | Levels and needs are data (HSE-09). **Level 2 needs:** *Diverse food*: the family's last Sunday allotment held **2 or more food types** and it is not Hungry (HSE-12 made per household). *Fenced plot* (HL-12). *Water* and *Church*: counted as met (HSE-19) | PROPOSED |
-| HL-22 | Needs are checked once a day. When every level 2 need is met, the household **reaches level 2 at once** and the message log says so. The house panel shows each need ticked or not | PROPOSED |
-| HL-23 | **Renovation (HSE-20) and house tier 2 are deferred.** In M21 a level 2 household still lives in a tier 1 house. Renovation recipes (10 beams + 6 planks + 10 daub was the draft) come with the house upgrade milestone | DECIDED (owner 17/11/2026: upgrades after M21) |
+| HL-22 | Needs are checked once a day. The house panel shows each need ticked or not. When every level 2 need is met the household is **eligible** and the panel shows an **Upgrade** button. The player presses it and the household becomes level 2; the message log says so. Nothing is automatic (HSE-20) | DECIDED (owner 17/11/2026) |
+| HL-23 | In M21 the Upgrade button **costs nothing and is instant**. Renovation materials, labour and the tier 2 house look are added to the same button later (the draft was 10 beams + 6 planks + 10 daub) | DECIDED (owner 17/11/2026: upgrade costs after M21) |
 | HL-25 | Level 2 **gives nothing yet**. Artisan backyards and house upgrades come after M21 | DECIDED (owner 17/11/2026) |
 | HL-26 | The top bar tooltip shows households by level | PROPOSED |
 
-> Note (HL-22 vs HSE-20): the GDD wants a renovation before a level applies. With renovation deferred, M21 grants the
-> level when the needs are met. When upgrades arrive, the owner decides whether existing level 2 households must renovate.
+> Note (HL-22, HL-23): the player always orders the upgrade (HSE-20). M21 has the button without a cost; the
+> renovation cost joins it later, so no level 2 household ever skips the button.
