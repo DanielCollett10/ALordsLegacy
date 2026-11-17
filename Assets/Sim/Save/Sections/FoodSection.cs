@@ -26,9 +26,11 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteBool(world.FoodHandedOver); // T-464
             w.WriteInt32(world.LastAllotmentServed); // T-465
             w.WriteInt32(world.LastAllotmentShort);
+            w.WriteBool(world.LastHungryTick.HasValue); // T-496
+            w.WriteInt64(world.LastHungryTick ?? 0);
             var fams = new List<Family>(world.People.Families);
             w.WriteInt32(fams.Count);
-            foreach (Family f in fams) { w.WriteInt32(f.Id); w.WriteInt32(f.LarderLocationId); w.WriteDouble(f.CarriedRations); w.WriteBool(f.IsHungry); w.WriteInt32(f.TripCarrierId);
+            foreach (Family f in fams) { w.WriteInt32(f.Id); w.WriteInt32(f.LarderLocationId); w.WriteDouble(f.CarriedRations); w.WriteBool(f.IsHungry); w.WriteInt32(f.HungryDays); w.WriteInt32(f.TripCarrierId);
                 w.WriteInt32(f.AllotmentReservationIds.Count);
                 foreach (int rid in f.AllotmentReservationIds) w.WriteInt32(rid);
             }
@@ -43,17 +45,22 @@ namespace LordsLegacy.Sim.Save.Sections
             world.FoodHandedOver = r.ReadBool();
             world.LastAllotmentServed = r.ReadInt32();
             world.LastAllotmentShort = r.ReadInt32();
+            bool hasHungry = r.ReadBool();
+            long hungryTick = r.ReadInt64();
+            world.LastHungryTick = hasHungry ? hungryTick : (long?)null;
             if (camp != 0)
             {
                 if (world.Camp == null) throw new SaveFormatException("Food store " + camp + " saved without a camp.");
                 world.Camp.FoodStoreLocation = CheckLarder(world, camp, "Camp food store");
             }
-            int nf = r.ReadCount(21);
+            int nf = r.ReadCount(25);
             for (int i = 0; i < nf; i++)
             {
                 int id = r.ReadInt32(), loc = r.ReadInt32();
                 double carried = r.ReadDouble();
                 bool hungry = r.ReadBool();
+                int hungryDays = r.ReadInt32();
+                if (hungryDays < 0) throw new SaveFormatException("Family " + id + " has bad hungry days.");
                 int tripCarrier = r.ReadInt32();
                 if (tripCarrier != 0 && world.Inventory.Get(tripCarrier)?.Kind != LocationKind.Carrier)
                     throw new SaveFormatException("Family " + id + " trip carrier " + tripCarrier + " is not a carrier.");
@@ -72,6 +79,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 f.LarderLocationId = loc;
                 f.CarriedRations = carried;
                 f.IsHungry = hungry;
+                f.HungryDays = hungryDays;
                 f.TripCarrierId = tripCarrier;
             }
             int nh = r.ReadCount(8);

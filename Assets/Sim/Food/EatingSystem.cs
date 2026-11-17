@@ -43,7 +43,7 @@ namespace LordsLegacy.Sim.Food
         private static void Eat(SimWorld world, Family f)
         {
             double need = DailyNeed(world, f);
-            if (need <= 0) { f.IsHungry = false; return; }
+            if (need <= 0) { f.IsHungry = false; f.HungryDays = 0; return; }
             Homes.HomeRecord home = f.HomeHouseId.HasValue ? world.Homes.Get(f.HomeHouseId.Value) : null;
             LedgerLocation larder = home != null ? Larders.ForHome(world, home) : Larders.ForFamily(world, f);
             double carried = f.CarriedRations;
@@ -66,6 +66,8 @@ namespace LordsLegacy.Sim.Food
             if (carried < eps) carried = 0;
             f.CarriedRations = carried;
             f.IsHungry = left > eps;
+            f.HungryDays = f.IsHungry ? f.HungryDays + 1 : 0;
+            if (f.IsHungry) world.LastHungryTick = world.Tick;
         }
     }
 }

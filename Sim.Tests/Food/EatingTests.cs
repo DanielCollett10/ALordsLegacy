@@ -102,6 +102,55 @@ namespace LordsLegacy.Sim.Tests.Food
         }
 
         [Test]
+        public void HungryDays_IncrementEachHungryMidnight_ResetOnFullDay_AndLastHungryTickIsLatest()
+        {
+            SimWorld w = Started();
+            Family ash = w.People.Families.First(), birch = w.People.Families.Last();
+            Assert.IsNull(w.LastHungryTick);
+            Assert.AreEqual(0, ash.HungryDays);
+            StepToMidnight(w);
+            Assert.AreEqual(1, ash.HungryDays);
+            Assert.AreEqual(w.Tick, w.LastHungryTick);
+            StepToMidnight(w);
+            Assert.AreEqual(2, ash.HungryDays);
+            Assert.AreEqual(w.Tick, w.LastHungryTick);
+            w.Inventory.Produce(Larders.ForFamily(w, ash), Items.Meat, 2); // 6 rations covers 2.5
+            StepToMidnight(w);
+            Assert.AreEqual(0, ash.HungryDays, "full day resets");
+            Assert.AreEqual(3, birch.HungryDays);
+            Assert.AreEqual(w.Tick, w.LastHungryTick, "birch still hungry");
+        }
+
+        [Test]
+        public void LastHungryTick_StaysPut_WhenNobodyIsHungry()
+        {
+            SimWorld w = Started();
+            foreach (Family f in w.People.Families) w.Inventory.Produce(Larders.ForFamily(w, f), Items.Meat, 10);
+            StepToMidnight(w); StepToMidnight(w);
+            Assert.IsNull(w.LastHungryTick);
+            Family ash = w.People.Families.First();
+            Larders.ForFamily(w, ash); // keep fed family; drain ash instead
+            w.Inventory.Consume(Larders.ForFamily(w, ash), Items.Meat, Larders.ForFamily(w, ash).CountOf(Items.Meat.Id));
+            ash.CarriedRations = 0;
+            StepToMidnight(w);
+            long hungryAt = w.Tick;
+            Assert.AreEqual(hungryAt, w.LastHungryTick);
+            w.Inventory.Produce(Larders.ForFamily(w, ash), Items.Meat, 5);
+            StepToMidnight(w);
+            Assert.AreEqual(hungryAt, w.LastHungryTick, "fed day keeps the old tick");
+        }
+
+        [Test]
+        public void HungryDays_StaysZero_ForFamilyWithNoNeed()
+        {
+            SimWorld w = Started();
+            w.Tuning.AdultRations = 0; w.Tuning.ChildRations = 0;
+            StepToMidnight(w); StepToMidnight(w);
+            Assert.IsTrue(w.People.Families.All(f => f.HungryDays == 0 && !f.IsHungry));
+            Assert.IsNull(w.LastHungryTick);
+        }
+
+        [Test]
         public void Hungry_DoesNotChangeWorkerTimingsOrPositions()
         {
             SimWorld fed = Started(), hungry = Started();
