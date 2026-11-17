@@ -30,6 +30,6 @@
 
 ## Gaps and follow-ups
 
-- No Unity panel or top bar readout yet; read `WorkshopReport` and `GoodsStats` there.
+- Unity side (T-527): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct; the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.
 - A site that loses a carried load at sunset drops it on a pile the site owns, and may not reserve it again if no spare logs exist (seen in the end-to-end test; not fixed here).
 - Stall builds need an odd-jobber family (one with no workplace); with every family assigned, build tasks stay open.

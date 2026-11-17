@@ -19,7 +19,17 @@ namespace LordsLegacy.Game
         private Label _dateLabel;
         private Label _notice;
         private Label _foodLabel;
+        private Label _logsLabel, _beamsLabel, _planksLabel;
         private Label _populationLabel;
+
+        /// <summary>"Logs: N" (T-527).</summary>
+        public string LogsText => _logsLabel == null ? "" : _logsLabel.text;
+
+        /// <summary>"Beams: N" (T-527).</summary>
+        public string BeamsText => _beamsLabel == null ? "" : _beamsLabel.text;
+
+        /// <summary>"Planks: N" (T-527).</summary>
+        public string PlanksText => _planksLabel == null ? "" : _planksLabel.text;
         private Label _populationTip;
         private Button _pauseButton;
         private Button _steadyButton;
@@ -68,6 +78,9 @@ namespace LordsLegacy.Game
             _dateLabel = root.Q<Label>("date-label");
             _notice = root.Q<Label>("slowed-notice");
             _foodLabel = root.Q<Label>("food-label");
+            _logsLabel = root.Q<Label>("logs-label");
+            _beamsLabel = root.Q<Label>("beams-label");
+            _planksLabel = root.Q<Label>("planks-label");
             _populationLabel = root.Q<Label>("population-label");
             if (_populationLabel == null && _foodLabel?.parent != null)
             {
@@ -163,6 +176,9 @@ namespace LordsLegacy.Game
             bar.style.flexDirection = FlexDirection.Row;
             bar.Add(new Label { name = "date-label" });
             bar.Add(new Label { name = "food-label" });
+            bar.Add(new Label { name = "logs-label" });
+            bar.Add(new Label { name = "beams-label" });
+            bar.Add(new Label { name = "planks-label" });
             bar.Add(new Label { name = "population-label" });
             bar.Add(new Label("Running slower than real time") { name = "slowed-notice" });
             bar.Add(new Button { name = "pause-button", text = "Pause" });
@@ -224,6 +240,9 @@ namespace LordsLegacy.Game
                 _foodLabel.text = FoodText.DaysLine(_host.World);
                 _foodLabel.tooltip = FoodText.Tooltip(_host.World);
             }
+            if (_logsLabel != null) _logsLabel.text = "Logs: " + Sim.Inventory.GoodsStats.Logs(_host.World);
+            if (_beamsLabel != null) _beamsLabel.text = "Beams: " + Sim.Inventory.GoodsStats.Beams(_host.World);
+            if (_planksLabel != null) _planksLabel.text = "Planks: " + Sim.Inventory.GoodsStats.Planks(_host.World);
             if (_populationLabel != null)
             {
                 var report = Sim.Growth.GrowthReport.Of(_host.World);

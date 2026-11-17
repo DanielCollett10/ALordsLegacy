@@ -2,6 +2,9 @@
     <ui:VisualElement name="top-bar" class="top-bar">
         <ui:Label name="date-label" class="top-bar__date" text="" />
         <ui:Label name="food-label" class="top-bar__food" text="" />
+        <ui:Label name="logs-label" class="top-bar__food" text="" />
+        <ui:Label name="beams-label" class="top-bar__food" text="" />
+        <ui:Label name="planks-label" class="top-bar__food" text="" />
         <ui:Label name="population-label" class="top-bar__food" text="" />
         <ui:Label name="slowed-notice" class="top-bar__notice" text="Running slower than real time" />
         <ui:VisualElement class="top-bar__spacer" />

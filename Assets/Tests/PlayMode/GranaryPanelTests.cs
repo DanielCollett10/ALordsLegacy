@@ -243,6 +243,25 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GranaryFamilyWithoutPlanksShowsWaitingForPlanks()
+        {
+            var w = _host.World;
+            AddFamily(1, "Archer");
+            var area = w.Execute(new DesignateArea(
+                AreaShape.Straight(new[] { M(10, 10), M(30, 10), M(30, 30), M(10, 30) }), AreaTypes.MarketId));
+            Assert.IsTrue(area.IsAccepted, area.Text);
+            yield return SelectBuilt();
+            int opId = w.Operations.FindByModule(_granaryId).Id;
+            Assert.IsTrue(w.Execute(new SetGranarySupplies(opId, true)).IsAccepted);
+            Assert.IsTrue(w.Execute(new AssignFamily(opId, 1)).IsAccepted);
+            Assert.AreEqual("", _panel.WaitingText);
+            w.Step(3);
+            yield return null;
+            Assert.AreEqual("Waiting for planks", _panel.WaitingText, "no planks in the camp, so no stall");
+            Assert.IsTrue(_panel.PanelElement.Q<Label>("granary-waiting").resolvedStyle.display == DisplayStyle.Flex);
+        }
+
+        [UnityTest]
         public IEnumerator FamilyAtAWoodcutterIsNotInTheAssignList()
         {
             var w = _host.World;
