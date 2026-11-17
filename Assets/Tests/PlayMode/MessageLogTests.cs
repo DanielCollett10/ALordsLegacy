@@ -1,4 +1,5 @@
 using LordsLegacy.Game;
+using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 using UnityEngine;
