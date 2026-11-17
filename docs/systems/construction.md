@@ -8,7 +8,7 @@ last log is in and the work is done, the site becomes a built footprint (decisio
 | Type | File | Role |
 |---|---|---|
 | `ConstructionRegistry` | `Assets/Sim/Construction/` (`SimWorld.Construction`) | One `ConstructionSite` per unbuilt footprint. No record means built. |
-| `ConstructionSite` | `Construction/ConstructionSite.cs` | Delivering / Building state, reservation ids, progress minutes, `LogsConsumed`, priority. |
+| `ConstructionSite` | `Construction/ConstructionSite.cs` | Delivering / Building state, reservation ids, progress minutes, `Consumed` counts per item (`LogsConsumed` = logs), priority. |
 | `ConstructionSources` | `Construction/ConstructionSources.cs` | `Available` sums stockpile, built log storage, unowned piles. `TryReserve` is nearest-first, all or nothing. |
 | `BuildCost` | `Construction/BuildCost.cs` | Read-only: `MinimumFor(OperationTypeDef)` (8 for woodcutting), `Of(moduleTypeIds)`, `CanAfford` (decision 0037). |
 | `ConstructionProgress` | `Construction/ConstructionProgress.cs` | `Of(world, footprintId)` (null when built) and `Work(...)`, which adds build minutes. |
@@ -24,7 +24,7 @@ last log is in and the work is done, the site becomes a built footprint (decisio
 2. **Deliver:** `ConstructionSystem` opens `task.deliver_materials` for logs reserved to the site: up to `OxLoadLogs` (1) per trip.
    Open tasks ask `OxPool.FindFor` each tick. The site turns Building at its first log on site.
 3. **Build:** up to `MaxBuildersPerSite` (4) `task.build` tasks at once. Each builder adds a minute per tick
-   (`StepBuild` → `ConstructionProgress.Work`). Cap = recipe minutes × delivered ÷ needed (on site + `LogsConsumed`).
+   (`StepBuild` → `ConstructionProgress.Work`). Cap = recipe minutes × delivered units ÷ needed units over all items (on site + `Consumed`).
 4. **Built:** at the full total the site record is removed and the footprint counts as built (`world.IsBuilt`).
 5. **Cancel:** a cancelled deliver hands its logs back. A removed site cancels its tasks; its logs go to an unowned pile.
 6. **Deconstruct (T-393, T-394; decision 0039):** a marked built module gets up to 4 `task.deconstruct` tasks (HelpersOnly,
