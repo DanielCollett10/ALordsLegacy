@@ -140,6 +140,8 @@ namespace LordsLegacy.Tests.PlayMode
                 new LordsLegacy.Sim.Start.StartFamily[0], 2));
             world.Inventory.Produce(world.Camp.StockpileLocation, LordsLegacy.Sim.Inventory.Items.Log, 5);
             int stockId = world.Camp.StockpileLocation.Id;
+            // The layout seeds some logs into the stockpile already, so compare with the ledger count, not a fixed 5.
+            int stockLogs = world.Camp.StockpileLocation.CountOf(LordsLegacy.Sim.Inventory.Items.Log.Id);
 
             _rendGo = new GameObject("CampRenderer");
             var camp = _rendGo.AddComponent<CampRenderer>();
@@ -150,7 +152,7 @@ namespace LordsLegacy.Tests.PlayMode
             camp.Draw();
             logs.Draw();
             Assert.AreEqual(3, camp.PieceCount, "Fire, stockpile and tie post while the camp stands.");
-            Assert.AreEqual(5, logs.DrawnFor(stockId), "Stockpile logs drawn while the camp stands.");
+            Assert.AreEqual(stockLogs, logs.DrawnFor(stockId), "Stockpile logs drawn while the camp stands.");
 
             // Handover is normally set by a built granary (CMP-20); its setter is internal to the Sim, so reflection sets it here.
             typeof(LordsLegacy.Sim.Core.SimWorld)
@@ -167,7 +169,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, camp.TentCount);
             var pile = System.Linq.Enumerable.Single(world.Inventory.Locations,
                 l => l.Kind == LordsLegacy.Sim.Inventory.LocationKind.GroundPile);
-            Assert.AreEqual(5, logs.DrawnFor(pile.Id), "The leftover logs are drawn as an ordinary ground pile.");
+            Assert.AreEqual(stockLogs, logs.DrawnFor(pile.Id), "The leftover logs are drawn as an ordinary ground pile.");
             Assert.AreEqual(0, logs.DrawnFor(stockId), "The old stockpile location is gone.");
         }
     }
