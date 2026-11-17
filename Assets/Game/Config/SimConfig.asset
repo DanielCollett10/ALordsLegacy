@@ -174,3 +174,6 @@ MonoBehaviour:
   - moduleId: module.forager_hut
     logs: 8
     buildWorkerMinutes: 480
+  - moduleId: module.market_stall
+    logs: 1
+    buildWorkerMinutes: 60
