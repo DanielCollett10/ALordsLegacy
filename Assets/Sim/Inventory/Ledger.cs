@@ -130,6 +130,13 @@ namespace LordsLegacy.Sim.Inventory
             return best ?? Add(new LedgerLocation(_nextId++, LocationKind.GroundPile, position, ownerOperationId, 0));
         }
 
+        /// <summary>
+        /// Adds a new ground pile at a point and never merges it (T-491: each felled log is its own pile, so lengths
+        /// stay separate on the ground).
+        /// </summary>
+        public LedgerLocation AddGroundPile(PointMm position, int? ownerOperationId) =>
+            Add(new LedgerLocation(_nextId++, LocationKind.GroundPile, position, ownerOperationId, 0));
+
         /// <summary>Creates <paramref name="n"/> items of <paramref name="item"/> at a location.</summary>
         public void Produce(LedgerLocation location, ItemDef item, int n)
         {

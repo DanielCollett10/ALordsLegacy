@@ -74,7 +74,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             Assert.IsNull(w.Operations.All.FirstOrDefault(op => op.ModuleIds.Contains(house)), "a house belongs to no operation");
             w.Step(1);
             List<TaskRecord> delivers = TasksOf(w, ConstructionTaskDefs.DeliverId);
-            Assert.AreEqual(3, delivers.Count, "10 logs in loads of 4 (4 + 4 + 2) open three tasks in one step");
+            Assert.AreEqual(5, delivers.Count, "10 logs in loads of 2 open five tasks in one step (OxLoadLogs 2)");
             foreach (TaskRecord t in delivers)
             {
                 Assert.AreEqual(DeconstructionWork.HouseOwnerId, t.OwnerOperationId);

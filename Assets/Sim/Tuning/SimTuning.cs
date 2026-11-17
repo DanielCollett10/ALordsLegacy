@@ -105,7 +105,7 @@ namespace LordsLegacy.Sim.Tuning
         public double OxSpeedMPerGameMinute { get; set; } = 1.04;
 
         /// <summary>Most logs an ox carries per trip. Unit: logs. Rule: WCO-07.</summary>
-        public int OxLoadLogs { get; set; } = 4;
+        public int OxLoadLogs { get; set; } = 2;
 
         /// <summary>Most odd-jobbers building one construction site at once. Unit: people. Rule: CN-23 (PLACEHOLDER).</summary>
         public int MaxBuildersPerSite { get; set; } = 4;

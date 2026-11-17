@@ -360,6 +360,28 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator StrandedPilesAndStorageFull_PanelShowsWhyLogsWait()
+        {
+            // T-491: a family and a standing tree make the operation reach the StorageFull check. Stranded piles of
+            // exactly the storage capacity fill it. One ox is free in the pool.
+            var w = _host.World;
+            w.Execute(new AssignFamily(_op.Id, 1));
+            w.Trees.Add(new LordsLegacy.Sim.Forestry.TreeId(9002), 105f, 105f, 15.0);
+            w.People.AddOx(1, "Bess", 70, 70);
+            int capacity = LordsLegacy.Sim.Operations.OperationStatus.LogCapacity(w, _op);
+            Assert.Greater(capacity, 0, "storage module has capacity");
+            w.Inventory.ProduceOnGround(M(125, 125), _op.Id, LordsLegacy.Sim.Inventory.Items.Log, capacity);
+            yield return OpenPanel();
+
+            Assert.AreEqual("Status: Storage full", _view.StatusText);
+            StringAssert.Contains("Logs: " + capacity + " stranded on the ground", _view.CausesText);
+            StringAssert.Contains("storage 0 / " + capacity, _view.CausesText);
+            StringAssert.Contains("free oxen 1 (assigned here 0)", _view.CausesText);
+            StringAssert.Contains("open haul tasks 0", _view.CausesText);
+            Assert.AreNotEqual(DisplayStyle.None, _view.Find<Label>("operation-causes").resolvedStyle.display);
+        }
+
+        [UnityTest]
         public IEnumerator RefusedSetWorkAreaOnConfirmShowsItsTextInThePanel()
         {
             _toolGo = new GameObject("WorkAreaTool");

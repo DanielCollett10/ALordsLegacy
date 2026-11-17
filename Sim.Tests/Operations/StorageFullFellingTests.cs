@@ -106,6 +106,9 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.IsTrue(w.Inventory.Transfer(store, w.Inventory.AddStockpile(), Items.Log, 5));
             w.Step(1);
             Assert.AreEqual(OperationState.Working, OperationStatus.Of(w, op));
+            // Felling restarts once the worker is free: with one length per pile (T-491) the worker may first haul the
+            // logs left on the ground, so allow a while for the next fell task to open.
+            for (int i = 0; i < 600 && UnfinishedFell(w, op) == 0; i++) w.Step(1);
             Assert.Greater(UnfinishedFell(w, op), 0, "felling restarts");
 
             for (int i = 0; i < 8000 && Stumps(w) == stumpsWhenFull; i++) w.Step(1);

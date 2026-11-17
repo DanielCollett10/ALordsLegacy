@@ -164,7 +164,8 @@ namespace LordsLegacy.Sim.Tests.Markets
             LedgerLocation near = Hut(f, 80, 60, 12);
             LedgerLocation far = Hut(f, 100, 100, 20);
             Assign(f);
-            f.W.Step(1);
+            // Builders of the second hut may still be finishing (2 logs per ox trip, T-491): give both workers a moment.
+            for (int i = 0; i < 120 && f.Trips.Count < 2; i++) f.W.Step(1);
             var sources = f.Trips.Select(SourceOf).OrderBy(x => x).ToList();
             Assert.AreEqual(2, sources.Count);
             CollectionAssert.AreEquivalent(new[] { near.Id, far.Id }, sources, "second worker sees the first one's promise: 12 beats 10");

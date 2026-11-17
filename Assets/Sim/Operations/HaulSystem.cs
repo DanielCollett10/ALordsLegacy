@@ -14,8 +14,8 @@ namespace LordsLegacy.Sim.Operations
     /// <summary>
     /// Operations-phase system that opens Haul tasks (T-290, WC-21..24, WC-26, WC-33, WCO-07, WCO-08, LED-05, TSK-09).
     /// Logs reach storage only by ox. For each woodcutting operation that is not Paused and has a hut, storage and a
-    /// worker, every own ground pile with at least <c>OxLoadLogs</c> unreserved logs gets a Haul task (fewer when no
-    /// standing tree and no unfinished fell task is left to add to the pile). The task reserves, at creation, the
+    /// worker, every own ground pile with unreserved logs gets Haul tasks of 1 to <c>OxLoadLogs</c> logs each (T-491),
+    /// whatever the pile size. The task reserves, at creation, the
     /// pile's logs and room in the storage with free space nearest the pile; then it asks <see cref="OxPool.FindFor"/>
     /// for an ox every tick. A task without an ox stays Open and shows as Waiting for ox; the dispatcher will not hand
     /// it out, so felling comes first. Steps: FetchOx, LeadTo pile, LoadOx, LeadTo storage, UnloadOx, ReturnOx.
@@ -39,7 +39,6 @@ namespace LordsLegacy.Sim.Operations
                 if (op.TypeId != OperationTypes.WoodcuttingId) continue;
                 if (!CanHaul(world, op)) continue;
                 ResolveAwaiting(world, op);
-                OpenEarly(world, op);
                 OpenTasks(world, op);
                 AttachOxen(world, op);
             }
@@ -85,11 +84,10 @@ namespace LordsLegacy.Sim.Operations
             }
         }
 
+        // Every own pile with unreserved logs gets haul tasks of 1 to OxLoadLogs logs each, whatever the pile size.
         private static void OpenTasks(SimWorld world, Operation op)
         {
             int load = Math.Max(1, world.Tuning.OxLoadLogs);
-            // A full operation stops felling, so no more logs will join sub-load piles: haul them as they are (T-490).
-            bool moreComing = MoreLogsComing(world, op) && !OperationStatus.IsStorageFull(world, op);
             var piles = new List<LedgerLocation>();
             foreach (LedgerLocation l in world.Inventory.Locations)
                 if (l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id) piles.Add(l);
@@ -99,20 +97,11 @@ namespace LordsLegacy.Sim.Operations
                 while (true)
                 {
                     int available = pile.AvailableOf(Items.Log.Id);
-                    if (available < load && (moreComing || available < 1)) break;
+                    if (available < 1) break;
                     int n = Math.Min(load, available);
                     if (!TryCreate(world, op, pile, n)) break;
                 }
             }
-        }
-
-        // True while a standing tree remains in the work region or a fell task is unfinished (more logs will arrive).
-        private static bool MoreLogsComing(SimWorld world, Operation op)
-        {
-            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
-                if (!t.IsFinished && t.Def.Id == WoodcuttingSystem.FellTaskId) return true;
-            Forestry.TreeRegion region = OperationStatus.WorkRegion(world, op);
-            return region != null && world.Trees.AnyStandingIn(region);
         }
 
         // awaiting: id of the Fell task still producing this pile's logs (early fetch); stock is reserved once it is Done.

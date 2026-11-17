@@ -35,7 +35,7 @@ namespace LordsLegacy.Game
         private VisualElement _oxenBox, _priorityBox, _deconBox;
         private string _deconSignature = "";
         private string _prioritySignature = "";
-        private Label _title, _status, _modules, _workers, _logs, _trees, _workArea, _message, _stock;
+        private Label _title, _status, _modules, _workers, _logs, _causes, _trees, _workArea, _message, _stock;
         private Button _pause, _close, _oxenTab;
         private string _signature = "", _oxenSignature = "";
         private bool _oxenOpen;
@@ -62,6 +62,9 @@ namespace LordsLegacy.Game
 
         /// <summary>Logs-on-the-ground line.</summary>
         public string LogsText => _logs?.text ?? "";
+
+        /// <summary>Why-logs-wait line (T-491): stranded piles, storage, free oxen, open haul tasks. Empty for foraging.</summary>
+        public string CausesText => _causes?.text ?? "";
 
         /// <summary>Standing-trees line.</summary>
         public string TreesText => _trees?.text ?? "";
@@ -209,6 +212,8 @@ namespace LordsLegacy.Game
             _workers.text = WorkerText(world, op);
             _logs.text = forage ? "" : "Logs waiting at tree sites: " + GroundLogs(world, op);
             _logs.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
+            _causes.text = forage ? "" : CauseText(world, op);
+            _causes.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
             _stock.text = forage ? HutStoreText(world, op) : StockText(world, op);
             RebuildOxen(world, op);
             var region = OperationStatus.WorkRegion(world, op);
@@ -526,6 +531,29 @@ namespace LordsLegacy.Game
             return n;
         }
 
+        /// <summary>
+        /// The "why logs wait" line (T-491): logs stranded in this operation's ground piles, stored logs over storage
+        /// capacity, free oxen (unassigned and available, plus available ones assigned here) and open haul tasks.
+        /// Reads the Sim only; the counts use the same sums as <see cref="OperationStatus"/> and <see cref="OxPool"/>.
+        /// </summary>
+        public static string CauseText(Sim.Core.SimWorld world, Operation op)
+        {
+            var pool = world.OperationPool(op.Id, Items.Log);
+            int freePool = 0, freeHere = 0;
+            foreach (var ox in world.People.Oxen)
+            {
+                if (!OxPool.IsAvailable(ox)) continue;
+                var owner = world.Operations.FindOxOwner(ox.Id);
+                if (owner == null) freePool++;
+                else if (owner.Id == op.Id) freeHere++;
+            }
+            int haul = 0;
+            foreach (var t in world.Tasks.ByOwner(op.Id))
+                if (!t.IsFinished && t.Def.Id == HaulSystem.HaulTaskId) haul++;
+            return "Logs: " + GroundLogs(world, op) + " stranded on the ground, storage " + pool.Total + " / " + pool.Capacity
+                + ", free oxen " + freePool + " (assigned here " + freeHere + "), open haul tasks " + haul;
+        }
+
         private static string WorkerText(Sim.Core.SimWorld world, Operation op)
         {
             var sb = new StringBuilder();
@@ -738,6 +766,7 @@ namespace LordsLegacy.Game
             _pickerBox.style.display = DisplayStyle.None;
             _workers = MakeLabel("operation-workers", 12, "");
             _logs = MakeLabel("operation-logs", 12, "");
+            _causes = MakeLabel("operation-causes", 12, "");
             _trees = MakeLabel("operation-trees", 12, "");
             _workArea = MakeLabel("operation-work-area", 12, "");
 
@@ -772,7 +801,7 @@ namespace LordsLegacy.Game
             _panel.Add(MakeLabel("operation-families-heading", 12, "Families"));
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(MakeLabel("operation-workers-heading", 12, "Workers"));
-            _panel.Add(_workers); _panel.Add(_logs); _panel.Add(_trees); _panel.Add(_workArea);
+            _panel.Add(_workers); _panel.Add(_logs); _panel.Add(_causes); _panel.Add(_trees); _panel.Add(_workArea);
             _panel.Add(areaRow); _panel.Add(expand); _panel.Add(deconOp); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
             _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);

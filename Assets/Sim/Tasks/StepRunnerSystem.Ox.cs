@@ -179,6 +179,30 @@ namespace LordsLegacy.Sim.Tasks
                 : world.Inventory.Transfer(carrier, other, Items.Log, step.Count, t.Id);
         }
 
+        // An Active task cancelled from outside the runner (a finished site cancels its deliveries, a removed site...) is
+        // never stepped again, so its Led ox would stay Led for ever (T-491). Release any Led ox no unfinished task holds:
+        // the load goes down as a ground pile, as when the runner cancels the task itself.
+        private void ReleaseStrandedOxen(SimWorld world)
+        {
+            List<Ox> stranded = null;
+            foreach (Ox ox in world.People.Oxen)
+                if (ox.State.Kind == OxStateKind.Led) (stranded ?? (stranded = new List<Ox>())).Add(ox);
+            if (stranded == null) return;
+            foreach (Ox ox in stranded)
+            {
+                TaskRecord last = null;
+                bool held = false;
+                foreach (TaskRecord t in world.Tasks.All)
+                {
+                    if (!t.OxId.HasValue || t.OxId.Value != ox.Id) continue;
+                    if (!t.IsFinished) { held = true; break; }
+                    if (t.State == TaskState.Cancelled && (last == null || t.Id > last.Id)) last = t;
+                }
+                // Only an ox whose last task was cancelled is stranded; one led with no task at all is not ours to free.
+                if (!held && last != null) ReleaseOx(world, last, null);
+            }
+        }
+
         // Cancel clean-up: drop what the ox carries as a ground pile where it stood, let it go, free reservations.
         private void ReleaseOx(SimWorld world, TaskRecord t, Citizen c)
         {

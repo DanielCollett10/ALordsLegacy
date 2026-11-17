@@ -24,7 +24,7 @@ namespace LordsLegacy.Sim.Tests
             public TaskRecord T;
         }
 
-        // Handler at (100,100); ox resting at its home (110,100) beside a 4-log pile; an unlimited store at (140,100).
+        // Handler at (100,100); ox resting at its home (110,100) beside a 2-log pile (one ox load); an unlimited store at (140,100).
         private static Rig Build(params TaskStep[] extraAfterLoad)
         {
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
@@ -33,7 +33,7 @@ namespace LordsLegacy.Sim.Tests
             Citizen c = w.People.AddCitizen(1, "C", Sex.Male, -4_000_000, 1, 100, 100);
             Ox o = w.People.AddOx(1, "O", 110, 100);
             o.State = OxState.Resting(110000, 100000);
-            LedgerLocation pile = w.Inventory.ProduceOnGround(PointMm.FromMetres(110, 100), Op, Items.Log, 4);
+            LedgerLocation pile = w.Inventory.ProduceOnGround(PointMm.FromMetres(110, 100), Op, Items.Log, 2); // one ox load (T-491)
             LedgerLocation store = w.Inventory.AddStockpile(PointMm.FromMetres(140, 100));
             return new Rig { W = w, C = c, O = o, Pile = pile, Store = store };
         }
@@ -61,11 +61,26 @@ namespace LordsLegacy.Sim.Tests
         private static TaskStep[] FullHaul(Rig r) => new[]
         {
             TaskStep.FetchOx(),
-            TaskStep.LoadOx(r.Pile.Id, 4, 10),
+            TaskStep.LoadOx(r.Pile.Id, 2, 10),
             TaskStep.LeadTo(new PathPoint(140, 100)),
-            TaskStep.UnloadOx(r.Store.Id, 4, 10),
+            TaskStep.UnloadOx(r.Store.Id, 2, 10),
             TaskStep.ReturnOx(),
         };
+
+        [Test]
+        public void ActiveTaskCancelledFromOutside_LedOxIsReleasedAndLoadDropped()
+        {
+            // T-491: a task cancelled by another system (e.g. a finished site) is never stepped again; its ox must not stay Led.
+            Rig r = Build();
+            Start(r, FullHaul(r));
+            RunUntil(r, () => r.T.CurrentStep == 2);
+            Assert.AreEqual(OxStateKind.Led, r.O.State.Kind);
+            Assert.IsTrue(r.W.Tasks.Cancel(r.T.Id));
+            r.W.Step(2);
+            Assert.AreNotEqual(OxStateKind.Led, r.O.State.Kind);
+            Assert.IsNull(r.O.Follow);
+            Assert.IsNull(r.W.Inventory.Audit());
+        }
 
         [Test]
         public void FullHaul_FetchLoadLeadUnloadReturn_MovesLogsAndRestsTheOx()
@@ -80,7 +95,7 @@ namespace LordsLegacy.Sim.Tests
 
             RunUntil(r, () => r.T.CurrentStep == 2);
             carrier = r.W.OxCarrier(r.O);
-            Assert.AreEqual(4, carrier.CountOf(Items.Log.Id));
+            Assert.AreEqual(2, carrier.CountOf(Items.Log.Id));
             Assert.AreEqual(0, r.Pile.CountOf(Items.Log.Id));
 
             RunUntil(r, () => r.T.CurrentStep == 3);
@@ -88,7 +103,7 @@ namespace LordsLegacy.Sim.Tests
             Assert.That(Dist(r.C, r.O.X, r.O.Z), Is.EqualTo(1.5).Within(1e-6));
 
             RunUntil(r, () => r.T.State == TaskState.Done);
-            Assert.AreEqual(4, r.Store.CountOf(Items.Log.Id));
+            Assert.AreEqual(2, r.Store.CountOf(Items.Log.Id));
             Assert.AreEqual(0, carrier.CountOf(Items.Log.Id));
             Assert.AreEqual(OxStateKind.Resting, r.O.State.Kind);
             Assert.IsNull(r.O.Follow);
@@ -100,14 +115,14 @@ namespace LordsLegacy.Sim.Tests
         public void LoadAndUnload_WorkForTheirMinutesBeforeTransferring()
         {
             Rig r = Build();
-            Start(r, TaskStep.FetchOx(), TaskStep.LoadOx(r.Pile.Id, 4, 10));
+            Start(r, TaskStep.FetchOx(), TaskStep.LoadOx(r.Pile.Id, 2, 10));
             RunUntil(r, () => r.T.CurrentStep == 1);
             LedgerLocation carrier = r.W.OxCarrier(r.O);
             r.W.Step(9);
             Assert.AreEqual(0, carrier.CountOf(Items.Log.Id));
             Assert.AreEqual(Activity.Working, r.C.Activity);
             r.W.Step(2);
-            Assert.AreEqual(4, carrier.CountOf(Items.Log.Id));
+            Assert.AreEqual(2, carrier.CountOf(Items.Log.Id));
             Assert.AreEqual(TaskState.Done, r.T.State);
         }
 
@@ -140,7 +155,7 @@ namespace LordsLegacy.Sim.Tests
             Assert.AreEqual(0, carrier.CountOf(Items.Log.Id));
             LedgerLocation dropped = null;
             foreach (LedgerLocation l in r.W.Inventory.Locations)
-                if (l.Kind == LocationKind.GroundPile && l.CountOf(Items.Log.Id) == 4 && l.OwnerOperationId == Op) dropped = l;
+                if (l.Kind == LocationKind.GroundPile && l.CountOf(Items.Log.Id) == 2 && l.OwnerOperationId == Op) dropped = l;
             Assert.IsNotNull(dropped);
             Assert.That(dropped.Position.DistanceTo(PointMm.FromMetres(ox, oz)), Is.LessThan(3000));
             Assert.IsFalse(r.W.Tasks.IsBusy(r.C.Id));
@@ -156,14 +171,14 @@ namespace LordsLegacy.Sim.Tests
             RunUntil(r, () => r.T.State == TaskState.Cancelled, 5);
             Assert.AreEqual(OxStateKind.Free, r.O.State.Kind);
             Assert.IsNull(r.O.Follow);
-            Assert.AreEqual(4, r.Pile.CountOf(Items.Log.Id));
+            Assert.AreEqual(2, r.Pile.CountOf(Items.Log.Id));
         }
 
         [Test]
         public void OxRemovedAfterLoad_LogsDropWhereTheOxLastStood()
         {
             Rig r = Build();
-            Start(r, TaskStep.FetchOx(), TaskStep.LoadOx(r.Pile.Id, 4, 10), TaskStep.LeadTo(new PathPoint(150, 100)));
+            Start(r, TaskStep.FetchOx(), TaskStep.LoadOx(r.Pile.Id, 2, 10), TaskStep.LeadTo(new PathPoint(150, 100)));
             RunUntil(r, () => r.T.CurrentStep == 2);
             r.W.Step(5);
             double ox = r.O.X;
@@ -174,7 +189,7 @@ namespace LordsLegacy.Sim.Tests
             foreach (LedgerLocation l in r.W.Inventory.Locations)
                 if (l.Kind == LocationKind.GroundPile && l.Position.DistanceTo(PointMm.FromMetres(ox, 100)) < 3000)
                     total += l.CountOf(Items.Log.Id);
-            Assert.AreEqual(4, total);
+            Assert.AreEqual(2, total);
         }
 
         [Test]

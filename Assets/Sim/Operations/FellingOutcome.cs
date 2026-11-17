@@ -25,8 +25,10 @@ namespace LordsLegacy.Sim.Operations
             if (task.State != TaskState.Done || tree.State == TreeState.Stump) return;
             world.Trees.SetState(tree.Id, TreeState.Stump);
             int logs = tree.LogYield(world.Tuning);
-            if (logs > 0)
-                world.Inventory.ProduceOnGround(PointMm.FromMetres(tree.X, tree.Z), task.OwnerOperationId, Items.Log, logs);
+            // Each length is its own ground pile, never merged (T-491).
+            for (int i = 0; i < logs; i++)
+                world.Inventory.Produce(
+                    world.Inventory.AddGroundPile(PointMm.FromMetres(tree.X, tree.Z), task.OwnerOperationId), Items.Log, 1);
         }
     }
 }

@@ -33,8 +33,10 @@ namespace LordsLegacy.Sim.Tasks
         public void Step(SimWorld world)
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
+            ReleaseStrandedOxen(world);
             foreach (TaskRecord t in world.Tasks.InState(TaskState.Active)) StepTask(world, t);
         }
+
 
         /// <inheritdoc />
         public void OnCommandApplied(SimWorld world, CommandResult result)

@@ -152,6 +152,25 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
+        public void FelledTree_EachLengthIsItsOwnPile_NotMerged()
+        {
+            // T-491: a tree with 4 lengths leaves 4 separate one-log piles at its position, never one stacked pile.
+            SimWorld w = NewWorld((100f, 85f));
+            Operation op = Setup(w);
+            var tree = w.Trees.Get(new TreeId(1));
+            for (int i = 0; i < 600 && tree.State != TreeState.Stump; i++) w.Step(1);
+            Assert.AreEqual(TreeState.Stump, tree.State);
+            int piles = 0;
+            foreach (LedgerLocation l in w.Inventory.Locations)
+            {
+                if (l.Kind != LocationKind.GroundPile || l.OwnerOperationId != op.Id) continue;
+                Assert.AreEqual(1, l.CountOf(Items.Log.Id), "one length per pile");
+                piles++;
+            }
+            Assert.AreEqual(4, piles);
+        }
+
+        [Test]
         public void FullCycle_TreeFelledThenStump_LogsInOwnedPileAtTree()
         {
             SimWorld w = NewWorld((100f, 85f));
