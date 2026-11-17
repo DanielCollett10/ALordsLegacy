@@ -50,7 +50,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | PL-30 | A workshop keeps a **reserve of its input in the village**: it only fetches an input while the **total in storage** of that item is **above the reserve** (more than 20). Defaults: hewing station **20 logs**, sawpit **20 beams**. Without it, the hewers use up every log and the sawyers every beam, and only planks pile up | DECIDED (owner 17/11/2026; 20 PLACEHOLDER) |
-| PL-31 | "Total in storage" means everything held in stores, reserved or not: logs in log storage and the camp stockpile; beams in hewing stores and storage yards. Ground piles, workshop input stock and items on the move are not counted | DECIDED (owner 17/11/2026: total; store list PROPOSED) |
+| PL-31 | "Total in storage" means everything held in stores, reserved or not: logs in log storage and the camp stockpile; beams in hewing stores and storage yards. Ground piles (including woodcutter piles), workshop input stock and items on the move are not counted: logs must be in storage | DECIDED (owner 17/11/2026) |
 | PL-32 | The reserve is tuning per workshop (`WorkshopDef`), 0 = no reserve (weaver and wattle yard default to 0). Status: *Keeping 20 logs in reserve*. A per-building setting on the panel can come with the UI tidy-up | PROPOSED |
 | PL-33 | Work already fetched is finished; the reserve only stops new fetches | PROPOSED |
 
