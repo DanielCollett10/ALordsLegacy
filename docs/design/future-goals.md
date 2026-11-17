@@ -59,4 +59,8 @@ Update 17/11/2026 (owner, the road after M21): M21 completes an **MVP for villag
 Gaea chunked terrain (FG-01..03, FG-07, FG-09) with drawn forests and bushes, and some 3D models by then. M16 and M17
 are drafted in the backlog; M18–M21 are drafted one at a time as each comes up.
 
+Update 17/11/2026 (M18–M21 planning, owner asked for all four at once): M18 `storage.md`, M19 and M20 `materials.md`,
+M21 `household-levels.md` (new). Technical decisions 0050 (stools and reed beds are bush kinds), 0051 (workshop
+recipes, hand fetch), 0052 (kit stores). The house recipe in M20 is open again (MAT-40b: 10 logs vs PL-11's 5).
+
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).
