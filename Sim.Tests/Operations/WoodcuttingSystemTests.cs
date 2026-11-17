@@ -171,6 +171,36 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
+        public void FelledLogs_AtDefaultOxLoad_OneLogPerTrip_AllReachStorage_NoPileStranded()
+        {
+            // Default OxLoadLogs (1): one tree of 4 lengths, one ox. Every log is hauled to storage, one per haul.
+            SimWorld w = NewWorld((100f, 85f));
+            Operation op = Setup(w);
+            Assert.AreEqual(1, w.Tuning.OxLoadLogs);
+            Ox ox = w.People.AddOx(50, "O", 100, 100);
+            ox.State = OxState.Resting(100000, 100000);
+            LedgerLocation store = w.Inventory.GetOrAddStorage(2, w.Footprints.Get(2).Type);
+            var doneHauls = new HashSet<int>();
+            // Run until storage has the four logs, then a settle window so the last haul can finish its unload.
+            int settle = -1;
+            for (int i = 0; i < 6000 && (settle < 0 || settle < 300); i++)
+            {
+                w.Step(1);
+                foreach (TaskRecord t in w.Tasks.ByOwner(op.Id))
+                    if (t.Def.Id == HaulSystem.HaulTaskId && t.State == TaskState.Done) doneHauls.Add(t.Id);
+                if (settle >= 0) settle++;
+                else if (store.CountOf(Items.Log.Id) >= 4) settle = 0;
+            }
+            Assert.AreEqual(4, store.CountOf(Items.Log.Id), "all four lengths are in storage");
+            Assert.AreEqual(4, doneHauls.Count, "one log per trip: four hauls");
+            foreach (LedgerLocation l in w.Inventory.Locations)
+                if (l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id)
+                    Assert.AreEqual(0, l.CountOf(Items.Log.Id), "no log left in a pile");
+            Assert.AreEqual(0, w.OxCarrier(ox).CountOf(Items.Log.Id), "the ox is empty");
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        [Test]
         public void FullCycle_TreeFelledThenStump_LogsInOwnedPileAtTree()
         {
             SimWorld w = NewWorld((100f, 85f));

@@ -30,7 +30,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             var list = new List<MapTree>();
             for (int i = 0; i < trees.Length; i++) list.Add(new MapTree(new TreeId(i + 1), trees[i].x, trees[i].z, 16));
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), list.ToArray());
-            return SimWorld.FromMapData(map, new SimTuning { StartHour = 8 });
+            return SimWorld.FromMapData(map, new SimTuning { StartHour = 8, OxLoadLogs = 2 });
         }
 
         // Area x 90..120, z 90..110; hut (100,100); storage 1 (id 2) at (110,100).

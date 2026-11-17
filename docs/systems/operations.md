@@ -15,7 +15,7 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 | `OperationStatus` | `Of(world, op)`, computed never stored: Working / Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull. `Reported` adds WaitingForOx (display only). |
 | `WoodcuttingSystem` | Operations phase. Keeps one Open `task.fell_tree` per idle adult worker, aimed at the nearest free standing tree in the work region. |
 | `FellingOutcome` | After fell: tree Felled. On the last step: Stump plus logs (`floor(trunk ÷ StandardLogLengthM)`) in an operation pile. |
-| `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` for each own pile with logs: 1 to `OxLoadLogs` (2) per trip, any pile size (T-491). Early fetch off; each felled length is its own pile. |
+| `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` for each own pile with logs: 1 to `OxLoadLogs` (1) per trip, any pile size (T-491). Early fetch off; each felled length is its own pile. |
 | `ModulePlacement`, `DraftModulePlacement` | Pure previews. The draft variant checks polygon and ghosts not yet in the world (decision 0037). |
 | `DesignateOperation`, `PlaceModules` | Commands: area + ordered modules (new operation), or modules for Expand. All or nothing. |
 | `DeconstructOperation` | Marks every module; the area goes when the last one is gone. |
