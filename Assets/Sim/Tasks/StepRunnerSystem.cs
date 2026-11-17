@@ -176,6 +176,13 @@ namespace LordsLegacy.Sim.Tasks
             }
         }
 
+        /// <summary>Fails an unfinished task through the normal fail path (per-task drops and releases run), for a family leaving (T-501).</summary>
+        internal void FailTask(SimWorld world, TaskRecord t)
+        {
+            Citizen c = t.AssigneeId.HasValue ? world.People.FindCitizen(t.AssigneeId.Value) : null;
+            Fail(world, t, c);
+        }
+
         private void Fail(SimWorld world, TaskRecord t, Citizen c)
         {
             _orders.Remove(t.Id);
