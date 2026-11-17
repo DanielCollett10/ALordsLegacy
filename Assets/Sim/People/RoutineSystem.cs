@@ -116,6 +116,9 @@ namespace LordsLegacy.Sim.People
 
         private void StepCitizen(SimWorld world, Citizen c, bool day)
         {
+            // A family in passage is moved by the growth systems, never by the routine (decision 0045, GR-13).
+            Family fam = world.People.FindFamily(c.FamilyId);
+            if (fam != null && fam.IsInPassage) { _states.Remove(c.Id); return; }
             // A debug send-to owns the citizen (PPL-33). Forget the routine state so it starts afresh afterwards.
             if (c.DebugSend != null) { _states.Remove(c.Id); return; }
             // A citizen holding a task belongs to the step runner; the routine starts afresh afterwards.

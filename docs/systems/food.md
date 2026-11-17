@@ -29,7 +29,7 @@ Family fields: `LarderLocationId`, `CarriedRations`, `IsHungry`, `TripCarrierId`
 - **Sunday trip:** `FoodTripSystem` opens `task.fetch_food` over the 240 minutes after dawn, spread by household rank.
   `DispatchSystem.RunFamilyTrips` gives it to the first awake, idle adult. Steps: a `WalkTo` and `CollectFood` for each
   reserved stop (camp or stall, nearest first), `WalkTo` home, `DepositFood`. A failed trip drops what it carries.
-- **Eating:** at midnight. Whole items first; the rest stays in `CarriedRations`. Short = `IsHungry` that day (only the UI reads it).
+- **Eating:** at midnight. Whole items first; the rest stays in `CarriedRations`. Short = `IsHungry` that day. `HungryDays` counts hungry midnights in a row (0 when fed or no need); `world.LastHungryTick` = latest hungry midnight (null at start). Both saved in Food (T-496, GR-02/21).
 - **Handover:** `SimWorld.FoodHandedOver` is set once a built granary supplies the market and is never cleared (`markets.md`).
 
 ## Rules

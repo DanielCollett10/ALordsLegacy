@@ -143,8 +143,11 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Markets per town | 1 | | MK-04 |
 | Ground pile no-build circle | 2 | m radius around a pile with items | PL-15 |
 | Store-family worker age | 8+ | years (light work) | MK-24 |
-| Hungry days before leaving | 30 | days in a row | GR-03 |
-| Arrival food surplus | 30 | days of food incl. the new family | GR-21 |
+| Hungry days before leaving | 30 | days in a row (`HungryDaysToLeave`, T-496) | GR-03 |
+| Arrival food surplus | 30 | days of food incl. the new family (`ArrivalFoodDays`) | GR-21 |
+| Arrival no-hunger window | 7 | days with no Hungry household (`ArrivalNoHungerDays`) | GR-21 |
+| Arrival gap | 7 | days between arrivals (`ArrivalGapDays`) | GR-21 |
+| Map edge tolerance | 2 | m (`MapEdgeToleranceM`) | GR-21 |
 | Arrival cooldown | 7 | days | GR-22 |
 | Arrival food | 30 | days of the arriving family's need (equal rations of meat, berries, mushrooms) | GR-22b |
 
@@ -191,7 +194,7 @@ PLACEHOLDER until playtested.
 | Demolish refund / rebuild cost | 50% / 50% | of materials | BLD-11, MIL-08 |
 | Standard log length | 4 | m | TMB-04 |
 | Usable trunk length | 12–20 | m (3–5 logs) | TMB-06 |
-| Ox load | 2 (owner 17/11/2026; was 4) | logs per trip (`SimTuning.OxLoadLogs`, saved in Core; to be exposed in `SimConfig`) | WCO-07 |
+| Ox load | 1 (owner 17/11/2026; was 4) | logs per trip (`SimTuning.OxLoadLogs`, saved in Core; to be exposed in `SimConfig`) | WCO-07 |
 | Max builders per site | 4 | odd-jobbers building one site at once (`SimTuning.MaxBuildersPerSite`) | CN-23 |
 | Deconstruct time share | 0.5 | of the recipe's build minutes (hut 480) (`SimTuning.DeconstructTimeShare`, saved in Core) | CN-53 |
 | Deconstruct refund share | 0.5 | of the recipe's logs, rounded down (hut 4, oxen stand 0) (`SimTuning.DeconstructRefundShare`, saved in Core) | CN-54 |
@@ -211,5 +214,5 @@ PLACEHOLDER until playtested.
 > `SimTuning`. Owner to decide where these belong.
 
 Woodcutting check (ox 1.04 m per game minute): trees 100 m from the log storage → ox round trip about
-3.2 game hours of walking, plus loading → about 4 trips per 16 h summer day → about 8 logs per ox per day at
-2 logs per trip (16 at the old 4), before fetching the ox from its stand.
+3.2 game hours of walking, plus loading → about 4 trips per 16 h summer day → about 4 logs per ox per day at
+1 log per trip (16 at the old 4), before fetching the ox from its stand. A 10-log house now needs 10 ox trips.

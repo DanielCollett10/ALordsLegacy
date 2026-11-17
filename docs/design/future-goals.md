@@ -14,6 +14,7 @@ system doc with rules. Source: T-119 notes (M3/M4 play), triaged 07/11/2026.
 | FG-07 | **World generation settings** (forest and vegetation scatter from Gaea masks, rivers, better forage bush spread) | Planned with the World MVP, after M18 | Map bake, `BushRegistry` scatter, tree scatter |
 | FG-08 | **Far-region simulation** at 50 km (millions of trees; the 50k-tree target is for 2 km) | Needs a decision before the World MVP is broken down | `TreeRegistry`, streaming, Sim LOD |
 | FG-09 | **Pregenerated roads to the map edges and choosing the start** (owner, 17/11/2026): final maps come with roads already leading out to the edges, and the player picks where to settle. Arrivals and departures then use those roads | Needs the World MVP maps (FG-01..03) | Map bake, start layout, `MapExits` |
+| FG-10 | **Player alerts** (owner, 17/11/2026): an alert system for things the player must notice. Not designed yet; nothing is built around it until it is. Candidate events so far: a family arrives (GR-26), a family leaves (GR-14), a household nears 30 hungry days (GR-04), a building waits for materials (e.g. Waiting for planks, PL-13). Today these only use the M16 message log | Needs its own design pass | `SettlementLog`, top bar, panels |
 
 ## Milestone order (owner, M6 planning)
 
@@ -42,15 +43,20 @@ FG-07): chunk-load the 50 × 50 km Gaea package (`source/gaea-world-data-package
 with world generation settings (forests, vegetation, rivers, foraging spread). The generated 2 km test map stays
 until then (PLT-07 not changed). Placeholder art is tracked in `placeholder-art.md`; the owner makes the final models.
 
-Update 17/11/2026 (owner, order confirmed): **M16 Growth** (`growth.md`), **M17 Sawpit and
+Update 17/11/2026 (owner, order confirmed; superseded by the split below): **M16 Growth** (`growth.md`), **M17 Sawpit and
 planks** (`planks.md`: the sawpit is its own building; only stalls use planks for now), **M18 Coppice and thatch**
 (`materials.md`: coppice hut, thatcher's hut, weaver, wattle yard; houses cost 10 logs + 10 thatch), **M19 Tier 1
 houses** (daub, household levels 1–2). Gameplay and tidy-up moves after M19.
 
 Update 17/11/2026, later (split confirmed by the owner): the storage yard joins and the materials milestone
 is split so each stays small: **M16 Growth**, **M17 Timber chain** (hewing station → beams → sawpit → planks; with
-multi-item recipes, hand delivery, ox load 2), **M18 Storage yard** (`storage.md`), **M19 Coppice, weaver and wattle** (stools, rods, baskets that double a
-carry, panels), **M20 Thatch** (reed beds, seasons, curing; houses become 10 logs + 10 thatch + 10 panels), **M21 Tier 1
-houses** (daub, fence, household levels 1–2). Gameplay and tidy-up after M21.
+multi-item recipes, hand delivery; ox load 1 log moves into M16), **M18 Storage yard** (`storage.md`), **M19 Coppice, weaver and wattle** (stools, rods, baskets that double a
+carry, panels), **M20 Thatch** (reed beds, seasons, curing; houses become 5 logs + 10 thatch + 10 panels, PL-11), **M21 Tier 1
+houses** (daub, fence, household levels 1–2).
+
+Update 17/11/2026 (owner, the road after M21): M21 completes an **MVP for village placement and upkeep**. Then
+**a polish round** on the current systems, then **a code check** (review and debt), then planning the **World MVP**:
+Gaea chunked terrain (FG-01..03, FG-07, FG-09) with drawn forests and bushes, and some 3D models by then. M16 and M17
+are drafted in the backlog; M18–M21 are drafted one at a time as each comes up.
 
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).

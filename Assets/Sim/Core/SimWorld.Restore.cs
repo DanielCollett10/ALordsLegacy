@@ -20,6 +20,8 @@ namespace LordsLegacy.Sim.Core
             var world = FromMapData(map, core.Tuning, core.RoadTypes, core.AreaTypes);
             world.Tick = core.Tick;
             world.Paused = core.Paused;
+            world.EntryPoint = core.EntryPoint;
+            world.SettlementLog.Restore(core.SettlementEntries);
             world.Random.Restore(core.RandomState);
             return world;
         }

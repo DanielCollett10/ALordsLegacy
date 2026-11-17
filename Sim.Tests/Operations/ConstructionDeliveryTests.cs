@@ -38,7 +38,7 @@ namespace LordsLegacy.Sim.Tests.Operations
         private static Ctx Build(int helpers = 1, int oxen = 1, int childHelpers = 0, bool placeHut = true)
         {
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
-            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8 });
+            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, OxLoadLogs = 2 });
             CommandResult r = w.Execute(new DesignateArea(
                 AreaShape.Straight(new[] { M(90, 90), M(120, 90), M(120, 110), M(90, 110) }), AreaTypes.WoodcuttingId));
             Assert.IsTrue(r.IsAccepted, r.Text);

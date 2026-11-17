@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Calendar;
+using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Tuning;
 
@@ -34,6 +35,15 @@ namespace LordsLegacy.Sim.Save.Sections
             WriteTuning(w, s.Tuning);
             WriteRoadTypes(w, s.RoadTypes);
             WriteAreaTypes(w, s.AreaTypes);
+            w.WriteBool(s.EntryPoint.HasValue); // T-497
+            w.WriteInt64(s.EntryPoint?.X ?? 0);
+            w.WriteInt64(s.EntryPoint?.Z ?? 0);
+            w.WriteInt32(s.SettlementEntries.Count); // T-498, decision 0045
+            foreach (SettlementEntry e in s.SettlementEntries)
+            {
+                w.WriteInt64(e.Tick);
+                w.WriteString(e.Text);
+            }
         }
 
         /// <summary>Reads a section body written by <see cref="WriteBody"/>.</summary>
@@ -46,6 +56,16 @@ namespace LordsLegacy.Sim.Save.Sections
             s.Tuning = ReadTuning(r);
             s.RoadTypes = ReadRoadTypes(r);
             s.AreaTypes = ReadAreaTypes(r);
+            bool hasEntry = r.ReadBool();
+            long ex = r.ReadInt64(), ez = r.ReadInt64();
+            if (hasEntry) s.EntryPoint = new LordsLegacy.Sim.Geometry.PointMm(ex, ez);
+            int ne = r.ReadCount(12);
+            for (int i = 0; i < ne; i++)
+            {
+                long tick = r.ReadInt64();
+                string text = r.ReadString();
+                s.SettlementEntries.Add(new SettlementEntry(tick, text));
+            }
             return s;
         }
 
@@ -119,6 +139,11 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.MarketMinAreaM2);
             w.WriteDouble(t.MarketMaxAreaM2);
             w.WriteDouble(t.PileClearanceM);
+            w.WriteInt32(t.HungryDaysToLeave);
+            w.WriteInt32(t.ArrivalFoodDays);
+            w.WriteInt32(t.ArrivalNoHungerDays);
+            w.WriteInt32(t.ArrivalGapDays);
+            w.WriteDouble(t.MapEdgeToleranceM);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -186,6 +211,11 @@ namespace LordsLegacy.Sim.Save.Sections
             t.MarketMinAreaM2 = r.ReadDouble();
             t.MarketMaxAreaM2 = r.ReadDouble();
             t.PileClearanceM = r.ReadDouble();
+            t.HungryDaysToLeave = r.ReadInt32();
+            t.ArrivalFoodDays = r.ReadInt32();
+            t.ArrivalNoHungerDays = r.ReadInt32();
+            t.ArrivalGapDays = r.ReadInt32();
+            t.MapEdgeToleranceM = r.ReadDouble();
             return t;
         }
 

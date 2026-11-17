@@ -13,6 +13,9 @@ through, and a way to tell the player what happened.
 - **Map edge:** a point within `MapEdgeToleranceM` (tuning, 2 m) of the terrain bounds. A **road exit** is any road
   node (segment end or junction) on the edge. Exits are **derived, never saved** (`MapExits`). With no road exit, the
   nearest walkable edge point.
+- **Entry point is saved, not re-derived:** `StartLayoutApplier` computes `SimWorld.EntryPoint` once at a new game
+  (via `MapExits.ComputeEntry`) and the Core section saves it. Loads never need the start layout, and road edits
+  later do not move it. Exits for leaving families are derived; a Leaving walk keeps its target in the saved `MoveOrder`.
 - **Entry point:** the trunk road's end on the map edge. The default layout's 80 m trunk road is extended to the nearest
   edge (owner, GR-24b); final maps will ship with roads to the edges (FG-09). As a safety net only, if a trunk road does
   not reach the edge the entry is the walkable edge point nearest its closer end.

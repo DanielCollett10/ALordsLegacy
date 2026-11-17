@@ -21,7 +21,7 @@ last log is in and the work is done, the site becomes a built footprint (decisio
 
 1. **Place:** `PlaceModule` checks the recipe (`ModulePlacement` refuses "Not enough logs (have N, need M)"). Footprint,
    Delivering site and reservations (owner = footprint id) are added in one `Apply`.
-2. **Deliver:** `ConstructionSystem` opens `task.deliver_materials` for logs reserved to the site: up to `OxLoadLogs` per trip.
+2. **Deliver:** `ConstructionSystem` opens `task.deliver_materials` for logs reserved to the site: up to `OxLoadLogs` (1) per trip.
    Open tasks ask `OxPool.FindFor` each tick. The site turns Building at its first log on site.
 3. **Build:** up to `MaxBuildersPerSite` (4) `task.build` tasks at once. Each builder adds a minute per tick
    (`StepBuild` → `ConstructionProgress.Work`). Cap = recipe minutes × delivered ÷ needed (on site + `LogsConsumed`).

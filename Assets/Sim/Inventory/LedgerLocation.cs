@@ -18,6 +18,8 @@ namespace LordsLegacy.Sim.Inventory
         Site = 4,
         /// <summary>A food-only store such as a larder (FD-02); refuses non-food.</summary>
         FoodStore = 5,
+        /// <summary>A store for General items (planks, beams); refuses logs and food (decision 0046).</summary>
+        GoodsStore = 6,
     }
 
     /// <summary>One place that holds items. Counts are owned by the <see cref="Ledger"/>.</summary>
@@ -52,6 +54,7 @@ namespace LordsLegacy.Sim.Inventory
             {
                 case LocationKind.Storage: return category == ItemCategory.Log;
                 case LocationKind.FoodStore: return category == ItemCategory.Food;
+                case LocationKind.GoodsStore: return category == ItemCategory.General;
                 default: return true;
             }
         }

@@ -33,6 +33,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(f.WorkplaceId ?? 0);
                 w.WriteInt32(f.MemberIds.Count);
                 foreach (int m in f.MemberIds) w.WriteInt32(m);
+                w.WriteInt32((int)f.Passage); // T-498, decision 0045
             }
             w.WriteInt32(p.CitizenCount);
             foreach (Citizen c in p.Citizens)
@@ -91,7 +92,7 @@ namespace LordsLegacy.Sim.Save.Sections
         private static void ReadInto(SimWorld world, SaveReader r)
         {
             Population p = world.People;
-            int nf = r.ReadCount(33);
+            int nf = r.ReadCount(37);
             for (int i = 0; i < nf; i++)
             {
                 int id = r.ReadInt32();
@@ -103,7 +104,9 @@ namespace LordsLegacy.Sim.Save.Sections
                 int nm = r.ReadCount(4);
                 var members = new List<int>(nm);
                 for (int j = 0; j < nm; j++) members.Add(r.ReadInt32());
-                p.RestoreFamily(id, surname, hx, hz, hasWork ? work : (int?)null, members);
+                int passage = r.ReadInt32();
+                if (!Enum.IsDefined(typeof(FamilyPassage), passage)) throw new SaveFormatException("Bad family passage " + passage + ".");
+                p.RestoreFamily(id, surname, hx, hz, hasWork ? work : (int?)null, members, (FamilyPassage)passage);
             }
             int nc = r.ReadCount(76);
             for (int i = 0; i < nc; i++)

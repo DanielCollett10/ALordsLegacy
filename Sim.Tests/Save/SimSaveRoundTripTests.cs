@@ -182,6 +182,74 @@ namespace LordsLegacy.Sim.Tests.Save
         }
 
         [Test]
+        public void RoundTrip_HouseholdWithHungryDays_AndLastHungryTick_AndTuning_AreIdentical()
+        {
+            MapData map = SyntheticMap.CreateRamp();
+            var layout = new LordsLegacy.Sim.Start.StartLayout(
+                M(100, 100), 0, M(0, 0), M(6, 0), M(-6, 0), new PointMm[0],
+                new[] { new LordsLegacy.Sim.Start.StartFamily("Ash", M(-8, -4),
+                    new[] { new LordsLegacy.Sim.Start.StartCitizen("A", Sex.Male, -4_000_000) }) }, 2);
+            var tuning = new SimTuning { HungryDaysToLeave = 11, ArrivalFoodDays = 12, ArrivalNoHungerDays = 13, ArrivalGapDays = 14, MapEdgeToleranceM = 3.5 };
+            SimWorld w = SimWorld.FromMapData(map, tuning);
+            LordsLegacy.Sim.Start.StartLayoutApplier.Apply(w, layout);
+            Assert.IsNull(w.LastHungryTick);
+            w.Step(Day * 3 + 5);
+            Family f = w.People.Families.First();
+            Assert.Greater(f.HungryDays, 0);
+            Assert.IsNotNull(w.LastHungryTick);
+            byte[] first = Bytes(w, map);
+            SimWorld back = SimSave.Read(first, map);
+            Assert.AreEqual(f.HungryDays, back.People.FindFamily(f.Id).HungryDays);
+            Assert.AreEqual(w.LastHungryTick, back.LastHungryTick);
+            Assert.AreEqual(11, back.Tuning.HungryDaysToLeave);
+            Assert.AreEqual(12, back.Tuning.ArrivalFoodDays);
+            Assert.AreEqual(13, back.Tuning.ArrivalNoHungerDays);
+            Assert.AreEqual(14, back.Tuning.ArrivalGapDays);
+            Assert.AreEqual(3.5, back.Tuning.MapEdgeToleranceM);
+            Assert.IsNull(Mismatch(first, Bytes(back, map)));
+        }
+
+        [Test]
+        public void RoundTrip_LeavingFamily_AndThreeEntryLog_AreIdentical()
+        {
+            MapData map = SyntheticMap.CreateRamp();
+            SimWorld w = SimWorld.FromMapData(map, new SimTuning());
+            w.People.AddFamily(7, "Gone", 100, 100).Passage = FamilyPassage.Leaving;
+            w.SettlementLog.Add(10, "The Gone family left");
+            w.SettlementLog.Add(20, "Two");
+            w.SettlementLog.Add(30, "Three");
+            byte[] first = Bytes(w, map);
+            SimWorld back = SimSave.Read(first, map);
+            Family f = back.People.FindFamily(7);
+            Assert.AreEqual(FamilyPassage.Leaving, f.Passage);
+            Assert.IsTrue(f.IsInPassage);
+            Assert.AreEqual(new[] { "The Gone family left", "Two", "Three" },
+                back.SettlementLog.Entries.Select(e => e.Text).ToArray());
+            Assert.AreEqual(30, back.SettlementLog.Entries[2].Tick);
+            Assert.IsNull(Mismatch(first, Bytes(back, map)));
+        }
+
+        [Test]
+        public void RoundTrip_ArrivingFamily_IsKept()
+        {
+            MapData map = SyntheticMap.CreateRamp();
+            SimWorld w = SimWorld.FromMapData(map, new SimTuning());
+            w.People.AddFamily(8, "New", 100, 100).Passage = FamilyPassage.Arriving;
+            SimWorld back = SimSave.Read(Bytes(w, map), map);
+            Assert.AreEqual(FamilyPassage.Arriving, back.People.FindFamily(8).Passage);
+            Assert.AreEqual(0, back.SettlementLog.Entries.Count);
+        }
+
+        [Test]
+        public void SaveVersion_IsBumpedTo22_ForPassageAndLog()
+        {
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 22);
+            byte[] bytes = { (byte)'L', (byte)'L', (byte)'S', (byte)'V', 21, 0, 0, 0, 0, 0, 0, 0 };
+            var e = Assert.Throws<SaveFormatException>(() => SaveReader.ReadHeaderOnly(bytes));
+            StringAssert.Contains("Unknown save format version 21 (this build reads version " + SaveWriter.CurrentVersion + ").", e.Message);
+        }
+
+        [Test]
         public void Scenarios_AreNotTrivial_MidHaulHasLogsOrTasks()
         {
             MapData map = Map();
