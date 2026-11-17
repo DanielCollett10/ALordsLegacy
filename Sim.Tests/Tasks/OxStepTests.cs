@@ -68,6 +68,21 @@ namespace LordsLegacy.Sim.Tests
         };
 
         [Test]
+        public void ActiveTaskCancelledFromOutside_LedOxIsReleasedAndLoadDropped()
+        {
+            // T-491: a task cancelled by another system (e.g. a finished site) is never stepped again; its ox must not stay Led.
+            Rig r = Build();
+            Start(r, FullHaul(r));
+            RunUntil(r, () => r.T.CurrentStep == 2);
+            Assert.AreEqual(OxStateKind.Led, r.O.State.Kind);
+            Assert.IsTrue(r.W.Tasks.Cancel(r.T.Id));
+            r.W.Step(2);
+            Assert.AreNotEqual(OxStateKind.Led, r.O.State.Kind);
+            Assert.IsNull(r.O.Follow);
+            Assert.IsNull(r.W.Inventory.Audit());
+        }
+
+        [Test]
         public void FullHaul_FetchLoadLeadUnloadReturn_MovesLogsAndRestsTheOx()
         {
             Rig r = Build();
