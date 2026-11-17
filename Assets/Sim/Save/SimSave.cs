@@ -32,6 +32,7 @@ namespace LordsLegacy.Sim.Save
                 RoadTypes = world.RoadTypes,
                 AreaTypes = world.AreaTypes,
                 EntryPoint = world.EntryPoint,
+                LastArrivalTick = world.LastArrivalTick,
                 SettlementEntries = new List<SettlementEntry>(world.SettlementLog.Entries)
             });
             for (int i = 0; i < sections.Count; i++)

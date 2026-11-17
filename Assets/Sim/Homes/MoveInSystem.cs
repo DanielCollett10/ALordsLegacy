@@ -11,7 +11,7 @@ namespace LordsLegacy.Sim.Homes
     /// Operations-phase system: moves Homeless families into Built, Empty houses (HM-11, HM-13). Houses are served in
     /// ascending footprint id. Homeless families with a workplace come first, nearest workplace to the house
     /// (straight line, centre of its area) first; if none has a workplace, any Homeless family; ties by lowest family id.
-    /// A house with no Homeless family stays Empty and is tried again every tick, so it fills when one exists.
+    /// A reserved house is never filled here. A house with no Homeless family stays Empty and is tried again every tick, so it fills when one exists.
     /// The family's home point becomes the house's access point. Families with no members never move in.
     /// </summary>
     public sealed class MoveInSystem : ISimSystem
@@ -23,7 +23,7 @@ namespace LordsLegacy.Sim.Homes
             if (world.Homes.Count == 0) return;
             foreach (HomeRecord home in new System.Collections.Generic.List<HomeRecord>(world.Homes.All))
             {
-                if (home.FamilyId != 0) continue;
+                if (home.FamilyId != 0 || home.ReservedForFamilyId != 0) continue; // reserved for an arriving family (GR-22)
                 Footprint house = world.Footprints.Get(home.HouseFootprintId);
                 if (house == null || !world.IsWorking(house.Id)) continue;
                 Family f = Choose(world, house);
