@@ -149,7 +149,13 @@ namespace LordsLegacy.Game.Tools
 
         private GameMenuView _menu;
 
-        private void OnEnable() { Subscribe(); SyncCamera(); }
+        private void OnEnable()
+        {
+            Subscribe(); SyncCamera();
+            // PL-12: the plot overlay follows the active tool; it lives next to the controller so no scene edit is needed.
+            if (GetComponent<LordsLegacy.Game.Visuals.PlacementOverlay>() == null)
+                gameObject.AddComponent<LordsLegacy.Game.Visuals.PlacementOverlay>().Configure(FindFirstObjectByType<SimHost>(), this);
+        }
 
         private void OnDisable()
         {

@@ -489,6 +489,9 @@ namespace LordsLegacy.Game.Tools
             _lastSnapped = true;
         }
 
+        /// <summary>The hovered point while the cursor is snapped to a corner or dot (AR-20), else null. The plot overlay highlights it.</summary>
+        public PointMm? SnappedHover => _active && _hasHover && _hoverSnapped ? _hover : (PointMm?)null;
+
         private readonly List<CursorMarker> _markerPool = new List<CursorMarker>();
         private readonly List<SnapMarker> _shownMarkers = new List<SnapMarker>();
         private const float CornerMarkerM = 1.0f, DotMarkerM = 0.35f;
