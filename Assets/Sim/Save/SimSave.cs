@@ -30,7 +30,8 @@ namespace LordsLegacy.Sim.Save
                 RandomState = world.Random.State,
                 Tuning = world.Tuning,
                 RoadTypes = world.RoadTypes,
-                AreaTypes = world.AreaTypes
+                AreaTypes = world.AreaTypes,
+                EntryPoint = world.EntryPoint
             });
             for (int i = 0; i < sections.Count; i++)
             {

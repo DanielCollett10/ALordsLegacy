@@ -8,6 +8,9 @@ namespace LordsLegacy.Sim.Core
         /// <summary>The camp placed by <see cref="StartLayoutApplier"/>, or null if no layout was applied.</summary>
         public CampInfo Camp { get; internal set; }
 
+        /// <summary>Where new families enter the map, computed once at a new game by <see cref="Roads.MapExits.ComputeEntry"/>; null until then. Saved in the Core section (decision 0045).</summary>
+        public Geometry.PointMm? EntryPoint { get; internal set; }
+
         /// <summary>The old camp fire spot, kept at camp removal as the rough-sleeping fallback (CMP-25). Saved in the Structures section.</summary>
         public Geometry.PointMm? RoughSleepSpot { get; internal set; }
 

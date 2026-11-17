@@ -22,5 +22,7 @@ namespace LordsLegacy.Sim.Save.Sections
         public RoadTypeCatalog RoadTypes { get; set; }
         /// <summary>Area types.</summary>
         public AreaTypeCatalog AreaTypes { get; set; }
+        /// <summary>The saved map entry point, or null.</summary>
+        public LordsLegacy.Sim.Geometry.PointMm? EntryPoint { get; set; }
     }
 }
