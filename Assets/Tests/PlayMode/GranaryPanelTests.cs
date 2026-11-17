@@ -281,5 +281,70 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_agents.HasGranary);
             Assert.IsFalse(_panel.IsShown);
         }
+
+        private void MakeMarket()
+        {
+            var shape = AreaShape.Straight(new[] { M(10, 10), M(30, 10), M(30, 30), M(10, 30) });
+            Assert.IsTrue(_host.World.Execute(new DesignateArea(shape, AreaTypes.MarketId)).IsAccepted);
+        }
+
+        [UnityTest]
+        public IEnumerator UnbuiltGranaryDisablesSupplyToggleWithReason()
+        {
+            _agents.SelectGranary(_granaryId);
+            yield return null;
+            var t = _panel.SuppliesToggle;
+            Assert.IsNotNull(t);
+            Assert.IsFalse(t.enabledSelf);
+            Assert.AreEqual("Supplies market: No", t.label);
+            Assert.AreEqual("Hut not built yet", _panel.SuppliesReasonText);
+            _panel.ClickSupplies(false);
+            Assert.AreEqual("Hut not built yet", _panel.MessageText, "A refused command shows its reason.");
+        }
+
+        [UnityTest]
+        public IEnumerator BuiltGranaryWithoutMarketDisablesSupplyToggleWithReason()
+        {
+            yield return SelectBuilt();
+            Assert.IsFalse(_panel.SuppliesToggle.enabledSelf);
+            Assert.AreEqual("No market yet", _panel.SuppliesReasonText);
+        }
+
+        [UnityTest]
+        public IEnumerator SwitchOnAfterConfirmThenOffSendsSetGranarySupplies()
+        {
+            var w = _host.World;
+            MakeMarket();
+            yield return SelectBuilt();
+            int opId = w.Operations.FindByModule(_granaryId).Id;
+            var t = _panel.SuppliesToggle;
+            Assert.IsTrue(t.enabledSelf);
+            Assert.AreEqual("", _panel.SuppliesReasonText);
+
+            t.value = true;
+            yield return null;
+            Assert.IsTrue(ConfirmDialog.IsOpen, "The first switch-on asks first (CMP-20).");
+            Assert.IsFalse(w.Operations.Get(opId).SuppliesMarket, "Nothing changes until confirmed.");
+            Assert.IsFalse(t.value);
+            ConfirmDialog.Cancel();
+            yield return null;
+            Assert.IsFalse(w.Operations.Get(opId).SuppliesMarket, "Cancel keeps the granary off.");
+            Assert.IsFalse(t.value);
+
+            t.value = true;
+            yield return null;
+            ConfirmDialog.Confirm();
+            yield return null;
+            Assert.IsTrue(w.Operations.Get(opId).SuppliesMarket);
+            Assert.IsTrue(t.value);
+            Assert.AreEqual("Supplies market: Yes", t.label);
+
+            t.value = false;
+            yield return null;
+            Assert.IsFalse(ConfirmDialog.IsOpen, "Switching off needs no confirm.");
+            Assert.IsFalse(w.Operations.Get(opId).SuppliesMarket);
+            Assert.IsFalse(t.value);
+            Assert.AreEqual("Supplies market: No", t.label);
+        }
     }
 }
