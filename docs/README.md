@@ -22,6 +22,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Commands | The only way to change Sim state: validate, apply, log. | [systems/commands.md](systems/commands.md) | `Assets/Sim/Commands` |
 | Roads | Freeform road network, validation, cutting and node moves. | [systems/roads.md](systems/roads.md) | `Assets/Sim/Roads` |
 | Areas | Drawn building and work areas, flattening, trimming, snapping. | [systems/areas.md](systems/areas.md) | `Assets/Sim/Areas` |
+| Growth | Families leave after 30 hungry days and arrive in plenty; read model for panels. | [systems/growth.md](systems/growth.md) | `Assets/Sim/Growth` |
 | Placement | Pure yes or no for placing an area vertex, a road point or a standalone structure (granary). | [systems/placement.md](systems/placement.md) | `Assets/Sim/Placement` |
 | Forestry | Standing trees, felling state, reservations, clearing. | [systems/forestry.md](systems/forestry.md) | `Assets/Sim/Forestry` |
 | Navigation | Walkable grid, A* pathfinding, movement orders, ox following. | [systems/navigation.md](systems/navigation.md) | `Assets/Sim/Navigation` |
