@@ -100,7 +100,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             SimWorld w = Make(9);
             CommandResult r = w.Execute(new DesignatePlot(Plot(w, 30)));
             Assert.IsTrue(r.IsRejected);
-            Assert.AreEqual("Not enough logs", r.Text);
+            Assert.AreEqual("Not enough logs (have 9, need 10)", r.Text); // text from SiteMaterials.Shortfall (T-515)
             Assert.AreEqual(0, w.Areas.All.Count());
             Assert.AreEqual(0, w.Footprints.Count);
             Assert.AreEqual(0, w.Homes.Count);

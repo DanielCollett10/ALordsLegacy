@@ -90,13 +90,8 @@ namespace LordsLegacy.Sim.Operations
             }
             if (Placement.PileZones.BlocksPolygon(world, fp.Polygon))
                 return Refuse(ModuleRefusal.ItemsOnGround, Placement.PileZones.Text);
-            int need = type.ConstructionRecipe.Logs;
-            if (need > 0)
-            {
-                int haveLogs = Construction.ConstructionSources.Available(world, Inventory.Items.Log);
-                if (haveLogs < need)
-                    return Refuse(ModuleRefusal.NotEnoughMaterials, "Not enough logs (have " + haveLogs + ", need " + need + ")");
-            }
+            string shortfall = Construction.SiteMaterials.Shortfall(world, type.ConstructionRecipe);
+            if (shortfall != null) return Refuse(ModuleRefusal.NotEnoughMaterials, shortfall);
             return new ModulePlacementResult(ModuleRefusal.None, string.Empty);
         }
 

@@ -57,9 +57,14 @@ namespace LordsLegacy.Sim.Placement
         /// <summary>Checks a structure of the given type at the centre and rotation (degrees, counter-clockwise).</summary>
         public static StructurePlacementResult Preview(SimWorld world, string typeId, PointMm centre, double rotationDegrees)
         {
+            return Preview(world, ModuleTypes.Find(typeId), centre, rotationDegrees);
+        }
+
+        /// <summary>Checks a structure of the given type (null is an unknown type); lets callers and tests pass any recipe.</summary>
+        public static StructurePlacementResult Preview(SimWorld world, FootprintTypeDef type, PointMm centre, double rotationDegrees)
+        {
             if (world == null) throw new ArgumentNullException(nameof(world));
             var none = new PointMm[0];
-            FootprintTypeDef type = ModuleTypes.Find(typeId);
             if (type == null || !type.IsStandalone)
                 return new StructurePlacementResult(StructureRefusal.UnknownType, "Unknown structure", none, none);
             if (double.IsNaN(rotationDegrees) || double.IsInfinity(rotationDegrees))
@@ -85,9 +90,9 @@ namespace LordsLegacy.Sim.Placement
             { r = StructureRefusal.ItemsOnGround; text = PileZones.Text; }
             if (r == StructureRefusal.None)
             {
-                int need = type.ConstructionRecipe.Logs, have = Construction.ConstructionSources.Available(world, Items.Log);
-                if (have < need)
-                { r = StructureRefusal.NotEnoughMaterials; text = "Not enough logs (have " + have + ", need " + need + ")"; }
+                string shortfall = Construction.SiteMaterials.Shortfall(world, type.ConstructionRecipe);
+                if (shortfall != null)
+                { r = StructureRefusal.NotEnoughMaterials; text = shortfall; }
             }
             return new StructurePlacementResult(r, text, fp.Polygon, plot);
         }
