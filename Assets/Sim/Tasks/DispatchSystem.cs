@@ -86,10 +86,12 @@ namespace LordsLegacy.Sim.Tasks
                 double bestTravel = 0;
                 foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
                 {
-                    if (!Eligible(t, f, helpers, adult, forager)) continue;
+                    if (!Eligible(world, t, f, helpers, adult, forager)) continue;
                     if (!TravelTo(world, t, c, helpers, oxOpen, out double travel)) continue;
+                    // T-518: at equal priority a stall carry beats stock_stall (no stall, no selling), whatever the travel.
                     if (best == null || t.Priority > best.Priority ||
-                        (t.Priority == best.Priority && travel < bestTravel - 1e-9))
+                        (t.Priority == best.Priority && (IsStallCarry(t) != IsStallCarry(best)
+                            ? IsStallCarry(t) : travel < bestTravel - 1e-9)))
                     {
                         best = t; bestTravel = travel;
                     }
@@ -169,8 +171,12 @@ namespace LordsLegacy.Sim.Tasks
             if (f == null || f.IsInPassage || helpers != !f.WorkplaceId.HasValue) return false;
             if (helpers && !world.WorkDay.OnShift(world, c)) return false;
             double age = c.AgeYears(world.Tick, world.Tuning.AgeingRate);
-            return Eligible(t, f, helpers, age >= OperationStatus.WorkingAgeYears, age >= world.Tuning.ForagerMinAge);
+            return Eligible(world, t, f, helpers, age >= OperationStatus.WorkingAgeYears, age >= world.Tuning.ForagerMinAge);
         }
+
+        // A carry that only the stall's granary family may take (T-518).
+        private static bool IsStallCarry(TaskRecord t) =>
+            t.Def.Id == ConstructionTaskDefs.CarryId && t.Def.Eligibility == EligibilityPolicy.AssignedFamilyOnly;
 
         private static double SquaredDistance(double ax, double az, double bx, double bz)
         {
@@ -184,10 +190,16 @@ namespace LordsLegacy.Sim.Tasks
             return Math.Sqrt(dx * dx + dz * dz);
         }
 
-        private static bool Eligible(TaskRecord t, Family f, bool helpers, bool adult, bool forager)
+        private static bool Eligible(SimWorld world, TaskRecord t, Family f, bool helpers, bool adult, bool forager)
         {
             if (t.State != TaskState.Open) return false;
             if (!adult && HasHeavyStep(t.Def)) return false;
+            if (IsStallCarry(t))
+            {
+                // T-518, PL-16: only the family staffing that stall, from age 8 (MK-24).
+                if (!forager || helpers || f.WorkplaceId != t.OwnerOperationId || !t.SiteFootprintId.HasValue) return false;
+                return world.Markets.Current != null && world.Markets.Current.FamilyOf(t.SiteFootprintId.Value) == f.Id;
+            }
             if (!forager && t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return false; // FD-23: 8 and over
             if (!forager && t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) return false; // MK-24: 8 and over
             switch (t.Def.Eligibility)

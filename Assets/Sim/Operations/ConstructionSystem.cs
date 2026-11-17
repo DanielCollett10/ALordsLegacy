@@ -152,6 +152,17 @@ namespace LordsLegacy.Sim.Operations
             return op != null && op.TypeId != OperationTypes.GranaryId ? op.Id : DeconstructionWork.HouseOwnerId;
         }
 
+        private const int NoOwner = int.MinValue;
+
+        // T-518, PL-16: a market stall's hand carries go to the stall's own granary family. Returns the operation that
+        // family works for, or NoOwner (not a stall, no family, family leaving or without a workplace: odd-jobbers carry).
+        private static int StallCarryOwner(SimWorld world, Footprint fp)
+        {
+            if (fp.Type.Id != ModuleTypes.MarketStallId || world.Markets.Current == null) return NoOwner;
+            Family fam = world.People.FindFamily(world.Markets.Current.FamilyOf(fp.Id));
+            return fam != null && !fam.IsInPassage && fam.WorkplaceId.HasValue ? fam.WorkplaceId.Value : NoOwner;
+        }
+
         private static TaskStep StepOf(TaskRecord t, StepKind kind, out int index)
         {
             for (int i = 0; i < t.Def.Steps.Count; i++)
@@ -184,6 +195,12 @@ namespace LordsLegacy.Sim.Operations
             return l != null && l.Kind == LocationKind.Site;
         }
 
+        private static bool StallCarryStillOurs(SimWorld world, TaskRecord t)
+        {
+            Footprint fp = t.SiteFootprintId.HasValue ? world.Footprints.Get(t.SiteFootprintId.Value) : null;
+            return fp != null && StallCarryOwner(world, fp) == t.OwnerOperationId;
+        }
+
         // Hand carries (T-517): those of a removed site are cancelled unless a walker is already on the way (the step
         // runner fails that one itself, so what it carries is dropped); a cancelled one frees its reservations.
         private static void SweepCarries(SimWorld world)
@@ -193,6 +210,14 @@ namespace LordsLegacy.Sim.Operations
                 if (t.Def.Id != ConstructionTaskDefs.CarryId || !IsSiteDelivery(world, t)) continue;
                 if (!t.IsFinished)
                 {
+                    if (t.State == TaskState.Open && t.Def.Eligibility == EligibilityPolicy.AssignedFamilyOnly &&
+                        !StallCarryStillOurs(world, t))
+                    {
+                        // The stall lost its family (or went): the carry reopens next tick for whoever may take it now.
+                        world.Tasks.Cancel(t.Id);
+                        StepRunnerSystem.ReleaseCarryReservations(world, t);
+                        continue;
+                    }
                     if (SiteOf(world, t) != null || t.State == TaskState.Active) continue;
                     world.Tasks.Cancel(t.Id);
                     StepRunnerSystem.ReleaseCarryReservations(world, t); // the system may sleep next tick: free them now
@@ -306,11 +331,12 @@ namespace LordsLegacy.Sim.Operations
                 }
                 PathPoint pick = PointOf(world, source);
                 PathPoint drop = new PathPoint(fp.AccessPoint.XMetres, fp.AccessPoint.ZMetres);
+                int stallOwner = isLog ? NoOwner : StallCarryOwner(world, fp);
                 TaskDef def = isLog
                     ? ConstructionTaskDefs.Deliver(pick, source.Id, drop, site.LedgerLocationId, n,
                         Math.Max(1, world.Tuning.OxLoadMinutes), Math.Max(1, world.Tuning.OxUnloadMinutes))
-                    : ConstructionTaskDefs.Carry(pick, source.Id, item.Id, drop, site.LedgerLocationId, n);
-                TaskRecord task = world.Tasks.Create(def, owner, null, priority, fp.Type.Id);
+                    : ConstructionTaskDefs.Carry(pick, source.Id, item.Id, drop, site.LedgerLocationId, n, stallOwner != NoOwner);
+                TaskRecord task = world.Tasks.Create(def, stallOwner != NoOwner ? stallOwner : owner, null, priority, fp.Type.Id);
                 world.Tasks.SetSite(task.Id, fp.Id); // lets a priority change (CN-30) reach this task
                 if (world.Inventory.ReserveStock(source, item, n, task.Id) == 0)
                 {
