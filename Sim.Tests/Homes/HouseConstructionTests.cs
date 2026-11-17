@@ -74,7 +74,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             Assert.IsNull(w.Operations.All.FirstOrDefault(op => op.ModuleIds.Contains(house)), "a house belongs to no operation");
             w.Step(1);
             List<TaskRecord> delivers = TasksOf(w, ConstructionTaskDefs.DeliverId);
-            Assert.AreEqual(5, delivers.Count, "10 logs in loads of 2 open five tasks in one step (OxLoadLogs 2)");
+            Assert.AreEqual(10, delivers.Count, "10 logs at the default one log per trip open ten tasks in one step");
             foreach (TaskRecord t in delivers)
             {
                 Assert.AreEqual(DeconstructionWork.HouseOwnerId, t.OwnerOperationId);
@@ -82,6 +82,24 @@ namespace LordsLegacy.Sim.Tests.Homes
             }
             w.Step(1);
             Assert.IsTrue(TasksOf(w, ConstructionTaskDefs.DeliverId).Any(t => t.OxId.HasValue), "the pool ox was attached");
+        }
+
+        [Test]
+        public void TenLogHouse_AtDefaultLoad_GetsTenOxDeliveriesAndIsBuilt()
+        {
+            SimWorld w = Make(logs: 10);
+            AddOddJobbers(w, 1);
+            int house = Place(w, 30);
+            Assert.AreEqual(1, w.Tuning.OxLoadLogs, "the default ox load is one log per trip");
+            var doneDeliveries = new HashSet<int>();
+            for (int i = 0; i < MaxTicks && w.Construction.Get(house) != null; i++)
+            {
+                w.Step(1);
+                foreach (TaskRecord t in TasksOf(w, ConstructionTaskDefs.DeliverId))
+                    if (t.State == TaskState.Done) doneDeliveries.Add(t.Id);
+            }
+            Assert.IsTrue(w.IsBuilt(house), "the house was built");
+            Assert.AreEqual(10, doneDeliveries.Count, "one log per trip: ten completed ox deliveries for ten logs");
         }
 
         [Test]
