@@ -40,7 +40,7 @@ namespace LordsLegacy.Game
         /// <summary>The food readout tooltip: raw counts by type (FD-04). Empty before the first refresh.</summary>
         public string FoodReadoutTooltip => _foodLabel == null ? "" : _foodLabel.tooltip;
 
-        /// <summary>Population readout, e.g. "Families: 3  Citizens: 12" (T-509).</summary>
+        /// <summary>Population readout, e.g. "Citizens: 12" (T-509).</summary>
         public string PopulationText => _populationLabel == null ? "" : _populationLabel.text;
 
         /// <summary>Population tooltip: arriving and leaving counts and the arrival reason (T-509).</summary>
@@ -48,7 +48,7 @@ namespace LordsLegacy.Game
 
         /// <summary>Builds the population tooltip from a growth report.</summary>
         public static string PopulationTooltipOf(Sim.Growth.GrowthReport r) =>
-            "Arriving: " + r.Arriving + "\nLeaving: " + r.Leaving + "\nNext family: "
+            "Families: " + r.Families + "\nArriving: " + r.Arriving + "\nLeaving: " + r.Leaving + "\nNext family: "
             + (r.ArrivalReason ?? "would be let in");
 
         /// <summary>Sets the SimHost to read from (for code that creates the component). Call before enabling.</summary>
@@ -227,7 +227,7 @@ namespace LordsLegacy.Game
             if (_populationLabel != null)
             {
                 var report = Sim.Growth.GrowthReport.Of(_host.World);
-                _populationLabel.text = "Families: " + report.Families + "  Citizens: " + report.Citizens;
+                _populationLabel.text = "Citizens: " + report.Citizens;
                 _populationLabel.tooltip = PopulationTooltipOf(report);
                 if (PopulationTipShown) _populationTip.text = _populationLabel.tooltip;
             }

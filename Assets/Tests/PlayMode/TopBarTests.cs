@@ -72,7 +72,8 @@ namespace LordsLegacy.Tests.PlayMode
             w.People.AddCitizen(3, "Cy", Sex.Male, -20L * Citizen.TicksPerYear, 2, 90, 90);
             LordsLegacy.Sim.Growth.FamilyDeparture.Begin(w, 2);
             _bar.Refresh();
-            Assert.AreEqual("Families: 2  Citizens: 3", _bar.PopulationText);
+            Assert.AreEqual("Citizens: 3", _bar.PopulationText);
+            StringAssert.StartsWith("Families: 2\n", _bar.PopulationTooltip);
             StringAssert.Contains("Arriving: 0", _bar.PopulationTooltip);
             StringAssert.Contains("Leaving: 1", _bar.PopulationTooltip);
             StringAssert.Contains("Next family:", _bar.PopulationTooltip);
