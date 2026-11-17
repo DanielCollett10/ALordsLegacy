@@ -168,6 +168,7 @@ namespace LordsLegacy.Sim.Tests.Food
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0, MarketRangeM = 60 });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 40);
+            w.Inventory.Produce(w.Inventory.AddGoodsStore(M(20, 22)), Items.Plank, 10); // stalls cost 2 planks (PL-10)
             AddFamily(w, 2, 40, 40, 2);
             AddFamily(w, 3, 42, 40, 1);
             AddFamily(w, 6, 95, 95, 1); // too far from the market centre
