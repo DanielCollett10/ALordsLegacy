@@ -7,6 +7,7 @@ using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Homes;
+using LordsLegacy.Sim.Markets;
 using LordsLegacy.Sim.People;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -29,7 +30,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _title, _state, _household, _members, _larder, _hungry, _message;
+        private Label _title, _state, _household, _members, _access, _larder, _hungry, _message;
         private Button _priority, _deconstruct, _close;
         private bool _subscribed;
 
@@ -50,6 +51,9 @@ namespace LordsLegacy.Game
 
         /// <summary>Larder lines: one per food type ("Meat: 4 (12 rations)") then "Days left: 4.8"; empty when Empty.</summary>
         public string LarderText => _larder?.style.display.value == DisplayStyle.Flex ? _larder.text : "";
+
+        /// <summary>Market access line text, e.g. "Market access: Yes" (MK-44); empty when no house is shown.</summary>
+        public string MarketAccessText => _access?.text ?? "";
 
         /// <summary>"Hungry" while the household's larder ran short at the last midnight (FD-16); empty otherwise.</summary>
         public string HungryText => _hungry?.style.display.value == DisplayStyle.Flex ? _hungry.text : "";
@@ -171,6 +175,8 @@ namespace LordsLegacy.Game
 
             _title.text = "House";
             _state.text = "State: " + OperationPanelView.BuildStateText(world, id);
+            // MK-44: re-read every frame, so it follows market placement, removal and the food handover.
+            _access.text = "Market access: " + MarketRange.AccessText(world, id);
             Family family = home.FamilyId != 0 ? world.People.FindFamily(home.FamilyId) : null;
             if (family == null)
             {
@@ -291,6 +297,7 @@ namespace LordsLegacy.Game
             _state = MakeLabel("house-state", 12, false);
             _household = MakeLabel("house-household", 12, false);
             _members = MakeLabel("house-members", 12, false);
+            _access = MakeLabel("house-market-access", 12, false);
             _larder = MakeLabel("house-larder", 12, false);
             _larder.style.display = DisplayStyle.None;
             _hungry = MakeLabel("house-hungry", 12, true);
@@ -306,7 +313,7 @@ namespace LordsLegacy.Game
             _deconstruct.clicked += ClickDeconstruct;
 
             _panel.Add(_title); _panel.Add(_state); _panel.Add(_household); _panel.Add(_members);
-            _panel.Add(_hungry); _panel.Add(_larder);
+            _panel.Add(_access); _panel.Add(_hungry); _panel.Add(_larder);
             _panel.Add(_priority); _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);
