@@ -327,16 +327,7 @@ namespace LordsLegacy.Game.Tools
 
         private string _hoverReason;
 
-        private float SnapDistanceM(float x, float z, float px)
-        {
-            if (_picker.TryWorldToScreen(x, z, out var c) && _picker.TryWorldToScreen(x + 1f, z, out var ax) &&
-                _picker.TryWorldToScreen(x, z + 1f, out var az))
-            {
-                float pxPerM = Mathf.Max((ax - c).magnitude, (az - c).magnitude);
-                if (pxPerM > 1e-3f) return px / pxPerM;
-            }
-            return 1f;
-        }
+        private float SnapDistanceM(float x, float z, float px) => _picker.MetresForPixels(x, z, px);
 
         private void RedrawPlaced()
         {

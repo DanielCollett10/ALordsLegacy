@@ -56,6 +56,20 @@ namespace LordsLegacy.Game
             return true;
         }
 
+        /// <summary>
+        /// Metres on the ground that <paramref name="px"/> screen pixels span at the Sim point (x,z), for snap distances
+        /// given in pixels. Returns 1 when the point cannot be projected.
+        /// </summary>
+        public float MetresForPixels(float x, float z, float px)
+        {
+            if (TryWorldToScreen(x, z, out var c) && TryWorldToScreen(x + 1f, z, out var ax) && TryWorldToScreen(x, z + 1f, out var az))
+            {
+                float pxPerM = Mathf.Max((ax - c).magnitude, (az - c).magnitude);
+                if (pxPerM > 1e-3f) return px / pxPerM;
+            }
+            return 1f;
+        }
+
         /// <summary>Casts the ray and reads the Sim at the hit point's x/z. False if nothing was hit or the Sim is not ready.</summary>
         public bool TryPickRay(Ray ray, out GroundSample sample)
         {
