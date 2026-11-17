@@ -45,6 +45,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateBuildBar(host);
             CreateRoadTool(host);
             CreateAreaTools(host);
+            CreatePlacementOverlay(host);
             CreateGroundReadout();
             CreateAgentSelection(host);
             CreateDebugOverlay(host);
@@ -322,6 +323,18 @@ namespace LordsLegacy.EditorTools.Scenes
             var so = new SerializedObject(target);
             so.FindProperty(field).stringValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>
+        /// Adds the PlacementOverlay (PL-12, T-480) to the ToolController object, wired to SimHost and the controller.
+        /// Without it the scene only got the overlay at run time, from ToolController.OnEnable.
+        /// </summary>
+        public static void CreatePlacementOverlay(SimHost host)
+        {
+            var controller = Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>();
+            var overlay = controller.gameObject.AddComponent<LordsLegacy.Game.Visuals.PlacementOverlay>();
+            SetRef(overlay, "_host", host);
+            SetRef(overlay, "_controller", controller);
         }
 
         /// <summary>Adds the cursor ground readout UIDocument and view.</summary>
