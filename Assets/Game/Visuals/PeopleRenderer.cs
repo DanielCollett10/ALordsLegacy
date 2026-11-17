@@ -121,6 +121,14 @@ namespace LordsLegacy.Game.Visuals
             foreach (var o in world.People.Oxen)
                 _oxen.Add(Matrix(oxDef, VisualSizes.Ox, o, t, dt, rate, spm, paused, _oxPhase, o.Id, world, ref min, ref max));
 
+            // T-509: forget gait phases of citizens that left, so ids never pile up.
+            if (_citizenPhase.Count > world.People.CitizenCount)
+            {
+                var gone = new List<int>();
+                foreach (int k in _citizenPhase.Keys) if (world.People.FindCitizen(k) == null) gone.Add(k);
+                foreach (int k in gone) _citizenPhase.Remove(k);
+            }
+
             if (_adults.Count + _children.Count + _oxen.Count == 0) return;
             var b = new Bounds();
             b.SetMinMax(min - Vector3.one * 4f, max + Vector3.one * 4f);

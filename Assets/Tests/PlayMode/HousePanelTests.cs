@@ -222,9 +222,41 @@ namespace LordsLegacy.Tests.PlayMode
             yield return null;
 
             Assert.IsTrue(family.IsHungry);
-            Assert.AreEqual("Hungry", _house.HungryText);
+            Assert.AreEqual("Hungry (1 / 30 days)", _house.HungryText);
             StringAssert.Contains("Days left: 0.0", _house.LarderText);
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator HousePanelShowsLeavingWhenTheFamilyIsLeaving()
+        {
+            var w = _host.World;
+            var family = w.People.Families.First();
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
+            _agents.SelectHouse(_houseId);
+            yield return null;
+            Assert.AreEqual("", _house.HungryText);
+            LordsLegacy.Sim.Growth.FamilyDeparture.Begin(w, family.Id);
+            // Begin evicts the family from its house (the panel then rightly shows Empty), so put it back to read the status.
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
+            yield return null;
+            Assert.AreEqual("Leaving (hungry)", _house.HungryText);
+        }
+
+        [UnityTest]
+        public IEnumerator HousePanelStaysClosedWithoutExceptionsWhenTheFamilyIsRemoved()
+        {
+            var w = _host.World;
+            var family = w.People.Families.First();
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
+            _agents.SelectHouse(_houseId);
+            yield return null;
+            foreach (int id in new System.Collections.Generic.List<int>(family.MemberIds)) w.People.RemoveCitizen(id);
+            w.People.RemoveFamily(family.Id);
+            yield return null;
+            yield return null;
+            Assert.AreEqual("", _house.HungryText);
+            LogAssert.NoUnexpectedReceived();
         }
 
         [UnityTest]

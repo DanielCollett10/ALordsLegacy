@@ -61,6 +61,30 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual("Meat: 4 (12 rations)\nBerries: 2 (2 rations)\nMushrooms: 0 (0 rations)", _bar.FoodReadoutTooltip);
         }
 
+        [Test]
+        public void PopulationReadoutShowsFamiliesCitizensAndTooltipCounts()
+        {
+            var w = _host.World;
+            w.People.AddFamily(1, "Archer", 100, 100);
+            w.People.AddCitizen(1, "Alda", Sex.Female, -20L * Citizen.TicksPerYear, 1, 100, 100);
+            w.People.AddCitizen(2, "Bran", Sex.Male, -20L * Citizen.TicksPerYear, 1, 100, 100);
+            w.People.AddFamily(2, "Baker", 90, 90);
+            w.People.AddCitizen(3, "Cy", Sex.Male, -20L * Citizen.TicksPerYear, 2, 90, 90);
+            LordsLegacy.Sim.Growth.FamilyDeparture.Begin(w, 2);
+            _bar.Refresh();
+            Assert.AreEqual("Citizens: 3", _bar.PopulationText);
+            StringAssert.StartsWith("Families: 2\n", _bar.PopulationTooltip);
+            StringAssert.Contains("Arriving: 0", _bar.PopulationTooltip);
+            StringAssert.Contains("Leaving: 1", _bar.PopulationTooltip);
+            StringAssert.Contains("Next family:", _bar.PopulationTooltip);
+            Assert.IsFalse(_bar.PopulationTipShown);
+            _bar.ShowPopulationTip();
+            Assert.IsTrue(_bar.PopulationTipShown);
+            StringAssert.Contains("Leaving: 1", _bar.PopulationTipText);
+            _bar.HidePopulationTip();
+            Assert.IsFalse(_bar.PopulationTipShown);
+        }
+
         private long Run100()
         {
             long start = _host.World.Tick;

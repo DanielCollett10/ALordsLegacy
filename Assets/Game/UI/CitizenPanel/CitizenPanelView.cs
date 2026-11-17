@@ -122,8 +122,10 @@ namespace LordsLegacy.Game
                 _home.text = HomeLine(world, family);
                 _home.style.display = DisplayStyle.Flex;
                 // FD-16: Hungry is shown only while the family is short; it changes nothing else.
-                _hungry.text = "Hungry";
-                _hungry.style.display = family != null && family.IsHungry ? DisplayStyle.Flex : DisplayStyle.None;
+                // T-509: status text comes from GrowthReport (Hungry (n / 30 days), Leaving (hungry), Arriving).
+                string status = family != null ? Sim.Growth.GrowthReport.StatusOf(world, family.Id) : null;
+                _hungry.text = status ?? "";
+                _hungry.style.display = status != null ? DisplayStyle.Flex : DisplayStyle.None;
                 _age.style.display = DisplayStyle.Flex;
                 _family.style.display = DisplayStyle.Flex;
                 _workplace.text = "Work: " + CitizenTaskText.Workplace(world, c);
