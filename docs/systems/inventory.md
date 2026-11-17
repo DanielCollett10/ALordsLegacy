@@ -11,9 +11,9 @@ transfer or consumption, so nothing appears from nowhere (decision 0032, decisio
 |---|---|
 | `Ledger` | Locations, counts, reservations, journals (produced, consumed), `Version`, `Audit()`. `AddCarrier`, `AddFoodStore`, `FindFoodStore`. |
 | `Ledger.Reservations.cs`, `Ledger.Restore.cs` | Reservation methods and internal restore methods for the save reader. |
-| `LedgerLocation`, `LocationKind` | `GroundPile` (point, optional owner operation id), `Storage` (module id, capacity from the type), `Carrier` (capacity; an ox, or a person's trip or forage carrier), `Stockpile` (unlimited, camp logs), `Site` (construction site, footprint id), `FoodStore` (food only; refuses non-food; larders, the camp food store, hut and granary stores). |
+| `LedgerLocation`, `LocationKind` | `GroundPile` (point, optional owner operation id), `Storage` (module id, capacity from the type), `Carrier` (capacity; an ox, or a person's trip or forage carrier), `Stockpile` (unlimited, camp logs), `Site` (construction site, footprint id), `FoodStore` (food only; refuses non-food; larders, the camp food store, hut and granary stores), `GoodsStore` (General items only, `AddGoodsStore`; refuses logs and food; decision 0046). |
 | `Reservation` | Id, location, item, count, owner, kind (stock or capacity). |
-| `ItemDef`, `ItemCategory`, `Items` | `Items.Log` (`item.log`, Log). `Meat` (3 rations), `Berries` and `Mushrooms` (1 ration each), all category Food. `Items.All` lists them. |
+| `ItemDef`, `ItemCategory`, `Items` | `Items.Log` (`item.log`, Log). `Plank`, `Beam` (category General). `Meat` (3 rations), `Berries` and `Mushrooms` (1 ration each), all category Food. `Items.All` lists them. |
 | `OperationPool` | `SimWorld.OperationPool(opId, item)` sums the operation's own storage modules only. |
 
 ## Operations
@@ -41,5 +41,5 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 ## Tests
 
 `Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`,
-`Sim.Tests/Save/LedgerFoodTests.cs`. Food stores: `Sim.Tests/Food/FoodStoreTests.cs`.
+`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (save version 23). Food stores: `Sim.Tests/Food/FoodStoreTests.cs`.
 Unity: `Assets/Tests/PlayMode/LogStacksTests.cs`.

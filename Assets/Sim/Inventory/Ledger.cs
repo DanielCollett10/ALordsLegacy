@@ -94,6 +94,13 @@ namespace LordsLegacy.Sim.Inventory
         public LedgerLocation AddFoodStore(PointMm position) =>
             Add(new LedgerLocation(_nextId++, LocationKind.FoodStore, position, null, 0));
 
+        /// <summary>Adds a goods store (General items only) holding up to <paramref name="capacity"/> items (decision 0046).</summary>
+        public LedgerLocation AddGoodsStore(int capacity = int.MaxValue)
+        {
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Must be positive.");
+            return Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, default, null, 0, capacity));
+        }
+
         /// <summary>Finds the Site location of a footprint, or null (never creates).</summary>
         public LedgerLocation FindSite(int footprintId)
         {
