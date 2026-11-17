@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
@@ -27,7 +28,8 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _title, _state, _stock, _stored, _message;
+        private Label _title, _state, _stock, _stored, _message, _suppliesReason;
+        private Toggle _supplies;
         private Button _deconstruct, _close;
         private VisualElement _familyBox, _pickerBox;
         private string _signature = "";
@@ -51,6 +53,15 @@ namespace LordsLegacy.Game
 
         /// <summary>Message line text (a refused command); empty when none.</summary>
         public string MessageText => _message?.text ?? "";
+
+        /// <summary>The "Supplies market" toggle, or null before the panel is built.</summary>
+        public Toggle SuppliesToggle => _panel?.Q<Toggle>("granary-supplies");
+
+        /// <summary>Why the supplies toggle is disabled (MK-11), or "" while it can be switched.</summary>
+        public string SuppliesReasonText => _suppliesReason?.text ?? "";
+
+        /// <summary>Confirm text shown before the first switch-on (CMP-20, MK-31).</summary>
+        public const string SuppliesConfirmText = "The camp will stop handing out food from next Sunday. Households only get what is on the stalls by then.";
 
         /// <summary>True while the Deconstruct button is visible.</summary>
         public bool DeconstructVisible => _deconstruct != null && _deconstruct.style.display.value != DisplayStyle.None;
@@ -145,9 +156,10 @@ namespace LordsLegacy.Game
             host = Host();
             var agents = Agents();
             if (host == null || !host.IsInitialized || agents == null || !agents.HasGranary) return null;
-            var op = host.World.Operations.FindByModule(agents.SelectedGranaryId);
-            return op?.Id;
+            return OperationOfGranary(host.World, agents.SelectedGranaryId);
         }
+
+        private static int? OperationOfGranary(SimWorld world, int granaryId) => world.Operations.FindByModule(granaryId)?.Id;
 
         /// <summary>A slot's Assign button: opens or closes the list of unassigned families (refused while unbuilt).</summary>
         public void ClickAssignSlot()
@@ -254,6 +266,39 @@ namespace LordsLegacy.Game
             UiFocusRules.Apply(_panel);
         }
 
+        /// <summary>
+        /// Supplies toggle changed by the player (MK-10). Switching on before the food handover asks to confirm first
+        /// (CMP-20, MK-31); the toggle stays off until the confirm is accepted. Switching off needs no confirm.
+        /// </summary>
+        public void ClickSupplies(bool on)
+        {
+            int? op = OperationOf(out var host);
+            if (!op.HasValue) return;
+            if (on && !host.World.FoodHandedOver)
+            {
+                _supplies.SetValueWithoutNotify(false);
+                ConfirmDialog.Show(SuppliesConfirmText, "Switch on", () => Run(new SetGranarySupplies(op.Value, true)));
+                return;
+            }
+            Run(new SetGranarySupplies(op.Value, on));
+        }
+
+        private void RefreshSupplies(SimWorld world, GranaryReport r, int? opId)
+        {
+            string reason = "";
+            if (opId.HasValue)
+            {
+                CommandResult check = new SetGranarySupplies(opId.Value, true).Validate(world);
+                if (check.IsRejected) reason = check.Text ?? "";
+            }
+            else reason = "No operation for this granary";
+            _supplies.label = r.SuppliesMarketText;
+            _supplies.SetValueWithoutNotify(r.SuppliesMarket);
+            _supplies.SetEnabled(reason.Length == 0);
+            _suppliesReason.text = reason;
+            _suppliesReason.style.display = reason.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
         private void Run(LordsLegacy.Sim.Commands.ISimCommand cmd)
         {
             var host = Host();
@@ -283,6 +328,7 @@ namespace LordsLegacy.Game
             _state.text = StateLine(r);
             _stock.text = StockLines(r);
             _stored.text = StoredLine(r);
+            RefreshSupplies(host.World, r, OperationOfGranary(host.World, agents.SelectedGranaryId));
             RebuildFamilies(host.World, agents.SelectedGranaryId);
             _deconstruct.style.display = r.State == GranaryState.Deconstructing ? DisplayStyle.None : DisplayStyle.Flex;
             _deconstruct.text = r.IsBuilt ? "Deconstruct" : "Cancel granary";
@@ -375,6 +421,15 @@ namespace LordsLegacy.Game
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
+            _supplies = new Toggle { name = "granary-supplies", label = "Supplies market: No" };
+            _supplies.labelElement.style.color = new Color(240f / 255f, 230f / 255f, 210f / 255f);
+            _supplies.labelElement.style.fontSize = 12;
+            _supplies.style.marginTop = 2;
+            _supplies.RegisterValueChangedCallback(evt => ClickSupplies(evt.newValue));
+            _suppliesReason = MakeLabel("granary-supplies-reason", 11, false);
+            _suppliesReason.style.color = new Color(200f / 255f, 170f / 255f, 120f / 255f);
+            _suppliesReason.style.display = DisplayStyle.None;
+
             _familyBox = new VisualElement { name = "granary-families" };
             _familyBox.style.marginTop = 4;
             _pickerBox = new VisualElement { name = "granary-picker" };
@@ -387,6 +442,7 @@ namespace LordsLegacy.Game
             _deconstruct.clicked += ClickDeconstruct;
 
             _panel.Add(_title); _panel.Add(_state); _panel.Add(_stock); _panel.Add(_stored);
+            _panel.Add(_supplies); _panel.Add(_suppliesReason);
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
