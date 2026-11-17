@@ -182,6 +182,34 @@ namespace LordsLegacy.Sim.Tests.Save
         }
 
         [Test]
+        public void RoundTrip_HouseholdWithHungryDays_AndLastHungryTick_AndTuning_AreIdentical()
+        {
+            MapData map = SyntheticMap.CreateRamp();
+            var layout = new LordsLegacy.Sim.Start.StartLayout(
+                M(100, 100), 0, M(0, 0), M(6, 0), M(-6, 0), new PointMm[0],
+                new[] { new LordsLegacy.Sim.Start.StartFamily("Ash", M(-8, -4),
+                    new[] { new LordsLegacy.Sim.Start.StartCitizen("A", Sex.Male, -4_000_000) }) }, 2);
+            var tuning = new SimTuning { HungryDaysToLeave = 11, ArrivalFoodDays = 12, ArrivalNoHungerDays = 13, ArrivalGapDays = 14, MapEdgeToleranceM = 3.5 };
+            SimWorld w = SimWorld.FromMapData(map, tuning);
+            LordsLegacy.Sim.Start.StartLayoutApplier.Apply(w, layout);
+            Assert.IsNull(w.LastHungryTick);
+            w.Step(Day * 3 + 5);
+            Family f = w.People.Families.First();
+            Assert.Greater(f.HungryDays, 0);
+            Assert.IsNotNull(w.LastHungryTick);
+            byte[] first = Bytes(w, map);
+            SimWorld back = SimSave.Read(first, map);
+            Assert.AreEqual(f.HungryDays, back.People.FindFamily(f.Id).HungryDays);
+            Assert.AreEqual(w.LastHungryTick, back.LastHungryTick);
+            Assert.AreEqual(11, back.Tuning.HungryDaysToLeave);
+            Assert.AreEqual(12, back.Tuning.ArrivalFoodDays);
+            Assert.AreEqual(13, back.Tuning.ArrivalNoHungerDays);
+            Assert.AreEqual(14, back.Tuning.ArrivalGapDays);
+            Assert.AreEqual(3.5, back.Tuning.MapEdgeToleranceM);
+            Assert.IsNull(Mismatch(first, Bytes(back, map)));
+        }
+
+        [Test]
         public void Scenarios_AreNotTrivial_MidHaulHasLogsOrTasks()
         {
             MapData map = Map();

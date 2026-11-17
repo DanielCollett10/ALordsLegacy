@@ -143,8 +143,11 @@ built once, at start). Presentation values (snap distances, sphere, dots) stay o
 | Markets per town | 1 | | MK-04 |
 | Ground pile no-build circle | 2 | m radius around a pile with items | PL-15 |
 | Store-family worker age | 8+ | years (light work) | MK-24 |
-| Hungry days before leaving | 30 | days in a row | GR-03 |
-| Arrival food surplus | 30 | days of food incl. the new family | GR-21 |
+| Hungry days before leaving | 30 | days in a row (`HungryDaysToLeave`, T-496) | GR-03 |
+| Arrival food surplus | 30 | days of food incl. the new family (`ArrivalFoodDays`) | GR-21 |
+| Arrival no-hunger window | 7 | days with no Hungry household (`ArrivalNoHungerDays`) | GR-21 |
+| Arrival gap | 7 | days between arrivals (`ArrivalGapDays`) | GR-21 |
+| Map edge tolerance | 2 | m (`MapEdgeToleranceM`) | GR-21 |
 | Arrival cooldown | 7 | days | GR-22 |
 | Arrival food | 30 | days of the arriving family's need (equal rations of meat, berries, mushrooms) | GR-22b |
 

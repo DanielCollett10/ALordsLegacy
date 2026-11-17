@@ -238,6 +238,21 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Rations a child eats per day. Unit: rations per day. Rule: FD-04.</summary>
         public double ChildRations { get; set; } = 0.5;
 
+        /// <summary>Consecutive Hungry days after which a household leaves. Unit: game days. Rule: GR-03 (PLACEHOLDER).</summary>
+        public int HungryDaysToLeave { get; set; } = 30;
+
+        /// <summary>Days of food a village must hold per household for a family to arrive. Unit: game days. Rule: GR-21 (PLACEHOLDER).</summary>
+        public int ArrivalFoodDays { get; set; } = 30;
+
+        /// <summary>Days with no Hungry household before a family may arrive. Unit: game days. Rule: GR-21 (PLACEHOLDER).</summary>
+        public int ArrivalNoHungerDays { get; set; } = 7;
+
+        /// <summary>Minimum days between two arrivals. Unit: game days. Rule: GR-21 (PLACEHOLDER).</summary>
+        public int ArrivalGapDays { get; set; } = 7;
+
+        /// <summary>Tolerance when deciding a point is on the map edge. Unit: metres. Rule: GR-21 (PLACEHOLDER).</summary>
+        public double MapEdgeToleranceM { get; set; } = 2;
+
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;
 

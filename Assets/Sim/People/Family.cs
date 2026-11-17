@@ -49,6 +49,9 @@ namespace LordsLegacy.Sim.People
         /// <summary>True when the family's larder could not cover its last daily need (FD-15). No effect on work (FD-16).</summary>
         public bool IsHungry { get; internal set; }
 
+        /// <summary>Consecutive midnights the household was Hungry (GR-02); reset by a fully fed day. Saved by the Food section.</summary>
+        public int HungryDays { get; internal set; }
+
         /// <summary>Ledger reservation ids of this week's Sunday allotment on the market stock (FD-13). Saved by the Food section.</summary>
         public IReadOnlyList<int> AllotmentReservationIds => _allotment;
 

@@ -119,6 +119,11 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.MarketMinAreaM2);
             w.WriteDouble(t.MarketMaxAreaM2);
             w.WriteDouble(t.PileClearanceM);
+            w.WriteInt32(t.HungryDaysToLeave);
+            w.WriteInt32(t.ArrivalFoodDays);
+            w.WriteInt32(t.ArrivalNoHungerDays);
+            w.WriteInt32(t.ArrivalGapDays);
+            w.WriteDouble(t.MapEdgeToleranceM);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -186,6 +191,11 @@ namespace LordsLegacy.Sim.Save.Sections
             t.MarketMinAreaM2 = r.ReadDouble();
             t.MarketMaxAreaM2 = r.ReadDouble();
             t.PileClearanceM = r.ReadDouble();
+            t.HungryDaysToLeave = r.ReadInt32();
+            t.ArrivalFoodDays = r.ReadInt32();
+            t.ArrivalNoHungerDays = r.ReadInt32();
+            t.ArrivalGapDays = r.ReadInt32();
+            t.MapEdgeToleranceM = r.ReadDouble();
             return t;
         }
 
