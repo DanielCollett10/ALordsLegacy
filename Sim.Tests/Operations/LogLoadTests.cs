@@ -20,7 +20,7 @@ namespace LordsLegacy.Sim.Tests.Operations
     {
         private static PointMm M(double x, double z) => PointMm.FromMetres(x, z);
 
-        private static SimWorld World() => new SimWorld(new SimTuning());
+        private static SimWorld World() => new SimWorld(new SimTuning { OxLoadLogs = 2 });
 
         private static Operation Designate(SimWorld w)
         {

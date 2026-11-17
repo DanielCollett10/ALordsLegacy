@@ -28,7 +28,7 @@ namespace LordsLegacy.Sim.Tests
         private static Rig Build(params TaskStep[] extraAfterLoad)
         {
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
-            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8 });
+            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, OxLoadLogs = 2 });
             w.People.AddFamily(1, "F", 100, 100);
             Citizen c = w.People.AddCitizen(1, "C", Sex.Male, -4_000_000, 1, 100, 100);
             Ox o = w.People.AddOx(1, "O", 110, 100);

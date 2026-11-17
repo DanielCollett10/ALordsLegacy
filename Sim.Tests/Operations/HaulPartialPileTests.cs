@@ -29,7 +29,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             for (int i = 0; i < trees; i++)
                 list.Add(new MapTree(new TreeId(i + 1), 92f + (i % 5) * 4f, 86f + (i / 5) * 3f, 8));
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), list.ToArray());
-            SimWorld w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8 });
+            SimWorld w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, OxLoadLogs = 2 });
             CommandResult r = w.Execute(new DesignateArea(
                 AreaShape.Straight(new[] { M(96, 96), M(114, 96), M(114, 112), M(96, 112) }), AreaTypes.WoodcuttingId));
             Assert.IsTrue(r.IsAccepted, r.Text);

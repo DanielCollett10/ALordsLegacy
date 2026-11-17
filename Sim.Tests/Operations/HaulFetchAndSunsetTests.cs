@@ -30,6 +30,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             return SimWorld.FromMapData(map, new SimTuning
             {
                 StartMonth = month, StartDay = day, StartHour = hour, StartMinute = 0, StartWeekday = Weekday.Monday,
+                OxLoadLogs = 2,
             });
         }
 
