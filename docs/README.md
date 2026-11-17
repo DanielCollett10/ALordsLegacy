@@ -32,6 +32,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Foraging | Forage bushes, foragers aged 8+ picking berries and mushrooms into their own hut store. | [systems/foraging.md](systems/foraging.md) | `Assets/Sim/Foraging`, `Assets/Sim/Core/SimWorld.Foraging.cs` |
 | Food | Larders, the Sunday allotment and fetch trip, daily eating and Hungry, granary food. | [systems/food.md](systems/food.md) | `Assets/Sim/Food` |
 | Markets | Market area, stalls, granary families stocking stalls, camp handover and removal, Sunday allotment from stalls. | [systems/markets.md](systems/markets.md) | `Assets/Sim/Markets`, `Assets/Sim/Geometry/StallGrid.cs`, `Assets/Game/Tools/MarketTool.cs` |
+| Workshops | Hewing station and sawpit: one data-driven system, stock and store, status, panel read model, village timber totals. | [systems/workshops.md](systems/workshops.md) | `Assets/Sim/Operations/Workshops`, `Assets/Sim/Inventory/GoodsStats.cs` |
 | Footprints | Placed buildings, stands and standalone structures: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
 | Inventory | Ledger of logs by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
 | Construction | Sites that take delivered logs and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
