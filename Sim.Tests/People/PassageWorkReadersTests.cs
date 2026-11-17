@@ -89,7 +89,9 @@ namespace LordsLegacy.Sim.Tests.People
             var w = NewWorld();
             Citizen c = Add(w, FamilyPassage.Leaving, null);
             w.Step(60);
-            Assert.IsNull(c.Move);
+            // The routine system gives no order; the departure system (T-502) may send the member to an exit.
+            Assert.IsTrue(c.Move == null || LordsLegacy.Sim.Roads.MapExits.IsOnEdge(w,
+                LordsLegacy.Sim.Geometry.PointMm.FromMetres(c.Move.TargetX, c.Move.TargetZ)), "only an exit order");
 
             var w2 = NewWorld();
             Citizen c2 = Add(w2, FamilyPassage.None, null);

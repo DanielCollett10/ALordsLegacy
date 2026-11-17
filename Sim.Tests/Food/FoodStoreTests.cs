@@ -110,7 +110,7 @@ namespace LordsLegacy.Sim.Tests.Food
         [Test]
         public void DaysLeft_ChildTurns14_CountsAsAdult()
         {
-            var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning { StartingMeat = 0, AgeingRate = 200 });
+            var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning { StartingMeat = 0, AgeingRate = 200, HungryDaysToLeave = 1000 });
             w.People.AddFamily(1, "F", 0, 0);
             w.People.AddCitizen(1, "Kid", Sex.Male, 0, 1, 0, 0);
             Assert.AreEqual(0.5, FoodStats.DailyNeed(w), 1e-9);
