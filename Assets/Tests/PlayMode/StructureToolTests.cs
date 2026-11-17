@@ -136,6 +136,78 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(0, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.GranaryId));
         }
 
+        /// <summary>PL-14: snapping on, the ghost turns and slides flush against a nearby house plot, and places there.</summary>
+        [UnityTest]
+        public IEnumerator SnapOnButtsTheGhostFlushAgainstAHousePlot()
+        {
+            yield return Setup(40);
+            _tool.SetViewSettings(new ViewSettings { Snapping = true, SnapDistancePx = 12f });
+            var w = _host.World;
+            var house = w.Footprints.Add(901, ModuleTypes.House, PointMm.FromMetres(100, 100), 0);
+            double houseTop = MaxZ(house.PlotPolygon);
+            double z = houseTop + GranaryHalfZ() + 0.3; // 30 cm short of flush, well inside 12 px
+            _tool.PointerMove(Screen(100, (float)z));
+            Assert.IsTrue(_tool.Preview.Ok, _tool.Preview.Text);
+            double quarter = System.Math.Round(_tool.GhostRotation / 90.0) * 90.0;
+            Assert.AreEqual(quarter, _tool.GhostRotation, 1e-6, "The ghost turns to lie parallel to the house plot's edge.");
+            Assert.AreEqual(houseTop, MinZ(_tool.Preview.Plot), 0.01, "The yard's edge sits flush on the house plot's edge.");
+            Click(100, (float)z);
+            var g = w.Footprints.All.FirstOrDefault(f => f.Type.Id == ModuleTypes.GranaryId);
+            Assert.IsNotNull(g, "Click places the granary at the snapped position.");
+            Assert.AreEqual(_tool.GhostRotation, g.RotationDegrees, 1e-9);
+        }
+
+        /// <summary>PL-14: snapping off, the ghost stays at the cursor and Q / E still turns it.</summary>
+        [UnityTest]
+        public IEnumerator SnappingOffDoesNotSnapAndQERotates()
+        {
+            yield return Setup(40);
+            _tool.SetViewSettings(new ViewSettings { Snapping = false });
+            var house = _host.World.Footprints.Add(901, ModuleTypes.House, PointMm.FromMetres(100, 100), 0);
+            double houseTop = MaxZ(house.PlotPolygon);
+            double z = houseTop + GranaryHalfZ() + 0.3;
+            _tool.PointerMove(Screen(100, (float)z));
+            Assert.AreEqual(0.0, _tool.GhostRotation, 1e-9);
+            Assert.AreEqual(z, _tool.GhostCentre.ZMetres, 0.2, "No snap: the ghost stays at the cursor.");
+            Assert.Greater(MinZ(_tool.Preview.Plot), houseTop + 0.2, "No snap: a gap of about 30 cm remains.");
+            _tool.Rotate(StructureTool.RotateStepDeg);
+            Assert.AreEqual(15.0, _tool.GhostRotation, 1e-9, "Q turns the ghost when it is not snapped.");
+        }
+
+        /// <summary>PL-14: snapping on but nothing within reach, the ghost keeps the Q / E rotation.</summary>
+        [UnityTest]
+        public IEnumerator SnappingOnWithNothingInReachKeepsQERotation()
+        {
+            yield return Setup(40);
+            _tool.SetViewSettings(new ViewSettings { Snapping = true });
+            _host.World.Footprints.Add(901, ModuleTypes.House, PointMm.FromMetres(100, 100), 0);
+            _tool.PointerMove(Screen(100, 140)); // tens of metres from the house
+            _tool.Rotate(StructureTool.RotateStepDeg);
+            Assert.AreEqual(15.0, _tool.GhostRotation, 1e-9);
+            Assert.AreEqual(140.0, _tool.GhostCentre.ZMetres, 0.2, "Out of reach: the ghost is not moved.");
+        }
+
+        private static double MaxZ(PointMm[] pts)
+        {
+            double m = double.MinValue;
+            foreach (var p in pts) m = System.Math.Max(m, p.ZMetres);
+            return m;
+        }
+
+        private static double MinZ(PointMm[] pts)
+        {
+            double m = double.MaxValue;
+            foreach (var p in pts) m = System.Math.Min(m, p.ZMetres);
+            return m;
+        }
+
+        // Distance from the granary's centre to its plot edge along z at rotation 0 (metres).
+        private static double GranaryHalfZ()
+        {
+            var plot = new Footprint(0, ModuleTypes.Find(ModuleTypes.GranaryId), PointMm.FromMetres(0, 0), 0).PlotPolygon;
+            return MaxZ(plot);
+        }
+
         [UnityTest]
         public IEnumerator RightClickLeavesTheTool()
         {
