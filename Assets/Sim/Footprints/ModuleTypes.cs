@@ -33,6 +33,8 @@ namespace LordsLegacy.Sim.Footprints
                 case GranaryId: return "Granary";
                 case ForagerHutId: return "Forager hut";
                 case MarketStallId: return "Market stall";
+                case HewingStationId: return "Hewing station";
+                case SawpitId: return "Sawpit";
                 default: return typeId;
             }
         }
@@ -89,8 +91,21 @@ namespace LordsLegacy.Sim.Footprints
         /// </summary>
         public static readonly ConstructionRecipe MarketStallLogRecipe = new ConstructionRecipe(1, 60);
 
+        /// <summary>Id of the hewing station (HW-01).</summary>
+        public const string HewingStationId = "module.hewing_station";
+        /// <summary>Id of the sawpit (PL-01).</summary>
+        public const string SawpitId = "module.sawpit";
+
+        /// <summary>Hewing station: 6 × 4 m, blocks movement, clears trees, 3 m yard, 6 logs / 480 worker-minutes (HW-01).</summary>
+        public static readonly FootprintTypeDef HewingStation =
+            new FootprintTypeDef(HewingStationId, 6000, 4000, true, true, recipe: new ConstructionRecipe(6, 480), yardMarginMm: 3000);
+
+        /// <summary>Sawpit: 6 × 4 m, blocks movement, clears trees, 3 m yard, 6 logs / 480 worker-minutes (PL-01).</summary>
+        public static readonly FootprintTypeDef Sawpit =
+            new FootprintTypeDef(SawpitId, 6000, 4000, true, true, recipe: new ConstructionRecipe(6, 480), yardMarginMm: 3000);
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)
