@@ -21,8 +21,14 @@ namespace LordsLegacy.Sim.Construction
         public int LedgerLocationId { get; set; }
         /// <summary>Build progress, in worker-minutes.</summary>
         public int ProgressMinutes { get; set; }
-        /// <summary>Logs already used up by the build work (CN-23b); delivered, but no longer on site.</summary>
-        public int LogsConsumed { get; set; }
+        /// <summary>Units of each item (id to count) already used up by the build work (CN-23b); delivered, but no longer on site.</summary>
+        public SortedDictionary<string, int> Consumed { get; } = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+        /// <summary>Logs already used up by the build work; a view of <see cref="Consumed"/> for the log item.</summary>
+        public int LogsConsumed { get => ConsumedOf(Inventory.Items.Log.Id); set => SetConsumed(Inventory.Items.Log.Id, value); }
+        /// <summary>Units of the item already used up by the build work.</summary>
+        public int ConsumedOf(string itemId) => Consumed.TryGetValue(itemId, out int n) ? n : 0;
+        /// <summary>Sets the consumed count of an item; zero removes the entry.</summary>
+        public void SetConsumed(string itemId, int count) { if (count > 0) Consumed[itemId] = count; else Consumed.Remove(itemId); }
         /// <summary>Normal or High.</summary>
         public ConstructionPriority Priority { get; set; }
 

@@ -46,12 +46,35 @@ namespace LordsLegacy.Sim.Construction
             return site.LogsConsumed + (loc == null ? 0 : loc.CountOf(Items.Log.Id));
         }
 
-        /// <summary>Progress cap in worker-minutes: recipe minutes × delivered ÷ needed (CN-23).</summary>
+        /// <summary>Units of one item delivered to the site: on site plus consumed.</summary>
+        public static int DeliveredOf(SimWorld world, ConstructionSite site, string itemId)
+        {
+            LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
+            return site.ConsumedOf(itemId) + (loc == null ? 0 : loc.CountOf(itemId));
+        }
+
+        private static int NeededUnits(ConstructionRecipe recipe)
+        {
+            int n = 0;
+            foreach (int c in recipe.Items.Values) n += c;
+            return n;
+        }
+
+        private static bool AllDelivered(SimWorld world, ConstructionSite site, ConstructionRecipe recipe)
+        {
+            foreach (var kv in recipe.Items)
+                if (DeliveredOf(world, site, kv.Key) < kv.Value) return false;
+            return true;
+        }
+
+        /// <summary>Progress cap in worker-minutes: recipe minutes × delivered units ÷ needed units over all items (CN-23, decision 0046).</summary>
         public static int Cap(SimWorld world, ConstructionSite site, ConstructionRecipe recipe)
         {
-            if (recipe.Logs == 0) return recipe.BuildWorkerMinutes;
-            int delivered = Math.Min(recipe.Logs, Delivered(world, site));
-            return (int)((long)recipe.BuildWorkerMinutes * delivered / recipe.Logs);
+            int needed = NeededUnits(recipe);
+            if (needed == 0) return recipe.BuildWorkerMinutes;
+            int delivered = 0;
+            foreach (var kv in recipe.Items) delivered += Math.Min(kv.Value, DeliveredOf(world, site, kv.Key));
+            return (int)((long)recipe.BuildWorkerMinutes * delivered / needed);
         }
 
         /// <summary>Worker-minutes of build work still allowed now: cap − progress, never negative.</summary>
@@ -74,7 +97,7 @@ namespace LordsLegacy.Sim.Construction
         /// <summary>Removes the site record when all logs are delivered and the work total is reached.</summary>
         public static bool TryFinish(SimWorld world, ConstructionSite site, ConstructionRecipe recipe)
         {
-            if (site.ProgressMinutes < recipe.BuildWorkerMinutes || Delivered(world, site) < recipe.Logs) return false;
+            if (site.ProgressMinutes < recipe.BuildWorkerMinutes || !AllDelivered(world, site, recipe)) return false;
             ConsumeDue(world, site, recipe);
             world.Construction.Remove(site.FootprintId);
             return true;
@@ -82,13 +105,17 @@ namespace LordsLegacy.Sim.Construction
 
         private static void ConsumeDue(SimWorld world, ConstructionSite site, ConstructionRecipe recipe)
         {
-            if (recipe.Logs == 0) return;
-            int due = recipe.BuildWorkerMinutes <= 0 || site.ProgressMinutes >= recipe.BuildWorkerMinutes
-                ? recipe.Logs
-                : (int)((long)site.ProgressMinutes * recipe.Logs / recipe.BuildWorkerMinutes);
             LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
-            while (site.LogsConsumed < due && loc != null && world.Inventory.Consume(loc, Items.Log, 1))
-                site.LogsConsumed++;
+            foreach (var kv in recipe.Items)
+            {
+                int due = recipe.BuildWorkerMinutes <= 0 || site.ProgressMinutes >= recipe.BuildWorkerMinutes
+                    ? kv.Value
+                    : (int)((long)site.ProgressMinutes * kv.Value / recipe.BuildWorkerMinutes);
+                ItemDef item = Items.Find(kv.Key);
+                int done = site.ConsumedOf(kv.Key);
+                while (done < due && loc != null && world.Inventory.Consume(loc, item, 1)) done++;
+                site.SetConsumed(kv.Key, done);
+            }
         }
     }
 }
