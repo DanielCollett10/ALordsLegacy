@@ -49,6 +49,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateGroundReadout();
             CreateAgentSelection(host);
             CreateDebugOverlay(host);
+            CreateMessageLog(host);
             CreateSunController(host, light, topBar);
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -415,6 +416,17 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(c, "_picker", Object.FindFirstObjectByType<GroundPicker>());
             SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/DebugOverlay/DebugOverlay.uxml"));
             SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/DebugOverlay/DebugOverlay.uss"));
+            return go;
+        }
+
+        /// <summary>Adds the settlement message log UIDocument and view under the top bar, wired to SimHost (T-508).</summary>
+        public static GameObject CreateMessageLog(SimHost host)
+        {
+            var go = CreateUiDocument("MessageLog", "Assets/Game/UI/MessageLog/MessageLog.uxml");
+            var c = go.AddComponent<MessageLogView>();
+            SetRef(c, "_host", host);
+            SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/MessageLog/MessageLog.uxml"));
+            SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/MessageLog/MessageLog.uss"));
             return go;
         }
 

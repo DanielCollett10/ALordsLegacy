@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="message-log" class="message-log" picking-mode="Ignore">
+        <ui:Label name="message-log-entry-0" class="message-log__entry" text="" />
+        <ui:Label name="message-log-entry-1" class="message-log__entry" text="" />
+        <ui:Label name="message-log-entry-2" class="message-log__entry" text="" />
+        <ui:Label name="message-log-entry-3" class="message-log__entry" text="" />
+    </ui:VisualElement>
+</ui:UXML>

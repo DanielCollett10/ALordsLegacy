@@ -1,0 +1,15 @@
+.message-log {
+    position: absolute;
+    top: 56px;
+    left: 12px;
+    width: 420px;
+    padding: 4px 8px;
+    background-color: rgba(30, 24, 18, 0.85);
+}
+.message-log__entry {
+    color: rgb(240, 230, 210);
+    background-color: rgba(0, 0, 0, 0);
+    font-size: 14px;
+    margin: 2px 0;
+    white-space: normal;
+}
