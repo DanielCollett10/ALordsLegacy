@@ -124,6 +124,16 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteDouble(t.OverlapToleranceM2);
             w.WriteDouble(t.SpatialIndexCellM);
             w.WriteDouble(t.DeconstructTimeShare);
+            w.WriteInt32(t.OxLoadBeams); // T-520
+            w.WriteInt32(t.HewingBeamsPerLog);
+            w.WriteInt32(t.HewingLogsPerDay);
+            w.WriteInt32(t.HewingStockCapacity);
+            w.WriteInt32(t.HewingStoreCapacity);
+            w.WriteInt32(t.SawingPlanksPerBeam);
+            w.WriteInt32(t.SawingBeamsPerDay);
+            w.WriteInt32(t.SawingStockCapacity);
+            w.WriteInt32(t.SawingStoreCapacity);
+            w.WriteInt32(t.WorkshopShiftMinutes);
             w.WriteDouble(t.DeconstructRefundShare);
             w.WriteInt32(t.StartingMeat);
             w.WriteInt32(t.StartingPlanks); // T-513
@@ -198,6 +208,16 @@ namespace LordsLegacy.Sim.Save.Sections
             t.OverlapToleranceM2 = r.ReadDouble();
             t.SpatialIndexCellM = r.ReadDouble();
             t.DeconstructTimeShare = r.ReadDouble();
+            t.OxLoadBeams = r.ReadInt32();
+            t.HewingBeamsPerLog = r.ReadInt32();
+            t.HewingLogsPerDay = r.ReadInt32();
+            t.HewingStockCapacity = r.ReadInt32();
+            t.HewingStoreCapacity = r.ReadInt32();
+            t.SawingPlanksPerBeam = r.ReadInt32();
+            t.SawingBeamsPerDay = r.ReadInt32();
+            t.SawingStockCapacity = r.ReadInt32();
+            t.SawingStoreCapacity = r.ReadInt32();
+            t.WorkshopShiftMinutes = r.ReadInt32();
             t.DeconstructRefundShare = r.ReadDouble();
             t.StartingMeat = r.ReadInt32();
             t.StartingPlanks = r.ReadInt32();

@@ -40,6 +40,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(l.OwnerOperationId ?? 0);
                 w.WriteInt32(l.ModuleId);
                 w.WriteInt32(l.Capacity);
+                w.WriteString(l.InputItemId ?? "");
                 WriteMap(w, l.Counts);
             }
             n = 0;
@@ -86,10 +87,11 @@ namespace LordsLegacy.Sim.Save.Sections
                 int owner = r.ReadInt32();
                 int module = r.ReadInt32();
                 int capacity = r.ReadInt32();
+                string input = r.ReadString();
                 List<KeyValuePair<string, int>> counts = ReadPairs(r);
-                if (kind < (int)LocationKind.GroundPile || kind > (int)LocationKind.GoodsStore) throw new SaveFormatException("Bad location kind " + kind + ".");
+                if (kind < (int)LocationKind.GroundPile || kind > (int)LocationKind.WorkshopStock) throw new SaveFormatException("Bad location kind " + kind + ".");
                 if (id >= nextLoc) throw new SaveFormatException("Location id " + id + " is not below the id counter " + nextLoc + ".");
-                led.RestoreLocation(id, (LocationKind)kind, new PointMm(x, z), hasOwner ? owner : (int?)null, module, capacity, counts);
+                led.RestoreLocation(id, (LocationKind)kind, new PointMm(x, z), hasOwner ? owner : (int?)null, module, capacity, counts, input.Length == 0 ? null : input);
             }
             int resCount = r.ReadCount(24);
             for (int i = 0; i < resCount; i++)

@@ -105,6 +105,24 @@ namespace LordsLegacy.Sim.Inventory
         public LedgerLocation AddGoodsStore(PointMm position) =>
             Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, position, null, 0));
 
+        /// <summary>Adds a workshop input stock bound to a footprint; it holds only <paramref name="inputItem"/>, up to <paramref name="capacity"/> (decision 0047).</summary>
+        public LedgerLocation AddWorkshopStock(int moduleId, ItemDef inputItem, int capacity)
+        {
+            if (inputItem == null) throw new ArgumentNullException(nameof(inputItem));
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Must be positive.");
+            var l = new LedgerLocation(_nextId++, LocationKind.WorkshopStock, default, null, moduleId, capacity);
+            l.InputItemId = inputItem.Id;
+            return Add(l);
+        }
+
+        /// <summary>Finds the workshop input stock bound to a footprint, or null (never creates).</summary>
+        public LedgerLocation FindWorkshopStock(int moduleId)
+        {
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.WorkshopStock && l.ModuleId == moduleId) return l;
+            return null;
+        }
+
         /// <summary>Finds the Site location of a footprint, or null (never creates).</summary>
         public LedgerLocation FindSite(int footprintId)
         {
@@ -169,6 +187,9 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>Why a location would not take an item (wrong category), or null when it would.</summary>
         public static string RefusalReason(LedgerLocation location, ItemDef item)
         {
+            if (location.Kind == LocationKind.WorkshopStock)
+                return item.Id == location.InputItemId ? null
+                    : "Location " + location.Id + " (WorkshopStock) holds only " + location.InputItemId + ", not " + item.Id + ".";
             if (location.Accepts(item.Category)) return null;
             return "Location " + location.Id + " (" + location.Kind + ") does not accept " + item.Category + " items (" + item.Id + ").";
         }
@@ -206,7 +227,8 @@ namespace LordsLegacy.Sim.Inventory
         public int TotalOf(string itemId)
         {
             int t = 0;
-            foreach (var l in _locations.Values) t += l.CountOf(itemId);
+            foreach (var l in _locations.Values)
+                if (l.Kind != LocationKind.WorkshopStock) t += l.CountOf(itemId); // workshop stock is not village stock
             return t;
         }
 
@@ -221,6 +243,8 @@ namespace LordsLegacy.Sim.Inventory
                 foreach (var kv in l.Counts)
                 {
                     if (kv.Value <= 0) return "Location " + l.Id + " holds " + kv.Value + " of " + kv.Key;
+                    if (l.Kind == LocationKind.WorkshopStock && kv.Key != l.InputItemId)
+                        return "Workshop stock " + l.Id + " holds " + kv.Key + " but takes only " + l.InputItemId;
                     seen.TryGetValue(kv.Key, out int s);
                     seen[kv.Key] = s + kv.Value;
                 }
