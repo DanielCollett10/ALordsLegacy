@@ -10,6 +10,7 @@ using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.People;
+using LordsLegacy.Sim.Tuning;
 
 namespace LordsLegacy.Sim.Growth
 {
@@ -50,6 +51,7 @@ namespace LordsLegacy.Sim.Growth
 
         private void TryArrive(SimWorld world)
         {
+            if (!MayTry(world)) return; // cheap pre-check: keeps world.Random untouched on days nothing can arrive
             if (_catalog == null) _catalog = new ArrivalCatalog();
             var used = new List<string>();
             foreach (Family f in world.People.Families) used.Add(f.Surname);
@@ -83,6 +85,21 @@ namespace LordsLegacy.Sim.Growth
             world.SettlementLog.Add(world.Tick, "The " + fam.Surname + " family has arrived");
         }
 
+        // The plan-independent parts of ArrivalRules.Check: entry point, a free working house, hunger window, gap.
+        private static bool MayTry(SimWorld world)
+        {
+            if (!world.EntryPoint.HasValue) return false;
+            SimTuning t = world.Tuning;
+            if (world.LastHungryTick.HasValue && world.Tick - world.LastHungryTick.Value <= t.ArrivalNoHungerDays * 1440L) return false;
+            if (world.LastArrivalTick.HasValue && world.Tick - world.LastArrivalTick.Value <= t.ArrivalGapDays * 1440L) return false;
+            foreach (HomeRecord h in world.Homes.All)
+            {
+                if (h.FamilyId != 0 || h.ReservedForFamilyId != 0) continue;
+                if (world.Footprints.Get(h.HouseFootprintId) != null && world.IsWorking(h.HouseFootprintId)) return true;
+            }
+            return false;
+        }
+
         private static void Inward(SimWorld world, PointMm p, out double dx, out double dz)
         {
             var b = world.Terrain.Bounds;
@@ -96,6 +113,9 @@ namespace LordsLegacy.Sim.Growth
         {
             if (f.MemberIds.Count == 0) { f.Passage = FamilyPassage.None; return; }
             HomeRecord home = FindReserved(world, f.Id);
+            // No reservation and nobody walking: nothing was ever sent, so there is nothing to undo (a bare Arriving
+            // flag, e.g. a test fixture). A removed house leaves the members' walk orders behind.
+            if (home == null && !HasOrder(world, f)) return;
             Footprint house = home == null ? null : world.Footprints.Get(home.HouseFootprintId);
             if (house == null || !world.IsWorking(house.Id))
             {
@@ -139,6 +159,16 @@ namespace LordsLegacy.Sim.Growth
                 c.Move = null;
                 c.Activity = Activity.MillingAbout;
             }
+        }
+
+        private static bool HasOrder(SimWorld world, Family f)
+        {
+            foreach (int id in f.MemberIds)
+            {
+                Citizen c = world.People.FindCitizen(id);
+                if (c != null && c.Move != null) return true;
+            }
+            return false;
         }
 
         private static HomeRecord FindReserved(SimWorld world, int familyId)
