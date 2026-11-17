@@ -6,7 +6,7 @@
 
 | Type | File | Role |
 |---|---|---|
-| `SimWorld` | `Assets/Sim/Core/SimWorld.cs` | Root. Tick clock, pause, `Terrain`, `Trees`, `Roads`, `Areas`, `Footprints`, `Operations`, `People`, `Tasks`, `Inventory`, `Construction`, `Homes`, `Bushes`, `Nav`, `Random`, `Camp`, `CommandLog`. Never-null registries. |
+| `SimWorld` | `Assets/Sim/Core/SimWorld.cs` | Root. Tick clock, pause, `Terrain`, `Trees`, `Roads`, `Areas`, `Footprints`, `Operations`, `People`, `Tasks`, `Inventory`, `Construction`, `Homes`, `Bushes`, `Nav`, `Random`, `Camp`, `CommandLog`, `SettlementLog` (last 20 tick + text entries, saved in Core; T-498). Never-null registries. |
 | `SimWorld.<Area>.cs` | `Assets/Sim/Core/` | One partial per subsystem (for example `SimWorld.Foraging.cs` for `Bushes`). Add a new one, don't grow `SimWorld.cs`. |
 | `ISimSystem` | `Core/ISimSystem.cs` | `Step(world)` once per tick; `OnCommandApplied(world, result)` after an accepted command. |
 | `SimSystems` | `Core/SimSystems.cs` | `CreateDefault()` is the one ordered list. The world copies it at construction. |

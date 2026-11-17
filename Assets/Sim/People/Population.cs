@@ -130,10 +130,11 @@ namespace LordsLegacy.Sim.People
         internal IEnumerable<int> UsedOxIds => Sorted(_usedOxIds);
 
         /// <summary>Restore: adds a family with its members list and workplace. Members are checked later by <see cref="CheckLinks"/>.</summary>
-        internal void RestoreFamily(int id, string surname, double homeX, double homeZ, int? workplaceId, IEnumerable<int> memberIds)
+        internal void RestoreFamily(int id, string surname, double homeX, double homeZ, int? workplaceId, IEnumerable<int> memberIds,
+            FamilyPassage passage = FamilyPassage.None)
         {
             Claim(_usedFamilyIds, id, "family");
-            var f = new Family(id, surname, homeX, homeZ) { WorkplaceId = workplaceId };
+            var f = new Family(id, surname, homeX, homeZ) { WorkplaceId = workplaceId, Passage = passage };
             foreach (int m in memberIds) f.AddMember(m);
             _families.Add(id, f);
             Version++;

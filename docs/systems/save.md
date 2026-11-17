@@ -20,18 +20,18 @@ sections, each as int32 id + length. `SimSave.Read` requires the exact list orde
 
 | Order | Id | Section | Holds |
 |---|---|---|---|
-| 1 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares and forager tuning), road and area catalogs. |
+| 1 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares and forager tuning), road and area catalogs, entry point, settlement log (T-498). |
 | 2 | 2 | Land | Trees as changes, road network, areas. |
 | 3 | 10 | Bushes | Forage bushes: position, kind, baskets, emptied tick, reservation, id counter. Replaces the new-game scatter on load (T-421). |
 | 4 | 3 | Structures | Footprints, camp, operations, construction sites, deconstruction entries, pending operations. |
 | 5 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
-| 6 | 5 | Population | Families, citizens, oxen. |
+| 6 | 5 | Population | Families (incl. Passage, T-498), citizens, oxen. |
 | 7 | 8 | Homes | Per house: footprint id, plot area id, family id (0 = Empty). Sets each family's `HomeHouseId`. |
 | 8 | 9 | Food | Camp food store id. Per family: larder, carried rations, Hungry, trip carrier, allotment reservations. Per house: larder. |
 | 9 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
 | 10 | 7 | Tasks | Task records (by def id) and their steps, with bush and carrier ids (T-423). |
 
-Version history: 9 added Food (T-415..418), 10 added Bushes (T-421), 11 added forager tuning and task bush and carrier ids (T-423), 12 added Markets (id 11, after Homes) and market tuning (T-456), 13 added the granary supply flag per operation (T-458), 14 added the family per stall in the Markets section (T-459).
+Version history: 9 added Food (T-415..418), 10 added Bushes (T-421), 11 added forager tuning and task bush and carrier ids (T-423), 12 added Markets (id 11, after Homes) and market tuning (T-456), 13 added the granary supply flag per operation (T-458), 14 added the family per stall in the Markets section (T-459), 22 added the family Passage (Population) and the settlement log (Core) (T-498, decision 0045).
 
 ## How data moves
 
