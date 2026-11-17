@@ -87,7 +87,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 int module = r.ReadInt32();
                 int capacity = r.ReadInt32();
                 List<KeyValuePair<string, int>> counts = ReadPairs(r);
-                if (kind < (int)LocationKind.GroundPile || kind > (int)LocationKind.FoodStore) throw new SaveFormatException("Bad location kind " + kind + ".");
+                if (kind < (int)LocationKind.GroundPile || kind > (int)LocationKind.GoodsStore) throw new SaveFormatException("Bad location kind " + kind + ".");
                 if (id >= nextLoc) throw new SaveFormatException("Location id " + id + " is not below the id counter " + nextLoc + ".");
                 led.RestoreLocation(id, (LocationKind)kind, new PointMm(x, z), hasOwner ? owner : (int?)null, module, capacity, counts);
             }
