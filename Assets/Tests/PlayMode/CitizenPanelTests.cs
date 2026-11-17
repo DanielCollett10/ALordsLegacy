@@ -99,8 +99,36 @@ namespace LordsLegacy.Tests.PlayMode
             do world.Step(); while (!(world.Now.Hour == 0 && world.Now.Minute == 0));
             Assert.IsTrue(family.IsHungry);
             yield return null;
-            Assert.AreEqual("Hungry", _view.HungryText);
+            Assert.AreEqual("Hungry (1 / 30 days)", _view.HungryText);
             Assert.AreEqual(DisplayStyle.Flex, L("citizen-hungry").style.display.value);
+        }
+
+        [UnityTest]
+        public IEnumerator LeavingFamilyShowsLeavingStatus()
+        {
+            yield return null;
+            Assert.IsTrue(_agents.ClickAt(ScreenOf(100, 100)));
+            yield return null;
+            LordsLegacy.Sim.Growth.FamilyDeparture.Begin(_host.World, 1);
+            yield return null;
+            Assert.AreEqual("Leaving (hungry)", _view.HungryText);
+        }
+
+        [UnityTest]
+        public IEnumerator RemovedCitizenClosesPanelAndClearsRingWithoutExceptions()
+        {
+            yield return null;
+            Assert.IsTrue(_agents.ClickAt(ScreenOf(100, 100)));
+            yield return null;
+            Assert.IsTrue(_view.IsShown);
+            Assert.IsTrue(_ringGo.GetComponent<SelectionRing>().IsShown);
+            _host.World.People.RemoveCitizen(1);
+            yield return null;
+            yield return null;
+            Assert.IsFalse(_view.IsShown);
+            Assert.IsFalse(_agents.HasSelection);
+            Assert.IsFalse(_ringGo.GetComponent<SelectionRing>().IsShown);
+            LogAssert.NoUnexpectedReceived();
         }
 
         [UnityTest]

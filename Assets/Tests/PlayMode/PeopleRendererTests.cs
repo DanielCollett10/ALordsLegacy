@@ -80,6 +80,34 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator CitizenAddedMidPlayIsDrawnNextFrameAndRemovedOneVanishes()
+        {
+            var host = MakeHost();
+            var pop = host.World.People;
+            pop.AddFamily(1, "Test", 50, 50);
+            pop.AddCitizen(1, "A", Sex.Male, -40L * Citizen.TicksPerYear, 1, 50, 50);
+            _rendGo = new GameObject("PeopleRenderer");
+            var r = _rendGo.AddComponent<PeopleRenderer>();
+            r.Configure(host, MakeRegistry(), new ViewSettings());
+            yield return null;
+            r.Draw(0.016f);
+            Assert.AreEqual(1, r.CitizenInstanceCount);
+
+            pop.AddFamily(2, "Newcomer", 0, 50);
+            var arrival = pop.AddCitizen(2, "N", Sex.Female, -30L * Citizen.TicksPerYear, 2, 0, 50);
+            arrival.X = 1.74;
+            r.Draw(0.25f);
+            Assert.AreEqual(2, r.CitizenInstanceCount, "Added citizen drawn on the next frame.");
+            Assert.Greater(r.CitizenPhase(2), 0);
+
+            pop.RemoveCitizen(2);
+            r.Draw(0.016f);
+            Assert.AreEqual(1, r.CitizenInstanceCount, "Removed citizen vanishes.");
+            Assert.AreEqual(0, r.CitizenPhase(2), "Its gait phase is forgotten.");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [UnityTest]
         public IEnumerator BobOnlyWhileWalking()
         {
             var host = MakeHost();
