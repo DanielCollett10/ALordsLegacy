@@ -11,6 +11,10 @@ building would copy the same fetch, work and status code four times.
 - One `WorkshopSystem` serves every workshop: it opens input-fetch tasks from the nearest source with free stock
   (ground piles, stores, or another workshop's output store) and **one work task per assigned family** at a time.
   Output is fixed per family per day, however many members work.
+- A workshop's input stock is a new ledger kind, `LocationKind.WorkshopStock`: it holds only the def's input item, is
+  **never** a construction or haul source, and is not counted in village totals (those logs and beams are committed).
+  Its output store is a `GoodsStore` (decision 0046), which other buildings and sites may draw from.
+- Ox contention: construction deliveries take a free ox before workshop fetches in the same tick (`planks.md` HW-06).
 - Status (No workers, Waiting for <input>, Waiting for ox, Store full) is computed from the def, never stored.
 - A new workshop is a footprint type, an operation type and a `WorkshopDef`. No new system.
 

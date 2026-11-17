@@ -13,6 +13,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HW-02 | **1 family slot.** It hews **1 log into 1 hewed beam**, **3 beams per working day per family**, however many members (heavy work, 14+) | DECIDED (owner 17/11/2026) |
 | HW-03 | The hewers fetch their own logs by ox (pool oxen) from the **nearest** ground pile or log storage with free logs (as PL-04 was) | PROPOSED (moved from the sawpit) |
 | HW-04 | Log stock 6, beam store 20 (PLACEHOLDER). Status lines: No workers, Waiting for logs, Waiting for ox, Store full | DECIDED (owner 17/11/2026) |
+| HW-06 | Hewers may take any **unreserved** logs (ground piles, woodcutter piles, log storage, camp stockpile); logs reserved for a construction site are never taken. When a construction delivery and a workshop fetch both want a free ox in the same tick, **construction goes first** | PROPOSED (plan review 17/11/2026) |
 | HW-05 | **Every rate, ratio and capacity in this file is tuning** (`SimTuning`, mirrored in `SimConfig`) from the first build, so the chain can be rebalanced without code | DECIDED (owner 17/11/2026) |
 
 ## Sawpit
