@@ -124,10 +124,10 @@ namespace LordsLegacy.Sim.Tests.Markets
                     {
                         if (s.Kind == StepKind.DepositForage)
                             Assert.IsTrue(hutStores.Contains(s.LocationId), "foragers deliver to their hut store only");
-                        if (s.Kind == StepKind.DepositStock)
+                        if (s.Kind == StepKind.DepositItems)
                             Assert.IsTrue(s.LocationId == granary || stalls.Contains(s.LocationId), "stock goes to the granary or a stall");
-                        if (s.Kind == StepKind.CollectStock && s.LocationId == granary)
-                            Assert.IsTrue(t.Def.Steps.Where(x => x.Kind == StepKind.DepositStock).All(x => stalls.Contains(x.LocationId)), "granary stock goes to a stall");
+                        if (s.Kind == StepKind.CollectItems && s.LocationId == granary)
+                            Assert.IsTrue(t.Def.Steps.Where(x => x.Kind == StepKind.DepositItems).All(x => stalls.Contains(x.LocationId)), "granary stock goes to a stall");
                     }
             }
             Assert.IsTrue(done(), what + " (now " + f.W.Now.Weekday + " " + f.W.Now.Hour + ":" + f.W.Now.Minute + ")");

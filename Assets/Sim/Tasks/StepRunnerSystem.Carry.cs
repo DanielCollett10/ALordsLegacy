@@ -58,8 +58,11 @@ namespace LordsLegacy.Sim.Tasks
         }
 
         // Ledger: the reserved items move from the source onto a new person carrier (the reservation is consumed).
+        // One collect for every item trip: a step with an item id moves that item; without one it takes a proportional
+        // share of whatever the source holds (stock-the-stall).
         private static bool CollectItems(SimWorld world, TaskRecord t, TaskStep step)
         {
+            if (step.ItemId == null) return CollectShare(world, t, step);
             LedgerLocation source = world.Inventory.Get(step.LocationId);
             ItemDef item = Items.Find(step.ItemId);
             if (source == null || item == null) return false;
@@ -71,6 +74,7 @@ namespace LordsLegacy.Sim.Tasks
         // Ledger: what the carrier holds goes into the site store.
         private static bool DepositItems(SimWorld world, TaskRecord t, TaskStep step)
         {
+            if (step.ItemId == null) return DepositShare(world, t, step);
             LedgerLocation carrier = t.CarrierId.HasValue ? world.Inventory.Get(t.CarrierId.Value) : null;
             LedgerLocation site = world.Inventory.Get(step.LocationId);
             ItemDef item = Items.Find(step.ItemId);

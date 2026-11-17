@@ -73,7 +73,7 @@ namespace LordsLegacy.Sim.Tests.Markets
 
         private static void Assign(Fx f) => Assert.IsTrue(f.W.Execute(new AssignFamily(f.GranaryOp, 2)).IsAccepted);
 
-        private static int SourceOf(TaskRecord t) => t.Def.Steps.First(s => s.Kind == StepKind.CollectStock).LocationId;
+        private static int SourceOf(TaskRecord t) => t.Def.Steps.First(s => s.Kind == StepKind.CollectItems).LocationId;
 
         [Test]
         public void NoMarket_FamilyCollectsFromHutIntoGranary_FullPipeline_TenItemsAndTenMinuteLoads()

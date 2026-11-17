@@ -56,13 +56,11 @@ namespace LordsLegacy.Sim.Tasks
         DepositFood,
         /// <summary>Move what the forager carries into the store named by the step's location id (FD-24).</summary>
         DepositForage,
-        /// <summary>Reserve and move food from a granary store onto the carrier, in proportion to its stock (MK-25).</summary>
-        CollectStock,
-        /// <summary>Put what the carrier holds onto the stall's store (MK-25).</summary>
-        DepositStock,
-        /// <summary>Move the step's count of the step's item from a ledger location onto the task's person carrier (T-517).</summary>
+        /// <summary>Move items from a ledger location onto the task's person carrier. With an item id: that many of it
+        /// (site materials, T-517). Without: up to that many items in proportion to the source's stock (stock-the-stall, MK-25).</summary>
         CollectItems,
-        /// <summary>Move the step's count of the step's item from the task's carrier into a ledger location (T-517).</summary>
+        /// <summary>Move items from the task's carrier into a ledger location. With an item id: that item; without: everything
+        /// carried (MK-25, T-517).</summary>
         DepositItems
     }
 
