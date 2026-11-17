@@ -11,7 +11,7 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 |---|---|
 | `TaskDef` | Id, explicit `TaskStep` list, `EligibilityPolicy` (`AssignedFamilyOnly`, `AssignedThenHelpers`, `HelpersOnly`, `OwnerFamily`), `RequiredResource` (`Ox`, …). |
 | `TaskDefCatalog` | Looks a def up by id and holds the policy per id. Saves refer to defs by id; an unknown id fails the load. |
-| `ConstructionTaskDefs` | `task.deliver_materials` (ox, logs), `task.carry_materials` (on foot, other items), `task.build`, `task.deconstruct` (all HelpersOnly; heavy steps). |
+| `ConstructionTaskDefs` | `task.deliver_materials` (ox, logs), `task.carry_materials` (on foot, other items), `task.build`, `task.deconstruct` (all HelpersOnly; heavy steps). A market stall's carry is AssignedFamilyOnly for the stall's granary family (age 8+, not heavy, owner = granary op, taken before `stock_stall`; T-518). |
 | `FoodTripSystem` (`Food/`) | `task.fetch_food` (OwnerFamily, owner `-1000 - familyId`), opened each Sunday morning. Ignores shifts. See `food.md`. |
 | `ForagingSystem` (`Foraging/`) | `task.forage` (AssignedFamilyOnly, owner = operation, age 8+), holds a bush and a carrier. See `foraging.md`. |
 | `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectItems` (no item id: reserved, in proportion, never allotted food), walk, unload 10 min, `DepositItems`. Source: `ChooseStockSource`. |

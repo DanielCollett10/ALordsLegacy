@@ -33,7 +33,13 @@ namespace LordsLegacy.Sim.Tasks
         }
 
         /// <summary>Builds a def from its id and steps. Null when the id is unknown.</summary>
-        public static TaskDef Build(string defId, IEnumerable<TaskStep> steps) =>
-            TryGet(defId, out var e, out var r) ? new TaskDef(defId, steps, e, r) : null;
+        public static TaskDef Build(string defId, IEnumerable<TaskStep> steps)
+        {
+            if (!TryGet(defId, out var e, out var r)) return null;
+            var list = new List<TaskStep>(steps);
+            // A stall carry (T-518) is the light, assigned-family variant of carry_materials: it has no heavy step.
+            if (defId == ConstructionTaskDefs.CarryId && !list.Exists(s => s.Heavy)) e = EligibilityPolicy.AssignedFamilyOnly;
+            return new TaskDef(defId, list, e, r);
+        }
     }
 }

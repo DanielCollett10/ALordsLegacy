@@ -20,15 +20,19 @@ namespace LordsLegacy.Sim.Tasks
         /// site, deposit. Helpers only like Deliver, but it needs no ox. Collect and deposit are flagged heavy so the
         /// eligibility matches Deliver (a child under 14 cannot take it, PPL-44).
         /// </summary>
-        public static TaskDef Carry(PathPoint source, int sourceLocationId, string itemId, PathPoint site, int siteLocationId, int count)
+        /// <param name="stallFamily">True for a market stall's carry (T-518, PL-16): only the stall's granary family takes
+        /// it (AssignedFamilyOnly), from age 8 (MK-24), so its steps are not heavy.</param>
+        public static TaskDef Carry(PathPoint source, int sourceLocationId, string itemId, PathPoint site, int siteLocationId,
+            int count, bool stallFamily = false)
         {
+            bool heavy = !stallFamily;
             return new TaskDef(CarryId, new[]
             {
                 TaskStep.WalkTo(source),
-                TaskStep.CollectItems(sourceLocationId, itemId, count, heavy: true),
+                TaskStep.CollectItems(sourceLocationId, itemId, count, heavy: heavy),
                 TaskStep.WalkTo(site),
-                TaskStep.DepositItems(siteLocationId, itemId, count, heavy: true),
-            }, EligibilityPolicy.HelpersOnly);
+                TaskStep.DepositItems(siteLocationId, itemId, count, heavy: heavy),
+            }, stallFamily ? EligibilityPolicy.AssignedFamilyOnly : EligibilityPolicy.HelpersOnly);
         }
 
         /// <summary>Id of the build task definition: a worker builds a site.</summary>
