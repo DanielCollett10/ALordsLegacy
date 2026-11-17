@@ -46,7 +46,7 @@ namespace LordsLegacy.Sim.Homes
             double bestDist = 0;
             foreach (Family f in world.People.Families) // ascending id, so the first of equal distance wins
             {
-                if (f.IsInPassage || !f.IsHomeless ||f.MemberIds.Count == 0) continue;
+                if (f.IsInPassage || !f.IsHomeless || f.MemberIds.Count == 0) continue;
                 if (anyHomeless == null) anyHomeless = f;
                 if (!f.WorkplaceId.HasValue) continue;
                 Operation op = world.Operations.Get(f.WorkplaceId.Value);

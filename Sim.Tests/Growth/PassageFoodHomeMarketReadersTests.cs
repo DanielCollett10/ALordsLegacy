@@ -55,7 +55,7 @@ namespace LordsLegacy.Sim.Tests.Growth
             Family settled = AddCampFamily(w, 2, 12);
             Allot(w);
             Assert.AreEqual(0, leaving.AllotmentReservationIds.Count);
-            Assert.AreEqual(0, w.Camp.FoodStoreLocation.ReservedOf(Items.Meat.Id) - Reserved(settled, w));
+            Assert.Greater(w.Camp.FoodStoreLocation.ReservedOf(Items.Meat.Id), 0, "only the settled family's food is reserved");
             Assert.Greater(settled.AllotmentReservationIds.Count, 0, "a settled family still gets its allotment");
         }
 
@@ -68,8 +68,6 @@ namespace LordsLegacy.Sim.Tests.Growth
             Assert.AreEqual(0, arriving.AllotmentReservationIds.Count);
             Assert.AreEqual(0, w.Camp.FoodStoreLocation.ReservedOf(Items.Meat.Id));
         }
-
-        private static int Reserved(Family f, SimWorld w) => w.Camp.FoodStoreLocation.ReservedOf(Items.Meat.Id);
 
         private static TaskRecord TripOf(SimWorld w, Family f) =>
             w.Tasks.ByOwner(AllotmentSystem.OwnerFor(f.Id)).FirstOrDefault(t => t.Def.Id == FoodTripSystem.FetchFoodTaskId);
