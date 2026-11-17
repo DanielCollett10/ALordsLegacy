@@ -34,6 +34,9 @@ namespace LordsLegacy.Sim.Save.Sections
             WriteTuning(w, s.Tuning);
             WriteRoadTypes(w, s.RoadTypes);
             WriteAreaTypes(w, s.AreaTypes);
+            w.WriteBool(s.EntryPoint.HasValue); // T-497
+            w.WriteInt64(s.EntryPoint?.X ?? 0);
+            w.WriteInt64(s.EntryPoint?.Z ?? 0);
         }
 
         /// <summary>Reads a section body written by <see cref="WriteBody"/>.</summary>
@@ -46,6 +49,9 @@ namespace LordsLegacy.Sim.Save.Sections
             s.Tuning = ReadTuning(r);
             s.RoadTypes = ReadRoadTypes(r);
             s.AreaTypes = ReadAreaTypes(r);
+            bool hasEntry = r.ReadBool();
+            long ex = r.ReadInt64(), ez = r.ReadInt64();
+            if (hasEntry) s.EntryPoint = new LordsLegacy.Sim.Geometry.PointMm(ex, ez);
             return s;
         }
 

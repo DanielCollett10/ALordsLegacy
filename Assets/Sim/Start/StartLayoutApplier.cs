@@ -34,7 +34,9 @@ namespace LordsLegacy.Sim.Start
                 if (r.IsRejected) throw new InvalidOperationException("Trunk road refused: " + r.Text);
             }
 
-            PointMm stockpileSpot = ToWorld(layout, layout.Stockpile);
+            world.EntryPoint = LordsLegacy.Sim.Roads.MapExits.ComputeEntry(world, layout.TrunkRoad);
+
+            PointMm stockpileSpot =ToWorld(layout, layout.Stockpile);
             LedgerLocation stockpile = world.Inventory.AddStockpile(stockpileSpot);
             foreach (StartStock s in layout.Stock)
                 if (s.Count > 0) world.Inventory.Produce(stockpile, s.Item, s.Count);
