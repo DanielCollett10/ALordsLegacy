@@ -34,7 +34,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   store (decisions 0043, narrowed by 0044). Routine phase: eating, the Sunday allotment and the Sunday trip. Operations phase: bush regrowth and foraging.
 - **Markets** (`systems/markets.md`): one market area holds stall slots. Granary families carry food from forager huts into
   the granary and from the granary to stalls (decision 0044). The camp hands its food over once a granary supplies the market,
-  then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both.
+  then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both (decision 0049).
 - **Passage and settlement log** (decision 0045): `Family.Passage` (None, Arriving, Leaving) marks families walking in or out;
   readers check `IsInPassage`. `SettlementLog` on `SimWorld` keeps the last 20 (tick, text) entries, saved in the Core section.
 - **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.

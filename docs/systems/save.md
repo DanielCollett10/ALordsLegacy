@@ -15,7 +15,7 @@
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 19; every change bumps it, decision 0038), the header, then sections as int32 id + length. `SimSave.Read` requires the exact list order (decision 0034).
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`; every change bumps it, decision 0038), the header, then sections as int32 id + length. `SimSave.Read` requires the exact list order (decision 0034).
 
 Core is written first. Then, in this order:
 

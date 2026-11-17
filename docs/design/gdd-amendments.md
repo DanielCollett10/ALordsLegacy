@@ -193,6 +193,9 @@ Markets are how food reaches households, so they arrive together with food.
 | MKT-07 | Design intent: towns end up with several markets, e.g. a large central market in the main town with advanced goods (where higher-level artisan households live), and satellite village markets with basic goods only. Satellite villages don't need high household levels | DECIDED (intent) |
 | MKT-08 | Stall table capacity (if any), how the mix on a stall is chosen, market sizes or tiers | OPEN |
 
+> Implementation note (MKT-06, T-476): the code tints houses green (in range) or red (out of range) through
+> `MarketRange`. The reachable-ground overlay is not built. The tint shows only while a market is selected (MK-41).
+
 ## Containers and carriers (WISHLIST: do not implement)
 
 The owner is mapping the construction and crafting tree in draw.io. Until that lands, this is
