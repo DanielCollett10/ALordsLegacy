@@ -18,6 +18,7 @@ namespace LordsLegacy.Game.Visuals
         private int _count;
         private int _builtVersion = -1;
         private int _builtSites = -1;
+        private int _builtInventory = -1;
         private Bounds _bounds;
 
         /// <summary>Modules currently drawn. For tests.</summary>
@@ -40,7 +41,37 @@ namespace LordsLegacy.Game.Visuals
                 case ModuleTypes.ForagerHutId: return VisualSizes.ModuleHut;
                 case ModuleTypes.OxenStandId: return VisualSizes.ModuleOxenStand;
                 case ModuleTypes.HouseId: return VisualSizes.ModuleHouse;
+                case ModuleTypes.MarketStallId: return VisualSizes.ModuleMarketStall;
                 default: return VisualSizes.ModuleLogStorage;
+            }
+        }
+
+        /// <summary>Food crates drawn on one stall: 0 when empty, else 1 to 3 by how full the store is (MK-43).</summary>
+        public static int CrateCount(int items, int capacity)
+        {
+            if (items <= 0 || capacity <= 0) return 0;
+            return Mathf.Clamp(Mathf.CeilToInt(3f * items / capacity), 1, 3);
+        }
+
+        /// <summary>Food crates currently drawn on stalls. For tests.</summary>
+        public int CrateInstanceCount => _byVisual.TryGetValue(VisualSizes.ItemFoodCrate, out var l) ? l.Count : 0;
+
+        // Adds up to three crates along the stall's table top, turned with the stall.
+        private void AddCrates(LordsLegacy.Sim.Core.SimWorld world, LordsLegacy.Sim.Footprints.Footprint fp, Vector3 p, float yaw)
+        {
+            var store = world.Inventory.FindFoodStore(fp.Id);
+            if (store == null) return;
+            int n = CrateCount(store.Total, store.Capacity);
+            if (n == 0) return;
+            if (!_byVisual.TryGetValue(VisualSizes.ItemFoodCrate, out var list)) { list = new List<Matrix4x4>(); _byVisual[VisualSizes.ItemFoodCrate] = list; }
+            float top = VisualSizes.Of(VisualSizes.ModuleMarketStall).y;
+            var rot = Quaternion.Euler(0f, yaw, 0f);
+            for (int i = 0; i < n; i++)
+            {
+                var pos = p + rot * new Vector3((i - 1) * 0.9f, top, 0f);
+                if (registry != null && registry.TryGet(VisualSizes.ItemFoodCrate, out var def))
+                    list.Add(VisualSizes.Place(def, VisualSizes.ItemFoodCrate, pos, yaw));
+                else list.Add(Matrix4x4.identity);
             }
         }
 
@@ -51,7 +82,8 @@ namespace LordsLegacy.Game.Visuals
         {
             if (host == null || !host.IsInitialized) return;
             var world = host.World;
-            if (world.Footprints.Version != _builtVersion || world.Construction.Count != _builtSites) Build(world);
+            if (world.Footprints.Version != _builtVersion || world.Construction.Count != _builtSites
+                || world.Inventory.Version != _builtInventory) Build(world);
             if (registry == null) return;
             foreach (var kv in _byVisual)
                 if (registry.TryGet(kv.Key, out var def)) InstancedDraw.Draw(def, kv.Value, _bounds);
@@ -61,6 +93,7 @@ namespace LordsLegacy.Game.Visuals
         {
             _builtVersion = world.Footprints.Version;
             _builtSites = world.Construction.Count;
+            _builtInventory = world.Inventory.Version;
             _byVisual.Clear();
             _count = 0;
             var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
@@ -69,6 +102,7 @@ namespace LordsLegacy.Game.Visuals
             foreach (var op in world.Operations.All) ids.AddRange(op.ModuleIds);
             foreach (var home in world.Homes.All) ids.Add(home.HouseFootprintId); // houses are not operation modules (HM-20)
             foreach (var f in world.Footprints.All) if (f.Type.IsStandalone) ids.Add(f.Id); // granary: one piece, in no operation (FD-30)
+            foreach (var f in world.Footprints.All) if (f.Type.Id == ModuleTypes.MarketStallId) ids.Add(f.Id); // stalls stand in no operation (MK-21)
             {
                 foreach (int id in ids)
                 {
@@ -94,6 +128,7 @@ namespace LordsLegacy.Game.Visuals
                     if (!_byVisual.TryGetValue(vid, out var list)) { list = new List<Matrix4x4>(); _byVisual[vid] = list; }
                     list.Add(m);
                     _count++;
+                    if (fp.Type.Id == ModuleTypes.MarketStallId) AddCrates(world, fp, p, yaw);
                     float r = Mathf.Max(fp.Type.WidthMm, fp.Type.DepthMm) / 1000f;
                     min = Vector3.Min(min, p - new Vector3(r, 1f, r));
                     max = Vector3.Max(max, p + new Vector3(r, box.y + 1f, r));

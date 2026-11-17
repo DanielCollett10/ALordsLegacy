@@ -27,6 +27,11 @@ namespace LordsLegacy.Game.Visuals
         private readonly Dictionary<int, double> _citizenPhase = new Dictionary<int, double>();
         private readonly Dictionary<int, double> _oxPhase = new Dictionary<int, double>();
 
+        private readonly List<Matrix4x4> _crates = new List<Matrix4x4>();
+
+        /// <summary>Food crates drawn on carriers in the last draw (MK-43). For tests.</summary>
+        public int CarriedCrateCount => _crates.Count;
+
         /// <summary>Instances submitted in the last draw: adults plus children.</summary>
         public int CitizenInstanceCount => _adults.Count + _children.Count;
 
@@ -93,6 +98,10 @@ namespace LordsLegacy.Game.Visuals
             var childDef = registry.Get(VisualSizes.CitizenChild);
             var oxDef = registry.Get(VisualSizes.Ox);
 
+            _crates.Clear();
+            var carriers = CarryingAssignees(world);
+            registry.TryGet(VisualSizes.ItemFoodCrate, out var crateDef);
+
             foreach (var c in world.People.Citizens)
             {
                 bool child = c.AgeYears(now, ageing) < AdultAgeYears;
@@ -100,6 +109,14 @@ namespace LordsLegacy.Game.Visuals
                 var m = Matrix(def, child ? VisualSizes.CitizenChild : VisualSizes.CitizenAdult, c, t, dt, rate, spm, paused,
                     _citizenPhase, c.Id, world, ref min, ref max);
                 (child ? _children : _adults).Add(m);
+                if (crateDef != null && carriers.Contains(c.Id))
+                {
+                    // MK-43: a food crate held at chest height in front of the carrier, bobbing with them.
+                    var body = m.GetPosition();
+                    var fwd = Quaternion.Euler(0f, (float)(c.FacingRad * Mathf.Rad2Deg), 0f) * Vector3.forward;
+                    _crates.Add(VisualSizes.Place(crateDef, VisualSizes.ItemFoodCrate,
+                        new Vector3(body.x, body.y + 0.1f, body.z) + fwd * 0.4f, (float)(c.FacingRad * Mathf.Rad2Deg)));
+                }
             }
             foreach (var o in world.People.Oxen)
                 _oxen.Add(Matrix(oxDef, VisualSizes.Ox, o, t, dt, rate, spm, paused, _oxPhase, o.Id, world, ref min, ref max));
@@ -110,7 +127,26 @@ namespace LordsLegacy.Game.Visuals
             InstancedDraw.Draw(adultDef, _adults, b);
             InstancedDraw.Draw(childDef, _children, b);
             InstancedDraw.Draw(oxDef, _oxen, b);
+            InstancedDraw.Draw(crateDef, _crates, b);
         }
+
+        // Ids of citizens whose live task carries food (a stall stocking or granary fetch trip with a non-empty carrier).
+        private static HashSet<int> CarryingAssignees(LordsLegacy.Sim.Core.SimWorld world)
+        {
+            var set = new HashSet<int>();
+            foreach (var task in world.Tasks.All)
+            {
+                if (task.IsFinished || !task.AssigneeId.HasValue || !task.CarrierId.HasValue) continue;
+                var carrier = world.Inventory.Get(task.CarrierId.Value);
+                if (carrier != null && carrier.Total > 0 && carrier.Kind == LordsLegacy.Sim.Inventory.LocationKind.Carrier
+                    && IsFoodTrip(task.Def.Id)) set.Add(task.AssigneeId.Value);
+            }
+            return set;
+        }
+
+        private static bool IsFoodTrip(string taskDefId) =>
+            taskDefId == LordsLegacy.Sim.Markets.StoreFamilySystem.StockStallTaskId
+            || taskDefId == LordsLegacy.Sim.Food.FoodTripSystem.FetchFoodTaskId;
 
         private Matrix4x4 Matrix(VisualDefinition def, string id, IMovable a, float t, float dt, double rate, double spm,
             bool paused, Dictionary<int, double> phases, int key, LordsLegacy.Sim.Core.SimWorld world,

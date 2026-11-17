@@ -40,6 +40,10 @@ namespace LordsLegacy.Game.Visuals
         public const string TreeFelled = "visual.tree.felled";
         /// <summary>Id of the single log visual.</summary>
         public const string ItemLog = "visual.item.log";
+        /// <summary>Id of the market stall visual (a placeholder table, MK-43).</summary>
+        public const string ModuleMarketStall = "visual.module.market_stall";
+        /// <summary>Id of the food crate visual: food on a stall or carried by a citizen (MK-43).</summary>
+        public const string ItemFoodCrate = "visual.item.food_crate";
 
         /// <summary>Box size (x width, y height, z depth) in metres for a visual id; one metre cube if unknown.</summary>
         public static Vector3 Of(string id)
@@ -61,6 +65,8 @@ namespace LordsLegacy.Game.Visuals
                 case TreeStump: return new Vector3(0.6f, 0.5f, 0.6f);
                 case TreeFelled: return new Vector3(0.6f, 1f, 0.6f); // y is stretched to the trunk length
                 case ItemLog: return new Vector3(0.35f, 1f, 0.35f);   // y is stretched to the log length
+                case ModuleMarketStall: return new Vector3(3f, 0.9f, 2f);
+                case ItemFoodCrate: return new Vector3(0.6f, 0.35f, 0.6f);
                 default: return Vector3.one;
             }
         }

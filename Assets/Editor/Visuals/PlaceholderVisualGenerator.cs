@@ -80,6 +80,8 @@ namespace LordsLegacy.EditorTools.Visuals
             (VisualSizes.TreeStump, "Cylinder.fbx", new Color(0.4f, 0.28f, 0.16f), 1f),
             (VisualSizes.TreeFelled, "Cylinder.fbx", new Color(0.36f, 0.26f, 0.15f), 1f),
             (VisualSizes.ItemLog, "Cylinder.fbx", new Color(0.5f, 0.34f, 0.18f), 1f),
+            (VisualSizes.ModuleMarketStall, "Cube.fbx", new Color(0.6f, 0.42f, 0.25f), 1f),
+            (VisualSizes.ItemFoodCrate, "Cube.fbx", new Color(0.85f, 0.7f, 0.25f), 1f),
         };
 
         private static void GeneratePeopleAndCamp(VisualRegistry registry)
