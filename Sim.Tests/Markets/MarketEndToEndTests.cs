@@ -59,7 +59,9 @@ namespace LordsLegacy.Sim.Tests.Markets
             StartLayoutApplier.Apply(w, new StartLayout(M(140, 140), 0, new PointMm(0, 0), new PointMm(6000, 0), new PointMm(-6000, 0),
                 new PointMm[0], new StartFamily[0], 2));
             w.Inventory.Produce(w.Camp.StockpileLocation, Items.Log, 80);
-            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.CountOf(Items.Plank.Id)); // T-513: planks used up, so the camp can go (ST-30)
+            // The camp's 10 starting planks (T-513): 8 are used up here, so the 2 left are all the stall needs (PL-10). The granary
+            // family carries them to the stall (PL-16), and the emptied General store lets the camp go (ST-30).
+            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.CountOf(Items.Plank.Id) - 2);
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal, new[] { M(20, 50), M(110, 50) }, new[] { M(20, 50), M(65, 50), M(110, 50) });
             for (int fam = 1; fam <= 3; fam++)
             {
@@ -124,7 +126,7 @@ namespace LordsLegacy.Sim.Tests.Markets
                     {
                         if (s.Kind == StepKind.DepositForage)
                             Assert.IsTrue(hutStores.Contains(s.LocationId), "foragers deliver to their hut store only");
-                        if (s.Kind == StepKind.DepositItems)
+                        if (s.Kind == StepKind.DepositItems && t.Def.Id != ConstructionTaskDefs.CarryId) // planks (PL-16) go to a site, not food
                             Assert.IsTrue(s.LocationId == granary || stalls.Contains(s.LocationId), "stock goes to the granary or a stall");
                         if (s.Kind == StepKind.CollectItems && s.LocationId == granary)
                             Assert.IsTrue(t.Def.Steps.Where(x => x.Kind == StepKind.DepositItems).All(x => stalls.Contains(x.LocationId)), "granary stock goes to a stall");

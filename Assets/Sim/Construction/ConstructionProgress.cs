@@ -32,7 +32,7 @@ namespace LordsLegacy.Sim.Construction
             ConstructionSite site = world.Construction.Get(footprintId);
             Footprint fp = site == null ? null : world.Footprints.Get(footprintId);
             if (fp == null) return null;
-            ConstructionRecipe recipe = fp.Type.ConstructionRecipe;
+            ConstructionRecipe recipe = SiteRecipe.Of(world, fp);
             double f = recipe.BuildWorkerMinutes > 0
                 ? (double)site.ProgressMinutes / recipe.BuildWorkerMinutes
                 : (recipe.Logs > 0 ? (double)Delivered(world, site) / recipe.Logs : 0);

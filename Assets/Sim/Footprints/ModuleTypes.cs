@@ -76,11 +76,18 @@ namespace LordsLegacy.Sim.Footprints
         public const string MarketStallId = "module.market_stall";
 
         /// <summary>
-        /// Market stall: 3 × 2 m open table that does not block movement (MK-03), 1 log / 60 worker-minutes, and a food-only
-        /// store of 30 items (MK-21, MK-22). It has no operation: it stands on a market slot (<c>StallSystem</c>).
+        /// Market stall: 3 × 2 m open table that does not block movement (MK-03), 2 planks / 60 worker-minutes (PL-10), and a
+        /// food-only store of 30 items (MK-21, MK-22). It has no operation: it stands on a market slot (<c>StallSystem</c>).
         /// </summary>
         public static readonly FootprintTypeDef MarketStall =
-            new FootprintTypeDef(MarketStallId, 3000, 2000, false, false, recipe: new ConstructionRecipe(1, 60), foodCapacity: 30);
+            new FootprintTypeDef(MarketStallId, 3000, 2000, false, false,
+                recipe: new ConstructionRecipe(new[] { new KeyValuePair<string, int>(Inventory.Items.Plank.Id, 2) }, 60), foodCapacity: 30);
+
+        /// <summary>
+        /// The stall's old recipe, 1 log / 60 worker-minutes. Only an unbuilt stall placed before the plank recipe keeps it
+        /// (PL-13); see <c>SiteRecipe</c>.
+        /// </summary>
+        public static readonly ConstructionRecipe MarketStallLogRecipe = new ConstructionRecipe(1, 60);
 
         /// <summary>All module types.</summary>
         public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall };

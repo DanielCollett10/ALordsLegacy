@@ -39,10 +39,10 @@ town's one market during the week. On Sunday, households in range are allotted f
 | ID | Rule | Tag |
 | --- | --- | --- |
 | MK-20 | Each family assigned to a **linked** granary gets **one stall** at that market (MKT-03b). Assigning the family, or linking a granary that already has families, queues the stall as an ordinary construction site | DECIDED |
-| MK-21 | Stall: **3 × 2 m** footprint, recipe **1 log, 60** worker-minutes (MKT-03, PLACEHOLDER until planks). Built on the **free slot nearest the market centre** (MK-05). All slots taken: the family shows *No room at the market* and does nothing until a slot frees | DECIDED (owner 16/11/2026; values PLACEHOLDER) |
+| MK-21 | Stall: **3 × 2 m** footprint, recipe **2 planks, 60** worker-minutes (MKT-03, PL-10), carried to the site by the **granary family** (PL-16). A stall placed before this change keeps its log reservation (PL-13). Built on the **free slot nearest the market centre** (MK-05). All slots taken: the family shows *No room at the market*; fewer than 2 planks in the camp: *Waiting for planks* (no stall is placed, it clears when planks appear) | DECIDED (owner 16/11/2026; values PLACEHOLDER) |
 | MK-22 | A stall holds **30 food items** (MKT-08, PLACEHOLDER). Food only | DECIDED (PLACEHOLDER) |
 | MK-23 | When the family is unassigned or the link changes, its stall becomes **unstaffed**: it keeps its food (still sold on Sunday) and is reused by the next family that needs a stall at that market. The player can deconstruct a stall from the market panel (MK-23b) | PROPOSED |
-| MK-23b | **Deconstructing a stall** is offered only for an **unstaffed** stall; a staffed one shows *Staffed by <family>: unassign them first*, so StallSystem never rebuilds a stall the player just removed. It follows CN-50..57 (mark, then work): refund round down(1 log × 50%) = **0 logs**, food on it drops as a ground pile at the stall (PL-15), and its slot becomes free | DECIDED (owner 16/11/2026, for now; to be finalised later) |
+| MK-23b | **Deconstructing a stall** is offered only for an **unstaffed** stall; a staffed one shows *Staffed by <family>: unassign them first*, so StallSystem never rebuilds a stall the player just removed. It follows CN-50..57 (mark, then work): refund round down(2 planks × 50%) = **1 plank**, food on it drops as a ground pile at the stall (PL-15), and its slot becomes free | DECIDED (owner 16/11/2026, for now; to be finalised later) |
 
 ## Store-family work (weekdays and Sunday)
 

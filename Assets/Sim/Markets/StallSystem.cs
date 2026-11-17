@@ -30,6 +30,7 @@ namespace LordsLegacy.Sim.Markets
             Market market = world.Markets.Current;
             if (market == null) return;
             market.ClearNoRoom();
+            market.ClearNoPlanks();
             market.StallFootprintIds.RemoveAll(id => world.Footprints.Get(id) == null);
 
             var families = StoreFamilies(world);
@@ -56,7 +57,7 @@ namespace LordsLegacy.Sim.Markets
                 StallSlot free = FirstFreeSlot(world, market, slots);
                 if (free == null) { market.AddNoRoom(familyId); continue; }
                 int stallId = BuildStall(world, free);
-                if (stallId == 0) continue; // no logs yet: try again next tick
+                if (stallId == 0) { market.AddNoPlanks(familyId); continue; } // fewer than 2 planks: try again next tick (PL-13)
                 market.StallFootprintIds.Add(stallId);
                 market.SetFamily(stallId, familyId);
             }
@@ -148,7 +149,7 @@ namespace LordsLegacy.Sim.Markets
             return null;
         }
 
-        // Queues a stall site on the slot like PlaceStructure does. Returns 0 when the logs cannot be reserved yet.
+        // Queues a stall site on the slot like PlaceStructure does. Returns 0 when the planks cannot be reserved yet.
         private static int BuildStall(SimWorld world, StallSlot slot)
         {
             FootprintTypeDef type = ModuleTypes.MarketStall;

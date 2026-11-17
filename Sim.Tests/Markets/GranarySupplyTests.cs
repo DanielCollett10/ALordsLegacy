@@ -28,6 +28,7 @@ namespace LordsLegacy.Sim.Tests.Markets
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0 });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 40);
+            w.Inventory.Produce(w.Inventory.AddGoodsStore(M(20, 22)), Items.Plank, 10); // stalls cost 2 planks (PL-10)
             for (int fam = 2; fam <= 5; fam++)
             {
                 w.People.AddFamily(fam, "F" + fam, 40, 40);

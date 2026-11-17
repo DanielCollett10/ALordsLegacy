@@ -24,6 +24,7 @@ namespace LordsLegacy.Sim.Tests.Markets
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0 });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 40);
+            w.Inventory.Produce(w.Inventory.AddGoodsStore(M(20, 22)), Items.Plank, 10); // stalls cost 2 planks (PL-10)
             for (int fam = 2; fam <= 5; fam++)
             {
                 w.People.AddFamily(fam, "F" + fam, 40, 40);
@@ -94,8 +95,9 @@ namespace LordsLegacy.Sim.Tests.Markets
             Assert.IsNull(w.Deconstruction.Get(stall));
             Assert.AreEqual(logsBefore, TotalLogs(w), "refund is 0 logs");
             LedgerLocation pile = w.Inventory.GetOrAddGroundPile(centre, null);
-            Assert.AreEqual(7, pile.Total, "food drops as a pile at the stall");
-            Assert.AreEqual(Items.Berries.Id, new System.Collections.Generic.List<string>(pile.Counts.Keys)[0]);
+            Assert.AreEqual(7, pile.CountOf(Items.Berries.Id), "food drops as a pile at the stall");
+            Assert.AreEqual(1, pile.CountOf(Items.Plank.Id), "refund: half of the stall's 2 planks (PL-10, DeconstructRefundShare)");
+            Assert.AreEqual(9, w.Inventory.TotalOf(Items.Plank), "9 planks: 8 left in the camp plus the 1 refunded to the pile");
             Assert.IsNull(pile.OwnerOperationId, "unowned");
         }
 
