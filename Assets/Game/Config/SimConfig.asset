@@ -52,6 +52,12 @@ MonoBehaviour:
   foragerHutCapacity: 30
   gatherMinutesPerBasket: 30
   handCarryItems: 10
+  hungryDaysToLeave: 30
+  arrivalFoodDays: 30
+  arrivalNoHungerDays: 7
+  arrivalGapDays: 7
+  mapEdgeToleranceM: 2
+  oxLoadLogs: 1
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
