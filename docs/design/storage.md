@@ -14,6 +14,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ST-03 | The **storage yard** is a building that stores General goods (footprint, recipe and capacity PLACEHOLDER: 8 × 6 m, 8 logs, 100 items) | DECIDED (numbers PROPOSED) |
 | ST-04 | Once a storage yard is built, **everything in the camp's General store is carried to it** and the camp General store closes. Carried by hand, light items | DECIDED (owner 17/11/2026; hand carry PROPOSED) |
 | ST-05 | Who carries goods to and from the yard: families assigned to it, like granary families (2 family slots) | PROPOSED |
+| ST-07 | The yard stores **beams** (and other General goods). It **never stores logs**; logs stay in log storage and ground piles. Sawpits fetch beams from the yard as well as from hewing stations (PL-04) | DECIDED (owner 17/11/2026) |
 | ST-06 | Construction takes planks and other General items from the nearest store with stock (production store, camp or yard) | PROPOSED |
 
 ## Workstation kit (baskets and other tools)
