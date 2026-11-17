@@ -31,7 +31,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
 - **Homes** (`systems/homes.md`): `DesignatePlot` makes the plot, house site and an Empty `HomeRegistry` record in one Apply; `MoveInSystem` (operations phase) moves Homeless families into Built houses (HM-11). Saved by `HomesSection`. `HouseRemoval` evicts the family when a house is marked and removes home and plot when it goes (HM-14, HM-14b; decision 0040).
 - **Food and foraging** (`systems/food.md`, `systems/foraging.md`): food is ledger stock in larders and food stores. The
   Sunday allotment is a reservation, and the fetch trip is a task (decision 0042). Foragers deliver only to their own hut
-  store (decisions 0043, narrowed by 0044). Routine phase: eating, the Sunday allotment and the Sunday trip. Operations phase: bush regrowth and foraging.
+  store (decisions 0043, narrowed by 0044). Routine phase: eating, `DepartureSystem`, `ArrivalSystem` (dawn: new family walks in with a month of food and moves in, decision 0045), the Sunday allotment and the Sunday trip. Operations phase: bush regrowth and foraging.
 - **Markets** (`systems/markets.md`): one market area holds stall slots. Granary families carry food from forager huts into
   the granary and from the granary to stalls (decision 0044). The camp hands its food over once a granary supplies the market,
   then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both (decision 0049).

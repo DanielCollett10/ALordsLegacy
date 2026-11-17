@@ -236,6 +236,8 @@ namespace LordsLegacy.Sim.Tests.Growth
         {
             SimWorld w = Ready(out _);
             Assert.IsNull(w.LastHungryTick);
+            w.LastArrivalTick = w.Tick; // Cause, not a hunger bug: with 40 meat a real dawn arrival now reserves the only free house, so Check would say
+            // "No empty house" instead of the hunger reason. Block arrivals so this test stays about the hunger window (T-505).
             do w.Step(); while (!(w.Now.Hour == 0 && w.Now.Minute == 0));
             Assert.IsNotNull(w.LastHungryTick, "the housed family's larder is empty, so it went hungry");
             Assert.AreEqual("Someone was hungry this week", ArrivalRules.Check(w, Plan(30, 30)).Reason);
