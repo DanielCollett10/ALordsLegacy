@@ -104,7 +104,7 @@ namespace LordsLegacy.Sim.Tasks
             PointMm at = default;
             if (c != null) at = PointMm.FromMetres(c.X, c.Z);
             else if (t.BushId.HasValue && world.Bushes.TryGet(t.BushId.Value, out BushRecord b)) at = PointMm.FromMetres(b.X, b.Z);
-            ForagingSystem.DropAll(world, carrier, at);
+            Inventory.CarrierDrop.DropAll(world, carrier, at);
         }
     }
 }

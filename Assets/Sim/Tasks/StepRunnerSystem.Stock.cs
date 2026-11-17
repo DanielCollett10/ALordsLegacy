@@ -107,7 +107,7 @@ namespace LordsLegacy.Sim.Tasks
                 Footprints.Footprint fp = stall == null ? null : world.Footprints.Get(stall.ModuleId);
                 if (fp != null) at = fp.Centre;
             }
-            Foraging.ForagingSystem.DropAll(world, carrier, at);
+            Inventory.CarrierDrop.DropAll(world, carrier, at);
         }
     }
 }
