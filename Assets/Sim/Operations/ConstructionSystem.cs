@@ -225,7 +225,8 @@ namespace LordsLegacy.Sim.Operations
         {
             int missing = Outstanding(world, site, recipeLogs, loc) - Reserved(world, site);
             if (missing <= 0) return;
-            List<int> ids = ConstructionSources.TryReserve(world, Items.Log, missing, fp.Centre, fp.Id);
+            var logsOnly = new ConstructionRecipe(missing, 0);
+            List<int> ids = SiteMaterials.TryReserveAll(world, logsOnly, fp.Centre, fp.Id);
             if (ids != null) site.ReservationIds.AddRange(ids);
         }
 

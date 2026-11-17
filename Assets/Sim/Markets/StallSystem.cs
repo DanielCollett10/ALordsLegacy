@@ -154,12 +154,9 @@ namespace LordsLegacy.Sim.Markets
             FootprintTypeDef type = ModuleTypes.MarketStall;
             int fpId = world.Footprints.NextId();
             var site = new ConstructionSite(fpId, world.Inventory.GetOrAddSite(fpId).Id);
-            if (type.ConstructionRecipe.Logs > 0)
-            {
-                var ids = ConstructionSources.TryReserve(world, Items.Log, type.ConstructionRecipe.Logs, slot.Centre, fpId);
-                if (ids == null) return 0;
-                site.ReservationIds.AddRange(ids);
-            }
+            var ids = SiteMaterials.TryReserveAll(world, type.ConstructionRecipe, slot.Centre, fpId);
+            if (ids == null) return 0;
+            site.ReservationIds.AddRange(ids);
             world.Construction.Add(site);
             // The stall's front (local -Z) faces the aisle, which lies on the slot's +v side (StallGrid).
             double ux = slot.Stall[1].X - slot.Stall[0].X, uz = slot.Stall[1].Z - slot.Stall[0].Z;
