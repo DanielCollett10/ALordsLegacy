@@ -76,6 +76,12 @@ namespace LordsLegacy.Tests.PlayMode
             StringAssert.Contains("Arriving: 0", _bar.PopulationTooltip);
             StringAssert.Contains("Leaving: 1", _bar.PopulationTooltip);
             StringAssert.Contains("Next family:", _bar.PopulationTooltip);
+            Assert.IsFalse(_bar.PopulationTipShown);
+            _bar.ShowPopulationTip();
+            Assert.IsTrue(_bar.PopulationTipShown);
+            StringAssert.Contains("Leaving: 1", _bar.PopulationTipText);
+            _bar.HidePopulationTip();
+            Assert.IsFalse(_bar.PopulationTipShown);
         }
 
         private long Run100()

@@ -20,6 +20,7 @@ namespace LordsLegacy.Game
         private Label _notice;
         private Label _foodLabel;
         private Label _populationLabel;
+        private Label _populationTip;
         private Button _pauseButton;
         private Button _steadyButton;
         private Button _snappingButton;
@@ -74,6 +75,7 @@ namespace LordsLegacy.Game
                 _populationLabel.AddToClassList("top-bar__food");
                 _foodLabel.parent.Insert(_foodLabel.parent.IndexOf(_foodLabel) + 1, _populationLabel);
             }
+            BuildPopulationTip(root);
             _pauseButton = root.Q<Button>("pause-button");
             _steadyButton = root.Q<Button>("steady-light-toggle");
             _snappingButton = root.Q<Button>("snapping-toggle");
@@ -92,6 +94,45 @@ namespace LordsLegacy.Game
             UpdateSnappingLabel();
             Refresh();
         }
+
+        // Runtime panels do not show the built-in tooltip, so the population hover text is drawn by this label (T-509).
+        private void BuildPopulationTip(VisualElement root)
+        {
+            if (_populationLabel == null) return;
+            _populationTip = new Label { name = "population-tooltip", pickingMode = PickingMode.Ignore };
+            var s = _populationTip.style;
+            s.position = Position.Absolute;
+            s.top = 52;
+            s.paddingLeft = s.paddingRight = 8; s.paddingTop = s.paddingBottom = 6;
+            s.color = new Color(240f / 255f, 230f / 255f, 210f / 255f);
+            s.backgroundColor = new Color(30f / 255f, 24f / 255f, 18f / 255f, 0.95f);
+            s.fontSize = 14;
+            s.display = DisplayStyle.None;
+            root.Add(_populationTip);
+            _populationLabel.RegisterCallback<PointerEnterEvent>(e => ShowPopulationTip());
+            _populationLabel.RegisterCallback<PointerLeaveEvent>(e => HidePopulationTip());
+        }
+
+        /// <summary>Shows the population tooltip under the label (the hover path; also callable by tests).</summary>
+        public void ShowPopulationTip()
+        {
+            if (_populationTip == null || _populationLabel == null) return;
+            _populationTip.text = _populationLabel.tooltip;
+            _populationTip.style.left = Mathf.Max(0f, _populationLabel.worldBound.x);
+            _populationTip.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>Hides the population tooltip.</summary>
+        public void HidePopulationTip()
+        {
+            if (_populationTip != null) _populationTip.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>True while the population tooltip is shown.</summary>
+        public bool PopulationTipShown => _populationTip != null && _populationTip.style.display.value == DisplayStyle.Flex;
+
+        /// <summary>Text of the shown population tooltip.</summary>
+        public string PopulationTipText => _populationTip == null ? "" : _populationTip.text;
 
         private void OnDisable()
         {
@@ -188,6 +229,7 @@ namespace LordsLegacy.Game
                 var report = Sim.Growth.GrowthReport.Of(_host.World);
                 _populationLabel.text = "Families: " + report.Families + "  Citizens: " + report.Citizens;
                 _populationLabel.tooltip = PopulationTooltipOf(report);
+                if (PopulationTipShown) _populationTip.text = _populationLabel.tooltip;
             }
             _pauseButton.EnableInClassList(ActiveClass, _host.World.Paused);
             _steadyButton.EnableInClassList(ActiveClass, ViewSettings.SteadyLight);
