@@ -19,7 +19,7 @@ namespace LordsLegacy.Sim.Construction
             if (world == null) throw new System.ArgumentNullException(nameof(world));
             if (item == null) throw new System.ArgumentNullException(nameof(item));
             long total = 0;
-            foreach (var s in Sources(world)) total += s.Location.AvailableOf(item.Id);
+            foreach (var s in Sources(world, item)) total += s.Location.AvailableOf(item.Id);
             return total > int.MaxValue ? int.MaxValue : (int)total;
         }
 
@@ -35,7 +35,7 @@ namespace LordsLegacy.Sim.Construction
             if (n <= 0) return null;
             if (Available(world, item) < n) return null;
 
-            var sources = Sources(world);
+            var sources = Sources(world, item);
             sources.Sort((a, b) =>
             {
                 int c = a.Position.DistanceTo(sitePoint).CompareTo(b.Position.DistanceTo(sitePoint));
@@ -69,8 +69,10 @@ namespace LordsLegacy.Sim.Construction
             public PointMm Position;
         }
 
-        private static List<Source> Sources(SimWorld world)
+        private static List<Source> Sources(SimWorld world, ItemDef item)
         {
+            // General items (planks, beams) come only from goods stores (decision 0046); logs keep their sources.
+            bool general = item.Category == ItemCategory.General;
             var builtStorage = new HashSet<int>();
             foreach (Operation op in world.Operations.All)
                 foreach (Footprint f in OperationStatus.StorageModules(world, op))
@@ -79,8 +81,16 @@ namespace LordsLegacy.Sim.Construction
             var list = new List<Source>();
             foreach (LedgerLocation l in world.Inventory.Locations)
             {
+                if (general)
+                {
+                    if (l.Kind == LocationKind.GoodsStore) list.Add(new Source { Location = l, Position = l.Position });
+                    continue;
+                }
                 switch (l.Kind)
                 {
+                    case LocationKind.GoodsStore:
+                        if (general) list.Add(new Source { Location = l, Position = l.Position });
+                        break;
                     case LocationKind.Stockpile:
                         list.Add(new Source { Location = l, Position = l.Position });
                         break;
