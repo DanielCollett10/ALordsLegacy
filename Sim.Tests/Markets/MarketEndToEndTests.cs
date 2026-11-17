@@ -59,6 +59,7 @@ namespace LordsLegacy.Sim.Tests.Markets
             StartLayoutApplier.Apply(w, new StartLayout(M(140, 140), 0, new PointMm(0, 0), new PointMm(6000, 0), new PointMm(-6000, 0),
                 new PointMm[0], new StartFamily[0], 2));
             w.Inventory.Produce(w.Camp.StockpileLocation, Items.Log, 80);
+            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.CountOf(Items.Plank.Id)); // T-513: planks used up, so the camp can go (ST-30)
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal, new[] { M(20, 50), M(110, 50) }, new[] { M(20, 50), M(65, 50), M(110, 50) });
             for (int fam = 1; fam <= 3; fam++)
             {
