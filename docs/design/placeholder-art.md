@@ -27,6 +27,8 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | `visual.module.log_storage` | Log storage **and granary** (default fallback) | 8 × 1.2 × 6 | `ModuleRenderer` | Placeholder |
 | `visual.module.oxen_stand` | Oxen stand | 3 × 1 × 3 | `ModuleRenderer` | Placeholder |
 | `visual.module.house` | Tier 1 log house (HSE-23) | 6 × 4 × 8 | `ModuleRenderer` | Placeholder |
+| `visual.module.market_stall` | Market stall (open table, MK-43) | 3 × 0.9 × 2 | `ModuleRenderer` | Placeholder |
+| `visual.item.food_crate` | Food crate: 1-3 on a stall by fill, one held by a food carrier (MK-43) | 0.6 × 0.35 × 0.6 | `ModuleRenderer`, `PeopleRenderer` | Placeholder |
 | `visual.construction.scaffold` | Building site scaffold | footprint × 2.6 | `ConstructionRenderer` | Placeholder |
 | `visual.road.dirt_path` | Dirt road surface | ribbon | `RoadRenderer` | Placeholder |
 | `visual.fallback` | Shown for a missing id | 1 m cube | `VisualRegistry` | Placeholder |
@@ -44,5 +46,5 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 
 ## Coming with planned milestones (add the row when the task lands)
 
-M15: `visual.module.market_stall`, `visual.item.food_crate` (food on a stall), market area fill. M17: wattle, daub and
+M15: market area fill (stall and crate rows landed in T-478). M17: wattle, daub and
 thatch house tiers, their sites and materials.
