@@ -309,14 +309,22 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(marketTool, "_panel", panel);
             SetRef(marketTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             // T-424: the "granary" build bar entry places one rotatable structure with its yard outline.
-            var structureTool = new GameObject("GranaryTool").AddComponent<LordsLegacy.Game.Tools.StructureTool>();
-            SetString(structureTool, "_toolId", LordsLegacy.Game.Tools.StructureTool.GranaryToolId);
-            SetString(structureTool, "_typeId", LordsLegacy.Sim.Footprints.ModuleTypes.GranaryId);
+            CreateStructureTool("GranaryTool", LordsLegacy.Game.Tools.StructureTool.GranaryToolId, LordsLegacy.Sim.Footprints.ModuleTypes.GranaryId, host, panel);
+            // T-526: hewing station and sawpit use the same tool with their own type.
+            CreateStructureTool("HewingStationTool", LordsLegacy.Game.Tools.StructureTool.HewingToolId, LordsLegacy.Sim.Footprints.ModuleTypes.HewingStationId, host, panel);
+            CreateStructureTool("SawpitTool", LordsLegacy.Game.Tools.StructureTool.SawpitToolId, LordsLegacy.Sim.Footprints.ModuleTypes.SawpitId, host, panel);
+            return last;
+        }
+
+        private static void CreateStructureTool(string name, string toolId, string typeId, SimHost host, ToolPanelView panel)
+        {
+            var structureTool = new GameObject(name).AddComponent<LordsLegacy.Game.Tools.StructureTool>();
+            SetString(structureTool, "_toolId", toolId);
+            SetString(structureTool, "_typeId", typeId);
             SetRef(structureTool, "_host", host);
             SetRef(structureTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
             SetRef(structureTool, "_panel", panel);
             SetRef(structureTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
-            return last;
         }
 
         private static void SetString(Component target, string field, string value)

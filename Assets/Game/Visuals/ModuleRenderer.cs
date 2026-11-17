@@ -42,6 +42,8 @@ namespace LordsLegacy.Game.Visuals
                 case ModuleTypes.OxenStandId: return VisualSizes.ModuleOxenStand;
                 case ModuleTypes.HouseId: return VisualSizes.ModuleHouse;
                 case ModuleTypes.MarketStallId: return VisualSizes.ModuleMarketStall;
+                case ModuleTypes.HewingStationId: return VisualSizes.ModuleHewingStation;
+                case ModuleTypes.SawpitId: return VisualSizes.ModuleSawpit;
                 default: return VisualSizes.ModuleLogStorage;
             }
         }
@@ -73,6 +75,43 @@ namespace LordsLegacy.Game.Visuals
                     list.Add(VisualSizes.Place(def, VisualSizes.ItemFoodCrate, pos, yaw));
                 else list.Add(Matrix4x4.identity);
             }
+        }
+
+        /// <summary>Beam stacks currently drawn beside hewing stations. For tests.</summary>
+        public int BeamStackCount => _byVisual.TryGetValue(VisualSizes.ItemBeamStack, out var l) ? l.Count : 0;
+
+        /// <summary>Plank stacks currently drawn beside sawpits. For tests.</summary>
+        public int PlankStackCount => _byVisual.TryGetValue(VisualSizes.ItemPlankStack, out var l) ? l.Count : 0;
+
+        /// <summary>Stack height as a fraction of a full stack: 0 when empty, else 0.25 to 1 by how full the store is (T-526).</summary>
+        public static float StackFill(int items, int capacity)
+        {
+            if (items <= 0 || capacity <= 0) return 0f;
+            return Mathf.Clamp(0.25f + 0.75f * items / capacity, 0.25f, 1f);
+        }
+
+        // Adds one stack of the workshop's output (beams or planks) on the ground in front of the building, turned with it.
+        private void AddOutputStack(LordsLegacy.Sim.Core.SimWorld world, LordsLegacy.Sim.Footprints.Footprint fp, Vector3 p, float yaw)
+        {
+            string vid = fp.Type.Id == ModuleTypes.HewingStationId ? VisualSizes.ItemBeamStack : VisualSizes.ItemPlankStack;
+            var item = fp.Type.Id == ModuleTypes.HewingStationId ? LordsLegacy.Sim.Inventory.Items.Beam : LordsLegacy.Sim.Inventory.Items.Plank;
+            var store = world.Inventory.FindGoodsStore(fp.Id);
+            if (store == null) return;
+            float fill = StackFill(store.CountOf(item.Id), store.Capacity);
+            if (fill <= 0f) return;
+            if (!_byVisual.TryGetValue(vid, out var list)) { list = new List<Matrix4x4>(); _byVisual[vid] = list; }
+            var rot = Quaternion.Euler(0f, yaw, 0f);
+            var local = new Vector3(0f, 0f, -(fp.Type.DepthMm / 2000f + 1f));
+            var pos = p + rot * local;
+            pos.y = world.Terrain.HeightAt(pos.x, pos.z);
+            if (registry != null && registry.TryGet(vid, out var def))
+            {
+                // Place() stands a full-height box on the ground; squash it to the fill about its centre and lower it
+                // by the height lost so it still sits on the ground (placeholder meshes are centred cubes).
+                pos.y -= (1f - fill) * VisualSizes.Of(vid).y * def.Scale * 0.5f;
+                list.Add(VisualSizes.Place(def, vid, pos, yaw) * Matrix4x4.Scale(new Vector3(1f, fill, 1f)));
+            }
+            else list.Add(Matrix4x4.identity);
         }
 
         private void Update() { Refresh(); }
@@ -129,6 +168,7 @@ namespace LordsLegacy.Game.Visuals
                     list.Add(m);
                     _count++;
                     if (fp.Type.Id == ModuleTypes.MarketStallId) AddCrates(world, fp, p, yaw);
+                    if (fp.Type.Id == ModuleTypes.HewingStationId || fp.Type.Id == ModuleTypes.SawpitId) AddOutputStack(world, fp, p, yaw);
                     float r = Mathf.Max(fp.Type.WidthMm, fp.Type.DepthMm) / 1000f;
                     min = Vector3.Min(min, p - new Vector3(r, 1f, r));
                     max = Vector3.Max(max, p + new Vector3(r, box.y + 1f, r));

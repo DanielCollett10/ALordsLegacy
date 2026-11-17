@@ -45,6 +45,15 @@ namespace LordsLegacy.Game.Visuals
         /// <summary>Id of the food crate visual: food on a stall or carried by a citizen (MK-43).</summary>
         public const string ItemFoodCrate = "visual.item.food_crate";
 
+        /// <summary>Id of the hewing station visual (T-526).</summary>
+        public const string ModuleHewingStation = "visual.module.hewing_station";
+        /// <summary>Id of the sawpit visual (T-526).</summary>
+        public const string ModuleSawpit = "visual.module.sawpit";
+        /// <summary>Id of the beam stack visual: one stack on a hewing station's output store (T-526).</summary>
+        public const string ItemBeamStack = "visual.item.beam_stack";
+        /// <summary>Id of the plank stack visual: one stack on a sawpit's output store (T-526).</summary>
+        public const string ItemPlankStack = "visual.item.plank_stack";
+
         /// <summary>Box size (x width, y height, z depth) in metres for a visual id; one metre cube if unknown.</summary>
         public static Vector3 Of(string id)
         {
@@ -67,6 +76,10 @@ namespace LordsLegacy.Game.Visuals
                 case ItemLog: return new Vector3(0.35f, 1f, 0.35f);   // y is stretched to the log length
                 case ModuleMarketStall: return new Vector3(3f, 0.9f, 2f);
                 case ItemFoodCrate: return new Vector3(0.6f, 0.35f, 0.6f);
+                case ModuleHewingStation: return new Vector3(6f, 2.2f, 4f);
+                case ModuleSawpit: return new Vector3(6f, 1.4f, 4f);
+                case ItemBeamStack: return new Vector3(1.2f, 0.5f, 0.6f);   // y is the height of a full stack
+                case ItemPlankStack: return new Vector3(1.2f, 0.4f, 0.6f);
                 default: return Vector3.one;
             }
         }
