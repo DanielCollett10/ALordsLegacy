@@ -75,11 +75,11 @@ namespace LordsLegacy.Tests.PlayMode
                 // OperationPanelView builds its panel in code too (T-281).
                 // HousePanelView and GranaryPanelView build theirs in code (T-410, T-449).
                 if (doc.name != "GroundReadout" && doc.name != "CitizenPanel" && doc.name != "OperationPanel"
-                    && doc.name != "HousePanel" && doc.name != "GranaryPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
+                    && doc.name != "HousePanel" && doc.name != "GranaryPanel" && doc.name != "MarketPanel") Assert.IsNotNull(doc.visualTreeAsset, doc.name + " has no UXML.");
                 names.Add(doc.name);
             }
             names.Sort(System.StringComparer.Ordinal);
-            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GranaryPanel", "GroundReadout", "HousePanel", "OperationPanel", "ToolPanel", "TopBar" }, names);
+            CollectionAssert.AreEqual(new[] { "BuildBar", "CitizenPanel", "DebugOverlay", "GameMenu", "GranaryPanel", "GroundReadout", "HousePanel", "MarketPanel", "OperationPanel", "ToolPanel", "TopBar" }, names);
         }
 
         [UnityTest]

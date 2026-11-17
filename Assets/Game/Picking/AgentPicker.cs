@@ -31,6 +31,7 @@ namespace LordsLegacy.Game
         private int? _operationId;
         private int? _houseId;
         private int? _granaryId;
+        private int? _marketId;
 
         /// <summary>Raised when the selection changes (select, clear).</summary>
         public event Action SelectionChanged;
@@ -60,6 +61,7 @@ namespace LordsLegacy.Game
             _hasSelection = true;
             _houseId = null;
             _granaryId = null;
+            _marketId = null;
             _selected = agent;
             SelectionChanged?.Invoke();
         }
@@ -84,10 +86,11 @@ namespace LordsLegacy.Game
             var host = Host();
             bool exists = host != null && host.IsInitialized && host.World.Operations.Get(operationId) != null;
             if (!exists) { ClearOperation(); return; }
-            bool changed = _hasSelection || _houseId.HasValue || _granaryId.HasValue || _operationId != operationId;
+            bool changed = _hasSelection || _houseId.HasValue || _granaryId.HasValue || _marketId.HasValue || _operationId != operationId;
             _hasSelection = false;
             _houseId = null;
             _granaryId = null;
+            _marketId = null;
             _operationId = operationId;
             if (changed) SelectionChanged?.Invoke();
         }
@@ -105,10 +108,11 @@ namespace LordsLegacy.Game
             bool exists = host != null && host.IsInitialized && host.World.Homes.Get(houseFootprintId) != null
                 && host.World.Footprints.Get(houseFootprintId) != null;
             if (!exists) { ClearHouse(); return; }
-            bool changed = _hasSelection || _operationId.HasValue || _granaryId.HasValue || _houseId != houseFootprintId;
+            bool changed = _hasSelection || _operationId.HasValue || _granaryId.HasValue || _marketId.HasValue || _houseId != houseFootprintId;
             _hasSelection = false;
             _operationId = null;
             _granaryId = null;
+            _marketId = null;
             _houseId = houseFootprintId;
             if (changed) SelectionChanged?.Invoke();
         }
@@ -148,10 +152,11 @@ namespace LordsLegacy.Game
             var host = Host();
             var fp = host != null && host.IsInitialized ? host.World.Footprints.Get(footprintId) : null;
             if (fp == null || fp.Type.Id != ModuleTypes.GranaryId) { ClearGranary(); return; }
-            bool changed = _hasSelection || _operationId.HasValue || _houseId.HasValue || _granaryId != footprintId;
+            bool changed = _hasSelection || _operationId.HasValue || _houseId.HasValue || _marketId.HasValue || _granaryId != footprintId;
             _hasSelection = false;
             _operationId = null;
             _houseId = null;
+            _marketId = null;
             _granaryId = footprintId;
             if (changed) SelectionChanged?.Invoke();
         }
@@ -171,6 +176,49 @@ namespace LordsLegacy.Game
             var fp = world.Footprints.FindAt(ground);
             if (fp == null || fp.Type.Id != ModuleTypes.GranaryId) return false;
             footprintId = fp.Id;
+            return true;
+        }
+
+        /// <summary>True when a market is selected (T-476).</summary>
+        public bool HasMarket => _marketId.HasValue;
+
+        /// <summary>Id of the selected market (only meaningful when <see cref="HasMarket"/>).</summary>
+        public int SelectedMarketId => _marketId ?? -1;
+
+        /// <summary>Selects a market by id and clears every other selection. Unknown ids clear the market selection.</summary>
+        public void SelectMarket(int marketId)
+        {
+            var host = Host();
+            if (host == null || !host.IsInitialized || host.World.Markets.Get(marketId) == null) { ClearMarket(); return; }
+            bool changed = _hasSelection || _operationId.HasValue || _houseId.HasValue || _granaryId.HasValue || _marketId != marketId;
+            _hasSelection = false;
+            _operationId = null;
+            _houseId = null;
+            _granaryId = null;
+            _marketId = marketId;
+            if (changed) SelectionChanged?.Invoke();
+        }
+
+        /// <summary>Clears the market selection.</summary>
+        public void ClearMarket()
+        {
+            if (!_marketId.HasValue) return;
+            _marketId = null;
+            SelectionChanged?.Invoke();
+        }
+
+        /// <summary>The market a click at the ground point would select: one of its stalls, else its area (MK-40). False when none.</summary>
+        public static bool TryPickMarket(SimWorld world, PointMm ground, out int marketId)
+        {
+            marketId = 0;
+            var fp = world.Footprints.FindAt(ground);
+            if (fp != null)
+                foreach (var m in world.Markets.All)
+                    if (m.StallFootprintIds.Contains(fp.Id)) { marketId = m.Id; return true; }
+            var area = world.Areas.FindAt(ground, AreaKind.Building);
+            var market = area == null ? null : world.Markets.FindByArea(area.Id);
+            if (market == null) return false;
+            marketId = market.Id;
             return true;
         }
 
@@ -253,6 +301,7 @@ namespace LordsLegacy.Game
                 _operationId = null;
                 _houseId = null;
                 _granaryId = null;
+                _marketId = null;
                 Select(agent);
             }
             else if (host != null && host.IsInitialized && Picker() != null
@@ -273,6 +322,16 @@ namespace LordsLegacy.Game
                 SelectGranary(granaryId);
             }
             else if (host != null && host.IsInitialized && Picker() != null
+                && Picker().TryPickScreen(screenPos, out var mg) && mg.HasValue
+                && TryPickMarket(host.World, PointMm.FromMetres(mg.X, mg.Z), out int marketId))
+            {
+                Clear();
+                ClearOperation();
+                ClearHouse();
+                ClearGranary();
+                SelectMarket(marketId);
+            }
+            else if (host != null && host.IsInitialized && Picker() != null
                 && Picker().TryPickScreen(screenPos, out var ground) && ground.HasValue
                 && TryPickOperation(host.World, PointMm.FromMetres(ground.X, ground.Z), out int opId))
             {
@@ -285,6 +344,7 @@ namespace LordsLegacy.Game
                 ClearOperation();
                 ClearHouse();
                 ClearGranary();
+                ClearMarket();
             }
             return true;
         }
@@ -304,6 +364,8 @@ namespace LordsLegacy.Game
                 ClearHouse();
             if (_granaryId.HasValue && host != null && host.IsInitialized && host.World.Footprints.Get(_granaryId.Value) == null)
                 ClearGranary();
+            if (_marketId.HasValue && host != null && host.IsInitialized && host.World.Markets.Get(_marketId.Value) == null)
+                ClearMarket();
             if (!ReadMouse) return;
             var mouse = Mouse.current;
             if (mouse != null && mouse.leftButton.wasPressedThisFrame) ClickAt(mouse.position.ReadValue());
