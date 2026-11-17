@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using LordsLegacy.Game.Tools;
 using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Food;
+using LordsLegacy.Sim.Operations;
+using LordsLegacy.Sim.People;
+using LordsLegacy.Sim.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -25,6 +29,9 @@ namespace LordsLegacy.Game
         private VisualElement _panel;
         private Label _title, _state, _stock, _stored, _message;
         private Button _deconstruct, _close;
+        private VisualElement _familyBox, _pickerBox;
+        private string _signature = "";
+        private bool _pickerOpen;
         private bool _subscribed;
 
         /// <summary>True while the panel is shown.</summary>
@@ -118,6 +125,135 @@ namespace LordsLegacy.Game
             return name.Length == 0 ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);
         }
 
+        /// <summary>Text on a family Assign button while the granary is unbuilt.</summary>
+        public const string NotBuiltText = "Granary not built yet";
+
+        /// <summary>The Assign button of a family slot, or null.</summary>
+        public Button AssignButton(int slot) => _panel?.Q<Button>("assign-slot-" + slot);
+
+        /// <summary>The label of a family slot ("Family 1: empty" / "Family 1: Archer"), or "".</summary>
+        public string SlotText(int slot) => _panel?.Q<Label>("family-slot-" + slot)?.text ?? "";
+
+        /// <summary>The members line of a family slot, or "".</summary>
+        public string MembersText(int slot) => _panel?.Q<Label>("family-members-" + slot)?.text ?? "";
+
+        /// <summary>True while the Assign list is open.</summary>
+        public bool PickerOpen => _pickerOpen;
+
+        private int? OperationOf(out SimHost host)
+        {
+            host = Host();
+            var agents = Agents();
+            if (host == null || !host.IsInitialized || agents == null || !agents.HasGranary) return null;
+            var op = host.World.Operations.FindByModule(agents.SelectedGranaryId);
+            return op?.Id;
+        }
+
+        /// <summary>A slot's Assign button: opens or closes the list of unassigned families (refused while unbuilt).</summary>
+        public void ClickAssignSlot()
+        {
+            if (OperationOf(out var host) == null) return;
+            if (!host.World.IsBuilt(Agents().SelectedGranaryId)) { SetMessage(NotBuiltText); return; }
+            _pickerOpen = !_pickerOpen;
+            Refresh();
+        }
+
+        /// <summary>A family in the Assign list: sends AssignFamily.</summary>
+        public void ClickAssignFamily(int familyId)
+        {
+            int? op = OperationOf(out _);
+            if (!op.HasValue) return;
+            _pickerOpen = false;
+            Run(new AssignFamily(op.Value, familyId));
+        }
+
+        /// <summary>A family row's Remove button: sends UnassignFamily.</summary>
+        public void ClickRemoveFamily(int familyId)
+        {
+            int? op = OperationOf(out _);
+            if (op.HasValue) Run(new UnassignFamily(op.Value, familyId));
+        }
+
+        private static string MembersLine(LordsLegacy.Sim.Core.SimWorld world, Family fam)
+        {
+            var sb = new StringBuilder();
+            foreach (int cid in fam.MemberIds)
+            {
+                Citizen c = world.People.FindCitizen(cid);
+                if (c == null || c.AgeYears(world.Tick, world.Tuning.AgeingRate) < OperationStatus.WorkingAgeYears) continue;
+                if (sb.Length > 0) sb.Append('\n');
+                sb.Append(c.Name).Append(": ").Append(CitizenTaskText.Task(world, c));
+            }
+            return sb.ToString();
+        }
+
+        // Rows hold buttons, so they are rebuilt only when what they show changes.
+        private void RebuildFamilies(LordsLegacy.Sim.Core.SimWorld world, int granaryId)
+        {
+            var op = world.Operations.FindByModule(granaryId);
+            if (op == null) { _familyBox.Clear(); _pickerBox.Clear(); _signature = ""; return; }
+            bool unbuilt = !world.IsBuilt(granaryId);
+            var sb = new StringBuilder();
+            sb.Append(op.Id).Append('|').Append(_pickerOpen).Append(unbuilt ? "|U" : "|B");
+            var members = new List<string>();
+            foreach (int id in op.FamilyIds)
+            {
+                Family fam = world.People.FindFamily(id);
+                string m = fam != null ? MembersLine(world, fam) : "";
+                members.Add(m);
+                sb.Append(",a").Append(id).Append(':').Append(m);
+            }
+            var free = new List<Family>();
+            foreach (var f in world.People.Families)
+                if (f.WorkplaceId == null) { free.Add(f); sb.Append(",f").Append(f.Id); }
+            string sig = sb.ToString();
+            if (sig == _signature) return;
+            _signature = sig;
+
+            _familyBox.Clear();
+            for (int i = 0; i < OperationTypes.Granary.FamilySlots; i++)
+            {
+                var row = new VisualElement();
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                if (i < op.FamilyIds.Count)
+                {
+                    int fid = op.FamilyIds[i];
+                    Family fam = world.People.FindFamily(fid);
+                    row.Add(MakeLabel("family-slot-" + i, 12, false, "Family " + (i + 1) + ": " + (fam != null ? fam.Surname : "?")));
+                    var remove = new Button { name = "remove-family-" + fid, text = "Remove" };
+                    remove.clicked += () => ClickRemoveFamily(fid);
+                    row.Add(remove);
+                    _familyBox.Add(row);
+                    if (members[i].Length > 0) _familyBox.Add(MakeLabel("family-members-" + i, 11, false, members[i]));
+                }
+                else
+                {
+                    row.Add(MakeLabel("family-slot-" + i, 12, false, "Family " + (i + 1) + ": empty"));
+                    var assign = new Button { name = "assign-slot-" + i, text = unbuilt ? NotBuiltText : "Assign" };
+                    assign.SetEnabled(!unbuilt);
+                    assign.clicked += ClickAssignSlot;
+                    row.Add(assign);
+                    _familyBox.Add(row);
+                }
+            }
+
+            _pickerBox.Clear();
+            _pickerBox.style.display = _pickerOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            if (_pickerOpen)
+            {
+                if (free.Count == 0) _pickerBox.Add(MakeLabel("assign-none", 12, false, "No unassigned families"));
+                foreach (var f in free)
+                {
+                    int fid = f.Id;
+                    var b = new Button { name = "assign-family-" + fid, text = f.Surname };
+                    b.clicked += () => ClickAssignFamily(fid);
+                    _pickerBox.Add(b);
+                }
+            }
+            UiFocusRules.Apply(_panel);
+        }
+
         private void Run(LordsLegacy.Sim.Commands.ISimCommand cmd)
         {
             var host = Host();
@@ -147,6 +283,7 @@ namespace LordsLegacy.Game
             _state.text = StateLine(r);
             _stock.text = StockLines(r);
             _stored.text = StoredLine(r);
+            RebuildFamilies(host.World, agents.SelectedGranaryId);
             _deconstruct.style.display = r.State == GranaryState.Deconstructing ? DisplayStyle.None : DisplayStyle.Flex;
             _deconstruct.text = r.IsBuilt ? "Deconstruct" : "Cancel granary";
             _panel.style.display = DisplayStyle.Flex;
@@ -194,6 +331,7 @@ namespace LordsLegacy.Game
 
         private void OnSelectionChanged()
         {
+            _pickerOpen = false; _signature = "";
             SetMessage("");
             Refresh();
         }
@@ -209,6 +347,7 @@ namespace LordsLegacy.Game
             var root = GetComponent<UIDocument>().rootVisualElement;
             if (root == null) return;
             root.Clear();
+            _signature = "";
             var holder = new VisualElement { name = "granary-panel-root", pickingMode = PickingMode.Ignore };
             holder.style.position = Position.Absolute;
             holder.style.right = 12; holder.style.bottom = 90;
@@ -236,6 +375,11 @@ namespace LordsLegacy.Game
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
+            _familyBox = new VisualElement { name = "granary-families" };
+            _familyBox.style.marginTop = 4;
+            _pickerBox = new VisualElement { name = "granary-picker" };
+            _pickerBox.style.display = DisplayStyle.None;
+
             _deconstruct = new Button { name = "granary-deconstruct", text = "Deconstruct" };
             _deconstruct.style.marginTop = 4;
             _deconstruct.style.color = new Color(240f / 255f, 230f / 255f, 210f / 255f);
@@ -243,15 +387,16 @@ namespace LordsLegacy.Game
             _deconstruct.clicked += ClickDeconstruct;
 
             _panel.Add(_title); _panel.Add(_state); _panel.Add(_stock); _panel.Add(_stored);
+            _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);
             UiFocusRules.Apply(root);
         }
 
-        private static Label MakeLabel(string name, int size, bool bold)
+        private static Label MakeLabel(string name, int size, bool bold, string text = "")
         {
-            var l = new Label { name = name };
+            var l = new Label { name = name, text = text };
             l.style.color = new Color(240f / 255f, 230f / 255f, 210f / 255f);
             l.style.fontSize = size;
             if (bold) l.style.unityFontStyleAndWeight = FontStyle.Bold;
