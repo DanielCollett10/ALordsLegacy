@@ -8,9 +8,9 @@ using LordsLegacy.Sim.People;
 namespace LordsLegacy.Sim.Tasks
 {
     /// <summary>
-    /// Stock-the-stall steps (MK-25): WalkTo the granary, Work (load, 10 min), CollectStock (reserve unreserved granary food in
-    /// proportion to stock and the stall's room, move it to the carrier), WalkTo the stall, Work (unload, 10 min), DepositStock
-    /// (carrier to stall). The carrier is a ledger location, so food in transit is saved with the Ledger section. A failed
+    /// Stock-the-stall steps (MK-25): WalkTo the granary, Work (load, 10 min), CollectItems with no item id (reserve unreserved granary
+    /// food in proportion to stock and the stall's room, move it to the carrier), WalkTo the stall, Work (unload, 10 min),
+    /// DepositItems with no item id (carrier to stall). With an item id the same steps move that one item (carry.cs). The carrier is a ledger location, so food in transit is saved with the Ledger section. A failed
     /// trip frees the reservations and drops what is carried on the ground where the carrier stands.
     /// </summary>
     public sealed partial class StepRunnerSystem
@@ -32,12 +32,12 @@ namespace LordsLegacy.Sim.Tasks
                     world.Tasks.AddProgress(t.Id, 1);
                     if (t.StepProgress >= step.DurationTicks) Advance(world, t, c);
                     return;
-                case StepKind.CollectStock:
-                    if (!CollectStock(world, t, step)) { Fail(world, t, c); return; }
+                case StepKind.CollectItems:
+                    if (!CollectItems(world, t, step)) { Fail(world, t, c); return; }
                     Advance(world, t, c);
                     return;
-                case StepKind.DepositStock:
-                    if (!DepositStock(world, t, step)) { Fail(world, t, c); return; }
+                case StepKind.DepositItems:
+                    if (!DepositItems(world, t, step)) { Fail(world, t, c); return; }
                     Advance(world, t, c);
                     return;
                 default:
@@ -48,7 +48,7 @@ namespace LordsLegacy.Sim.Tasks
 
         // Ledger: reserve stock at the granary and room at the stall for the share, then move it to the carrier. The stock
         // reservation only covers unreserved food (MK-27); the capacity reservation is consumed when the stall is stocked.
-        private static bool CollectStock(SimWorld world, TaskRecord t, TaskStep step)
+        private static bool CollectShare(SimWorld world, TaskRecord t, TaskStep step)
         {
             LedgerLocation granary = world.Inventory.Get(step.LocationId);
             LedgerLocation stall = StallOf(world, t);
@@ -71,7 +71,7 @@ namespace LordsLegacy.Sim.Tasks
         }
 
         // Ledger: everything carried goes onto the stall, which must still be working.
-        private static bool DepositStock(SimWorld world, TaskRecord t, TaskStep step)
+        private static bool DepositShare(SimWorld world, TaskRecord t, TaskStep step)
         {
             LedgerLocation carrier = t.CarrierId.HasValue ? world.Inventory.Get(t.CarrierId.Value) : null;
             LedgerLocation stall = world.Inventory.Get(step.LocationId);
@@ -89,7 +89,7 @@ namespace LordsLegacy.Sim.Tasks
         private static LedgerLocation StallOf(SimWorld world, TaskRecord t)
         {
             foreach (TaskStep s in t.Def.Steps)
-                if (s.Kind == StepKind.DepositStock) return world.Inventory.Get(s.LocationId);
+                if (s.Kind == StepKind.DepositItems) return world.Inventory.Get(s.LocationId);
             return null;
         }
 

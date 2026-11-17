@@ -11,11 +11,11 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 |---|---|
 | `TaskDef` | Id, explicit `TaskStep` list, `EligibilityPolicy` (`AssignedFamilyOnly`, `AssignedThenHelpers`, `HelpersOnly`, `OwnerFamily`), `RequiredResource` (`Ox`, …). |
 | `TaskDefCatalog` | Looks a def up by id and holds the policy per id. Saves refer to defs by id; an unknown id fails the load. |
-| `ConstructionTaskDefs` | `task.deliver_materials`, `task.build`, `task.deconstruct` (all HelpersOnly; heavy steps). |
+| `ConstructionTaskDefs` | `task.deliver_materials` (ox, logs), `task.carry_materials` (on foot, other items), `task.build`, `task.deconstruct` (all HelpersOnly; heavy steps). |
 | `FoodTripSystem` (`Food/`) | `task.fetch_food` (OwnerFamily, owner `-1000 - familyId`), opened each Sunday morning. Ignores shifts. See `food.md`. |
 | `ForagingSystem` (`Foraging/`) | `task.forage` (AssignedFamilyOnly, owner = operation, age 8+), holds a bush and a carrier. See `foraging.md`. |
-| `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectStock` (reserved, in proportion, never allotted food), walk, unload 10 min, `DepositStock`. Source: `ChooseStockSource`. |
-| `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, `CollectStock`, `DepositStock`. |
+| `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectItems` (no item id: reserved, in proportion, never allotted food), walk, unload 10 min, `DepositItems`. Source: `ChooseStockSource`. |
+| `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, and the one item trip pair `CollectItems`/`DepositItems` (an item id moves that item, none means a stock share). |
 | `TaskRecord`, `TaskPriority` | Id, def, state, owner, assignee, priority (Normal or High, set by `TaskBoard.SetPriority`), target, step index, ox, site, `BushId`, `CarrierId`. |
 | `DispatchSystem` | Dispatch phase. Hands Open tasks to idle workers, and runs the Sunday family trips (`RunFamilyTrips`). |
 | `StepRunnerSystem` (+ `.Ox.cs`, `.Food.cs`, `.Forage.cs`, `.Stock.cs`) | Steps phase. Runs Active tasks in id order. Each partial owns one family of steps. |

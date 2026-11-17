@@ -140,6 +140,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.ForagerHutCapacity);
             w.WriteInt32(t.GatherMinutesPerBasket);
             w.WriteInt32(t.HandCarryItems);
+            w.WriteInt32(t.HandCarryPlanks); // T-517
             w.WriteDouble(t.StallCellWidthM);
             w.WriteDouble(t.StallCellDepthM);
             w.WriteDouble(t.MarketMinAreaM2);
@@ -213,6 +214,7 @@ namespace LordsLegacy.Sim.Save.Sections
             t.ForagerHutCapacity = r.ReadInt32();
             t.GatherMinutesPerBasket = r.ReadInt32();
             t.HandCarryItems = r.ReadInt32();
+            t.HandCarryPlanks = r.ReadInt32();
             t.StallCellWidthM = r.ReadDouble();
             t.StallCellDepthM = r.ReadDouble();
             t.MarketMinAreaM2 = r.ReadDouble();

@@ -36,16 +36,20 @@ namespace LordsLegacy.Sim.Operations
             {
                 Footprint fp = world.Footprints.Get(site.FootprintId);
                 if (fp == null) continue;
-                int logs = fp.Type.ConstructionRecipe.Logs;
+                ConstructionRecipe recipe = fp.Type.ConstructionRecipe;
                 LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
                 if (loc == null) continue;
-                if (site.State == ConstructionState.Delivering && (logs == 0 || loc.CountOf(Items.Log.Id) > 0))
-                    site.State = ConstructionState.Building; // CN-23
+                if (site.State == ConstructionState.Delivering && AnyDelivered(world, site, recipe))
+                    site.State = ConstructionState.Building; // CN-23: from the first item on site
                 int owner = OwnerOf(world, site.FootprintId);
-                if (site.State == ConstructionState.Building && !ConstructionProgress.TryFinish(world, site, fp.Type.ConstructionRecipe))
+                if (site.State == ConstructionState.Building && !ConstructionProgress.TryFinish(world, site, recipe))
                     ManageBuilders(world, site, fp, owner);
-                if (logs == 0) continue;
-                TopUp(world, site, fp, logs, loc);
+                if (recipe.Items.Count == 0) continue;
+                foreach (var kv in recipe.Items)
+                {
+                    ItemDef item = Items.Find(kv.Key);
+                    if (item != null) TopUp(world, site, fp, item, kv.Value, loc);
+                }
                 OpenTasks(world, site, fp, owner);
             }
             AttachOxen(world);
@@ -54,6 +58,15 @@ namespace LordsLegacy.Sim.Operations
         /// <inheritdoc />
         public void OnCommandApplied(SimWorld world, CommandResult result)
         {
+        }
+
+        // CN-23: a site with nothing to deliver, or with its first item on site (or already used up), is Building.
+        private static bool AnyDelivered(SimWorld world, ConstructionSite site, ConstructionRecipe recipe)
+        {
+            if (recipe.Items.Count == 0) return true;
+            foreach (var kv in recipe.Items)
+                if (ConstructionProgress.DeliveredOf(world, site, kv.Key) > 0) return true;
+            return false;
         }
 
         private static bool AnyLiveDeliver(SimWorld world)
@@ -147,10 +160,17 @@ namespace LordsLegacy.Sim.Operations
             return default;
         }
 
+        // The step that puts the task's load into a store: UnloadOx for an ox delivery, DepositItems for a hand carry.
+        private static TaskStep DropStepOf(TaskRecord t, out int index)
+        {
+            TaskStep s = StepOf(t, StepKind.UnloadOx, out index);
+            return index >= 0 ? s : StepOf(t, StepKind.DepositItems, out index);
+        }
+
         // Site whose store the task unloads into, or null.
         private static ConstructionSite SiteOf(SimWorld world, TaskRecord t)
         {
-            TaskStep unload = StepOf(t, StepKind.UnloadOx, out int idx);
+            TaskStep unload = DropStepOf(t, out int idx);
             if (idx < 0) return null;
             LedgerLocation l = world.Inventory.Get(unload.LocationId);
             return l == null || l.Kind != LocationKind.Site ? null : world.Construction.Get(l.ModuleId);
@@ -158,15 +178,36 @@ namespace LordsLegacy.Sim.Operations
 
         private static bool IsSiteDelivery(SimWorld world, TaskRecord t)
         {
-            TaskStep unload = StepOf(t, StepKind.UnloadOx, out int idx);
+            TaskStep unload = DropStepOf(t, out int idx);
             if (idx < 0) return false;
             LedgerLocation l = world.Inventory.Get(unload.LocationId);
             return l != null && l.Kind == LocationKind.Site;
         }
 
+        // Hand carries (T-517): those of a removed site are cancelled unless a walker is already on the way (the step
+        // runner fails that one itself, so what it carries is dropped); a cancelled one frees its reservations.
+        private static void SweepCarries(SimWorld world)
+        {
+            foreach (TaskRecord t in new List<TaskRecord>(world.Tasks.All))
+            {
+                if (t.Def.Id != ConstructionTaskDefs.CarryId || !IsSiteDelivery(world, t)) continue;
+                if (!t.IsFinished)
+                {
+                    if (SiteOf(world, t) != null || t.State == TaskState.Active) continue;
+                    world.Tasks.Cancel(t.Id);
+                    StepRunnerSystem.ReleaseCarryReservations(world, t); // the system may sleep next tick: free them now
+                    continue;
+                }
+                if (t.State != TaskState.Cancelled) continue;
+                StepRunnerSystem.ReleaseCarryReservations(world, t);
+                StepRunnerSystem.DropCarried(world, t, null); // cancelled from outside the runner mid-walk
+            }
+        }
+
         // Cancels tasks of removed sites, and hands the logs of finished-but-undelivered tasks back to their site.
         private static void Sweep(SimWorld world)
         {
+            SweepCarries(world);
             foreach (TaskRecord t in new List<TaskRecord>(world.Tasks.All))
             {
                 if (t.Def.Id != ConstructionTaskDefs.DeliverId) continue;
@@ -197,71 +238,84 @@ namespace LordsLegacy.Sim.Operations
             }
         }
 
-        private static int Reserved(SimWorld world, ConstructionSite site)
+        private static int Reserved(SimWorld world, ConstructionSite site, ItemDef item)
         {
             int n = 0;
-            foreach (int id in site.ReservationIds) n += world.Inventory.GetReservation(id)?.Count ?? 0;
-            return n;
-        }
-
-        // Logs the site still needs from outside: recipe - delivered (on site + already consumed by progress, T-347) -
-        // carried by live tasks that have not unloaded yet. Consumed logs must count as delivered, or the site
-        // orders them again from the stock (T-350).
-        private static int Outstanding(SimWorld world, ConstructionSite site, int recipeLogs, LedgerLocation loc)
-        {
-            int n = recipeLogs - loc.CountOf(Items.Log.Id) - site.LogsConsumed;
-            foreach (TaskRecord t in world.Tasks.All)
+            foreach (int id in site.ReservationIds)
             {
-                if (t.IsFinished || t.Def.Id != ConstructionTaskDefs.DeliverId) continue;
-                if (SiteOf(world, t) != site) continue;
-                TaskStep unload = StepOf(t, StepKind.UnloadOx, out int idx);
-                if (t.CurrentStep <= idx) n -= unload.Count;
+                Reservation r = world.Inventory.GetReservation(id);
+                if (r != null && r.ItemId == item.Id) n += r.Count;
             }
             return n;
         }
 
-        // Re-reserves logs the site lost when a task was cancelled (the logs may now sit elsewhere).
-        private static void TopUp(SimWorld world, ConstructionSite site, Footprint fp, int recipeLogs, LedgerLocation loc)
+        // Units of an item the site still needs from outside: recipe - delivered (on site + already consumed by progress,
+        // T-347) - carried by live tasks (ox deliveries for logs, hand carries for the rest) that have not unloaded yet.
+        // Consumed units must count as delivered, or the site orders them again from the stock (T-350).
+        private static int Outstanding(SimWorld world, ConstructionSite site, ItemDef item, int recipeCount, LedgerLocation loc)
         {
-            int missing = Outstanding(world, site, recipeLogs, loc) - Reserved(world, site);
+            int n = recipeCount - loc.CountOf(item.Id) - site.ConsumedOf(item.Id);
+            bool isLog = item.Id == Items.Log.Id;
+            foreach (TaskRecord t in world.Tasks.All)
+            {
+                if (t.IsFinished) continue;
+                bool ours = isLog ? t.Def.Id == ConstructionTaskDefs.DeliverId : t.Def.Id == ConstructionTaskDefs.CarryId;
+                if (!ours || SiteOf(world, t) != site) continue;
+                TaskStep drop = DropStepOf(t, out int idx);
+                if (!isLog && drop.ItemId != item.Id) continue;
+                if (t.CurrentStep <= idx) n -= drop.Count;
+            }
+            return n;
+        }
+
+        // Re-reserves units the site lost when a task was cancelled (the items may now sit elsewhere).
+        private static void TopUp(SimWorld world, ConstructionSite site, Footprint fp, ItemDef item, int recipeCount, LedgerLocation loc)
+        {
+            int missing = Outstanding(world, site, item, recipeCount, loc) - Reserved(world, site, item);
             if (missing <= 0) return;
-            var logsOnly = new ConstructionRecipe(missing, 0);
-            List<int> ids = SiteMaterials.TryReserveAll(world, logsOnly, fp.Centre, fp.Id);
+            var one = new ConstructionRecipe(new[] { new KeyValuePair<string, int>(item.Id, missing) }, 0);
+            List<int> ids = SiteMaterials.TryReserveAll(world, one, fp.Centre, fp.Id);
             if (ids != null) site.ReservationIds.AddRange(ids);
         }
 
+        // Turns the site's reservations into tasks: logs go by ox (OxLoadLogs per trip), every other item is carried by
+        // hand (HandCarryPlanks per trip, PL-16).
         private static void OpenTasks(SimWorld world, ConstructionSite site, Footprint fp, int owner)
         {
-            int load = Math.Max(1, world.Tuning.OxLoadLogs);
             TaskPriority priority = site.Priority == ConstructionPriority.High ? TaskPriority.High : TaskPriority.Normal;
             while (site.ReservationIds.Count > 0)
             {
                 int at = FirstIndex(world, site);
                 int resId = site.ReservationIds[at];
                 Reservation r = world.Inventory.GetReservation(resId);
-                if (r == null) { site.ReservationIds.RemoveAt(at); continue; }
+                ItemDef item = r == null ? null : Items.Find(r.ItemId);
+                if (item == null) { site.ReservationIds.RemoveAt(at); continue; }
+                bool isLog = item.Id == Items.Log.Id;
+                int load = Math.Max(1, isLog ? world.Tuning.OxLoadLogs : world.Tuning.HandCarryPlanks);
                 LedgerLocation source = world.Inventory.Get(r.LocationId);
                 int n = Math.Min(load, r.Count);
                 int remainder = r.Count - n;
 
-                // Hand n logs from the site's reservation to the task.
+                // Hand n items from the site's reservation to the task.
                 world.Inventory.Release(resId);
                 site.ReservationIds.RemoveAt(at);
                 if (remainder > 0)
                 {
-                    int rest = world.Inventory.ReserveStock(source, Items.Log, remainder, fp.Id);
+                    int rest = world.Inventory.ReserveStock(source, item, remainder, fp.Id);
                     site.ReservationIds.Insert(at, rest);
                 }
                 PathPoint pick = PointOf(world, source);
                 PathPoint drop = new PathPoint(fp.AccessPoint.XMetres, fp.AccessPoint.ZMetres);
-                TaskDef def = ConstructionTaskDefs.Deliver(pick, source.Id, drop, site.LedgerLocationId, n,
-                    Math.Max(1, world.Tuning.OxLoadMinutes), Math.Max(1, world.Tuning.OxUnloadMinutes));
+                TaskDef def = isLog
+                    ? ConstructionTaskDefs.Deliver(pick, source.Id, drop, site.LedgerLocationId, n,
+                        Math.Max(1, world.Tuning.OxLoadMinutes), Math.Max(1, world.Tuning.OxUnloadMinutes))
+                    : ConstructionTaskDefs.Carry(pick, source.Id, item.Id, drop, site.LedgerLocationId, n);
                 TaskRecord task = world.Tasks.Create(def, owner, null, priority, fp.Type.Id);
                 world.Tasks.SetSite(task.Id, fp.Id); // lets a priority change (CN-30) reach this task
-                if (world.Inventory.ReserveStock(source, Items.Log, n, task.Id) == 0)
+                if (world.Inventory.ReserveStock(source, item, n, task.Id) == 0)
                 {
                     world.Tasks.Cancel(task.Id);
-                    throw new InvalidOperationException("Could not re-reserve logs for a delivery task.");
+                    throw new InvalidOperationException("Could not re-reserve " + item.Id + " for a delivery task.");
                 }
             }
         }

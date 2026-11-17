@@ -118,7 +118,7 @@ namespace LordsLegacy.Sim.Markets
                 for (int i = t.CurrentStep; i < t.Def.Steps.Count; i++)
                 {
                     TaskStep s = t.Def.Steps[i];
-                    if (s.Kind == StepKind.CollectStock && s.LocationId == granaryLocationId) n += s.Count;
+                    if (s.Kind == StepKind.CollectItems && s.LocationId == granaryLocationId) n += s.Count;
                 }
             }
             return n;
@@ -134,10 +134,10 @@ namespace LordsLegacy.Sim.Markets
                 if (t.IsFinished || t.Def.Id != StockStallTaskId) continue;
                 bool loaded = false;
                 for (int i = 0; i < t.CurrentStep && i < t.Def.Steps.Count; i++)
-                    if (t.Def.Steps[i].Kind == StepKind.CollectStock) loaded = true;
+                    if (t.Def.Steps[i].Kind == StepKind.CollectItems) loaded = true;
                 if (loaded) continue;
                 foreach (TaskStep s in t.Def.Steps)
-                    if (s.Kind == StepKind.DepositStock && s.LocationId == stallLocationId) n += s.Count;
+                    if (s.Kind == StepKind.DepositItems && s.LocationId == stallLocationId) n += s.Count;
             }
             return n;
         }
@@ -197,7 +197,7 @@ namespace LordsLegacy.Sim.Markets
         private static bool IsCollectTrip(TaskRecord t, int granaryLocationId)
         {
             foreach (TaskStep s in t.Def.Steps)
-                if (s.Kind == StepKind.DepositStock) return s.LocationId == granaryLocationId;
+                if (s.Kind == StepKind.DepositItems) return s.LocationId == granaryLocationId;
             return false;
         }
 
@@ -262,7 +262,7 @@ namespace LordsLegacy.Sim.Markets
                 if (!t.CarrierId.HasValue) continue;
                 LedgerLocation carrier = world.Inventory.Get(t.CarrierId.Value);
                 if (carrier == null || carrier.Total == 0) continue;
-                Footprint at = FirstStep(t, StepKind.DepositStock, world);
+                Footprint at = FirstStep(t, StepKind.DepositItems, world);
                 PointMm p = at != null ? at.Centre : default;
                 Inventory.CarrierDrop.DropAll(world, carrier, p);
             }
@@ -351,7 +351,7 @@ namespace LordsLegacy.Sim.Markets
             {
                 if (t.State != TaskState.Open || t.Def.Id != StockStallTaskId) continue;
                 foreach (TaskStep s in t.Def.Steps)
-                    if (s.Kind == StepKind.DepositStock && s.LocationId == store.Id) { n++; break; }
+                    if (s.Kind == StepKind.DepositItems && s.LocationId == store.Id) { n++; break; }
             }
             return n;
         }
@@ -367,10 +367,10 @@ namespace LordsLegacy.Sim.Markets
             {
                 TaskStep.WalkTo(from),
                 TaskStep.Work(LoadMinutes, false, LoadStageId),
-                TaskStep.CollectStock(source.Id, n),
+                TaskStep.CollectItems(source.Id, null, n),
                 TaskStep.WalkTo(new PathPoint(stall.AccessPoint.XMetres, stall.AccessPoint.ZMetres)),
                 TaskStep.Work(LoadMinutes, false, UnloadStageId),
-                TaskStep.DepositStock(stallStore.Id, n)
+                TaskStep.DepositItems(stallStore.Id, null, n)
             };
             return new TaskDef(StockStallTaskId, steps, EligibilityPolicy.AssignedFamilyOnly);
         }

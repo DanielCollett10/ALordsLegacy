@@ -74,7 +74,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             foreach (TaskStep s in t.Def.Steps)
             {
-                if (s.Kind != StepKind.DepositStock) continue;
+                if (s.Kind != StepKind.DepositItems) continue;
                 Inventory.LedgerLocation to = world.Inventory.Get(s.LocationId);
                 Footprints.Footprint fp = to == null ? null : world.Footprints.Get(to.ModuleId);
                 return fp != null && fp.Type.Id == Footprints.ModuleTypes.MarketStallId ? "Carrying food to stall" : "Collecting food";

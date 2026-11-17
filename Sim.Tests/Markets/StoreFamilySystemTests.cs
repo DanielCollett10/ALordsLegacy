@@ -92,7 +92,7 @@ namespace LordsLegacy.Sim.Tests.Markets
             Assert.IsNotNull(t);
             Assert.AreEqual(f.GranaryOp, t.OwnerOperationId);
             var kinds = t.Def.Steps.Select(s => s.Kind).ToArray();
-            Assert.AreEqual(new[] { StepKind.WalkTo, StepKind.Work, StepKind.CollectStock, StepKind.WalkTo, StepKind.Work, StepKind.DepositStock }, kinds);
+            Assert.AreEqual(new[] { StepKind.WalkTo, StepKind.Work, StepKind.CollectItems, StepKind.WalkTo, StepKind.Work, StepKind.DepositItems }, kinds);
             Assert.AreEqual(10, t.Def.Steps[1].DurationTicks, "load is 10 minutes");
             Assert.AreEqual(10, t.Def.Steps[4].DurationTicks, "unload is 10 minutes");
             Assert.AreEqual(10, t.Def.Steps[2].Count, "up to HandCarryItems");
