@@ -42,6 +42,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | PL-15 | Until the storage yard (M18), starting planks sit in a new camp **General goods** store (`storage.md` ST-02) | PROPOSED |
 | PL-16 | Planks are carried **by hand, 2 per trip**. **Stall planks are carried by the stall's own granary family**; planks for any other building by odd-jobbers. May change later | DECIDED (owner 17/11/2026) |
 
+> Implementation note (PL-10, PL-13): the stall recipe is still 1 log and 60 worker-minutes (`ModuleTypes`, the
+> placeholder MKT-03 allows until planks exist). Stalls do not use planks yet. Owner to decide when that switches.
+
 ## Oxen
 
 | ID | Rule | Tag |

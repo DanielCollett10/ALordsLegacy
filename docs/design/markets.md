@@ -22,6 +22,10 @@ town's one market during the week. On Sunday, households in range are allotted f
 | MK-04 | **One marketplace per town** (owner 16/11/2026; overrides MKT-01's "several" for now). Until towns exist the whole settlement is one town, so a second market is refused: *Only one market per town*, and the build bar entry is disabled with that reason. Deleting the market removes its stalls; food on them drops as a ground pile at each stall (CN-55) | DECIDED (refusal text PROPOSED) |
 | MK-05 | **Stall slots:** designating the market subdivides it into a simple grid of stall slots, shown as outlines. Each slot is a cell of **4 × 5 m** (3 × 2 m stall, 1 m side gap, 3 m aisle in front, PLACEHOLDER), aligned to the area's longest edge, kept only where the whole cell lies inside the polygon. The slot count is the market's stall capacity. Fewer than 1 slot: *Too small for a market*. Set dressing comes later | DECIDED (grid sizes PLACEHOLDER) |
 
+> Implementation note (MK-05, T-455): `StallGrid` keeps a 2 m clear strip between every cell and the market edge
+> (`EdgePaddingMm`, PLACEHOLDER) and centres the grid in what is left. The rule above does not mention this padding.
+> Owner to decide whether it stays.
+
 ## Linking stores to markets
 
 | ID | Rule | Tag |
@@ -69,7 +73,14 @@ town's one market during the week. On Sunday, households in range are allotted f
 | MK-42 | Citizen panel task lines: *Carrying food to stall*, *Collecting food* (a trip into the granary) | PROPOSED |
 | MK-43 | Stalls draw as a placeholder table; food on a stall shows as a few coloured boxes (placeholder, see `placeholder-art.md`) | PROPOSED |
 
+> Implementation note (MK-41, T-476): the range tint (`MarketPanelView`) shows only while a market is selected. It is not
+> shown while placing the market. Owner to decide whether placing should show it.
+
 ## Not in M15
+
+> Implementation note (this section, T-461/T-464): the code already empties the camp food store into the granary after the
+> handover (MK-24 step 2, CMP-21). Only a permanent camp-meat store is left out. The line "moving the camp meat into a
+> granary" may be meant narrowly. Owner to confirm.
 
 Storage yards and non-food goods on stalls (MKT-03d later), market upgrades (MKT-04), pack stations (MKT-03f), the
 reachable-ground overlay, spoilage (FOOD-A11), containers (CNT-*), moving the camp meat into a granary (FD-12 later),

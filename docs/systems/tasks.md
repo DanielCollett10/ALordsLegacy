@@ -18,7 +18,7 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 | `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, `CollectStock`, `DepositStock`. |
 | `TaskRecord`, `TaskPriority` | Id, def, state, owner, assignee, priority (Normal or High, set by `TaskBoard.SetPriority`), target, step index, ox, site, `BushId`, `CarrierId`. |
 | `DispatchSystem` | Dispatch phase. Hands Open tasks to idle workers, and runs the Sunday family trips (`RunFamilyTrips`). |
-| `StepRunnerSystem` (+ `.Ox.cs`, `.Food.cs`, `.Forage.cs`) | Steps phase. Runs Active tasks in id order. Each partial owns one family of steps. |
+| `StepRunnerSystem` (+ `.Ox.cs`, `.Food.cs`, `.Forage.cs`, `.Stock.cs`) | Steps phase. Runs Active tasks in id order. Each partial owns one family of steps. |
 | `CitizenTaskText` | Text for the citizen panel. |
 
 ## State machine

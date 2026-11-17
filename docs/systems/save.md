@@ -15,28 +15,29 @@
 
 ## Format
 
-Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`, now 16; every change bumps it, decision 0038), the header, then
-sections, each as int32 id + length. `SimSave.Read` requires the exact list order. Homes (id 8) and Food (id 9) sit between Population and Movement (decision 0034).
+Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`; every change bumps it, decision 0038), the header, then sections as int32 id + length. `SimSave.Read` requires the exact list order (decision 0034).
+
+Core is written first. Then, in this order:
 
 | Order | Id | Section | Holds |
 |---|---|---|---|
-| 1 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares and forager tuning), road and area catalogs, entry point, settlement log (T-498). |
-| 2 | 2 | Land | Trees as changes, road network, areas. |
-| 3 | 10 | Bushes | Forage bushes: position, kind, baskets, emptied tick, reservation, id counter. Replaces the new-game scatter on load (T-421). |
-| 4 | 3 | Structures | Footprints, camp, operations, construction sites, deconstruction entries, pending operations. |
-| 5 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
-| 6 | 5 | Population | Families (incl. Passage, T-498), citizens, oxen. |
-| 7 | 8 | Homes | Per house: footprint id, plot area id, family id (0 = Empty). Sets each family's `HomeHouseId`. |
-| 8 | 9 | Food | Camp food store id. Per family: larder, carried rations, Hungry, trip carrier, allotment reservations. Per house: larder. |
+| 0 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares, forager and market tuning), road and area catalogs, entry point, settlement log (T-498). |
+| 1 | 2 | Land | Trees as changes, road network, areas. |
+| 2 | 10 | Bushes | Forage bushes: position, kind, baskets, emptied tick, reservation, id counter. Replaces the new-game scatter on load (T-421). |
+| 3 | 3 | Structures | Footprints, camp, operations (with supply flag), construction sites, deconstruction entries, pending operations. |
+| 4 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
+| 5 | 5 | Population | Families (incl. Passage, T-498), citizens, oxen. |
+| 6 | 8 | Homes | Per house: footprint id, plot area id, family id (0 = Empty). Sets each family's `HomeHouseId`. |
+| 7 | 11 | Markets | The market record, stall footprint ids and stall-to-family links (T-456, T-459). |
+| 8 | 9 | Food | Camp food store id, `FoodHandedOver`, last Sunday served and short. Per family: larder, carried rations, Hungry, trip carrier, allotment reservations, hungry days, last hungry tick (T-496). Per house: larder. |
 | 9 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
-| 10 | 7 | Tasks | Task records (by def id) and their steps, with bush and carrier ids (T-423). |
+| 10 | 7 | Tasks | Task records (by def id) and their steps, with bush and carrier ids (T-423). Stock-stall trips included. |
 
-Version history: 9 added Food (T-415..418), 10 added Bushes (T-421), 11 added forager tuning and task bush and carrier ids (T-423), 12 added Markets (id 11, after Homes) and market tuning (T-456), 13 added the granary supply flag per operation (T-458), 14 added the family per stall in the Markets section (T-459), 22 added the family Passage (Population) and the settlement log (Core) (T-498, decision 0045).
+Versions 9 to 23 each added a section or field (Food 9, Bushes 10, Markets 11, granary supply flag, stall families, family Passage and settlement log 22, plank/beam items and goods store 23); see `SaveWriter.CurrentVersion`.
 
 ## How data moves
 
-**Write:** sections in order. **Read:** header → refuse map mismatch → Core → `SimWorld.ForRestore` (no start layout, no
-systems stepped) → each list section → full `Nav.Sync`. Unity: `LoadPanelController` → `PendingLoad` → scene reload → `SimHost.Start`.
+**Write:** sections in order. **Read:** header → refuse map mismatch → Core → `SimWorld.ForRestore` (no start layout, no systems stepped) → each list section → full `Nav.Sync`. Unity: `LoadPanelController` → `PendingLoad` → scene reload → `SimHost.Start`.
 
 ## Rules for new state
 
@@ -45,8 +46,7 @@ Any task that adds Sim state adds it to a section in the same task, and extends 
 
 ## Extending
 
-- A new section gets the next id and goes at the end unless it must load earlier (record in decision 0034). A new task def id must be in `TaskDefCatalog`.
-- A format change bumps the version. Old versions are refused with a message; no migrations yet (SV-33). The Load list greys them.
+- A new section gets the next id and goes at the end unless it must load earlier (decision 0034). New task def ids go in `TaskDefCatalog`. A format change bumps the version; old versions are refused (SV-33, no migrations) and greyed in the Load list.
 
 ## Gotchas
 

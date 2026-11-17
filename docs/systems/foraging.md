@@ -32,14 +32,14 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 
 ## Rules
 
-- Only the camp's own hut store (0044). Never a granary (store families collect later), never the camp food store (FD-12).
+- Only the camp's own hut store (0044). Never a granary, never the camp food store (FD-12). Granary store families collect from the hut store (`markets.md`, `StoreFamilySystem`).
 - Room = free space minus items promised to unfinished forage tasks. Hut full means Storage full and no new tasks (FD-23b).
 - A granary operation has no work region, so foraging skips it by type.
 
 ## How to extend
 
 - **New bush kind:** add it to `BushKind`, map it in `PickBasket`, and update the kind check in `BushesSection`.
-- **Store families (not built yet):** they will collect from the hut store into granaries (0044). Foragers stay hut-only.
+- **Store families** collect from the hut store into granaries (`markets.md`). Foragers stay hut-only.
 - **Balancing:** `SimTuning` `BushBaskets`, `BushRegrowDays`, `ForagerMinAge`, `ForagerHutCapacity`,
   `GatherMinutesPerBasket`, `HandCarryItems`. All are placeholders until playtested.
 
