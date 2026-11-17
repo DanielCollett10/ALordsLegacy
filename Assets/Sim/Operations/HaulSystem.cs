@@ -88,7 +88,8 @@ namespace LordsLegacy.Sim.Operations
         private static void OpenTasks(SimWorld world, Operation op)
         {
             int load = Math.Max(1, world.Tuning.OxLoadLogs);
-            bool moreComing = MoreLogsComing(world, op);
+            // A full operation stops felling, so no more logs will join sub-load piles: haul them as they are (T-490).
+            bool moreComing = MoreLogsComing(world, op) && !OperationStatus.IsStorageFull(world, op);
             var piles = new List<LedgerLocation>();
             foreach (LedgerLocation l in world.Inventory.Locations)
                 if (l.Kind == LocationKind.GroundPile && l.OwnerOperationId == op.Id) piles.Add(l);
