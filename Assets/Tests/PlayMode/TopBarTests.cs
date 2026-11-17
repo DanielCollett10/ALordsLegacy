@@ -62,6 +62,32 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [Test]
+        public void TimberLabelsReadLogsBeamsPlanksInOrderAndUpdateWhenStockChanges()
+        {
+            var w = _host.World;
+            _bar.Refresh();
+            var root = _uiGo.GetComponent<UIDocument>().rootVisualElement;
+            var food = root.Q<Label>("food-label");
+            Assert.AreEqual("Logs: 0", _bar.LogsText);
+            Assert.AreEqual("Beams: 0", _bar.BeamsText);
+            Assert.AreEqual("Planks: 0", _bar.PlanksText);
+            var siblings = food.parent;
+            int f = siblings.IndexOf(food);
+            Assert.AreEqual("logs-label", siblings[f + 1].name);
+            Assert.AreEqual("beams-label", siblings[f + 2].name);
+            Assert.AreEqual("planks-label", siblings[f + 3].name);
+
+            w.Inventory.Produce(w.Inventory.AddStockpile(LordsLegacy.Sim.Geometry.PointMm.FromMetres(60, 40)), Items.Log, 12);
+            var goods = w.Inventory.AddGoodsStore(LordsLegacy.Sim.Geometry.PointMm.FromMetres(62, 40));
+            w.Inventory.Produce(goods, Items.Beam, 5);
+            w.Inventory.Produce(goods, Items.Plank, 3);
+            _bar.Refresh();
+            Assert.AreEqual("Logs: 12", _bar.LogsText);
+            Assert.AreEqual("Beams: 5", _bar.BeamsText);
+            Assert.AreEqual("Planks: 3", _bar.PlanksText);
+        }
+
+        [Test]
         public void PopulationReadoutShowsFamiliesCitizensAndTooltipCounts()
         {
             var w = _host.World;

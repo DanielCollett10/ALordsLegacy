@@ -28,7 +28,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _title, _state, _stock, _stored, _message, _suppliesReason;
+        private Label _title, _state, _stock, _stored, _message, _suppliesReason, _waiting;
         private Toggle _supplies;
         private Button _deconstruct, _close;
         private VisualElement _familyBox, _pickerBox;
@@ -129,6 +129,22 @@ namespace LordsLegacy.Game
             if (r.Reserved > 0) s += " (" + r.Reserved + " reserved)";
             return s;
         }
+
+        /// <summary>"Waiting for planks" or "No room at market" while a family of this granary cannot get a stall (T-527, PL-13); "" otherwise.</summary>
+        public static string WaitingLine(SimWorld world, int? operationId, bool built)
+        {
+            Operation op = built && operationId.HasValue ? world.Operations.Get(operationId.Value) : null;
+            if (op == null) return "";
+            switch (OperationStatus.Of(world, op))
+            {
+                case OperationState.WaitingForPlanks: return "Waiting for planks";
+                case OperationState.NoRoomAtMarket: return "No room at market";
+                default: return "";
+            }
+        }
+
+        /// <summary>The waiting line ("Waiting for planks"), or "" when the granary is not waiting.</summary>
+        public string WaitingText => _waiting?.text ?? "";
 
         private static string ItemLabel(string id)
         {
@@ -328,6 +344,8 @@ namespace LordsLegacy.Game
             _state.text = StateLine(r);
             _stock.text = StockLines(r);
             _stored.text = StoredLine(r);
+            _waiting.text = WaitingLine(host.World, OperationOfGranary(host.World, agents.SelectedGranaryId), r.IsBuilt);
+            _waiting.style.display = _waiting.text.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshSupplies(host.World, r, OperationOfGranary(host.World, agents.SelectedGranaryId));
             RebuildFamilies(host.World, agents.SelectedGranaryId);
             _deconstruct.style.display = r.State == GranaryState.Deconstructing ? DisplayStyle.None : DisplayStyle.Flex;
@@ -417,6 +435,9 @@ namespace LordsLegacy.Game
             _state = MakeLabel("granary-state", 12, false);
             _stock = MakeLabel("granary-stock", 12, false);
             _stored = MakeLabel("granary-stored", 12, false);
+            _waiting = MakeLabel("granary-waiting", 12, false);
+            _waiting.style.color = new Color(200f / 255f, 170f / 255f, 120f / 255f);
+            _waiting.style.display = DisplayStyle.None;
             _message = MakeLabel("granary-message", 12, false);
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
@@ -441,7 +462,7 @@ namespace LordsLegacy.Game
             _deconstruct.style.backgroundColor = new Color(70f / 255f, 58f / 255f, 44f / 255f);
             _deconstruct.clicked += ClickDeconstruct;
 
-            _panel.Add(_title); _panel.Add(_state); _panel.Add(_stock); _panel.Add(_stored);
+            _panel.Add(_title); _panel.Add(_state); _panel.Add(_waiting); _panel.Add(_stock); _panel.Add(_stored);
             _panel.Add(_supplies); _panel.Add(_suppliesReason);
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);

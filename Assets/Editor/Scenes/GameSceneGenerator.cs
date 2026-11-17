@@ -388,6 +388,11 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(granaryPanel, "_host", host);
             SetRef(granaryPanel, "_agents", agents);
             SetRef(granaryPanel, "_controller", controller);
+            var workshopGo = CreateUiDocument("WorkshopPanel", null);
+            var workshopPanel = workshopGo.AddComponent<WorkshopPanelView>();
+            SetRef(workshopPanel, "_host", host);
+            SetRef(workshopPanel, "_agents", agents);
+            SetRef(workshopPanel, "_controller", controller);
             var marketGo = CreateUiDocument("MarketPanel", null);
             var marketPanel = marketGo.AddComponent<MarketPanelView>();
             SetRef(marketPanel, "_host", host);
