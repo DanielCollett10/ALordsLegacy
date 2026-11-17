@@ -28,7 +28,8 @@ The yard is a granary for General goods. Its families plan trips with the same r
 | --- | --- | --- |
 | ST-40 | **1. Camp first:** while the camp General store holds goods, empty it into the yard as room allows. If the yard fills, the rest waits where it is (in the camp store, or in the dropped pile after ST-31) | PROPOSED |
 | ST-41 | **2. Loose goods:** pick up unowned General ground piles (dropped kit ST-23, camp leftovers ST-31, deconstruction refunds) | PROPOSED |
-| ST-42 | **3. Production stores:** collect from a production store (sawpit, hewing station, later coppice hut, weaver, wattle yard, thatcher) once it is **at least half full** (`YardCollectThreshold` 0.5). Fullest store first. Below half, the goods stay where the next workshop or site can use them nearby | PROPOSED |
+| ST-42 | **3. Workshop output:** collect only from **workshops** (a building with an input and an output: hewing station, sawpit, later weaver and wattle yard) once the output store is **at least half full** (`YardCollectThreshold` 0.5). Fullest store first. Below half, the goods stay where the next workshop or site can use them nearby | DECIDED (owner 17/11/2026: workshops only; threshold PROPOSED) |
+| ST-42b | Gathering huts (coppice hut, thatcher's hut) and the daub pit (no input) are **not** collected. Workshops and sites fetch from their stores directly | DECIDED (owner 17/11/2026) |
 | ST-43 | **Loads:** light items by hand, a per-item load from tuning (planks 2, rods 10, baskets 5, panels 2, thatch 1). **Beams by ox** (pool ox, 1 per trip, PL-21), same ox priority as workshops (construction first, HW-06) | PROPOSED |
 | ST-44 | Reserved stock (for a site or another fetch) is never collected. Collected goods are reserved on the yard's capacity before the trip starts, so a full yard means no trip | PROPOSED |
 | ST-45 | Panel status: No workers, Moving camp goods, Collecting, Yard full, Idle | PROPOSED |
@@ -38,7 +39,7 @@ The yard is a granary for General goods. Its families plan trips with the same r
 | ID | Rule | Tag |
 | --- | --- | --- |
 | ST-20 | A production or gathering building that uses a kit item (baskets now; tools later) has a **local kit store** with a fixed number of slots per item (e.g. 5 baskets) | DECIDED (owner 17/11/2026; slot counts PLACEHOLDER) |
-| ST-21 | It **claims** kit from General goods (camp store or storage yard) until its slots are full or none are left. Example: 10 baskets in the village, a building with 5 slots takes 5 | DECIDED (owner 17/11/2026) |
+| ST-21 | It **claims** kit from General goods (camp store, storage yard, or the weaver's own store) until its slots are full or none are left. Example: 10 baskets in the village, a building with 5 slots takes 5 | DECIDED (owner 17/11/2026) |
 | ST-22 | Its own workers fetch the claimed kit by hand, nearest store first. Claimed kit **stays** at the building | PROPOSED (who fetches) |
 | ST-23 | If the building is deconstructed or deleted, its kit is **dropped on the ground** there, and storage yard families collect it | DECIDED (owner 17/11/2026) |
 | ST-24 | When several buildings want the same kit, the oldest claim is served first | PROPOSED |

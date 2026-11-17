@@ -34,7 +34,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | PL-10 | A market stall costs **2 planks** (its real MKT-03 cost), replacing the 1-log placeholder | DECIDED |
-| PL-11 | **Tier 1 house: 5 logs** (was 10), switched **in M20 together with thatch and panels** (MAT-40). Until then houses stay at 10 logs | DECIDED (owner 17/11/2026) |
+| PL-11 | **Tier 1 house: 10 logs** plus thatch and panels from M20 (MAT-40, MAT-40b). The earlier 5-log plan is dropped for now | DECIDED (owner 17/11/2026, M18–M21 planning) |
 | PL-11b | **Tier 2 house: 10 beams** instead of logs (plus planks and other items, later). Tier 2 is not built yet | DECIDED (owner 17/11/2026; future) |
 | PL-12 | Construction learns **recipes with more than one item** and **hand delivery** for light items (decision 0046) | PROPOSED |
 | PL-13 | Stalls already placed keep their log cost; only new stalls cost planks. With too few planks no stall is placed and the granary family shows *Waiting for planks* | PROPOSED |
@@ -44,6 +44,15 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 > Implementation note (PL-10, PL-13): the stall recipe is still 1 log and 60 worker-minutes (`ModuleTypes`, the
 > placeholder MKT-03 allows until planks exist). Stalls do not use planks yet. Owner to decide when that switches.
+
+## Input reserve (M18)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| PL-30 | A workshop keeps a **reserve of its input in the village**: it only fetches an input while the village's free stock of that item stays **at or above the reserve after the fetch**. Defaults: hewing station **20 logs**, sawpit **20 beams**. Without it, the hewers use up every log and the sawyers every beam, and only planks pile up | DECIDED (owner 17/11/2026; 20 PLACEHOLDER) |
+| PL-31 | "Free stock" means unreserved stock where a site or workshop could fetch it: logs in log storage, the camp stockpile and unowned or woodcutter ground piles; beams in hewing stores and storage yards. Workshop input stock and items on the move are not counted | PROPOSED |
+| PL-32 | The reserve is tuning per workshop (`WorkshopDef`), 0 = no reserve (weaver and wattle yard default to 0). Status: *Keeping 20 logs in reserve*. A per-building setting on the panel can come with the UI tidy-up | PROPOSED |
+| PL-33 | Work already fetched is finished; the reserve only stops new fetches | PROPOSED |
 
 ## Oxen
 

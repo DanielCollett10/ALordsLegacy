@@ -7,7 +7,7 @@ kit store (`design/storage.md` ST-20..25), fetched by the building's own workers
 - A kit store is a `GoodsStore` with `ModuleId` = the building and a **per-item slot count** from the building's def
   (forager hut 5 baskets, granary 2). It is never a construction, workshop or yard-collect source, but it counts
   in village totals.
-- Claims: a building with free slots and a basket available in a General store (camp, yard) opens a kit fetch for its own
+- Claims: a building with free slots and a basket available in a General store (camp, yard, weaver's store) opens a kit fetch for its own
   family. Claims are served oldest first by building id order of first claim tick (ST-24).
 - A carry trip that can use a basket **reserves one basket** in the kit store at plan time and releases it when the
   task ends, so the basket never moves in the ledger. The plan uses the doubled load only with a reservation.

@@ -61,6 +61,8 @@ are drafted in the backlog; M18–M21 are drafted one at a time as each comes up
 
 Update 17/11/2026 (M18–M21 planning, owner asked for all four at once): M18 `storage.md`, M19 and M20 `materials.md`,
 M21 `household-levels.md` (new). Technical decisions 0050 (stools and reed beds are bush kinds), 0051 (workshop
-recipes, hand fetch), 0052 (kit stores). The house recipe in M20 is open again (MAT-40b: 10 logs vs PL-11's 5).
+recipes, hand fetch), 0052 (kit stores). Owner answers: houses stay at 10 logs (MAT-40b); level 2 gives nothing yet and renovation/house tier 2 and
+artisans come after M21 (HL-23, HL-25); yards collect only workshop output (ST-42); workshops keep a 20-item input
+reserve (PL-30). A UI tidy-up with embedded panels comes in a later milestone, once the owner plans a layout.
 
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).

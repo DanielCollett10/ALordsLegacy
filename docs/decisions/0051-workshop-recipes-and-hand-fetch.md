@@ -13,6 +13,8 @@ M21 needs a daub pit with no input at all (`design/household-levels.md` HL-01).
 - Each input has a **carry class**: Ox (logs, beams; `task.fetch_input`, construction first) or Hand (rods;
   a new `task.fetch_input_hand` done by the workshop's own family, load from the item's hand load in tuning).
 - The workshop fetches the input it is **shortest of** first (lowest share of its capacity).
+- Each input carries a **village reserve** (`design/planks.md` PL-30..33, added in M18 before this refactor): no
+  fetch that would leave less than the reserve in free village stock. The refactor keeps it per input.
 - Status *Waiting for <item>* names the first missing input.
 
 **Consequences.** Weaver, wattle yard and daub pit are data plus a footprint type. Hewing and sawpit tests must still pass

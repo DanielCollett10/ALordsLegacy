@@ -64,7 +64,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | MAT-40 | A house costs **10 logs + 10 thatch sheaves + 10 wattle panels** (placeholder; replaces HM-06's 10 logs) | DECIDED (owner 17/11/2026) |
-| MAT-40b | **Conflict:** PL-11 says 5 logs from M20. Owner restated 10 logs on 17/11/2026 (M20 planning). Lead's default: **10 logs**, owner to confirm. A house site placed before the switch keeps its old recipe (like stalls, PL-13) | OPEN |
+| MAT-40b | Logs stay at **10** for now (replaces PL-11's 5). A house site placed before the switch keeps its old recipe (like stalls, PL-13) | DECIDED (owner 17/11/2026) |
 | MAT-43 | Thatch is carried by hand **1 a trip**, panels **2 a trip**, by odd-jobbers (PL-16) | PROPOSED |
 | MAT-41 | Wattle panels also build the plot's perimeter fence (panels by perimeter length, OPEN), which is **not** required to move in | DECIDED (fence with tier-1 houses) |
 | MAT-42 | Daub (earth or clay) and household levels 1–2 come with tier-1 houses (HSE-20..23) | DECIDED (M21, `household-levels.md`) |
