@@ -49,6 +49,10 @@ namespace LordsLegacy.Game.Visuals
         public const string ModuleHewingStation = "visual.module.hewing_station";
         /// <summary>Id of the sawpit visual (T-526).</summary>
         public const string ModuleSawpit = "visual.module.sawpit";
+        /// <summary>Id of the weaver visual (T-569).</summary>
+        public const string ModuleWeaver = "visual.module.weaver";
+        /// <summary>Id of the wattle yard visual (T-569).</summary>
+        public const string ModuleWattleYard = "visual.module.wattle_yard";
         /// <summary>Id of the storage yard visual (T-549).</summary>
         public const string ModuleStorageYard = "visual.module.storage_yard";
         /// <summary>Id of the beam stack visual: one stack on a hewing station's output store (T-526).</summary>
@@ -80,6 +84,8 @@ namespace LordsLegacy.Game.Visuals
                 case ItemFoodCrate: return new Vector3(0.6f, 0.35f, 0.6f);
                 case ModuleHewingStation: return new Vector3(6f, 2.2f, 4f);
                 case ModuleSawpit: return new Vector3(6f, 1.4f, 4f);
+                case ModuleWeaver: return new Vector3(6f, 2f, 4f);
+                case ModuleWattleYard: return new Vector3(6f, 1.6f, 4f);
                 case ModuleStorageYard: return new Vector3(8f, 0.8f, 6f);
                 case ItemBeamStack: return new Vector3(1.2f, 0.5f, 0.6f);   // y is the height of a full stack
                 case ItemPlankStack: return new Vector3(1.2f, 0.4f, 0.6f);

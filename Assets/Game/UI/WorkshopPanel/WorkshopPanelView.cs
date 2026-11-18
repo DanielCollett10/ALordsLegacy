@@ -24,10 +24,20 @@ namespace LordsLegacy.Game
         private VisualElement _panel, _pickerBox;
         private Label _title, _status, _input, _output, _family, _message;
         private Button _assign, _unassign, _deconstruct, _close;
-        private VisualElement _reserveRow;
-        private IntegerField _reserveField;
-        private Label _reserveItems;
+        private Label _recipe;
+        private VisualElement _inputsBox;
+        private readonly System.Collections.Generic.List<InputRow> _rows = new System.Collections.Generic.List<InputRow>();
+        private VisualElement _reserveRow => _rows.Count > 0 ? _rows[0].Row : null;
+        private IntegerField _reserveField => _rows.Count > 0 ? _rows[0].Field : null;
+        private Label _reserveItems => _rows.Count > 0 ? _rows[0].Items : null;
         private bool _pickerOpen;
+
+        // One recipe input on the panel: its stock line and its own "Keep in storage" row (T-569).
+        private sealed class InputRow
+        {
+            public VisualElement Row; public IntegerField Field; public Label Items, Stock;
+            public string ItemId;
+        }
         private string _pickerSignature = "";
         private bool _subscribed;
 
@@ -55,6 +65,14 @@ namespace LordsLegacy.Game
         public VisualElement ReserveRow => _reserveRow;
         /// <summary>The item name after the reserve field, e.g. "logs".</summary>
         public string ReserveItemsText => _reserveItems?.text ?? "";
+        /// <summary>The recipe line, e.g. "Recipe: 6 hazel_rod + 2 willow_rod -> 1 wattle_panel".</summary>
+        public string RecipeLineText => _recipe?.text ?? "";
+        /// <summary>Number of per-input rows currently built.</summary>
+        public int InputRowCount => _rows.Count;
+        /// <summary>The reserve field of input <paramref name="index"/>, or null.</summary>
+        public IntegerField ReserveFieldOf(int index) => index >= 0 && index < _rows.Count ? _rows[index].Field : null;
+        /// <summary>The stock line of input <paramref name="index"/> (empty for single-input workshops).</summary>
+        public string InputStockText(int index) => index >= 0 && index < _rows.Count ? _rows[index].Stock.text : "";
         /// <summary>The Assign button, or null.</summary>
         public Button AssignButton => _assign;
         /// <summary>The Unassign button, or null.</summary>
@@ -153,16 +171,27 @@ namespace LordsLegacy.Game
             _input.text = r.InputText;
             _output.text = r.OutputText;
             _family.text = "Family: " + (r.FamilyName ?? "none");
+            _recipe.text = "Recipe: " + r.RecipeText;
+            bool multi = r.Inputs.Count > 1;
+            _input.style.display = multi ? DisplayStyle.None : DisplayStyle.Flex;
+            EnsureRows(r.Inputs.Count);
             var reserveOp = host.World.Operations.FindByModule(r.FootprintId);
             bool showReserve = r.IsBuilt && reserveOp != null;
-            _reserveRow.style.display = showReserve ? DisplayStyle.Flex : DisplayStyle.None;
-            if (showReserve)
+            for (int i = 0; i < _rows.Count; i++)
             {
-                _reserveItems.text = r.InputName + "s";
-                int reserve = InputReserve.ReserveOf(host.World, reserveOp);
-                if (!UiFocusRules.TextInputActive && _reserveField.value != reserve) _reserveField.SetValueWithoutNotify(reserve);
+                var row = _rows[i];
+                var line = r.Inputs[i];
+                row.ItemId = line.ItemId;
+                row.Stock.style.display = multi ? DisplayStyle.Flex : DisplayStyle.None;
+                row.Stock.text = line.Name + ": " + line.Stock + " / " + line.StockCapacity + " (" + line.PerBatch + " per batch)";
+                row.Row.style.display = showReserve ? DisplayStyle.Flex : DisplayStyle.None;
+                if (showReserve)
+                {
+                    row.Items.text = line.Name + "s";
+                    if (!UiFocusRules.TextInputActive && row.Field.value != line.Reserve) row.Field.SetValueWithoutNotify(line.Reserve);
+                }
+                else UiFocusRules.ReleaseFocus(row.Field);
             }
-            else if (_reserveField != null) UiFocusRules.ReleaseFocus(_reserveField);
             bool hasFamily = r.FamilyId != 0;
             _assign.style.display = !hasFamily ? DisplayStyle.Flex : DisplayStyle.None;
             _assign.SetEnabled(r.IsBuilt);
@@ -299,7 +328,9 @@ namespace LordsLegacy.Game
             _input = MakeLabel("workshop-input", 12, false);
             _output = MakeLabel("workshop-output", 12, false);
             _family = MakeLabel("workshop-family", 12, false);
-            BuildReserveRow();
+            _recipe = MakeLabel("workshop-recipe", 12, false);
+            _inputsBox = new VisualElement { name = "workshop-inputs" };
+            _rows.Clear();
             _message = MakeLabel("workshop-message", 12, false);
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
@@ -311,7 +342,7 @@ namespace LordsLegacy.Game
             _pickerBox.style.display = DisplayStyle.None;
 
             _panel.Add(_title); _panel.Add(_status); _panel.Add(_input); _panel.Add(_output); _panel.Add(_family);
-            _panel.Add(_reserveRow);
+            _panel.Add(_recipe); _panel.Add(_inputsBox);
             _panel.Add(_assign); _panel.Add(_unassign); _panel.Add(_pickerBox);
             _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
@@ -319,38 +350,52 @@ namespace LordsLegacy.Game
             UiFocusRules.Apply(root);
         }
 
-        private void BuildReserveRow()
+        // Adds per-input rows until there are <paramref name="count"/>; row 0 keeps the T-527 element names.
+        private void EnsureRows(int count)
+        {
+            while (_rows.Count < count) AddRow(_rows.Count);
+        }
+
+        private void AddRow(int index)
         {
             var light = new Color(240f / 255f, 230f / 255f, 210f / 255f);
-            _reserveRow = new VisualElement { name = "workshop-reserve-row" };
-            _reserveRow.style.flexDirection = FlexDirection.Row;
-            _reserveRow.style.alignItems = Align.Center;
-            _reserveRow.style.marginTop = 2;
-            var caption = MakeLabel("workshop-reserve-caption", 12, false, "Keep in storage:");
-            _reserveField = new IntegerField { name = "workshop-reserve", isDelayed = true };
-            _reserveField.style.width = 64;
-            _reserveField.style.marginLeft = _reserveField.style.marginRight = 4;
-            var input = _reserveField.Q(className: TextInputBaseField<int>.inputUssClassName);
+            string sfx = index == 0 ? "" : "-" + index;
+            var row = new InputRow();
+            row.Stock = MakeLabel("workshop-input-stock" + sfx, 12, false);
+            row.Row = new VisualElement { name = "workshop-reserve-row" + sfx };
+            row.Row.style.flexDirection = FlexDirection.Row;
+            row.Row.style.alignItems = Align.Center;
+            row.Row.style.marginTop = 2;
+            var caption = MakeLabel("workshop-reserve-caption" + sfx, 12, false, "Keep in storage:");
+            row.Field = new IntegerField { name = "workshop-reserve" + sfx, isDelayed = true };
+            row.Field.style.width = 64;
+            row.Field.style.marginLeft = row.Field.style.marginRight = 4;
+            var input = row.Field.Q(className: TextInputBaseField<int>.inputUssClassName);
             if (input != null)
             {
                 input.style.color = light;
                 input.style.backgroundColor = new Color(55f / 255f, 46f / 255f, 36f / 255f);
             }
-            _reserveField.RegisterValueChangedCallback(OnReserveChanged);
-            UiFocusRules.AllowTextInput(_reserveField);
-            _reserveItems = MakeLabel("workshop-reserve-items", 12, false);
-            _reserveRow.Add(caption); _reserveRow.Add(_reserveField); _reserveRow.Add(_reserveItems);
-            _reserveRow.style.display = DisplayStyle.None;
+            row.Field.RegisterValueChangedCallback(e => OnReserveChanged(row, e));
+            UiFocusRules.AllowTextInput(row.Field);
+            row.Items = MakeLabel("workshop-reserve-items" + sfx, 12, false);
+            row.Row.Add(caption); row.Row.Add(row.Field); row.Row.Add(row.Items);
+            row.Row.style.display = DisplayStyle.None;
+            _rows.Add(row);
+            _inputsBox.Add(row.Stock); _inputsBox.Add(row.Row);
+            UiFocusRules.Apply(row.Row);
         }
 
-        private void OnReserveChanged(ChangeEvent<int> e)
+        private void OnReserveChanged(InputRow row, ChangeEvent<int> e)
         {
-            if (!TryOperation(out int op, out _)) return;
+            if (!TryOperation(out int op, out _) || string.IsNullOrEmpty(row.ItemId)) return;
             var world = Host().World;
-            var def = OperationTypes.WorkshopOf(world.Operations.Get(op).TypeId, world.Tuning);
-            Run(new SetWorkshopReserve(op, def.Input.Id, e.newValue));
+            Run(new SetWorkshopReserve(op, row.ItemId, e.newValue));
             // Accepted or refused, show what the Sim holds (a refused value snaps back).
-            _reserveField.SetValueWithoutNotify(InputReserve.ReserveOf(world, world.Operations.Get(op)));
+            var item = Sim.Inventory.Items.Find(row.ItemId);
+            row.Field.SetValueWithoutNotify(item != null
+                ? InputReserve.ReserveOf(world, world.Operations.Get(op), item)
+                : InputReserve.ReserveOf(world, world.Operations.Get(op)));
         }
 
         private static Button MakeButton(string name, string text, System.Action onClick)

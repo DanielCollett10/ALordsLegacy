@@ -144,8 +144,8 @@ SceneRoots:
   - {fileID: 100004}
   - {fileID: 100153}
   - {fileID: 100156}
-  - {fileID: 100177}
-  - {fileID: 100174}
+  - {fileID: 100183}
+  - {fileID: 100180}
   - {fileID: 100057}
   - {fileID: 100051}
   - {fileID: 100034}
@@ -160,6 +160,8 @@ SceneRoots:
   - {fileID: 100070}
   - {fileID: 100080}
   - {fileID: 100133}
+  - {fileID: 100177}
+  - {fileID: 100174}
   - {fileID: 100146}
   - {fileID: 100076}
   - {fileID: 100001}
@@ -168,7 +170,7 @@ SceneRoots:
   - {fileID: 100114}
   - {fileID: 100083}
   - {fileID: 100066}
-  - {fileID: 100180}
+  - {fileID: 100186}
   - {fileID: 100142}
   - {fileID: 100097}
   - {fileID: 100060}
@@ -2173,7 +2175,7 @@ MonoBehaviour:
   _operationTypeId: operation.woodcutting
   _host: {fileID: 100140}
   _picker: {fileID: 100074}
-  _areaTool: {fileID: 100175}
+  _areaTool: {fileID: 100181}
   _areas: {fileID: 100005}
   _panel: {fileID: 100165}
   _controller: {fileID: 100160}
@@ -3210,7 +3212,7 @@ GameObject:
   - component: {fileID: 100174}
   - component: {fileID: 100175}
   m_Layer: 0
-  m_Name: WoodcutterAreaTool
+  m_Name: WattleYardTool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3240,17 +3242,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 100173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62c0c86b0e02858429f414926400f613, type: 3}
+  m_Script: {fileID: 11500000, guid: 56c7f7f4b35934e4faaf2fbfb6ba621d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.AreaTool
-  _toolId: woodcutter-draw
-  _typeId: area.woodcutting
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.StructureTool
+  _toolId: wattle-yard
+  _typeId: module.wattle_yard
   _host: {fileID: 100140}
   _picker: {fileID: 100074}
-  _areas: {fileID: 100005}
   _panel: {fileID: 100165}
   _controller: {fileID: 100160}
-  _topBar: {fileID: 100169}
 --- !u!1 &100176
 GameObject:
   m_ObjectHideFlags: 0
@@ -3262,7 +3262,7 @@ GameObject:
   - component: {fileID: 100177}
   - component: {fileID: 100178}
   m_Layer: 0
-  m_Name: WoodcutterWorkAreaTool
+  m_Name: WeaverTool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3292,17 +3292,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 100176}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62c0c86b0e02858429f414926400f613, type: 3}
+  m_Script: {fileID: 11500000, guid: 56c7f7f4b35934e4faaf2fbfb6ba621d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.AreaTool
-  _toolId: woodcutter-work
-  _typeId: area.work_woodcutting
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.StructureTool
+  _toolId: weaver
+  _typeId: module.weaver
   _host: {fileID: 100140}
   _picker: {fileID: 100074}
-  _areas: {fileID: 100005}
   _panel: {fileID: 100165}
   _controller: {fileID: 100160}
-  _topBar: {fileID: 100169}
 --- !u!1 &100179
 GameObject:
   m_ObjectHideFlags: 0
@@ -3313,9 +3311,8 @@ GameObject:
   m_Component:
   - component: {fileID: 100180}
   - component: {fileID: 100181}
-  - component: {fileID: 100182}
   m_Layer: 0
-  m_Name: WorkshopPanel
+  m_Name: WoodcutterAreaTool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3345,6 +3342,111 @@ MonoBehaviour:
   m_GameObject: {fileID: 100179}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c0c86b0e02858429f414926400f613, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.AreaTool
+  _toolId: woodcutter-draw
+  _typeId: area.woodcutting
+  _host: {fileID: 100140}
+  _picker: {fileID: 100074}
+  _areas: {fileID: 100005}
+  _panel: {fileID: 100165}
+  _controller: {fileID: 100160}
+  _topBar: {fileID: 100169}
+--- !u!1 &100182
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100183}
+  - component: {fileID: 100184}
+  m_Layer: 0
+  m_Name: WoodcutterWorkAreaTool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100183
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100182}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c0c86b0e02858429f414926400f613, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.Tools.AreaTool
+  _toolId: woodcutter-work
+  _typeId: area.work_woodcutting
+  _host: {fileID: 100140}
+  _picker: {fileID: 100074}
+  _areas: {fileID: 100005}
+  _panel: {fileID: 100165}
+  _controller: {fileID: 100160}
+  _topBar: {fileID: 100169}
+--- !u!1 &100185
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100186}
+  - component: {fileID: 100187}
+  - component: {fileID: 100188}
+  m_Layer: 0
+  m_Name: WorkshopPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100186
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100185}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
@@ -3359,13 +3461,13 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &100182
+--- !u!114 &100188
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100179}
+  m_GameObject: {fileID: 100185}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d287cf72b63630640ae95ef2bcc7b7a3, type: 3}

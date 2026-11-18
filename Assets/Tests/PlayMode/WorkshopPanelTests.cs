@@ -183,6 +183,55 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_panel.IsShown);
         }
 
+        [Test]
+        public void BuildBarOffersWeaverAndWattleYard()
+        {
+            var entries = ToolEntry.Defaults();
+            var weaver = System.Array.Find(entries, e => e.Id == LordsLegacy.Game.Tools.StructureTool.WeaverToolId);
+            var wattle = System.Array.Find(entries, e => e.Id == LordsLegacy.Game.Tools.StructureTool.WattleYardToolId);
+            Assert.IsNotNull(weaver); Assert.AreEqual("Weaver", weaver.Label);
+            Assert.IsNotNull(wattle); Assert.AreEqual("Wattle yard", wattle.Label);
+            Assert.AreEqual(ModuleTypes.Weaver.ConstructionRecipe.Logs, weaver.CostLogs());
+            Assert.AreEqual(ModuleTypes.WattleYard.ConstructionRecipe.Logs, wattle.CostLogs());
+        }
+
+        [UnityTest]
+        public IEnumerator WattleYardPanelListsEveryInputWithItsOwnReserveField()
+        {
+            var w = _host.World;
+            int yard = BuildWorkshop(ModuleTypes.WattleYardId, 811, 100, 100);
+            int opId = w.Operations.FindByModule(yard).Id;
+            w.Inventory.Produce(w.Inventory.FindWorkshopStock(yard, Items.HazelRod.Id), Items.HazelRod, 5);
+            _agents.SelectWorkshop(yard);
+            yield return null;
+            Assert.AreEqual("Wattle yard", _panel.TitleText);
+            StringAssert.Contains("hazel_rod", _panel.RecipeLineText);
+            StringAssert.Contains("wattle_panel", _panel.RecipeLineText);
+            Assert.AreEqual(2, _panel.InputRowCount);
+            StringAssert.StartsWith("hazel_rod: 5 / ", _panel.InputStockText(0));
+            StringAssert.StartsWith("willow_rod: 0 / ", _panel.InputStockText(1));
+            Assert.AreEqual(DisplayStyle.Flex, _panel.ReserveFieldOf(1).parent.resolvedStyle.display);
+            Assert.Greater(_panel.ReserveFieldOf(1).worldBound.width, 0f);
+            _panel.ReserveFieldOf(1).value = 7;
+            yield return null;
+            Assert.AreEqual(7, InputReserve.ReserveOf(w, w.Operations.Get(opId), Items.WillowRod));
+            Assert.AreNotEqual(7, InputReserve.ReserveOf(w, w.Operations.Get(opId), Items.HazelRod));
+            Assert.AreEqual(7, _panel.ReserveFieldOf(1).value);
+        }
+
+        [UnityTest]
+        public IEnumerator WeaverPanelShowsRodsRecipeAndReserve()
+        {
+            int weaver = BuildWorkshop(ModuleTypes.WeaverId, 812, 100, 100);
+            _agents.SelectWorkshop(weaver);
+            yield return null;
+            Assert.AreEqual("Weaver", _panel.TitleText);
+            StringAssert.Contains("willow_rod", _panel.RecipeLineText);
+            StringAssert.Contains("basket", _panel.RecipeLineText);
+            Assert.AreEqual(1, _panel.InputRowCount);
+            Assert.AreEqual("willow_rods", _panel.ReserveItemsText);
+        }
+
         [UnityTest]
         public IEnumerator ReserveFieldShowsCaptionAndItemsAndSetsTheReserve()
         {

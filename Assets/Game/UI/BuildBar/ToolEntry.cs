@@ -68,6 +68,10 @@ namespace LordsLegacy.Game
                     () => ModuleTypes.HewingStation.ConstructionRecipe.Logs),
                 new ToolEntry(LordsLegacy.Game.Tools.StructureTool.SawpitToolId,"Sawpit", true, "Place a sawpit: beams into planks",
                     () => ModuleTypes.Sawpit.ConstructionRecipe.Logs),
+                new ToolEntry(LordsLegacy.Game.Tools.StructureTool.WeaverToolId, "Weaver", true, "Place a weaver: willow rods into baskets",
+                    () => ModuleTypes.Weaver.ConstructionRecipe.Logs),
+                new ToolEntry(LordsLegacy.Game.Tools.StructureTool.WattleYardToolId, "Wattle yard", true, "Place a wattle yard: hazel and willow rods into wattle panels",
+                    () => ModuleTypes.WattleYard.ConstructionRecipe.Logs),
             };
         }
     }
