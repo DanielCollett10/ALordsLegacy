@@ -36,6 +36,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             {
                 WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
                 if (def == null) continue;
+                WorkshopDef.RequireSingleInput(def);
                 Footprint fp = HutOf(world, op);
                 if (fp == null || op.Paused || !world.IsWorking(fp.Id) || !HasWorker(world, op)) continue;
                 LedgerLocation stock = world.Inventory.FindWorkshopStock(fp.Id);
