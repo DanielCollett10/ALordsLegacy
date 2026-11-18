@@ -9,7 +9,8 @@
 | Type | Role |
 |---|---|
 | `WorkshopDef` | Data: input, output, outputs per input, inputs per day per family, stock and store capacity, ox load. `Hewing(t)` and `Sawing(t)` read every number from `SimTuning`. |
-| `WorkshopBuildings` | `IsWorkshop`; `OnBuilt` makes the `WorkshopStock` (input) and `GoodsStore` (output) when the site finishes. |
+| `WorkshopBuildings` | `IsWorkshop`; `OnBuilt` makes one `WorkshopStock` per recipe input (own capacity, `RecipeInput.StockCapacity`) and the `GoodsStore` (output) when the site finishes. |
+| Multi-input (T-558) | A work task starts only when every input has one batch available and the store has room for one batch; all reserved at start, all consumed and outputs produced on finish. Fetch runs the single-input path per input in recipe order (choice: cw-5c). Save v35. Tests inject a def via `OperationTypes.TestDefs`. |
 | `WorkshopSystem` | Operations phase, after construction. Opens `task.fetch_input` (ox, nearest free source) and one `task.workshop_work` per working family. |
 | `InputSources` | Where an ox may fetch from: logs share `ConstructionSources` plus woodcutting piles; beams come from workshop goods stores. Never a `WorkshopStock`. |
 | `WorkshopStatus` | Computed status: Paused, MissingHut, NoWorkers, Working, WorkshopStoreFull, WaitingForInput (Reported: WaitingForOx). |

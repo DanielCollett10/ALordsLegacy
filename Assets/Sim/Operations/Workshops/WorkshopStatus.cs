@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Inventory;
@@ -16,17 +17,26 @@ namespace LordsLegacy.Sim.Operations.Workshops
         /// <summary>The status of <paramref name="op"/>, which must be a workshop operation.</summary>
         public static OperationState Of(SimWorld world, Operation op, WorkshopDef def)
         {
-            WorkshopDef.RequireSingleInput(def);
             if (op.Paused) return OperationState.Paused;
             Footprint fp = WorkshopSystem.HutOf(world, op);
             if (fp == null || !world.IsWorking(fp.Id)) return OperationState.MissingHut;
             if (!WorkshopSystem.HasWorker(world, op)) return OperationState.NoWorkers;
             if (WorkshopSystem.OpenWorkCount(world, op) > 0) return OperationState.Working;
             LedgerLocation store = world.Inventory.FindGoodsStore(fp.Id);
-            if (store == null || store.FreeSpace < def.OutputsPerInput) return OperationState.WorkshopStoreFull;
-            LedgerLocation stock = world.Inventory.FindWorkshopStock(fp.Id);
-            if (stock == null || stock.AvailableOf(def.Input.Id) < 1) return OperationState.WaitingForInput;
+            if (store == null || store.FreeSpace < def.OutputsPerBatch) return OperationState.WorkshopStoreFull;
+            List<LedgerLocation> stocks = WorkshopSystem.StocksOf(world, fp, def);
+            if (stocks == null || !WorkshopSystem.HasBatch(def, stocks)) return OperationState.WaitingForInput;
             return OperationState.Working;
+        }
+
+        /// <summary>The first input (recipe order) whose stock lacks one batch, or null when none lacks or a stock is missing.</summary>
+        public static RecipeInput? FirstMissing(SimWorld world, Footprint fp, WorkshopDef def)
+        {
+            List<LedgerLocation> stocks = WorkshopSystem.StocksOf(world, fp, def);
+            if (stocks == null) return null;
+            for (int i = 0; i < def.Inputs.Count; i++)
+                if (stocks[i].AvailableOf(def.Inputs[i].Item.Id) < def.Inputs[i].Count) return def.Inputs[i];
+            return null;
         }
 
         /// <summary>
@@ -39,9 +49,12 @@ namespace LordsLegacy.Sim.Operations.Workshops
             if (fp == null) return false;
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
                 if (t.Def.Id == WorkshopSystem.FetchTaskId && !t.IsFinished) return false;
-            LedgerLocation source = InputSources.CreateDefault().Find(world, def.Input, fp.AccessPoint);
+            RecipeInput? missing = FirstMissing(world, fp, def);
+            if (missing == null) return false;
+            ItemDef item = missing.Value.Item;
+            LedgerLocation source = InputSources.CreateDefault().Find(world, item, fp.AccessPoint);
             int load = System.Math.Max(1, def.OxLoadForInput);
-            return source != null && source.AvailableOf(def.Input.Id) >= load && !InputReserve.Allows(world, op, def.Input, load);
+            return source != null && source.AvailableOf(item.Id) >= load && !InputReserve.Allows(world, op, item, load);
         }
 
         /// <summary>
@@ -54,9 +67,12 @@ namespace LordsLegacy.Sim.Operations.Workshops
             if (fp == null) return false;
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
                 if (t.Def.Id == WorkshopSystem.FetchTaskId && !t.IsFinished) return false;
-            LedgerLocation source = InputSources.CreateDefault().Find(world, def.Input, fp.AccessPoint);
+            RecipeInput? missing = FirstMissing(world, fp, def);
+            if (missing == null) return false;
+            ItemDef item = missing.Value.Item;
+            LedgerLocation source = InputSources.CreateDefault().Find(world, item, fp.AccessPoint);
             int load = System.Math.Max(1, def.OxLoadForInput);
-            return source != null && InputReserve.Allows(world, op, def.Input, load) && source.AvailableOf(def.Input.Id) >= load && new OxPool(world).FindFor(op.Id, fp.AccessPoint) == null;
+            return source != null && InputReserve.Allows(world, op, item, load) && source.AvailableOf(item.Id) >= load && new OxPool(world).FindFor(op.Id, fp.AccessPoint) == null;
         }
     }
 }

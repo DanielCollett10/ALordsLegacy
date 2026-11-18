@@ -35,7 +35,9 @@ namespace LordsLegacy.Sim.Commands
             if (op == null) return CommandResult.Rejected(CommandRejectCode.NotFound, "no operation " + OperationId);
             WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
             if (def == null) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Only a workshop has an input reserve");
-            if (ItemId != def.Input.Id) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Not an input of this workshop");
+            bool isInput = false;
+            foreach (RecipeInput input in def.Inputs) if (input.Item.Id == ItemId) isInput = true;
+            if (!isInput) return CommandResult.Rejected(CommandRejectCode.NotAllowed, "Not an input of this workshop");
             if (Amount < 0 || Amount > MaxReserve)
                 return CommandResult.Rejected(CommandRejectCode.InvalidArgument, "Reserve must be 0 to " + MaxReserve);
             return CommandResult.Accepted();

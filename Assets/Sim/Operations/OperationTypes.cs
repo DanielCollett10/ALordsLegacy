@@ -110,9 +110,13 @@ namespace LordsLegacy.Sim.Operations
             logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
             familySlots: 2, defaultWorkRadiusM: 0);
 
+        /// <summary>Test seam: defs that replace a workshop operation type's def (a multi-input recipe before one ships). Null in play; set only by tests.</summary>
+        internal static Dictionary<string, Workshops.WorkshopDef> TestDefs;
+
         /// <summary>The workshop def an operation type carries (decision 0047), or null for a non-workshop type.</summary>
         public static Workshops.WorkshopDef WorkshopOf(string operationTypeId, Tuning.SimTuning t)
         {
+            if (TestDefs != null && operationTypeId != null && TestDefs.TryGetValue(operationTypeId, out Workshops.WorkshopDef over)) return over;
             if (operationTypeId == HewingId) return Workshops.WorkshopDef.Hewing(t);
             if (operationTypeId == SawingId) return Workshops.WorkshopDef.Sawing(t);
             return null;

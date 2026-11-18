@@ -61,9 +61,9 @@ namespace LordsLegacy.Sim.Construction
             if (storage == null) storage = inv.FindFoodStore(footprintId); // a granary's food store (CN-55)
             var sources = new List<LedgerLocation>();
             if (storage != null) sources.Add(storage);
-            LedgerLocation wStock = inv.FindWorkshopStock(footprintId); // a workshop's input stock and output store (HW-01, PL-01)
+            List<LedgerLocation> wStocks = inv.WorkshopStocks(footprintId); // a workshop's input stocks and output store (HW-01, PL-01)
             LedgerLocation wStore = inv.FindGoodsStore(footprintId);
-            if (wStock != null) sources.Add(wStock);
+            sources.AddRange(wStocks);
             if (wStore != null) sources.Add(wStore);
             bool hasContents = false;
             foreach (LedgerLocation s in sources) if (s.Total > 0) hasContents = true;
@@ -78,7 +78,7 @@ namespace LordsLegacy.Sim.Construction
                     }
                 foreach (KeyValuePair<string, int> kv in refunds) inv.Produce(pile, Items.Find(kv.Key), kv.Value);
             }
-            if (wStock != null) inv.RemoveEmptyLocation(wStock.Id);
+            foreach (LedgerLocation s in wStocks) inv.RemoveEmptyLocation(s.Id);
             if (wStore != null) inv.RemoveEmptyLocation(wStore.Id);
 
             var owners = new List<int>();
