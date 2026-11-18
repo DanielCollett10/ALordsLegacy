@@ -91,7 +91,7 @@ namespace LordsLegacy.Sim.Foraging
             float ax = (float)hut.AccessPoint.XMetres, az = (float)hut.AccessPoint.ZMetres;
             for (int i = 0; i < wanted; i++)
             {
-                BushRecord bush = world.Bushes.NearestAvailable(ax, az, region);
+                BushRecord bush = world.Bushes.NearestAvailable(ax, az, region, BushKind.Berries, BushKind.Mushrooms);
                 if (bush == null) return;
                 LedgerLocation store = ForagingStores.HutStoreWithRoom(world, op, out int room);
                 if (store == null) return;

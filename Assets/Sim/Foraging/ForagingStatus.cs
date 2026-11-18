@@ -14,7 +14,7 @@ namespace LordsLegacy.Sim.Foraging
             if (OperationStatus.Hut(world, op) == null) return OperationState.MissingHut;
             if (!HasForager(world, op)) return OperationState.NoWorkers;
             var region = OperationStatus.WorkRegion(world, op);
-            if (region == null || !world.Bushes.AnyWithBasketsIn(region)) return OperationState.NoBushes;
+            if (region == null || !world.Bushes.AnyWithBasketsIn(region, BushKind.Berries, BushKind.Mushrooms)) return OperationState.NoBushes;
             if (ForagingStores.AllFull(world, op)) return OperationState.StorageFull;
             return OperationState.Working;
         }
