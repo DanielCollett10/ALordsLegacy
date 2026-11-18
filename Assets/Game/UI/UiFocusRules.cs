@@ -53,9 +53,10 @@ namespace LordsLegacy.Game
         public static void AllowTextInput(VisualElement field)
         {
             field.AddToClassList(TextInputClass);
-            var input = field.Q(className: TextInputBaseField<string>.inputUssClassName);
             // Neither the field nor its inner input may take focus from navigation keys (WASD, arrows, Tab).
             // Only a pointer-down on the field opens the edit (BeginTextInput), so a navigation key can never land in it.
+            var input = FirstFocusableDescendant(field);
+            field.userData = input;
             field.focusable = false;
             if (input != null) input.focusable = false;
             field.RegisterCallback<PointerDownEvent>(_ => BeginTextInput(field), TrickleDown.TrickleDown);
@@ -81,10 +82,21 @@ namespace LordsLegacy.Game
         /// </summary>
         public static void BeginTextInput(VisualElement field)
         {
-            var input = field?.Q(className: TextInputBaseField<string>.inputUssClassName);
-            if (input == null) return;
+            if (field?.userData is not VisualElement input) return;
             input.focusable = true;
             input.Focus();
+        }
+
+        // The inner input is the first focusable element under the field (found before the field is made unfocusable).
+        private static VisualElement FirstFocusableDescendant(VisualElement root)
+        {
+            foreach (var child in root.Children())
+            {
+                if (child.focusable) return child;
+                var found = FirstFocusableDescendant(child);
+                if (found != null) return found;
+            }
+            return null;
         }
 
         /// <summary>Forgets edits in fields that are no longer in a panel (call when the UI is rebuilt, so a destroyed field cannot leave typing stuck on).</summary>
