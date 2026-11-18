@@ -6,7 +6,7 @@ Start with [`architecture.md`](architecture.md) for the big picture and [`../CLA
 - [`design/`](design/README.md): the designer's rules and why (owned by the human; agents read it).
 - [`decisions/`](decisions/): short records of technical decisions, `NNNN-title.md`. Read before re-arguing one.
 - [`milestones/`](milestones/): what each finished milestone shipped and what it left open.
-- [`test-runs/`](test-runs/): recorded results of full suite runs for a milestone.
+- Suite-run results go in `test-runs/<milestone>.md` when recorded (none yet).
 - [`unity-mcp.md`](unity-mcp.md): how agents drive the Unity Editor.
 
 ## Systems
@@ -32,7 +32,9 @@ One line per system. The doc says how it fits together; folders are where the co
 | Foraging | Forage bushes, foragers aged 8+ picking berries and mushrooms into their own hut store. | [systems/foraging.md](systems/foraging.md) | `Assets/Sim/Foraging`, `Assets/Sim/Core/SimWorld.Foraging.cs` |
 | Food | Larders, the Sunday allotment and fetch trip, daily eating and Hungry, granary food. | [systems/food.md](systems/food.md) | `Assets/Sim/Food` |
 | Markets | Market area, stalls, granary families stocking stalls, camp handover and removal, Sunday allotment from stalls. | [systems/markets.md](systems/markets.md) | `Assets/Sim/Markets`, `Assets/Sim/Geometry/StallGrid.cs`, `Assets/Game/Tools/MarketTool.cs` |
-| Workshops | Hewing station and sawpit: one data-driven system, stock and store, status, panel read model, village timber totals. | [systems/workshops.md](systems/workshops.md) | `Assets/Sim/Operations/Workshops`, `Assets/Sim/Inventory/GoodsStats.cs` |
+| Workshops | Hewing station and sawpit: one data-driven system, stock and store, status, input reserve, panel read model, village timber totals. | [systems/workshops.md](systems/workshops.md) | `Assets/Sim/Operations/Workshops`, `Assets/Sim/Inventory/GoodsStats.cs` |
+| Storage | Storage yard for General goods (planks, beams): families move goods in on an ordered job list, sites and sawpits draw from it. | [systems/storage.md](systems/storage.md) | `Assets/Sim/Operations` (`Yard*`, `StorageYardReport`), `Assets/Sim/Operations/Workshops/InputReserve.cs`, `Assets/Game/UI/StorageYardPanel` |
+| Coppice | Coppice hut: a family cuts rods from stools in its work area into the hut's own store. | [systems/coppice.md](systems/coppice.md) | `Assets/Sim/Coppice` |
 | Footprints | Placed buildings, stands and standalone structures: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
 | Inventory | Ledger of items (logs, food, planks, beams) by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
 | Construction | Sites that reserve every recipe item, take logs by ox and planks by hand, and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |

@@ -32,6 +32,12 @@ The yard is a granary for General goods. Its families plan trips with the same r
 | ST-44 | Reserved stock (for a site or another fetch) is never collected. Collected goods are reserved on the yard's capacity before the trip starts, so a full yard means no trip | PROPOSED |
 | ST-45 | Panel status: No workers, Moving camp goods, Collecting, Yard full, Idle | PROPOSED |
 
+> Implementation note (ST-45): the code has seven statuses, checked in this order: Under construction, No workers,
+> Waiting for ox (a beam trip has no free ox), Moving camp goods, Collecting, Yard full, Idle. Under construction and
+> Waiting for ox are not in this table. The owner decides whether to keep them.
+>
+> Implementation note (ST-43): thatch has no item yet, so its hand load (1) is not in `HandLoads`.
+
 ## Workstation kit (baskets and other tools), built in M19
 
 | ID | Rule | Tag |

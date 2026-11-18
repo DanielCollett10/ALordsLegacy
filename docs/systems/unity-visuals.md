@@ -14,7 +14,7 @@
 | `PeopleRenderer` | Citizens (adult or child, by age; a stock carrier holds a food crate) and oxen. Lerps `PreviousX/Z` → `X/Z` by `TickFraction` (current while paused). Yaw from `FacingRad`. Citizens that arrive or leave appear and vanish with their ids; phase state of removed citizens is dropped (T-509). |
 | `WalkBob` | Placeholder walk bob. Rate depends on metres walked per tick and `ViewSettings.WalkStepsPerMetre`. |
 | `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. One tent per Homeless family; nothing once the camp is removed (CMP-23). Rebuilds on footprint, camp, family or `Homes.Version` changes. |
-| `ModuleRenderer` | Woodcutting modules, forager huts, houses (`visual.module.house`) and standalone structures (granary, hewing station, sawpit), stretched to the footprint. Market stalls, with food crates by fill. Beam stacks beside hewing stations and plank stacks beside sawpits, height by `StackFill` (T-526). Skips unbuilt footprints. |
+| `ModuleRenderer` | Woodcutting modules, forager huts, houses (`visual.module.house`) and standalone structures (granary, hewing station, sawpit, storage yard), stretched to the footprint. Market stalls, with food crates by fill. Beam stacks beside hewing stations and plank stacks beside sawpits, height by `StackFill` (T-526). Skips unbuilt footprints. |
 | `BushRenderer` | Forage bushes from `BushRegistry`, instanced. Rebuilds only on `Bushes.Version` (not on reservations). |
 | `LogPileRenderer` | One log per ledger log in every location. Piles and stockpile stack at their point; storages along the footprint's X; ox carriers drag logs behind the ox. |
 | `ConstructionRenderer` | Scaffold per unbuilt site, height from `ConstructionProgress.Fraction`. |
@@ -25,7 +25,7 @@
 | `GroundOverlay` | `Material(texture)` from shader `LordsLegacy/GroundOverlay` (unlit, alpha, depth bias with distance). Cached material. |
 | `VisualRegistry` | `VisualRegistry.asset`. `TryGet(id)`, `Get(id)` (logs an error, returns a placeholder). `IsPlaceholder`. |
 | `VisualDefinition` | Mesh and materials for one id. |
-| `VisualSizes` | Box sizes for placeholder art, including the hewing station, sawpit, beam and plank stacks. |
+| `VisualSizes` | Box sizes for placeholder art, including the hewing station, sawpit, storage yard, beam and plank stacks. |
 | `CursorMarker` | Ground cursor at the snapped point: a 0.6 m sphere for areas (AR-20) or a road-width ring for roads (RD-18). The tool shows or hides it (PL-06). |
 | `SelectionRing` | Ring under the selected agent. |
 | `SunLightModel` | Pure maths: `GameTime` + `Daylight` → elevation, azimuth, colour, intensity. |
