@@ -58,6 +58,8 @@ The yard is a granary for General goods. Its families plan trips with the same r
 | ST-30 | The camp **stays** while its General store holds goods and no storage yard exists, even if everyone is housed and its food is gone | DECIDED (owner 17/11/2026) |
 | ST-31 | When the camp's removal conditions are met (everyone housed, food handed over) **and** a storage yard exists, the camp is removed and its General goods are **dropped on the ground** (like the leftover pile, T-467). Storage yard families collect them | DECIDED (owner 17/11/2026) |
 
+| ST-32 | When the camp would be removed (everyone housed, food handed over) but stays only because its General store holds goods and no yard exists, the message log says once: *The camp stays until a storage yard can take its goods* | PROPOSED (after plan review 18/11/2026) |
+
 ## Not decided
 
 - An accept list per item (GDD logistics settings). Not in M18 (ST-08).

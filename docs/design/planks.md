@@ -57,6 +57,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | PL-31 | "Total in storage" means everything held in stores, reserved or not: logs in log storage and the camp stockpile; beams in hewing stores and storage yards. Ground piles (including woodcutter piles), workshop input stock and items on the move are not counted: logs must be in storage | DECIDED (owner 17/11/2026) |
 | PL-32 | The reserve is tuning per workshop (`WorkshopDef`), 0 = no reserve (weaver and wattle yard default to 0). Status: *Keeping 20 logs in reserve*. A per-building setting on the panel can come with the UI tidy-up | PROPOSED |
 | PL-33 | Work already fetched is finished; the reserve only stops new fetches | PROPOSED |
+| PL-34 | **No deadlock:** a reserve must be smaller than the store that feeds it. The hewing station's beam store rises from 20 to **30** (HW-04), so one hewing station alone can hold more than the 20-beam reserve and the sawpit runs without a yard. Tuning validation refuses a beam reserve ≥ the hewing store capacity. The log reserve can still stop hewing when every log is in use; the panel then says *Keeping 20 logs in reserve*, and the fix is more log storage | PROPOSED (lead 18/11/2026, after plan review) |
 
 ## Oxen
 

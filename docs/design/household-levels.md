@@ -21,7 +21,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HL-10 | A built house's panel has **Build fence**. The fence runs along every plot edge **except road frontage** | PROPOSED |
 | HL-11 | It costs **1 wattle panel per 2 m** of fenced edge (rounded up) and 20 worker-minutes per panel, built by odd-jobbers as a normal site | PROPOSED |
 | HL-12 | A fence does not block walking (yet) and is not needed to live in the house. It **is** a level 2 need (HL-21) | PROPOSED |
-| HL-13 | Deconstructing the house takes the fence with it (refund share as CN-5x) | PROPOSED |
+| HL-13 | Deconstructing the house takes the fence with it (refund share as CN-5x). How it is built: decision 0053 | PROPOSED |
 
 ## Household levels
 
