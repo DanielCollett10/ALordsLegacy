@@ -55,6 +55,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Operations.Workshops.WorkshopSystem(),
                 new LordsLegacy.Sim.Homes.MoveInSystem(),
                 new LordsLegacy.Sim.Foraging.BushRegrowSystem(),
+                new LordsLegacy.Sim.Thatch.CuringSystem(),
                 new LordsLegacy.Sim.Foraging.ForagingSystem(),
                 new LordsLegacy.Sim.Coppice.CoppiceSystem(),
                 new LordsLegacy.Sim.Markets.StallSystem(),
