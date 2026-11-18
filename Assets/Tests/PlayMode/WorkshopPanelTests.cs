@@ -224,15 +224,18 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ReserveFieldIsFocusableButTheRestOfThePanelIsNot()
+        public IEnumerator ReserveBoxIsNotFocusableUntilClickedAndTheRestOfThePanelIsNot()
         {
             int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
             _agents.SelectWorkshop(hew);
             yield return null;
-            Assert.IsTrue(_panel.ReserveField.focusable);
+            var input = _panel.ReserveField.Q(className: TextInputBaseField<int>.inputUssClassName);
+            Assert.IsFalse(_panel.ReserveField.focusable, "the box itself takes no navigation focus");
+            Assert.IsFalse(input.focusable, "its inner input takes no navigation focus until clicked");
             Assert.IsFalse(_panel.AssignButton.focusable);
             Assert.IsFalse(UiFocusRules.TextInputActive);
-            _panel.ReserveField.Q(className: TextInputBaseField<int>.inputUssClassName).Focus();
+            // Stand-in for a click on the box (the pointer-down path calls BeginTextInput).
+            UiFocusRules.BeginTextInput(_panel.ReserveField);
             yield return null;
             Assert.IsTrue(UiFocusRules.TextInputActive, "typing blocks game hotkeys");
             Assert.IsNull(UiFocusRules.GameKeyboard);
@@ -276,7 +279,7 @@ namespace LordsLegacy.Tests.PlayMode
             int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
             _agents.SelectWorkshop(hew);
             yield return null;
-            _panel.ReserveField.Q(className: TextInputBaseField<int>.inputUssClassName).Focus();
+            UiFocusRules.BeginTextInput(_panel.ReserveField);
             yield return null;
             Assert.IsTrue(UiFocusRules.TextInputActive);
             _panel.ClickClose();

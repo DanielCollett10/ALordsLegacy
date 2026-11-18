@@ -53,11 +53,18 @@ namespace LordsLegacy.Game
         public static void AllowTextInput(VisualElement field)
         {
             field.AddToClassList(TextInputClass);
+            var input = field.Q(className: TextInputBaseField<string>.inputUssClassName);
+            // Neither the field nor its inner input may take focus from navigation keys (WASD, arrows, Tab).
+            // Only a pointer-down on the field opens the edit (BeginTextInput), so a navigation key can never land in it.
+            field.focusable = false;
+            if (input != null) input.focusable = false;
+            field.RegisterCallback<PointerDownEvent>(_ => BeginTextInput(field), TrickleDown.TrickleDown);
             // FocusIn/FocusOut bubble from the inner input, so the field sees them for its own edit; Set makes repeats harmless.
             field.RegisterCallback<FocusInEvent>(_ => _editing.Add(field));
             field.RegisterCallback<FocusOutEvent>(_ =>
             {
                 _editing.Remove(field);
+                if (input != null) input.focusable = false;
                 _releasedFrame = UnityEngine.Time.frameCount;
             });
             field.RegisterCallback<KeyDownEvent>(e =>
@@ -66,6 +73,18 @@ namespace LordsLegacy.Game
                 e.StopPropagation();
                 ReleaseFocus(field);
             }, TrickleDown.TrickleDown);
+        }
+
+        /// <summary>
+        /// Opens an edit on a text field registered with <see cref="AllowTextInput"/>: its inner input becomes focusable and
+        /// takes focus. Called on pointer-down over the field; tests call it to stand in for a click.
+        /// </summary>
+        public static void BeginTextInput(VisualElement field)
+        {
+            var input = field?.Q(className: TextInputBaseField<string>.inputUssClassName);
+            if (input == null) return;
+            input.focusable = true;
+            input.Focus();
         }
 
         /// <summary>Forgets edits in fields that are no longer in a panel (call when the UI is rebuilt, so a destroyed field cannot leave typing stuck on).</summary>
