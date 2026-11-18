@@ -41,6 +41,18 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>The sources, in the order they are asked.</summary>
         public IReadOnlyList<IYardJobSource> Sources => _sources;
 
+        /// <summary>
+        /// The job sources the game runs, in order: the camp General store first (ST-40), then unowned General
+        /// ground piles (ST-41). Both carry by hand through <c>task.haul_by_hand</c>.
+        /// </summary>
+        public static YardJobs Standard()
+        {
+            var jobs = new YardJobs();
+            jobs.Add(new YardCampStoreSource());
+            jobs.Add(new YardPileSource());
+            return jobs;
+        }
+
         /// <summary>Appends a source at the end of the order.</summary>
         public void Add(IYardJobSource source)
         {
