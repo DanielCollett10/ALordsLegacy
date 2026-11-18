@@ -46,6 +46,17 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 }
                 return;
             }
+            if (fp.Type.Id == ModuleTypes.ThatcherHutId)
+            {
+                // MAT-38: the hut's own sheaf store (40 thatch). Not part of yard collection.
+                if (world.Inventory.FindGoodsStore(fp.Id) == null)
+                {
+                    int cap = System.Math.Max(1, world.Tuning.ThatcherHutStore);
+                    LedgerLocation s = world.Inventory.AddGoodsStore(cap, fp.Id);
+                    world.Inventory.SetItemCap(s, Items.Thatch, cap);
+                }
+                return;
+            }
             if (!IsWorkshop(fp.Type)) return;
             WorkshopDef def = OperationTypes.WorkshopOf(OperationTypes.WorkshopOperationFor(fp.Type.Id), world.Tuning);
             Ledger inv = world.Inventory;
