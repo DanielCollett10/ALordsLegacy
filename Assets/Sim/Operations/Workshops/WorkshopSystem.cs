@@ -35,15 +35,15 @@ namespace LordsLegacy.Sim.Operations.Workshops
             foreach (Operation op in new List<Operation>(world.Operations.All))
             {
                 WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
-                if (def == null || def.Inputs.Count == 0) continue;
+                if (def == null) continue;
                 Footprint fp = HutOf(world, op);
                 if (fp == null || op.Paused || !world.IsWorking(fp.Id) || !HasWorker(world, op)) continue;
                 List<LedgerLocation> stocks = StocksOf(world, fp, def);
                 if (stocks == null) continue;
-                AttachOxen(world, op, fp);
+                // A def with no inputs never fetches: it only opens work while the store has room (decision 0051).
+                if (def.Inputs.Count > 0) AttachOxen(world, op, fp);
                 OpenWork(world, op, def, fp, stocks);
-                for (int i = 0; i < def.Inputs.Count; i++)
-                    if (def.Inputs[i].Carry == CarryClass.Ox) OpenTasks(world, op, def, fp, def.Inputs[i], stocks[i]);
+                if (def.Inputs.Count > 0) OpenTasks(world, op, def, fp, stocks);
             }
         }
 
@@ -221,18 +221,33 @@ namespace LordsLegacy.Sim.Operations.Workshops
             ox.State = OxState.Reserved(t.Id);
         }
 
-        // One fetch per free ox while the stock has room for a whole load and a source has that much free input.
-        // This is the cw-5 single-input path, run once per input in recipe order (choice of input comes in cw-5c).
-        private void OpenTasks(SimWorld world, Operation op, WorkshopDef def, Footprint fp, RecipeInput input, LedgerLocation stock)
+        // One fetch per free ox. Each round picks the ox-carried input with the lowest share of its stock capacity (PL-30,
+        // decision 0051), skipping inputs with no room for a load, with no source holding a load, or blocked by the reserve.
+        private void OpenTasks(SimWorld world, Operation op, WorkshopDef def, Footprint fp, IList<LedgerLocation> stocks)
         {
-            ItemDef inItem = input.Item;
-            int load = Math.Max(1, def.OxLoadForInput);
             var pool = new OxPool(world);
-            while (stock.FreeSpace >= load)
+            while (true)
             {
-                if (!InputReserve.Allows(world, op, inItem, load)) return;
-                LedgerLocation source = _sources.Find(world, inItem, fp.AccessPoint);
-                if (source == null || source.AvailableOf(inItem.Id) < load) return;
+                int best = -1;
+                LedgerLocation source = null;
+                int load = Math.Max(1, def.OxLoadForInput);
+                for (int i = 0; i < def.Inputs.Count; i++)
+                {
+                    RecipeInput cand = def.Inputs[i];
+                    LedgerLocation s = stocks[i];
+                    if (cand.Carry != CarryClass.Ox || s.FreeSpace < load) continue;
+                    if (!InputReserve.Allows(world, op, cand.Item, load)) continue;
+                    LedgerLocation src = _sources.Find(world, cand.Item, fp.AccessPoint);
+                    if (src == null || src.AvailableOf(cand.Item.Id) < load) continue;
+                    // Lower share first: held/capacity compared by cross-multiplication; ties keep recipe order.
+                    if (best >= 0 && !Shorter(stocks[i], stocks[best])) continue;
+                    best = i;
+                    source = src;
+                }
+                if (best < 0) return;
+                RecipeInput input = def.Inputs[best];
+                ItemDef inItem = input.Item;
+                LedgerLocation stock = stocks[best];
                 Ox ox = pool.FindFor(op.Id, PointOf(world, source));
                 if (ox == null) return;
 
@@ -259,6 +274,13 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 }
                 Attach(world, task, ox);
             }
+        }
+
+        // True when a holds a strictly lower share of its capacity than b (held plus incoming, so open fetches count).
+        private static bool Shorter(LedgerLocation a, LedgerLocation b)
+        {
+            long ua = a.Capacity - a.FreeSpace, ub = b.Capacity - b.FreeSpace;
+            return ua * b.Capacity < ub * a.Capacity;
         }
 
         // Where to lead the ox to reach a source: a pile lies on the ground, a building is reached at its access point.

@@ -19,7 +19,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public static int ReserveOf(SimWorld world, Operation op)
         {
             WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
-            return def == null ? Math.Max(0, world.Tuning.WorkshopDefaultReserve) : ReserveOf(world, op, def.FirstInput);
+            return def == null || def.FirstInput == null ? Math.Max(0, world.Tuning.WorkshopDefaultReserve) : ReserveOf(world, op, def.FirstInput);
         }
 
         /// <summary>The reserve of <paramref name="op"/> for one input item.</summary>
@@ -59,7 +59,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         /// <summary>True when one more fetch of <paramref name="load"/> items keeps storage at or above the reserve.</summary>
         public static bool Allows(SimWorld world, Operation op, ItemDef item, int load)
         {
-            int reserve = ReserveOf(world, op);
+            int reserve = ReserveOf(world, op, item);
             if (reserve <= 0) return true;
             return Free(world, item) - Math.Max(1, load) >= reserve;
         }
