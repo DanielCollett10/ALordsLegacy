@@ -85,7 +85,7 @@ namespace LordsLegacy.Sim.Construction
                 if (general)
                 {
                     // Workshop and yard stores are bound to a footprint; their own Position is unset (ST-06).
-                    if (l.Kind == LocationKind.GoodsStore) list.Add(new Source { Location = l, Position = StorePosition(world, l) });
+                    if (l.Kind == LocationKind.GoodsStore && !Kit.KitStores.IsKitStore(world, l)) list.Add(new Source { Location = l, Position = StorePosition(world, l) });
                     continue;
                 }
                 switch (l.Kind)
