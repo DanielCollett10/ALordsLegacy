@@ -8,7 +8,8 @@ namespace LordsLegacy.Sim.Inventory
     /// Village timber totals for the top bar and panels (T-525, decisions 0046, 0047). Pure queries. Totals include reserved
     /// stock. Logs are what construction can draw on (camp stockpile, built log storage, unowned ground piles, as
     /// <see cref="ConstructionSources"/> counts them); beams and planks are everything in goods stores. A workshop's input
-    /// stock, an ox's load, a site store and an operation's own pile are not counted.
+    /// stock, an ox's load, a site store and an operation's own pile are not counted. Storage yards are goods stores, so
+    /// their beams and planks are in the totals (T-541, ST-07).
     /// </summary>
     public static class GoodsStats
     {
@@ -21,7 +22,7 @@ namespace LordsLegacy.Sim.Inventory
             return (int)Math.Min(t, int.MaxValue);
         }
 
-        /// <summary>Beams in every goods store, reserved ones included.</summary>
+        /// <summary>Beams in every goods store (workshop and storage yard), reserved ones included.</summary>
         public static int Beams(SimWorld world) => InGoodsStores(world, Items.Beam);
 
         /// <summary>Planks in every goods store, reserved ones included.</summary>

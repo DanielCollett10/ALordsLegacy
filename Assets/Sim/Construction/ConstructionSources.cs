@@ -9,7 +9,8 @@ namespace LordsLegacy.Sim.Construction
 {
     /// <summary>
     /// Where construction may take materials from (CN-11..13): the camp stockpile, every operation's BUILT log
-    /// storage and unowned ground piles. Operation-owned piles, unbuilt storage, carriers and site stores are not sources.
+    /// storage and unowned ground piles. General items (planks, beams) come from any goods store, workshop or yard (ST-06).
+    /// Operation-owned piles, unbuilt storage, carriers and site stores are not sources.
     /// </summary>
     public static class ConstructionSources
     {
@@ -83,14 +84,12 @@ namespace LordsLegacy.Sim.Construction
             {
                 if (general)
                 {
-                    if (l.Kind == LocationKind.GoodsStore) list.Add(new Source { Location = l, Position = l.Position });
+                    // Workshop and yard stores are bound to a footprint; their own Position is unset (ST-06).
+                    if (l.Kind == LocationKind.GoodsStore) list.Add(new Source { Location = l, Position = StorePosition(world, l) });
                     continue;
                 }
                 switch (l.Kind)
                 {
-                    case LocationKind.GoodsStore:
-                        if (general) list.Add(new Source { Location = l, Position = l.Position });
-                        break;
                     case LocationKind.Stockpile:
                         list.Add(new Source { Location = l, Position = l.Position });
                         break;
@@ -107,6 +106,13 @@ namespace LordsLegacy.Sim.Construction
                 }
             }
             return list;
+        }
+
+        /// <summary>Where a goods store lies: its footprint's centre when bound to one (workshop, yard), else its own position.</summary>
+        private static PointMm StorePosition(SimWorld world, LedgerLocation l)
+        {
+            Footprint f = l.ModuleId == 0 ? null : world.Footprints.Get(l.ModuleId);
+            return f != null ? f.Centre : l.Position;
         }
     }
 }

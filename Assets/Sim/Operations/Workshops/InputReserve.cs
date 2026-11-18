@@ -10,8 +10,8 @@ namespace LordsLegacy.Sim.Operations.Workshops
     /// The workshop input reserve (T-537, PL-30..PL-33): a workshop opens a fetch only while the total of its input in
     /// storage, minus every fetch of that item already on the way, minus the load, stays at or above the reserve.
     /// Storage means (PL-31) logs in <see cref="LocationKind.Storage"/> and <see cref="LocationKind.Stockpile"/> and beams
-    /// in workshop <see cref="LocationKind.GoodsStore"/>s, reserved or not. Ground piles, workshop input stock, sites and
-    /// carried items are never counted (the input stock is committed, PL-30d). Yard stock joins in st-3.
+    /// in workshop and storage-yard <see cref="LocationKind.GoodsStore"/>s, reserved or not. Ground piles, workshop input
+    /// stock, sites and carried items are never counted (the input stock is committed, PL-30d).
     /// </summary>
     public static class InputReserve
     {
@@ -71,7 +71,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             {
                 if (l.Kind != LocationKind.GoodsStore) return false;
                 Footprint f = world.Footprints.Get(l.ModuleId);
-                return f != null && WorkshopBuildings.IsWorkshop(f.Type);
+                return f != null && WorkshopBuildings.HoldsGoods(f.Type);
             }
             return false;
         }

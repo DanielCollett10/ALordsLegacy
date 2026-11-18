@@ -27,7 +27,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
     /// Where an ox may fetch a workshop input item from (T-522, decision 0047, PL-04): an extendable list of finders per
     /// item. <see cref="Nearest(SimWorld, ItemDef, PointMm)"/> returns the nearest candidate with unreserved stock, and
     /// never a <see cref="LocationKind.WorkshopStock"/> or stock reserved for a site. Logs share
-    /// <see cref="ConstructionSources"/> and add woodcutting operation piles; beams come from workshop output goods stores.
+    /// <see cref="ConstructionSources"/> and add woodcutting operation piles; beams come from built workshop and storage-yard goods stores (PL-04, ST-07).
     /// </summary>
     public sealed class InputSources
     {
@@ -98,7 +98,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             {
                 if (l.Kind != LocationKind.GoodsStore) continue;
                 Footprint f = world.Footprints.Get(l.ModuleId);
-                if (f == null || !WorkshopBuildings.IsWorkshop(f.Type) || !world.IsWorking(f.Id)) continue;
+                if (f == null || !WorkshopBuildings.HoldsGoods(f.Type) || !world.IsWorking(f.Id)) continue;
                 yield return new InputSource(l, f.Centre);
             }
         }
