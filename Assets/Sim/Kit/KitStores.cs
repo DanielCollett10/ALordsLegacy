@@ -44,5 +44,26 @@ namespace LordsLegacy.Sim.Kit
             LedgerLocation s = world.Inventory.AddGoodsStore(slots, fp.Id);
             world.Inventory.SetItemCap(s, Items.Basket, slots);
         }
+
+        /// <summary>
+        /// A kit-using building is going (ST-23): its claim closes and its kit store's items become an unowned ground pile at
+        /// the access point, where yard families collect them (ST-41). The store is removed. No-op for other buildings.
+        /// </summary>
+        public static void DropOnRemoval(SimWorld world, int buildingId)
+        {
+            world.KitClaims.Release(buildingId);
+            LedgerLocation store = Find(world, buildingId);
+            Footprint fp = world.Footprints.Get(buildingId);
+            if (store == null || fp == null) return;
+            LedgerLocation pile = null;
+            foreach (System.Collections.Generic.KeyValuePair<string, int> kv in new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>(store.Counts))
+            {
+                int n = store.AvailableOf(kv.Key);
+                if (n <= 0) continue;
+                if (pile == null) pile = world.Inventory.GetOrAddGroundPile(fp.AccessPoint, null);
+                world.Inventory.Transfer(store, pile, Items.Find(kv.Key), n);
+            }
+            world.Inventory.RemoveEmptyLocation(store.Id);
+        }
     }
 }

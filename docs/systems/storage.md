@@ -33,3 +33,8 @@ Shortcuts: housing (`HomeHouseId`, `FoodHandedOver` set directly) in the camp-re
 - No Unity yard panel or build button yet (the bar shows Storage yard greyed out); no UI for the reserve.
 - Two logs of a fetched batch were seen on ground piles after a hewing run (a site/ox sunset drop, see workshops.md); not fixed here.
 - Houses are not built in the end-to-end test; housing is a shortcut.
+
+## Kit fetch and drop (T-564, ST-21..24, ST-23)
+
+- `Kit/KitFetchSystem` (after `YardFamilySystem`): a kit store with free slots holds a claim, a full one closes it. Oldest claim first, the building's own family gets `task.haul_by_hand` from the nearest camp General store, working yard or weaver store.
+- `KitStores.DropOnRemoval` runs on deconstruct, `RemoveModule` and `DeleteArea`: the claim closes and the kit becomes an unowned ground pile at the access point for yard families.

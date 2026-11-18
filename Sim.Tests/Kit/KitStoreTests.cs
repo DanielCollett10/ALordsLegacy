@@ -159,6 +159,8 @@ namespace LordsLegacy.Sim.Tests.Kit
             int hut = BuildHut(w, 60, 60);
             int granary = BuildGranary(w, 80, 80);
             w.Inventory.Produce(KitStores.Find(w, hut), Items.Basket, 4);
+            w.KitClaims.Release(granary);
+            w.KitClaims.Release(hut);
             w.KitClaims.Claim(granary, 777);
             w.KitClaims.Claim(hut, 333);
             MapData map = Map();

@@ -60,6 +60,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Markets.StallSystem(),
                 new LordsLegacy.Sim.Markets.StoreFamilySystem(),
                 new LordsLegacy.Sim.Operations.YardFamilySystem(LordsLegacy.Sim.Operations.YardJobs.Standard()),
+                new LordsLegacy.Sim.Kit.KitFetchSystem(),
                 new LordsLegacy.Sim.Start.CampRemovalSystem(),
             };
         }

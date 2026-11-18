@@ -55,6 +55,7 @@ namespace LordsLegacy.Sim.Construction
                 if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeconstructId && t.SiteFootprintId == footprintId)
                     world.Tasks.Cancel(t.Id);
 
+            Kit.KitStores.DropOnRemoval(world, footprintId); // ST-23: kit drops at the access point
             Ledger inv = world.Inventory;
             SortedDictionary<string, int> refunds = Refunds(world, fp);
             LedgerLocation storage = inv.FindStorage(footprintId);

@@ -102,6 +102,7 @@ namespace LordsLegacy.Sim.Commands
             ConstructionSite site = world.Construction.Get(ModuleId);
             if (site != null) ReleaseSite(world, site, world.Footprints.Get(ModuleId));
             if (op != null) world.Operations.RemoveModule(op.Id, ModuleId);
+            LordsLegacy.Sim.Kit.KitStores.DropOnRemoval(world, ModuleId);
             world.Footprints.Remove(ModuleId);
             if (op != null) DeconstructionWork.RemoveGranaryOperation(world, new[] { op.Id });
             int? plot = HouseRemoval.RemoveWithPlot(world, ModuleId);
