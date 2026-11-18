@@ -40,7 +40,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 if (t.Def.Id == WorkshopSystem.FetchTaskId && !t.IsFinished) return false;
             LedgerLocation source = InputSources.CreateDefault().Find(world, def.Input, fp.AccessPoint);
             int load = System.Math.Max(1, def.OxLoadForInput);
-            return source != null && source.AvailableOf(def.Input.Id) >= load && new OxPool(world).FindFor(op.Id, fp.AccessPoint) == null;
+            return source != null && InputReserve.Allows(world, op, def.Input, load) && source.AvailableOf(def.Input.Id) >= load && new OxPool(world).FindFor(op.Id, fp.AccessPoint) == null;
         }
     }
 }

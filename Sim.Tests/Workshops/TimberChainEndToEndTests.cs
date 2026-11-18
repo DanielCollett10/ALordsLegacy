@@ -42,7 +42,7 @@ namespace LordsLegacy.Sim.Tests.Workshops
             var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, BushCount = 0, StartingMeat = 400 });
             // The builds reserve 44 logs. A few spare logs let a site that loses a carried load at sunset (the load is dropped
             // on a pile owned by the site) reserve again; the woodcutter feeds the hewing station after that.
-            var stock = new[] { new StartStock(Items.Log, 8 + 6 + 6 + 3 * 8 + 4) };
+            var stock = new[] { new StartStock(Items.Log, 8 + 6 + 6 + 3 * 8 + 4 + 20) }; // + the default workshop reserves: 5 logs and 5 beams stay in storage (T-537)
             StartLayoutApplier.Apply(w, new StartLayout(M(150, 150), 0, new PointMm(0, 0), new PointMm(6000, 0), new PointMm(-6000, 0),
                 new PointMm[0], new StartFamily[0], 2, stock: stock));
             Assert.AreEqual(10, w.Camp.GeneralStoreLocation.CountOf(Items.Plank.Id), "the 10 starting planks");

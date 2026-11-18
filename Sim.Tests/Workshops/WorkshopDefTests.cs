@@ -24,11 +24,11 @@ namespace LordsLegacy.Sim.Tests.Workshops
             var t = new SimTuning();
             WorkshopDef h = WorkshopDef.Hewing(t);
             Assert.AreSame(Items.Log, h.Input); Assert.AreSame(Items.Beam, h.Output);
-            Assert.AreEqual(new[] { 1, 3, 6, 20, 1 },
+            Assert.AreEqual(new[] { 1, 3, 10, 10, 1 },
                 new[] { h.OutputsPerInput, h.InputsPerDayPerFamily, h.InputStockCapacity, h.OutputCapacity, h.OxLoadForInput });
             WorkshopDef s = WorkshopDef.Sawing(t);
             Assert.AreSame(Items.Beam, s.Input); Assert.AreSame(Items.Plank, s.Output);
-            Assert.AreEqual(new[] { 3, 3, 6, 20, 1 },
+            Assert.AreEqual(new[] { 3, 3, 10, 20, 1 },
                 new[] { s.OutputsPerInput, s.InputsPerDayPerFamily, s.InputStockCapacity, s.OutputCapacity, s.OxLoadForInput });
             Assert.AreEqual(0, t.WorkshopShiftMinutes, "0 = the day's daylight window");
         }

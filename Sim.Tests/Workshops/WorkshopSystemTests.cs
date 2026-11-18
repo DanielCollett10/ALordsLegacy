@@ -26,7 +26,7 @@ namespace LordsLegacy.Sim.Tests.Workshops
         private static (SimWorld w, MapData map) Make(int oxen = 1)
         {
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
-            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8 });
+            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, WorkshopDefaultReserve = 0 });
             for (int fam = 2; fam <= 4; fam++)
             {
                 w.People.AddFamily(fam, "F" + fam, 40, 40);

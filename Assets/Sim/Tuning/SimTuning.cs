@@ -236,10 +236,13 @@ namespace LordsLegacy.Sim.Tuning
         public int HewingLogsPerDay { get; set; } = 3;
 
         /// <summary>Most logs waiting in a hewing station's input stock. Unit: logs. Rule: HW-05.</summary>
-        public int HewingStockCapacity { get; set; } = 6;
+        public int HewingStockCapacity { get; set; } = 10;
 
-        /// <summary>Most beams a hewing station's output store holds. Unit: beams. Rule: HW-05.</summary>
-        public int HewingStoreCapacity { get; set; } = 20;
+        /// <summary>Most beams a hewing station's output store holds. Unit: beams. Rule: HW-05, PL-34.</summary>
+        public int HewingStoreCapacity { get; set; } = 10;
+
+        /// <summary>Input a workshop leaves in storage: it fetches only while the total stays at or above this (0 = none). Unit: items. Rule: PL-30b. Not saved until st-0b.</summary>
+        public int WorkshopDefaultReserve { get; set; } = 5;
 
         /// <summary>Planks a sawpit saws from one beam. Unit: planks. Rule: HW-05 (decision 0047).</summary>
         public int SawingPlanksPerBeam { get; set; } = 3;
@@ -248,7 +251,7 @@ namespace LordsLegacy.Sim.Tuning
         public int SawingBeamsPerDay { get; set; } = 3;
 
         /// <summary>Most beams waiting in a sawpit's input stock. Unit: beams. Rule: HW-05.</summary>
-        public int SawingStockCapacity { get; set; } = 6;
+        public int SawingStockCapacity { get; set; } = 10;
 
         /// <summary>Most planks a sawpit's output store holds. Unit: planks. Rule: HW-05.</summary>
         public int SawingStoreCapacity { get; set; } = 20;

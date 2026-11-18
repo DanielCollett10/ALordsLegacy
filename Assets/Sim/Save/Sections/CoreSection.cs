@@ -134,6 +134,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.SawingStockCapacity);
             w.WriteInt32(t.SawingStoreCapacity);
             w.WriteInt32(t.WorkshopShiftMinutes);
+            w.WriteInt32(t.WorkshopDefaultReserve);
             w.WriteDouble(t.DeconstructRefundShare);
             w.WriteInt32(t.StartingMeat);
             w.WriteInt32(t.StartingPlanks); // T-513
@@ -218,6 +219,7 @@ namespace LordsLegacy.Sim.Save.Sections
             t.SawingStockCapacity = r.ReadInt32();
             t.SawingStoreCapacity = r.ReadInt32();
             t.WorkshopShiftMinutes = r.ReadInt32();
+            t.WorkshopDefaultReserve = r.ReadInt32();
             t.DeconstructRefundShare = r.ReadDouble();
             t.StartingMeat = r.ReadInt32();
             t.StartingPlanks = r.ReadInt32();
