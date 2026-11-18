@@ -27,7 +27,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
     /// Where an ox may fetch a workshop input item from (T-522, decision 0047, PL-04): an extendable list of finders per
     /// item. <see cref="Nearest(SimWorld, ItemDef, PointMm)"/> returns the nearest candidate with unreserved stock, and
     /// never a <see cref="LocationKind.WorkshopStock"/> or stock reserved for a site. Logs share
-    /// <see cref="ConstructionSources"/> and add woodcutting operation piles; beams come from built workshop and storage-yard goods stores (PL-04, ST-07).
+    /// <see cref="ConstructionSources"/> and add woodcutting operation piles; beams come from built workshop and storage-yard goods stores (PL-04, ST-07); baskets and panels from storage yards only (T-562).
     /// </summary>
     public sealed class InputSources
     {
@@ -42,6 +42,8 @@ namespace LordsLegacy.Sim.Operations.Workshops
             s.Register(Items.Beam, BeamFinder);
             s.Register(Items.WillowRod, RodFinder);
             s.Register(Items.HazelRod, RodFinder);
+            s.Register(Items.Basket, YardGoodsFinder);
+            s.Register(Items.WattlePanel, YardGoodsFinder);
             return s;
         }
 
@@ -109,6 +111,18 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 if (!IsRodStore(world, l)) continue;
                 Footprint f = world.Footprints.Get(l.ModuleId);
                 if (!world.IsWorking(f.Id)) continue;
+                yield return new InputSource(l, f.Centre);
+            }
+        }
+
+        /// <summary>Baskets and panels are drawn from working storage yards only (T-562); a workshop's own output store is never an input source.</summary>
+        private static IEnumerable<InputSource> YardGoodsFinder(SimWorld world, ItemDef item)
+        {
+            foreach (LedgerLocation l in world.Inventory.Locations)
+            {
+                if (l.Kind != LocationKind.GoodsStore) continue;
+                Footprint f = world.Footprints.Get(l.ModuleId);
+                if (f == null || f.Type.Id != ModuleTypes.StorageYardId || !world.IsWorking(f.Id)) continue;
                 yield return new InputSource(l, f.Centre);
             }
         }
