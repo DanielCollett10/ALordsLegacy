@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 
@@ -23,18 +24,30 @@ namespace LordsLegacy.Sim.Inventory
         }
 
         /// <summary>Beams in every goods store (workshop and storage yard), reserved ones included.</summary>
-        public static int Beams(SimWorld world) => InGoodsStores(world, Items.Beam);
+        public static int Beams(SimWorld world) => OfItem(world, Items.Beam);
 
         /// <summary>Planks in every goods store, reserved ones included.</summary>
-        public static int Planks(SimWorld world) => InGoodsStores(world, Items.Plank);
+        public static int Planks(SimWorld world) => OfItem(world, Items.Plank);
 
-        private static int InGoodsStores(SimWorld world, ItemDef item)
+        /// <summary>One General item in every goods store (workshop and storage yard), reserved ones included (T-547).</summary>
+        public static int OfItem(SimWorld world, ItemDef item)
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
+            if (item == null) throw new ArgumentNullException(nameof(item));
             long t = 0;
             foreach (LedgerLocation l in world.Inventory.Locations)
                 if (l.Kind == LocationKind.GoodsStore) t += l.CountOf(item.Id);
             return (int)Math.Min(t, int.MaxValue);
+        }
+
+        /// <summary>Every General item in catalogue order with its village total (zeros included), as (item id, count) pairs (T-547).</summary>
+        public static IReadOnlyList<KeyValuePair<string, int>> GeneralByItem(SimWorld world)
+        {
+            if (world == null) throw new ArgumentNullException(nameof(world));
+            var list = new List<KeyValuePair<string, int>>();
+            foreach (ItemDef item in Items.All)
+                if (item.Category == ItemCategory.General) list.Add(new KeyValuePair<string, int>(item.Id, OfItem(world, item)));
+            return list;
         }
     }
 }

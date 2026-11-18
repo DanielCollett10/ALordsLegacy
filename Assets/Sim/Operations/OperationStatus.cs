@@ -188,7 +188,8 @@ namespace LordsLegacy.Sim.Operations
             return TreeRegion.Circle((float)hut.Centre.XMetres, (float)hut.Centre.ZMetres, (float)radius);
         }
 
-        private static bool HasWorker(SimWorld world, Operation op)
+        /// <summary>True when an assigned family has a member at <see cref="WorkingAgeYears"/> or more.</summary>
+        internal static bool HasWorker(SimWorld world, Operation op)
         {
             foreach (int fid in op.FamilyIds)
             {

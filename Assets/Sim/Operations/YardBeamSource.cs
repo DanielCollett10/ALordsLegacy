@@ -64,6 +64,20 @@ namespace LordsLegacy.Sim.Operations
             return null;
         }
 
+        /// <summary>
+        /// True when a beam load is ready for <paramref name="yard"/> but no pool ox is free (the Waiting for ox status,
+        /// ST-45). Read only: same source and room rules as <see cref="NextTrip"/>, without making a task.
+        /// </summary>
+        public static bool WaitingForOx(SimWorld world, Operation yard)
+        {
+            if (world == null || yard == null) return false;
+            LedgerLocation dest = YardRoute.StoreOf(world, yard);
+            if (dest == null || HasOpenBeamTask(world, yard)) return false;
+            LedgerLocation from = Pick(world, yard, dest);
+            if (from == null || Math.Min(from.AvailableOf(Items.Beam.Id), dest.FreeSpace) <= 0) return false;
+            return new OxPool(world).FindFor(yard.Id, PointOf(world, from)) == null;
+        }
+
         // One waiting trip per yard at a time; the next is made once a family member has picked it up.
         private static bool HasOpenBeamTask(SimWorld world, Operation yard)
         {

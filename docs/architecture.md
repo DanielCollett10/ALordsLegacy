@@ -35,7 +35,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
 - **Markets** (`systems/markets.md`): one market area holds stall slots. Granary families carry food from forager huts into
   the granary and from the granary to stalls (decision 0044). A stall's planks are carried by its granary family (T-518). The camp hands its food over once a granary supplies the market,
   then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both (decision 0049).
-- **Workshops** (`systems/workshops.md`, decisions 0046, 0047): hewing station and sawpit are data (`WorkshopDef`) run by one `WorkshopSystem`. `WorkshopReport` (panel text, stock, store, family) and `GoodsStats` (village Logs, Beams, Planks; reserved counts, workshop stock and ox loads do not) are read only.
+- **Workshops** (`systems/workshops.md`, decisions 0046, 0047): hewing station and sawpit are data (`WorkshopDef`) run by one `WorkshopSystem`. `WorkshopReport` (panel text, stock, store, family) and `GoodsStats` (village Logs, Beams, Planks; reserved counts, workshop stock and ox loads do not) are read only. `StorageYardReport` (T-547) is the read-only yard panel model: per-item stock, families, computed ST-45 status and the ST-10 market text; its village totals come from `GoodsStats.GeneralByItem`.
 - **Passage and settlement log** (decision 0045): `Family.Passage` (None, Arriving, Leaving) marks families walking in or out;
   readers check `IsInPassage`. `SettlementLog` on `SimWorld` keeps the last 20 (tick, text) entries, saved in the Core section.
 - **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.
