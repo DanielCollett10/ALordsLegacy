@@ -46,6 +46,7 @@ namespace LordsLegacy.Sim.Save.Sections
             }
             w.WriteBool(s.LastArrivalTick.HasValue); // T-504
             w.WriteInt64(s.LastArrivalTick ?? 0);
+            w.WriteBool(s.CampStaysMessageSaid); // T-546
         }
 
         /// <summary>Reads a section body written by <see cref="WriteBody"/>.</summary>
@@ -71,6 +72,7 @@ namespace LordsLegacy.Sim.Save.Sections
             bool hasArrival = r.ReadBool();
             long arrival = r.ReadInt64();
             s.LastArrivalTick = hasArrival ? arrival : (long?)null;
+            s.CampStaysMessageSaid = r.ReadBool();
             return s;
         }
 

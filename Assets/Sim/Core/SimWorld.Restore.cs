@@ -23,6 +23,7 @@ namespace LordsLegacy.Sim.Core
             world.EntryPoint = core.EntryPoint;
             world.LastArrivalTick = core.LastArrivalTick;
             world.SettlementLog.Restore(core.SettlementEntries);
+            world.CampStaysMessageSaid = core.CampStaysMessageSaid;
             world.Random.Restore(core.RandomState);
             return world;
         }

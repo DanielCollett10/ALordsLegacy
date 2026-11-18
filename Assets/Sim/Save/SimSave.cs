@@ -33,6 +33,7 @@ namespace LordsLegacy.Sim.Save
                 AreaTypes = world.AreaTypes,
                 EntryPoint = world.EntryPoint,
                 LastArrivalTick = world.LastArrivalTick,
+                CampStaysMessageSaid = world.CampStaysMessageSaid,
                 SettlementEntries = new List<SettlementEntry>(world.SettlementLog.Entries)
             });
             for (int i = 0; i < sections.Count; i++)
