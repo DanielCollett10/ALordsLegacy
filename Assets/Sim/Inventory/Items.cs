@@ -35,10 +35,13 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>A wattle panel made by the wattle yard (MAT-04).</summary>
         public static readonly ItemDef WattlePanel = new ItemDef("item.wattle_panel", ItemCategory.General);
 
+        /// <summary>A sheaf of cut reed, cured then used for thatch (MAT-02).</summary>
+        public static readonly ItemDef Thatch = new ItemDef("item.thatch", ItemCategory.General);
+
         /// <summary>All built-in items.</summary>
         public static IReadOnlyList<ItemDef> All { get; } = new[]
         {
-            Log, Meat, Berries, Mushrooms, Plank, Beam, WillowRod, HazelRod, Basket, WattlePanel,
+            Log, Meat, Berries, Mushrooms, Plank, Beam, WillowRod, HazelRod, Basket, WattlePanel, Thatch,
         };
 
         /// <summary>Finds an item by id, or null.</summary>

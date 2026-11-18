@@ -51,7 +51,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 long emptied = r.ReadInt64();
                 bool reserved = r.ReadBool();
                 int owner = r.ReadInt32();
-                if (kind < 0 || kind > (int)BushKind.WillowStool) throw new SaveFormatException("Bad bush kind " + kind + ".");
+                if (kind < 0 || kind > (int)BushKind.ReedBed) throw new SaveFormatException("Bad bush kind " + kind + ".");
                 if (baskets < 0 || baskets > BushKinds.FullUnits((BushKind)kind, world.Tuning)) throw new SaveFormatException("Bad bush baskets " + baskets + ".");
                 if (reserved && baskets == 0) throw new SaveFormatException("Bush " + id + " is reserved but empty.");
                 try { b.RestoreBush(id, x, z, (BushKind)kind, baskets, emptied, reserved ? owner : (int?)null); }

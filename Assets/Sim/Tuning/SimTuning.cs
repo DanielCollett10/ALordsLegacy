@@ -364,6 +364,42 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Most rods a person carries by hand on one trip. Unit: rods. Rule: MAT-23 (PROPOSED, tuning).</summary>
         public int HandCarryRods { get; set; } = 10;
 
+        /// <summary>Reed beds scattered on low ground at new game. Unit: beds. Rule: MAT-39a (PROPOSED, tuning).</summary>
+        public int ReedBedCount { get; set; } = 20;
+
+        /// <summary>Sheaves one cut takes from a reed bed. Unit: sheaves. Rule: MAT-34 (PROPOSED, tuning).</summary>
+        public int ReedSheavesPerCut { get; set; } = 8;
+
+        /// <summary>Days an emptied reed bed takes to regrow. Unit: game days. Rule: MAT-34 (PROPOSED, tuning).</summary>
+        public int ReedRegrowDays { get; set; } = 90;
+
+        /// <summary>Game minutes to cut one bundle of reed in winter. Unit: minutes. Rule: MAT-35 (PROPOSED, tuning).</summary>
+        public int ThatchCutMinutesPerBundle { get; set; } = 30;
+
+        /// <summary>How many times slower cutting is out of season. Unit: factor. Rule: MAT-35 (PROPOSED, tuning).</summary>
+        public int ThatchOffSeasonFactor { get; set; } = 4;
+
+        /// <summary>Days a stook cures before the sheaves are dry. Unit: game days. Rule: MAT-38 (PROPOSED, tuning).</summary>
+        public int ThatchCureDays { get; set; } = 7;
+
+        /// <summary>Most thatch sheaves a thatcher hut stores. Unit: sheaves. Rule: MAT-30 (PROPOSED, tuning).</summary>
+        public int ThatcherHutStore { get; set; } = 40;
+
+        /// <summary>Thatcher hut footprint width. Unit: metres. Rule: MAT-30 (PLACEHOLDER).</summary>
+        public double ThatcherHutWidthM { get; set; } = 6;
+
+        /// <summary>Thatcher hut footprint depth. Unit: metres. Rule: MAT-30 (PLACEHOLDER).</summary>
+        public double ThatcherHutDepthM { get; set; } = 4;
+
+        /// <summary>Logs a thatcher hut recipe takes. Unit: logs. Rule: MAT-30 (PLACEHOLDER).</summary>
+        public int ThatcherHutLogs { get; set; } = 8;
+
+        /// <summary>Game minutes a thatcher hut takes to build. Unit: minutes. Rule: MAT-30 (PLACEHOLDER).</summary>
+        public int ThatcherHutMinutes { get; set; } = 480;
+
+        /// <summary>Most thatch sheaves a person carries by hand on one trip. Unit: sheaves. Rule: MAT-02 (DECIDED).</summary>
+        public int HandCarryThatch { get; set; } = 1;
+
         /// <summary>Most baskets a person carries by hand on one trip. Unit: baskets. Rule: MAT-23 (PROPOSED, tuning).</summary>
         public int HandCarryBaskets { get; set; } = 5;
 

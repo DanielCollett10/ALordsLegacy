@@ -15,6 +15,7 @@ namespace LordsLegacy.Sim.Foraging
     public static class BushScatter
     {
         private const ulong SeedSalt = 0xB05B05B05UL;
+        private const ulong ReedSalt = 0x4EED4EED5UL;
 
         /// <summary>Fills <see cref="SimWorld.Bushes"/> from the tuning and the world's terrain and trees.</summary>
         public static void Run(SimWorld world)
@@ -50,6 +51,11 @@ namespace LordsLegacy.Sim.Foraging
             Place(world, rng, b, BushKind.HazelStool, t.HazelStoolCount, null);
             if (t.WillowStoolCount > 0) low = new LowGround(world.Terrain);
             Place(world, rng, b, BushKind.WillowStool, t.WillowStoolCount, low);
+            // Reed beds use their own stream so stool counts never move them (and they never move the stools).
+            if (t.ReedBedCount <= 0) return;
+            low = low ?? new LowGround(world.Terrain);
+            var reedRng = new SimRandom(unchecked((ulong)(long)t.WorldSeed) ^ ReedSalt);
+            Place(world, reedRng, b, BushKind.ReedBed, t.ReedBedCount, low);
         }
 
         private static void Place(SimWorld world, SimRandom rng, Bounds2 b, BushKind kind, int count, LowGround low)
