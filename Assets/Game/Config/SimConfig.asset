@@ -77,7 +77,7 @@ MonoBehaviour:
   storageYardMinutes: 480
   storageYardCapacity: 300
   storageYardFamilySlots: 2
-  yardCollectThreshold: 0.5
+  yardCollectThreshold: 0
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5

@@ -12,8 +12,8 @@ using LordsLegacy.Sim.Tasks;
 namespace LordsLegacy.Sim.Operations
 {
     /// <summary>
-    /// ST-43, source 4: beams go to the yard by ox, never by hand. From a hewing store at or above
-    /// <c>YardCollectThreshold</c> full, or an unowned loose beam pile, a free pool ox (<see cref="OxPool.FindFor"/>) is led
+    /// ST-43, source 4: beams go to the yard by ox, never by hand. From a hewing store with a free beam (at or above
+    /// <c>YardCollectThreshold</c> full, 0 by default), or an unowned loose beam pile, a free pool ox (<see cref="OxPool.FindFor"/>) is led
     /// by the yard family: one <c>OxLoadBeams</c> load per trip, to the nearest yard with room. The trip reuses the
     /// <see cref="WorkshopSystem.FetchTaskId"/> steps (FetchOx, LeadTo, LoadOx, LeadTo, UnloadOx, ReturnOx), so its reservations
     /// and ox are freed by the workshop sweep. The yard system runs after construction, so deliveries take free oxen first

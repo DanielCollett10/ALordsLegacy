@@ -59,16 +59,13 @@ namespace LordsLegacy.Sim.Tests.Operations
             w.Tasks.ByOwner(yard.Id).Count(t => t.Def.Id == WorkshopSystem.FetchTaskId && !t.IsFinished);
 
         [Test]
-        public void Threshold_FourOfTen_NoTask_FiveOfTen_OneBeamTaskWithOx()
+        public void ThreeOfTen_NotWaitingForMore_OneBeamTaskWithOx()
         {
             SimWorld w = Make();
             Operation yard = BuiltYard(w, M(100, 100));
-            LedgerLocation store = Hewing(w, M(60, 100), 4);
+            LedgerLocation store = Hewing(w, M(60, 100), 3);
+            Assert.AreEqual(10, store.Capacity, "a hewing store holds 10 beams");
             var src = new YardBeamSource();
-            Assert.IsNull(src.NextTrip(w, yard));
-            Assert.AreEqual(0, OpenFetches(w, yard), "4/10 is below the threshold");
-
-            w.Inventory.Produce(store, Items.Beam, 1);
             Assert.IsNull(src.NextTrip(w, yard), "it makes its own task, never a hand trip");
             TaskRecord t = w.Tasks.ByOwner(yard.Id).Single(x => x.Def.Id == WorkshopSystem.FetchTaskId);
             Assert.AreEqual(50, t.OxId);

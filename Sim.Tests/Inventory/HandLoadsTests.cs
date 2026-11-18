@@ -70,7 +70,7 @@ namespace LordsLegacy.Sim.Tests.Inventory
             Assert.AreEqual(480, t.StorageYardMinutes, "ST-03 build minutes");
             Assert.AreEqual(300, t.StorageYardCapacity, "ST-03 capacity");
             Assert.AreEqual(2, t.StorageYardFamilySlots, "ST-43 family slots");
-            Assert.AreEqual(0.5, t.YardCollectThreshold, 1e-9, "ST-42 collect threshold");
+            Assert.AreEqual(0.0, t.YardCollectThreshold, 1e-9, "ST-42 collect threshold: any free output");
         }
     }
 }

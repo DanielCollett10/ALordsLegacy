@@ -6,7 +6,7 @@
 
 1. `PlaceStructure(module.storage_yard)` makes the 8 x 6 m footprint and site (8 logs); workers build it. `StorageYards.OnBuilt` makes its General `GoodsStore` and `operation.storage_yard`.
 2. `AssignFamily` staffs it. `YardFamilySystem` plans `task.haul_by_hand` trips from `YardJobs.Standard()`, in order:
-   camp General store (ST-40), unowned General piles (ST-41), workshop output stores at half full or more (ST-42, `YardCollectThreshold`), beams by pool ox (ST-43).
+   camp General store (ST-40), unowned General piles (ST-41), workshop output stores with any free item (ST-42, `YardCollectThreshold` 0), beams by pool ox from a hewing store with a free beam (ST-43).
 3. A hand trip carries the item's hand load (planks 2). Room and stock are reserved when planned, so trips never double-book (ST-44).
 4. Others draw from it: construction plank sources, sawpit beam fetches, the beam reserve and `GoodsStats` all count yard stock by distance (ST-06, ST-07).
 5. Camp removal (`CampRemovalSystem`): with a yard, an empty camp General store closes (ST-04); when all families are housed and food is handed over, leftovers drop as one unowned pile and the yard collects it (ST-31).
@@ -20,7 +20,7 @@ A fetch opens only if storage total minus stock reserved by open fetches minus t
 
 `Sim.Tests/Operations/StorageYardEndToEndTests.cs`, from `StartLayoutApplier`, real commands and ticks, ledger Audit on every tick:
 
-- Camp planks reach the yard (10); a sawpit below half is left alone, at half it is collected and then left below half; a stall is built and its 2 planks come out of the yard.
+- Camp planks reach the yard (10); a sawpit holding 1 plank has it collected; a stall is built and its 2 planks come out of the yard.
 - Default reserve: logs become beams become planks that reach the yard; reserve logs stay in storage.
 - `SetWorkshopReserve(hewing, log, 60)` with 66 logs: exactly 6 are fetched and hewn, then it waits with the text above.
 - Camp goes once housed and food handed over; its planks are collected.
