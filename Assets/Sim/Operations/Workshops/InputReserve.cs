@@ -45,8 +45,16 @@ namespace LordsLegacy.Sim.Operations.Workshops
             foreach (Reservation r in world.Inventory.Reservations)
             {
                 if (r.Kind != ReservationKind.Stock || r.ItemId != item.Id) continue;
-                TaskRecord t = world.Tasks.Get(r.Owner);
-                if (t == null || t.IsFinished || t.Def.Id != WorkshopSystem.FetchTaskId) continue;
+                // A hand fetch reserves under its haul owner id (negative); it counts when a workshop owns the task.
+                int taskId = r.Owner <= -2_000_000 ? -2_000_000 - r.Owner : r.Owner;
+                TaskRecord t = world.Tasks.Get(taskId);
+                if (t == null || t.IsFinished) continue;
+                if (t.Def.Id == HandHaulTaskDefs.HaulId)
+                {
+                    Operation o = world.Operations.Get(t.OwnerOperationId);
+                    if (r.Owner != HandHaulTaskDefs.OwnerFor(t.Id) || o == null || OperationTypes.WorkshopOf(o.TypeId, world.Tuning) == null) continue;
+                }
+                else if (t.Def.Id != WorkshopSystem.FetchTaskId || r.Owner != t.Id) continue;
                 LedgerLocation l = world.Inventory.Get(r.LocationId);
                 if (l != null && Counts(world, l, item)) n += r.Count;
             }
@@ -73,6 +81,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 Footprint f = world.Footprints.Get(l.ModuleId);
                 return f != null && WorkshopBuildings.HoldsGoods(f.Type);
             }
+            if (item.Id == Items.WillowRod.Id || item.Id == Items.HazelRod.Id) return InputSources.IsRodStore(world, l);
             return false;
         }
     }

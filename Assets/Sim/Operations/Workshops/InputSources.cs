@@ -40,6 +40,8 @@ namespace LordsLegacy.Sim.Operations.Workshops
             var s = new InputSources();
             s.Register(Items.Log, LogFinder);
             s.Register(Items.Beam, BeamFinder);
+            s.Register(Items.WillowRod, RodFinder);
+            s.Register(Items.HazelRod, RodFinder);
             return s;
         }
 
@@ -89,6 +91,25 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 if (l.Kind != LocationKind.GroundPile || l.OwnerOperationId == null) continue;
                 Operation op = world.Operations.Get(l.OwnerOperationId.Value);
                 if (op != null && op.TypeId == OperationTypes.WoodcuttingId) yield return new InputSource(l, l.Position);
+            }
+        }
+
+        /// <summary>True for the goods stores that count as rod storage: a coppice hut's or a storage yard's (MAT-23, PL-31).</summary>
+        internal static bool IsRodStore(SimWorld world, LedgerLocation l)
+        {
+            if (l.Kind != LocationKind.GoodsStore) return false;
+            Footprint f = world.Footprints.Get(l.ModuleId);
+            return f != null && (f.Type.Id == ModuleTypes.CoppiceHutId || f.Type.Id == ModuleTypes.StorageYardId);
+        }
+
+        private static IEnumerable<InputSource> RodFinder(SimWorld world, ItemDef item)
+        {
+            foreach (LedgerLocation l in world.Inventory.Locations)
+            {
+                if (!IsRodStore(world, l)) continue;
+                Footprint f = world.Footprints.Get(l.ModuleId);
+                if (!world.IsWorking(f.Id)) continue;
+                yield return new InputSource(l, f.Centre);
             }
         }
 
