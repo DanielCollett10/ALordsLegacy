@@ -29,6 +29,15 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>Planks in every goods store, reserved ones included.</summary>
         public static int Planks(SimWorld world) => OfItem(world, Items.Plank);
 
+        /// <summary>Hazel and willow rods in every goods store (coppice huts, yards), reserved ones included (T-566).</summary>
+        public static int Rods(SimWorld world) => OfItem(world, Items.HazelRod) + OfItem(world, Items.WillowRod);
+
+        /// <summary>Baskets in every goods store, kit stores of forager huts and granaries included, reserved ones included (T-566).</summary>
+        public static int Baskets(SimWorld world) => OfItem(world, Items.Basket);
+
+        /// <summary>Wattle panels in every goods store, reserved ones included (T-566).</summary>
+        public static int Panels(SimWorld world) => OfItem(world, Items.WattlePanel);
+
         /// <summary>One General item in every goods store (workshop and storage yard), reserved ones included (T-547).</summary>
         public static int OfItem(SimWorld world, ItemDef item)
         {
