@@ -15,6 +15,10 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public static bool IsWorkshop(FootprintTypeDef type) =>
             type != null && OperationTypes.WorkshopOperationFor(type.Id) != null;
 
+        /// <summary>True for a building whose built footprint holds a <see cref="LocationKind.GoodsStore"/>: a workshop or a storage yard (ST-07).</summary>
+        public static bool HoldsGoods(FootprintTypeDef type) =>
+            IsWorkshop(type) || (type != null && type.Id == ModuleTypes.StorageYardId);
+
         /// <summary>Creates the stock and store of a just-built workshop footprint; does nothing for other types or if they exist.</summary>
         public static void OnBuilt(SimWorld world, Footprint fp)
         {
