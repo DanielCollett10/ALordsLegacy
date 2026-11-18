@@ -56,10 +56,11 @@ namespace LordsLegacy.Sim.Tasks
             if (granary == null || stall == null || (granary.ModuleId != 0 && !world.IsWorking(granary.ModuleId)) || !world.IsWorking(stall.ModuleId)) return false;
             int owner = StoreFamilySystem.OwnerFor(t.Id);
             int room = stall.FreeSpace; // already net of items other trips have reserved room for
-            int n = System.Math.Min(System.Math.Min(step.Count, room), System.Math.Max(1, world.Tuning.HandCarryItems));
+            int load = StoreFamilySystem.LoadFor(world, t); // doubled with a borrowed basket (MAT-54)
+            int n = System.Math.Min(System.Math.Min(step.Count, room), load);
             List<KeyValuePair<ItemDef, int>> share = StoreFamilySystem.Proportions(granary, n);
             if (share.Count == 0) return false;
-            LedgerLocation carrier = world.Inventory.AddCarrier(System.Math.Max(1, world.Tuning.HandCarryItems));
+            LedgerLocation carrier = world.Inventory.AddCarrier(load);
             world.Tasks.SetCarrier(t.Id, carrier.Id);
             foreach (KeyValuePair<ItemDef, int> kv in share)
             {

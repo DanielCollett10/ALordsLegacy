@@ -49,6 +49,11 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 - Bush reservations do not move `Bushes.Version`, so `BushRenderer` does not redraw on a reservation.
 - Bushes are not in the baked map (FD-20). They come from the new-game scatter, then from the save.
 
+## Basket loan (T-565, MAT-50..54)
+
+- `Kit/KitLoans` reserves one kit basket (stock reservation, owner `-3_000_000 - taskId`) at plan time. With it `ForagingSystem` and `StoreFamilySystem` plan 2 x `HandCarryItems`; without, the normal load.
+- `ReleaseFinished` frees loans of ended tasks each tick. The basket never moves in the ledger. Tests: `Kit/KitLoanTests`.
+
 ## Tests
 
 - Sim: `Operations/ForagingTests` (full pipeline), `Operations/OperationStatusTests`, `Save/BushesSectionTests`,
