@@ -121,13 +121,14 @@ namespace LordsLegacy.Game
         [Tooltip("PL-21 most beams an ox carries per trip")] [Range(1, 100)] public int oxLoadBeams = 1;
         [Tooltip("HW-05 beams a hewing station makes from one log")] [Range(1, 100)] public int hewingBeamsPerLog = 1;
         [Tooltip("HW-05 logs one family hews per day")] [Range(1, 100)] public int hewingLogsPerDay = 3;
-        [Tooltip("HW-05 most logs waiting in a hewing station's input stock")] [Range(1, 1000)] public int hewingStockCapacity = 6;
-        [Tooltip("HW-05 most beams a hewing station's output store holds")] [Range(1, 1000)] public int hewingStoreCapacity = 20;
+        [Tooltip("HW-05 most logs waiting in a hewing station's input stock")] [Range(1, 1000)] public int hewingStockCapacity = 10;
+        [Tooltip("HW-05 most beams a hewing station's output store holds")] [Range(1, 1000)] public int hewingStoreCapacity = 10;
         [Tooltip("HW-05 planks a sawpit saws from one beam")] [Range(1, 100)] public int sawingPlanksPerBeam = 3;
         [Tooltip("HW-05 beams one family saws per day")] [Range(1, 100)] public int sawingBeamsPerDay = 3;
-        [Tooltip("HW-05 most beams waiting in a sawpit's input stock")] [Range(1, 1000)] public int sawingStockCapacity = 6;
+        [Tooltip("HW-05 most beams waiting in a sawpit's input stock")] [Range(1, 1000)] public int sawingStockCapacity = 10;
         [Tooltip("HW-05 most planks a sawpit's output store holds")] [Range(1, 1000)] public int sawingStoreCapacity = 20;
         [Tooltip("HW-05 workshop shift length, game minutes; 0 = the daylight work window")] [Range(0, 1440)] public int workshopShiftMinutes = 0;
+        [Tooltip("PL-30b input a workshop leaves in storage (0 = none)")] [Range(0, 1000)] public int workshopDefaultReserve = 5;
 
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
@@ -180,7 +181,7 @@ namespace LordsLegacy.Game
             HewingStockCapacity = hewingStockCapacity, HewingStoreCapacity = hewingStoreCapacity,
             SawingPlanksPerBeam = sawingPlanksPerBeam, SawingBeamsPerDay = sawingBeamsPerDay,
             SawingStockCapacity = sawingStockCapacity, SawingStoreCapacity = sawingStoreCapacity,
-            WorkshopShiftMinutes = workshopShiftMinutes,
+            WorkshopShiftMinutes = workshopShiftMinutes, WorkshopDefaultReserve = workshopDefaultReserve,
         };
 
         /// <summary>Builds the road catalog from these values.</summary>

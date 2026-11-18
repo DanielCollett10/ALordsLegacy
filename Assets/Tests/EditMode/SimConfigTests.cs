@@ -170,6 +170,7 @@ namespace LordsLegacy.Tests.EditMode
             Assert.AreEqual(d.SawingStockCapacity, t.SawingStockCapacity);
             Assert.AreEqual(d.SawingStoreCapacity, t.SawingStoreCapacity);
             Assert.AreEqual(d.WorkshopShiftMinutes, t.WorkshopShiftMinutes);
+            Assert.AreEqual(d.WorkshopDefaultReserve, t.WorkshopDefaultReserve);
         }
 
         [Test]
@@ -195,7 +196,7 @@ namespace LordsLegacy.Tests.EditMode
             try
             {
                 cfg.startingPlanks = 33; cfg.handCarryPlanks = 4; cfg.oxLoadBeams = 2; cfg.hewingLogsPerDay = 5;
-                cfg.sawingStoreCapacity = 77; cfg.workshopShiftMinutes = 480;
+                cfg.sawingStoreCapacity = 77; cfg.workshopShiftMinutes = 480; cfg.workshopDefaultReserve = 9;
                 var t = cfg.BuildTuning();
                 Assert.AreEqual(33, t.StartingPlanks);
                 Assert.AreEqual(4, t.HandCarryPlanks);
@@ -203,6 +204,7 @@ namespace LordsLegacy.Tests.EditMode
                 Assert.AreEqual(5, t.HewingLogsPerDay);
                 Assert.AreEqual(77, t.SawingStoreCapacity);
                 Assert.AreEqual(480, t.WorkshopShiftMinutes);
+                Assert.AreEqual(9, t.WorkshopDefaultReserve);
             }
             finally { Object.DestroyImmediate(cfg); }
         }

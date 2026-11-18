@@ -63,13 +63,14 @@ MonoBehaviour:
   oxLoadBeams: 1
   hewingBeamsPerLog: 1
   hewingLogsPerDay: 3
-  hewingStockCapacity: 6
-  hewingStoreCapacity: 20
+  hewingStockCapacity: 10
+  hewingStoreCapacity: 10
   sawingPlanksPerBeam: 3
   sawingBeamsPerDay: 3
-  sawingStockCapacity: 6
+  sawingStockCapacity: 10
   sawingStoreCapacity: 20
   workshopShiftMinutes: 0
+  workshopDefaultReserve: 5
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
