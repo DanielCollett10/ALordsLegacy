@@ -289,6 +289,27 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Tolerance when deciding a point is on the map edge. Unit: metres. Rule: GR-21 (PLACEHOLDER).</summary>
         public double MapEdgeToleranceM { get; set; } = 2;
 
+        /// <summary>Storage yard footprint width. Unit: metres. Rule: ST-03 (PLACEHOLDER).</summary>
+        public double StorageYardWidthM { get; set; } = 8;
+
+        /// <summary>Storage yard footprint depth. Unit: metres. Rule: ST-03 (PLACEHOLDER).</summary>
+        public double StorageYardDepthM { get; set; } = 6;
+
+        /// <summary>Logs a storage yard recipe takes. Unit: logs. Rule: ST-03 (PLACEHOLDER).</summary>
+        public int StorageYardLogs { get; set; } = 8;
+
+        /// <summary>Game minutes a storage yard takes to build. Unit: minutes. Rule: ST-03 (PLACEHOLDER).</summary>
+        public int StorageYardMinutes { get; set; } = 480;
+
+        /// <summary>Most General goods (items) a storage yard holds. Unit: items. Rule: ST-03 (PLACEHOLDER).</summary>
+        public int StorageYardCapacity { get; set; } = 300;
+
+        /// <summary>Families that move goods for one storage yard. Unit: families. Rule: ST-43 (PLACEHOLDER).</summary>
+        public int StorageYardFamilySlots { get; set; } = 2;
+
+        /// <summary>Share of a workshop output store that must be full before the yard collects from it. Unit: fraction. Rule: ST-42 (PLACEHOLDER).</summary>
+        public double YardCollectThreshold { get; set; } = 0.5;
+
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;
 

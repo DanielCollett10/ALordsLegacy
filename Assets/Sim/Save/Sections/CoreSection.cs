@@ -162,6 +162,13 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.ArrivalNoHungerDays);
             w.WriteInt32(t.ArrivalGapDays);
             w.WriteDouble(t.MapEdgeToleranceM);
+            w.WriteDouble(t.StorageYardWidthM); // T-539
+            w.WriteDouble(t.StorageYardDepthM);
+            w.WriteInt32(t.StorageYardLogs);
+            w.WriteInt32(t.StorageYardMinutes);
+            w.WriteInt32(t.StorageYardCapacity);
+            w.WriteInt32(t.StorageYardFamilySlots);
+            w.WriteDouble(t.YardCollectThreshold);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -247,6 +254,13 @@ namespace LordsLegacy.Sim.Save.Sections
             t.ArrivalNoHungerDays = r.ReadInt32();
             t.ArrivalGapDays = r.ReadInt32();
             t.MapEdgeToleranceM = r.ReadDouble();
+            t.StorageYardWidthM = r.ReadDouble();
+            t.StorageYardDepthM = r.ReadDouble();
+            t.StorageYardLogs = r.ReadInt32();
+            t.StorageYardMinutes = r.ReadInt32();
+            t.StorageYardCapacity = r.ReadInt32();
+            t.StorageYardFamilySlots = r.ReadInt32();
+            t.YardCollectThreshold = r.ReadDouble();
             return t;
         }
 

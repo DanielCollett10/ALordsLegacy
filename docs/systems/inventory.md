@@ -14,6 +14,7 @@ transfer or consumption, so nothing appears from nowhere (decision 0032, decisio
 | `LedgerLocation`, `LocationKind` | `GroundPile` (point, optional owner operation id), `Storage` (module id, capacity from the type), `Carrier` (capacity; an ox, or a person's trip or forage carrier), `Stockpile` (unlimited, camp logs), `Site` (construction site, footprint id), `FoodStore` (food only; refuses non-food; larders, the camp food store, hut and granary stores), `GoodsStore` (General items only, `AddGoodsStore`; refuses logs and food; decision 0046), `WorkshopStock` (`AddWorkshopStock(module, item, cap)`; holds only `InputItemId`; not a construction source, left out of `TotalOf`; `WorkshopDef` in `Operations/Workshops`, T-520, save v28). |
 | `Reservation` | Id, location, item, count, owner, kind (stock or capacity). |
 | `ItemDef`, `ItemCategory`, `Items` | `Items.Log` (`item.log`, Log). `Plank`, `Beam` (category General). `Meat` (3 rations), `Berries` and `Mushrooms` (1 ration each), all category Food. `Items.All` lists them. |
+| `HandLoads.For` | Hand load per trip (ST-43, PL-16): planks use `HandCarryPlanks`, other General items `HandCarryItems`, beams and non-General goods return null (beams go by ox). Add a row for an item with its own load. |
 | `OperationPool` | `SimWorld.OperationPool(opId, item)` sums the operation's own storage modules only. |
 
 ## Operations
