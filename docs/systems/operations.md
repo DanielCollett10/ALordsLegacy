@@ -57,4 +57,4 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 
 ## Tests
 `Sim.Tests/Operations/` (`Woodcutting*`, `Foraging` incl. the full pipeline, `OperationStatus`, `OperationCommand`, `Haul*`, `Ox*`, `LogLoad`,
-`DeconstructOperation`), `Sim.Tests/Commands/`, `Sim.Tests/Processes/`. Unity (EditMode): `OperationPanelTests`, `OperationDraft*Tests`.
+`DeconstructOperation`), `Scenarios/BasketChainScenarioTests` (M19: coppice, weaver, wattle yard, yard, kit; `coppice.md`, `kit.md`), `Sim.Tests/Commands/`, `Sim.Tests/Processes/`. Unity (EditMode): `OperationPanelTests`, `OperationDraft*Tests`.

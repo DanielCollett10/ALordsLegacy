@@ -37,6 +37,10 @@ Design: `design/materials.md` MAT-10, MAT-11, MAT-13..18. Copied from foraging (
 - No Unity UI, build-bar entry, art or `OperationPanelView` text for `NoStools` yet. The SimConfig asset and its EditMode
   tests list area and module types by `All`, so they need the new types.
 
+## Rods onward (T-567)
+
+Rods leave the hut by hand to the weaver (willow) and wattle yard (hazel and willow), never by the yard (ST-42b). Weaver baskets go to kit stores (`kit.md`) and wattle panels to the yard. `Scenarios/BasketChainScenarioTests` runs it from the start layout: coppice, weaver, wattle and yard staffed, panels in the yard, a 20 carry.
+
 ## Tests
 
 `Sim.Tests/Operations/CoppiceTests` (type, kind choice, store full, regrow, drops, save, full pipeline).

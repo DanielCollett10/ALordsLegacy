@@ -51,10 +51,10 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 
 ## Basket loan (T-565, MAT-50..54)
 
-- `Kit/KitLoans` reserves one kit basket at plan time (owner `-3_000_000 - taskId`): load is 2 x `HandCarryItems`, else normal. `ReleaseFinished` frees it when the task ends. Tests: `Kit/KitLoanTests`.
+- `Kit/KitLoans` reserves one kit basket at plan time (owner `-3_000_000 - taskId`): load is 2 x `HandCarryItems`, else normal. `ReleaseFinished` frees it when the task ends. Details: `kit.md`.
+- A trip plans from one bush, so 20 needs the bush, hut-store room and a free basket (T-567: `BushBaskets` 25, `ForagerHutCapacity` 200).
 
 ## Tests
 
-- Sim: `Operations/ForagingTests` (full pipeline), `Operations/OperationStatusTests`, `Save/BushesSectionTests`,
-  `Tasks/DispatchAndStepRunnerTests`.
+- Sim: `Operations/ForagingTests`, `OperationStatusTests`, `Save/BushesSectionTests`, `Tasks/DispatchAndStepRunnerTests`, `Kit/KitLoanTests`, `Scenarios/BasketChainScenarioTests` (20 with a basket).
 - Unity PlayMode: `ForagerUiTests`. Gap: no `BushRenderer` test.
