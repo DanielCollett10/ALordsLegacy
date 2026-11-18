@@ -86,6 +86,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             if (t.Def.Id == WoodcuttingSystem.FellTaskId) return FellVerb;
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return "Foraging";
+            if (t.Def.Id == HandHaulTaskDefs.HaulId) return "Hauling goods";
             return ConstructionTaskDefs.VerbFor(t.Def.Id, Footprints.ModuleTypes.DisplayName(t.Subject)) ?? "Working";
         }
 
