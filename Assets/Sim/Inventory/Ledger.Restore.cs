@@ -21,7 +21,8 @@ namespace LordsLegacy.Sim.Inventory
 
         /// <summary>Adds a location with exactly the given fields and counts. Throws on a duplicate id or bad count.</summary>
         internal LedgerLocation RestoreLocation(int id, LocationKind kind, PointMm position, int? owner, int moduleId, int capacity,
-            IEnumerable<KeyValuePair<string, int>> counts, string inputItemId = null)
+            IEnumerable<KeyValuePair<string, int>> counts, string inputItemId = null,
+            IEnumerable<KeyValuePair<string, int>> itemCaps = null)
         {
             if (id <= 0) throw new ArgumentException("Location id must be positive.");
             if (_locations.ContainsKey(id)) throw new ArgumentException("Duplicate location id " + id + ".");
@@ -32,6 +33,12 @@ namespace LordsLegacy.Sim.Inventory
                 if (kv.Value <= 0) throw new ArgumentException("Location " + id + " holds " + kv.Value + " of " + kv.Key + ".");
                 l.Counts[kv.Key] = kv.Value;
             }
+            if (itemCaps != null)
+                foreach (var kv in itemCaps)
+                {
+                    if (kv.Value <= 0) throw new ArgumentException("Location " + id + " caps " + kv.Key + " at " + kv.Value + ".");
+                    l.ItemCaps[kv.Key] = kv.Value;
+                }
             return Add(l);
         }
 
