@@ -53,11 +53,10 @@ namespace LordsLegacy.Game
         public static void AllowTextInput(VisualElement field)
         {
             field.AddToClassList(TextInputClass);
-            // The inner input stays focusable so a click focuses it natively. Focus that did not come from a pointer-down
-            // on the field (WASD, arrows, Tab) is blurred again in FocusIn, so a navigation key never opens an edit.
-            var input = FirstFocusableDescendant(field);
-            field.userData = input;
-            field.focusable = false;
+            // The field and its inner input stay focusable: IntegerField delegates focus to its input, so making the field
+            // unfocusable stops Focus() on the input from working at all. Focus that did not come from a pointer-down on
+            // the field (WASD, arrows, Tab) is blurred again in FocusIn, so a navigation key never opens an edit.
+            field.userData = FirstFocusableDescendant(field);
             field.RegisterCallback<PointerDownEvent>(_ => Allow(field), TrickleDown.TrickleDown);
             // FocusIn/FocusOut bubble from the inner input, so the field sees them for its own edit; Set makes repeats harmless.
             field.RegisterCallback<FocusInEvent>(e =>
@@ -149,11 +148,10 @@ namespace LordsLegacy.Game
         }
 
         // StopImmediatePropagation alone does not stop the focus change: the default action still moves focus to the
-        // only focusable element (the reserve box's input). PreventDefault and IgnoreEvent stop that default action.
+        // only focusable element (the reserve box). IgnoreEvent stops that default action.
         private static void StopNavigation<T>(EventBase<T> evt) where T : EventBase<T>, new()
         {
             evt.StopImmediatePropagation();
-            evt.PreventDefault();
             (evt.target as VisualElement)?.panel?.focusController?.IgnoreEvent(evt);
         }
     }

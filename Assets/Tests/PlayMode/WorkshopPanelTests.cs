@@ -230,7 +230,6 @@ namespace LordsLegacy.Tests.PlayMode
             _agents.SelectWorkshop(hew);
             yield return null;
             var input = _panel.ReserveField.Q(className: TextInputBaseField<int>.inputUssClassName);
-            Assert.IsFalse(_panel.ReserveField.focusable, "the box itself takes no navigation focus");
             Assert.IsFalse(_panel.AssignButton.focusable);
             Assert.IsFalse(UiFocusRules.TextInputActive);
             Assert.IsNotNull(input);
