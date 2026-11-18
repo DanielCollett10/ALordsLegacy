@@ -20,7 +20,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | --- | --- | --- |
 | HL-10 | A built house's panel has **Build fence**. The fence runs along every plot edge **except road frontage** | PROPOSED |
 | HL-11 | It costs **1 wattle panel per 2 m** of fenced edge (rounded up) and 20 worker-minutes per panel, built by odd-jobbers as a normal site | PROPOSED |
-| HL-12 | A fence does not block walking (yet) and is not needed to live in the house. It **is** a level 2 need (HL-21) | PROPOSED |
+| HL-12 | A built fence **blocks walking** (it is solid). The unfenced road frontage is the way in and out, drawn as an **open gate** at the house's access point. People inside a fenced plot walk round to the frontage to leave, and nobody cuts across a fenced plot. A fence under construction does not block yet | DECIDED (owner 18/11/2026) |
+| HL-12b | A fence is not needed to live in the house. It **is** a level 2 need (HL-21) | PROPOSED |
+| HL-12c | A fence never closes a plot completely: the road frontage is always left open, so the house can always be reached | PROPOSED |
 | HL-13 | Deconstructing the house takes the fence with it (refund share as CN-5x). How it is built: decision 0053 | PROPOSED |
 
 ## Household levels

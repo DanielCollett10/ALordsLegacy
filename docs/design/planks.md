@@ -60,7 +60,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | PL-31 | "Total in storage" means everything held in stores, reserved or not: logs in log storage and the camp stockpile; beams in hewing stores and storage yards. Ground piles (including woodcutter piles), workshop input stock and items on the move are not counted: logs must be in storage | DECIDED (owner 17/11/2026) |
 | PL-32 | Status when the reserve blocks fetching: *Waiting: 50 / 60 logs in storage*. The setting is saved per building | PROPOSED |
 | PL-33 | Work already fetched is finished; the reserve only stops new fetches | PROPOSED |
-| PL-34 | Stores: the hewing station's beam store drops from 20 to **10** (HW-04), and each workshop's own input stock holds **10** (was 6). With the default reserve of 5 a lone hewing station (10 beams) always feeds a sawpit, no yard needed. A player who sets a reserve higher than their storage can hold sees the *Waiting* status; that is their choice, not a deadlock in the rules | DECIDED (owner 18/11/2026; which stores PROPOSED) |
+| PL-34 | Stores: the hewing station's beam store drops from 20 to **10** (HW-04), and each workshop's own input stock holds **10** (was 6). With the default reserve of 5 a lone hewing station (10 beams) always feeds a sawpit, no yard needed. A player who sets a reserve higher than their storage can hold sees the *Waiting* status; that is their choice, not a deadlock in the rules | DECIDED (owner 18/11/2026) |
 
 ## Oxen
 
