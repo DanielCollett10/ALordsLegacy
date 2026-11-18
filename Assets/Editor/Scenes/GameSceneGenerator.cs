@@ -236,15 +236,18 @@ namespace LordsLegacy.EditorTools.Scenes
                 new[] { "WoodcutterAreaTool", "woodcutter-draw", LordsLegacy.Sim.Areas.AreaTypes.WoodcuttingId },
                 new[] { "ForagerWorkAreaTool", "forager-work", LordsLegacy.Sim.Areas.AreaTypes.ForagingWorkId },
                 new[] { "ForagerAreaTool", "forager-draw", LordsLegacy.Sim.Areas.AreaTypes.ForagingId },
+                new[] { "CoppiceWorkAreaTool", "coppice-work", LordsLegacy.Sim.Areas.AreaTypes.CoppiceWorkId },
+                new[] { "CoppiceAreaTool", "coppice-draw", LordsLegacy.Sim.Areas.AreaTypes.CoppiceId },
             };
             GameObject last = null;
-            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null, foragerDraw = null;
+            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null, foragerDraw = null, coppiceDraw = null;
             foreach (var d in defs)
             {
                 last = new GameObject(d[0]);
                 var tool = last.AddComponent<LordsLegacy.Game.Tools.AreaTool>();
                 if (d[1] == "woodcutter-draw") woodcutterDraw = tool;
                 if (d[1] == "forager-draw") foragerDraw = tool;
+                if (d[1] == "coppice-draw") coppiceDraw = tool;
                 SetString(tool, "_toolId", d[1]);
                 SetString(tool, "_typeId", d[2]);
                 SetRef(tool, "_host", host);
@@ -276,6 +279,17 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(foragerTool, "_panel", panel);
             SetRef(foragerTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             SetRef(foragerTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            // T-568: the "coppice" build bar entry runs the same draft tool for the coppice operation (hut only).
+            var coppiceTool = new GameObject("CoppiceDraftTool").AddComponent<LordsLegacy.Game.Tools.OperationDraftTool>();
+            SetString(coppiceTool, "_toolId", LordsLegacy.Game.Tools.OperationDraftTool.CoppiceToolId);
+            SetString(coppiceTool, "_operationTypeId", LordsLegacy.Sim.Operations.OperationTypes.CoppiceId);
+            SetRef(coppiceTool, "_host", host);
+            SetRef(coppiceTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(coppiceTool, "_areaTool", coppiceDraw);
+            SetRef(coppiceTool, "_areas", ar);
+            SetRef(coppiceTool, "_panel", panel);
+            SetRef(coppiceTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
+            SetRef(coppiceTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             // T-408: the "house" build bar entry draws a plot with the composed plot AreaTool and shows the house ghost.
             var plotArea = new GameObject("PlotAreaTool").AddComponent<LordsLegacy.Game.Tools.AreaTool>();
             SetString(plotArea, "_toolId", "plot-draw");
