@@ -35,6 +35,13 @@ namespace LordsLegacy.Sim.Kit
             return IsKitStore(world, l) ? l : null;
         }
 
+        /// <summary>Baskets in the building's kit store, 0 when it has none (T-566).</summary>
+        public static int BasketsHeld(SimWorld world, int buildingId)
+        {
+            LedgerLocation s = Find(world, buildingId);
+            return s == null ? 0 : s.CountOf(Items.Basket.Id);
+        }
+
         /// <summary>Creates the kit store of a just-built kit-using building; no-op for other types, zero slots or if it exists.</summary>
         public static void OnBuilt(SimWorld world, Footprint fp)
         {

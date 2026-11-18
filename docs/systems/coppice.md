@@ -13,6 +13,7 @@ Design: `design/materials.md` MAT-10, MAT-11, MAT-13..18. Copied from foraging (
 | `CoppiceSystem` | Operations phase. Per Working hut: sweep, one open `task.coppice` per idle cutter, reserve a stool. Stateless. |
 | `CoppiceStores` | Hut store lookup, rods promised by unfinished tasks per kind, room per kind. |
 | `CoppiceStatus` | Working, Paused, MissingHut, NoWorkers, NoStools, StorageFull. |
+| `CoppiceReport` | Read model (T-566): status text, per-kind stock and cap, stools available or regrowing in the work area. |
 | `CoppiceDrop` | Rods of a task that ended mid-carry go to an operation pile at the stool (cutting) or the hut (walking home). |
 
 ## Data flow

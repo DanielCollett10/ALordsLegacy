@@ -48,6 +48,13 @@ namespace LordsLegacy.Sim.Food
         /// <summary>"Supplies market: Yes" or "Supplies market: No".</summary>
         public string SuppliesMarketText => "Supplies market: " + (SuppliesMarket ? "Yes" : "No");
 
+        /// <summary>Baskets held in the granary's kit store (T-566).</summary>
+        public int BasketsHeld { get; private set; }
+        /// <summary>Basket slots of a granary (tuning), the "out of" of <see cref="BasketsHeld"/>.</summary>
+        public int BasketSlots { get; private set; }
+        /// <summary>"Baskets: 1 / 2".</summary>
+        public string BasketsText => "Baskets: " + BasketsHeld + " / " + BasketSlots;
+
         private GranaryReport() { }
 
         /// <summary>The report for a granary footprint, or null when the id is not a granary.</summary>
@@ -92,6 +99,8 @@ namespace LordsLegacy.Sim.Food
                 r.Capacity = store.Capacity;
                 foreach (KeyValuePair<string, int> kv in store.ReservedCounts) r.Reserved += kv.Value;
             }
+            r.BasketsHeld = Kit.KitStores.BasketsHeld(world, footprintId);
+            r.BasketSlots = Kit.KitStores.BasketSlots(world, fp.Type);
             r.RefundLogs = DeconstructionWork.RefundLogs(world, fp);
             r.DropsItems = r.Total;
             Operations.Operation granaryOp = world.Operations.FindByModule(footprintId);

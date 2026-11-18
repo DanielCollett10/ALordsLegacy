@@ -47,6 +47,10 @@ Each fetch round picks the ox input with the lowest share of its stock (held plu
 `InputReserve`: a fetch opens only if storage total (logs in Storage/Stockpile, beams in workshop GoodsStores; never piles, workshop stock, carried) minus stock reserved by open fetches minus the load is at least the reserve (tuning `WorkshopDefaultReserve` = 5, 0 = none). Own input stock is committed and uncounted; fetched work is always processed. Stocks: hewing store 10, input stocks 10.
 The player sets it per workshop and input (`SetWorkshopReserve`, 0..9999): stored on the operation (`Operation.Reserves`, Structures section, save v31); an unset input uses the tuning default. Yard and coppice-hut stores also count (see `storage.md`). Decision 0055.
 
+## Read models for M19 (T-566, read only)
+
+`WorkshopReport.Inputs` (one `WorkshopInputLine` per recipe input: stock, stock cap, reserve, `InStorage`, per batch) and `RecipeText`. `GoodsStats.Rods/Baskets/Panels` count every goods store (kit stores too). `CoppiceReport` (status, per-kind rods out of 40, stools available/regrowing in the work area), `ForagerHutReport` and `GranaryReport.BasketsHeld/BasketSlots` (loaned baskets still count as held). Tests: `Workshops/KitReadModelTests`.
+
 ## Gaps and follow-ups
 
 - Unity side (T-527, T-550): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct and the "Keep in storage" reserve field (text input, focus only on click, T-602); the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.
