@@ -201,6 +201,33 @@ namespace LordsLegacy.Sim.Tests.Operations
             Assert.IsNull(Next(w, yard), "no room in the yard for baskets either");
         }
 
+        [TestCase(0)]
+        [TestCase(1)]
+        public void PlannedHaul_IsCappedAtTheHandLoad_NotTheFullFreeStock(int which)
+        {
+            SimWorld w = Make();
+            ItemDef item = which == 0 ? Items.Basket : Items.WattlePanel;
+            string type = which == 0 ? ModuleTypes.WeaverId : ModuleTypes.WattleYardId;
+            Operation yard = BuiltYard(w, M(100, 100));
+            Assert.IsTrue(w.Execute(new AssignFamily(yard.Id, 4)).IsAccepted);
+            Footprint shop = Workshop(w, type, M(60, 100));
+            w.Inventory.FindGoodsStore(shop.Id).Capacity = 30; // room for more than both workers carry
+            LedgerLocation store = Output(w, shop, item, 14);
+            int load = HandLoads.For(item, w.Tuning).Value;
+            Assert.Less(2 * load, 14, "the store holds more than both workers can carry");
+
+            int reserved = 0;
+            for (int i = 0; i < 1440 && reserved == 0; i++)
+            {
+                w.Step(1);
+                reserved = store.CountOf(item.Id) - store.AvailableOf(item.Id);
+            }
+
+            Assert.Greater(reserved, 0, "the yard family planned a haul");
+            Assert.LessOrEqual(reserved, 2 * load, "at most one hand load per idle worker (2 adults), never the whole stock");
+            Assert.AreEqual(0, reserved % load, "each planned haul is exactly one hand load");
+        }
+
         [Test]
         public void FullPipeline_WeaverBaskets_ReachTheYard_ThroughSimTicks()
         {
