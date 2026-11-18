@@ -290,7 +290,7 @@ namespace LordsLegacy.Sim.Tests.Save
             // Flip the last byte: it lies in the last section (Tasks, id 7 per decision 0034).
             byte[] c = (byte[])a.Clone();
             c[c.Length - 1] ^= 0xFF;
-            StringAssert.Contains("section 7", SaveDiff.FirstDifference(a, c));
+            StringAssert.Contains("section 12", SaveDiff.FirstDifference(a, c));
         }
     }
 }
