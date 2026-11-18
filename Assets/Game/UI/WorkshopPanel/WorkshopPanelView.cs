@@ -24,6 +24,9 @@ namespace LordsLegacy.Game
         private VisualElement _panel, _pickerBox;
         private Label _title, _status, _input, _output, _family, _message;
         private Button _assign, _unassign, _deconstruct, _close;
+        private VisualElement _reserveRow;
+        private IntegerField _reserveField;
+        private Label _reserveItems;
         private bool _pickerOpen;
         private string _pickerSignature = "";
         private bool _subscribed;
@@ -46,6 +49,12 @@ namespace LordsLegacy.Game
         public bool PickerOpen => _pickerOpen;
         /// <summary>The panel element, for layout checks.</summary>
         public VisualElement PanelElement => _panel;
+        /// <summary>The "Keep in storage" integer field, or null.</summary>
+        public IntegerField ReserveField => _reserveField;
+        /// <summary>The reserve row (caption, field, item name), or null.</summary>
+        public VisualElement ReserveRow => _reserveRow;
+        /// <summary>The item name after the reserve field, e.g. "logs".</summary>
+        public string ReserveItemsText => _reserveItems?.text ?? "";
         /// <summary>The Assign button, or null.</summary>
         public Button AssignButton => _assign;
         /// <summary>The Unassign button, or null.</summary>
@@ -144,6 +153,15 @@ namespace LordsLegacy.Game
             _input.text = r.InputText;
             _output.text = r.OutputText;
             _family.text = "Family: " + (r.FamilyName ?? "none");
+            var reserveOp = host.World.Operations.FindByModule(r.FootprintId);
+            bool showReserve = r.IsBuilt && reserveOp != null;
+            _reserveRow.style.display = showReserve ? DisplayStyle.Flex : DisplayStyle.None;
+            if (showReserve)
+            {
+                _reserveItems.text = r.InputName + "s";
+                int reserve = InputReserve.ReserveOf(host.World, reserveOp);
+                if (!UiFocusRules.TextInputActive && _reserveField.value != reserve) _reserveField.SetValueWithoutNotify(reserve);
+            }
             bool hasFamily = r.FamilyId != 0;
             _assign.style.display = !hasFamily ? DisplayStyle.Flex : DisplayStyle.None;
             _assign.SetEnabled(r.IsBuilt);
@@ -196,7 +214,15 @@ namespace LordsLegacy.Game
             if (_panel == null || _panel.panel == null || (doc.rootVisualElement != null && _panel.panel != doc.rootVisualElement.panel))
                 Build();
             Refresh();
-            var kb = Keyboard.current;
+            // Clicking anywhere outside the reserve field ends the edit.
+            var mouse = Mouse.current;
+            if (UiFocusRules.TextInputActive && mouse != null && mouse.leftButton.wasPressedThisFrame && _reserveField?.panel != null)
+            {
+                Vector2 p = mouse.position.ReadValue();
+                Vector2 local = RuntimePanelUtils.ScreenToPanel(_reserveField.panel, new Vector2(p.x, Screen.height - p.y));
+                if (!_reserveField.worldBound.Contains(local)) UiFocusRules.ReleaseFocus(_reserveField);
+            }
+            var kb = UiFocusRules.GameKeyboard;
             if (kb != null && kb.escapeKey.wasPressedThisFrame && !ConfirmDialog.OwnsEscape && IsShown)
             {
                 var controller = _controller != null ? _controller : (_controller = FindFirstObjectByType<Tools.ToolController>());
@@ -223,6 +249,7 @@ namespace LordsLegacy.Game
         private void OnSelectionChanged()
         {
             _pickerOpen = false; _pickerSignature = "";
+            if (_reserveField != null) UiFocusRules.ReleaseFocus(_reserveField);
             SetMessage("");
             Refresh();
         }
@@ -239,6 +266,7 @@ namespace LordsLegacy.Game
             if (root == null) return;
             root.Clear();
             _pickerSignature = "";
+            UiFocusRules.ResetTextInput();
             var holder = new VisualElement { name = "workshop-panel-root", pickingMode = PickingMode.Ignore };
             holder.style.position = Position.Absolute;
             holder.style.right = 12; holder.style.bottom = 90;
@@ -263,6 +291,7 @@ namespace LordsLegacy.Game
             _input = MakeLabel("workshop-input", 12, false);
             _output = MakeLabel("workshop-output", 12, false);
             _family = MakeLabel("workshop-family", 12, false);
+            BuildReserveRow();
             _message = MakeLabel("workshop-message", 12, false);
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
@@ -274,11 +303,46 @@ namespace LordsLegacy.Game
             _pickerBox.style.display = DisplayStyle.None;
 
             _panel.Add(_title); _panel.Add(_status); _panel.Add(_input); _panel.Add(_output); _panel.Add(_family);
+            _panel.Add(_reserveRow);
             _panel.Add(_assign); _panel.Add(_unassign); _panel.Add(_pickerBox);
             _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);
             UiFocusRules.Apply(root);
+        }
+
+        private void BuildReserveRow()
+        {
+            var light = new Color(240f / 255f, 230f / 255f, 210f / 255f);
+            _reserveRow = new VisualElement { name = "workshop-reserve-row" };
+            _reserveRow.style.flexDirection = FlexDirection.Row;
+            _reserveRow.style.alignItems = Align.Center;
+            _reserveRow.style.marginTop = 2;
+            var caption = MakeLabel("workshop-reserve-caption", 12, false, "Keep in storage:");
+            _reserveField = new IntegerField { name = "workshop-reserve", isDelayed = true };
+            _reserveField.style.width = 64;
+            _reserveField.style.marginLeft = _reserveField.style.marginRight = 4;
+            var input = _reserveField.Q(className: TextInputBaseField<int>.inputUssClassName);
+            if (input != null)
+            {
+                input.style.color = light;
+                input.style.backgroundColor = new Color(55f / 255f, 46f / 255f, 36f / 255f);
+            }
+            _reserveField.RegisterValueChangedCallback(OnReserveChanged);
+            UiFocusRules.AllowTextInput(_reserveField);
+            _reserveItems = MakeLabel("workshop-reserve-items", 12, false);
+            _reserveRow.Add(caption); _reserveRow.Add(_reserveField); _reserveRow.Add(_reserveItems);
+            _reserveRow.style.display = DisplayStyle.None;
+        }
+
+        private void OnReserveChanged(ChangeEvent<int> e)
+        {
+            if (!TryOperation(out int op, out _)) return;
+            var world = Host().World;
+            var def = OperationTypes.WorkshopOf(world.Operations.Get(op).TypeId, world.Tuning);
+            Run(new SetWorkshopReserve(op, def.Input.Id, e.newValue));
+            // Accepted or refused, show what the Sim holds (a refused value snaps back).
+            _reserveField.SetValueWithoutNotify(InputReserve.ReserveOf(world, world.Operations.Get(op)));
         }
 
         private static Button MakeButton(string name, string text, System.Action onClick)
