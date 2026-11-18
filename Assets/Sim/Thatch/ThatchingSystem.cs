@@ -4,6 +4,7 @@ using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Foraging;
 using LordsLegacy.Sim.Footprints;
+using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Navigation;
@@ -34,21 +35,27 @@ namespace LordsLegacy.Sim.Thatch
             foreach (Operation op in new List<Operation>(world.Operations.All))
             {
                 if (op.TypeId != OperationTypes.ThatchingId) continue;
-                if (ThatchingStatus.Of(world, op) != OperationState.Working) CancelOpen(world, op);
-                else Refill(world, op);
+                bool working = ThatchingStatus.Of(world, op) == OperationState.Working;
+                if (!working) CancelOpen(world, op, CutReedTaskId);
+                if (!CanCollect(world, op)) CancelOpen(world, op, SheafCollecting.CollectTaskId);
+                else Refill(world, op, working);
             }
             ReleaseOrphanBeds(world);
         }
+
+        // Collecting needs a built hut, a worker and no pause; it goes on when the reed beds are used up (MAT-39d).
+        private static bool CanCollect(SimWorld world, Operation op) =>
+            !op.Paused && OperationStatus.Hut(world, op) != null && OperationStatus.HasWorker(world, op);
 
         /// <inheritdoc />
         public void OnCommandApplied(SimWorld world, CommandResult result)
         {
         }
 
-        private static void CancelOpen(SimWorld world, Operation op)
+        private static void CancelOpen(SimWorld world, Operation op, string defId)
         {
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
-                if (t.State == TaskState.Open && t.Def.Id == CutReedTaskId) world.Tasks.Cancel(t.Id);
+                if (t.State == TaskState.Open && t.Def.Id == defId) world.Tasks.Cancel(t.Id);
         }
 
         // A bed reserved by a cut_reed task that ended is freed.
@@ -62,15 +69,21 @@ namespace LordsLegacy.Sim.Thatch
             }
         }
 
-        private static void Refill(SimWorld world, Operation op)
+        // Idle cutters first take collect trips (1 sheaf each, while a dry sheaf and room exist), then cut (MAT-39d).
+        private static void Refill(SimWorld world, Operation op, bool cutting)
         {
             Footprint hut = OperationStatus.Hut(world, op);
-            TreeRegion region = OperationStatus.WorkRegion(world, op);
-            if (hut == null || region == null) return;
+            if (hut == null) return;
             int open = 0;
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
-                if (t.State == TaskState.Open && t.Def.Id == CutReedTaskId) open++;
+                if (t.State == TaskState.Open && (t.Def.Id == CutReedTaskId || t.Def.Id == SheafCollecting.CollectTaskId)) open++;
             int wanted = CountIdleCutters(world, op) - open;
+            LedgerLocation store = ThatchingStatus.HutStore(world, op);
+            if (store != null)
+                while (wanted > 0 && SheafCollecting.PlanOne(world, op, hut, store)) wanted--;
+            if (!cutting) return;
+            TreeRegion region = OperationStatus.WorkRegion(world, op);
+            if (region == null) return;
             float ax = (float)hut.AccessPoint.XMetres, az = (float)hut.AccessPoint.ZMetres;
             for (int i = 0; i < wanted; i++)
             {

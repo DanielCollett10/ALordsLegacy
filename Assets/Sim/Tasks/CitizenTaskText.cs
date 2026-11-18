@@ -88,6 +88,7 @@ namespace LordsLegacy.Sim.Tasks
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return "Foraging";
             if (t.Def.Id == Coppice.CoppiceSystem.CoppiceTaskId) return "Cutting rods";
             if (t.Def.Id == Thatch.ThatchingSystem.CutReedTaskId) return "Cutting reed";
+            if (t.Def.Id == Thatch.SheafCollecting.CollectTaskId) return "Collecting thatch";
             if (t.Def.Id == HandHaulTaskDefs.HaulId) return "Hauling goods";
             return ConstructionTaskDefs.VerbFor(t.Def.Id, Footprints.ModuleTypes.DisplayName(t.Subject)) ?? "Working";
         }
