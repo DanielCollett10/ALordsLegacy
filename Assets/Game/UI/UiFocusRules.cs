@@ -58,18 +58,20 @@ namespace LordsLegacy.Game
             var input = FirstFocusableDescendant(field);
             field.userData = input;
             field.focusable = false;
-            field.RegisterCallback<PointerDownEvent>(_ => Allow(input), TrickleDown.TrickleDown);
+            field.RegisterCallback<PointerDownEvent>(_ => Allow(field), TrickleDown.TrickleDown);
             // FocusIn/FocusOut bubble from the inner input, so the field sees them for its own edit; Set makes repeats harmless.
             field.RegisterCallback<FocusInEvent>(e =>
             {
                 var target = e.target as VisualElement;
                 if (target == null) return;
-                if (target == _allowedInput && UnityEngine.Time.frameCount - _allowedFrame <= 1)
+                // Accept focus on any element inside this field, but only within a few frames of a click or BeginTextInput.
+                bool allowed = _allowedField == field && UnityEngine.Time.frameCount - _allowedFrame <= 2;
+                if (allowed && IsWithin(target, field))
                 {
-                    _allowedInput = null;
+                    _allowedField = null;
                     _editing.Add(field);
                 }
-                else target.Blur();
+                else if (!_editing.Contains(field)) target.Blur();
             });
             field.RegisterCallback<FocusOutEvent>(_ =>
             {
@@ -91,17 +93,17 @@ namespace LordsLegacy.Game
         public static void BeginTextInput(VisualElement field)
         {
             if (field?.userData is not VisualElement input) return;
-            Allow(input);
+            Allow(field);
             input.Focus();
         }
 
-        // The one input the player has just pointed at, valid only for the frame of the pointer-down (see FocusIn above).
-        private static VisualElement _allowedInput;
+        // The field the player has just pointed at, valid for a few frames after the pointer-down (see FocusIn above).
+        private static VisualElement _allowedField;
         private static int _allowedFrame = -1;
 
-        private static void Allow(VisualElement input)
+        private static void Allow(VisualElement field)
         {
-            _allowedInput = input;
+            _allowedField = field;
             _allowedFrame = UnityEngine.Time.frameCount;
         }
 
