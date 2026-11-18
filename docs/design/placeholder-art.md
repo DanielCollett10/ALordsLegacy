@@ -31,6 +31,7 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | `visual.item.food_crate` | Food crate: 1-3 on a stall by fill, one held by a food carrier (MK-43) | 0.6 × 0.35 × 0.6 | `ModuleRenderer`, `PeopleRenderer` | Placeholder |
 | `visual.module.hewing_station` | Hewing station (T-526) | 6 × 2.2 × 4 | `ModuleRenderer` | Placeholder |
 | `visual.module.sawpit` | Sawpit (T-526) | 6 × 1.4 × 4 | `ModuleRenderer` | Placeholder |
+| `visual.module.storage_yard` | Storage yard (T-549) | 8 × 0.8 × 6 | `ModuleRenderer` | Placeholder |
 | `visual.item.beam_stack` | Beams in a hewing station's store; height grows with fill | 1.2 × 0.5 × 0.6 | `ModuleRenderer` | Placeholder |
 | `visual.item.plank_stack` | Planks in a sawpit's store; height grows with fill | 1.2 × 0.4 × 0.6 | `ModuleRenderer` | Placeholder |
 | `visual.construction.scaffold` | Building site scaffold | footprint × 2.6 | `ConstructionRenderer` | Placeholder |

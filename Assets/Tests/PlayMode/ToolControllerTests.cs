@@ -77,8 +77,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsFalse(_view.GetButton("woodcutter").ClassListContains("build-bar__button--disabled"));
             Assert.AreEqual("House plot", ToolEntry.Defaults()[5].Label);
             Assert.IsFalse(_view.GetButton("house").ClassListContains("build-bar__button--disabled"), "House plot is affordable with 40 logs.");
-            Assert.AreEqual("Coming later", _view.GetButton("storage-yard").tooltip);
-            Assert.IsTrue(_view.GetButton("storage-yard").ClassListContains("build-bar__button--disabled"));
+            Assert.IsFalse(_view.GetButton("storage-yard").ClassListContains("build-bar__button--disabled"), "Storage yard is affordable with 40 logs (T-549).");
             Assert.IsFalse(_view.GetButton("granary").ClassListContains("build-bar__button--disabled"), "Granary is affordable with 40 logs.");
             foreach (var e in ToolEntry.Defaults()) Assert.IsFalse(_view.GetButton(e.Id).focusable, e.Id);
         }
@@ -105,7 +104,8 @@ namespace LordsLegacy.Tests.PlayMode
         [Test]
         public void DisabledButtonDoesNothing()
         {
-            // "storage-yard" is greyed out ("Coming later").
+            // The storage yard is greyed out when the village has fewer logs than its cost (T-549).
+            _view.AvailableLogs = () => 0;
             _view.Click("storage-yard");
             Assert.IsNull(_ctl.ActiveTool);
         }

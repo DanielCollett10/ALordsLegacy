@@ -101,6 +101,26 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(1, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.SawpitId));
         }
 
+        /// <summary>T-549: the storage yard places like a workshop and creates its operation.</summary>
+        [UnityTest]
+        public IEnumerator StorageYardGhostPlacesAndCreatesItsOperation()
+        {
+            yield return Setup(40, StructureTool.StorageYardToolId, ModuleTypes.StorageYardId);
+            _tool.PointerMove(Screen(100, 100));
+            Assert.IsTrue(_tool.GhostVisible);
+            Assert.IsFalse(_tool.GhostIsRed, _tool.Preview?.Text);
+            Click(100, 100);
+            Assert.AreEqual(1, _host.World.Footprints.All.Count(f => f.Type.Id == ModuleTypes.StorageYardId));
+            Assert.IsNotNull(_host.World.Operations.All.FirstOrDefault(o => o.TypeId == LordsLegacy.Sim.Operations.OperationTypes.StorageYardOpId));
+        }
+
+        /// <summary>T-549: ModuleRenderer draws a yard with its own visual id.</summary>
+        [Test]
+        public void StorageYardHasItsOwnVisualId()
+        {
+            Assert.AreEqual("visual.module.storage_yard", ModuleRenderer.VisualIdOf(ModuleTypes.StorageYardId));
+        }
+
         /// <summary>T-526: with no logs the workshop ghost is red with the Sim's text and a click places nothing.</summary>
         [UnityTest]
         public IEnumerator UnaffordableWorkshopIsRefusedWithSimText()

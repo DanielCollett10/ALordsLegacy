@@ -25,6 +25,8 @@ namespace LordsLegacy.Game.Tools
         public const string HewingToolId = "hewing-station";
         /// <summary>Build bar id of the sawpit entry.</summary>
         public const string SawpitToolId = "sawpit";
+        /// <summary>Build bar id of the storage yard entry (T-549).</summary>
+        public const string StorageYardToolId = "storage-yard";
         /// <summary>Degrees one Q / E press turns the ghost.</summary>
         public const double RotateStepDeg = 15.0;
         /// <summary>Degrees one Shift + Q / E press turns the ghost.</summary>

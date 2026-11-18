@@ -44,6 +44,7 @@ namespace LordsLegacy.Game.Visuals
                 case ModuleTypes.MarketStallId: return VisualSizes.ModuleMarketStall;
                 case ModuleTypes.HewingStationId: return VisualSizes.ModuleHewingStation;
                 case ModuleTypes.SawpitId: return VisualSizes.ModuleSawpit;
+                case ModuleTypes.StorageYardId: return VisualSizes.ModuleStorageYard;
                 default: return VisualSizes.ModuleLogStorage;
             }
         }
