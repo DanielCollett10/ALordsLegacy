@@ -26,6 +26,8 @@ namespace LordsLegacy.Sim.Save.Sections
         public LordsLegacy.Sim.Geometry.PointMm? EntryPoint { get; set; }
         /// <summary>Tick of the latest arrival, or null (T-504).</summary>
         public long? LastArrivalTick { get; set; }
+        /// <summary>True once the ST-32 "camp stays" message was logged (T-546).</summary>
+        public bool CampStaysMessageSaid { get; set; }
         /// <summary>The settlement log entries, oldest first (T-498). Never null.</summary>
         public System.Collections.Generic.List<LordsLegacy.Sim.Core.SettlementEntry> SettlementEntries { get; set; }
             = new System.Collections.Generic.List<LordsLegacy.Sim.Core.SettlementEntry>();

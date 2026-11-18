@@ -5,5 +5,8 @@ namespace LordsLegacy.Sim.Core
     {
         /// <summary>The last few settlement events. Never null; empty at the start.</summary>
         public SettlementLog SettlementLog { get; } = new SettlementLog();
+
+        /// <summary>True once the log has said "The camp stays until a storage yard can take its goods" (ST-32). Saved in Core.</summary>
+        public bool CampStaysMessageSaid { get; internal set; }
     }
 }
