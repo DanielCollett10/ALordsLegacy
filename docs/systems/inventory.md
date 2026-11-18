@@ -40,6 +40,10 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 - A food store's capacity comes from its type, or from `ForagerHutCapacity` for the forager hut. `FoodStats` and the granary panel read counts through the ledger.
 - The save stores both counters and journals; `Audit` runs on load and throws `SaveFormatException` if they disagree.
 
+## Kit and baskets (T-567)
+
+A basket is a General item. Kit stores (`kit.md`) are goods stores keyed by the building. A loan is a reservation, so the basket stays counted in the ledger and `Audit` stays clean. `BasketChainScenarioTests` audits every tick.
+
 ## Tests
 
 `Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`,
