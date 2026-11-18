@@ -138,20 +138,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         }
 
         /// <summary>Status text for a workshop state; <paramref name="input"/> names what is missing.</summary>
-        public static string TextOf(OperationState s, string input)
-        {
-            switch (s)
-            {
-                case OperationState.Working: return "Working";
-                case OperationState.Paused: return "Paused";
-                case OperationState.MissingHut: return "Missing hut";
-                case OperationState.NoWorkers: return "No workers";
-                case OperationState.WaitingForInput: return "Waiting for " + input + "s";
-                case OperationState.WaitingForOx: return "Waiting for ox";
-                case OperationState.WorkshopStoreFull: return "Store full";
-                default: return s.ToString();
-            }
-        }
+        public static string TextOf(OperationState s, string input) => OperationText.Of(s, input);
 
         /// <summary>The confirm-dialog text for placing a hewing station or sawpit, or null for another type.</summary>
         public static string ConfirmText(SimWorld world, string typeId)

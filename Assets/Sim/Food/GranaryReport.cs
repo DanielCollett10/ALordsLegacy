@@ -101,7 +101,7 @@ namespace LordsLegacy.Sim.Food
             }
             r.BasketsHeld = Kit.KitStores.BasketsHeld(world, footprintId);
             r.BasketSlots = Kit.KitStores.BasketSlots(world, fp.Type);
-            r.RefundLogs =DeconstructionWork.RefundLogs(world, fp);
+            r.RefundLogs = DeconstructionWork.RefundLogs(world, fp);
             r.DropsItems = r.Total;
             Operations.Operation granaryOp = world.Operations.FindByModule(footprintId);
             r.SuppliesMarket = granaryOp != null && granaryOp.SuppliesMarket;

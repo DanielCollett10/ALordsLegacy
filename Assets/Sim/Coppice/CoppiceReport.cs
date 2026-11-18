@@ -91,23 +91,8 @@ namespace LordsLegacy.Sim.Coppice
             r.Kinds = lines;
             if (!r.IsBuilt) r.StatusText = "Under construction";
             else if (op == null) { r.State = OperationState.NoWorkers; r.StatusText = "No workers"; }
-            else { r.State = CoppiceStatus.Of(world, op); r.StatusText = TextOf(r.State); }
+            else { r.State = CoppiceStatus.Of(world, op); r.StatusText = OperationText.Of(r.State); }
             return r;
-        }
-
-        /// <summary>Status text for a coppice state.</summary>
-        public static string TextOf(OperationState s)
-        {
-            switch (s)
-            {
-                case OperationState.Working: return "Working";
-                case OperationState.Paused: return "Paused";
-                case OperationState.MissingHut: return "Missing hut";
-                case OperationState.NoWorkers: return "No workers";
-                case OperationState.NoStools: return "No stools";
-                case OperationState.StorageFull: return "Storage full";
-                default: return s.ToString();
-            }
         }
     }
 }
