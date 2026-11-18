@@ -13,7 +13,7 @@ using NUnit.Framework;
 
 namespace LordsLegacy.Sim.Tests.Operations
 {
-    /// <summary>Yard job source 3 (ST-42, ST-42b, PL-30d): collect from half-full workshop output stores.</summary>
+    /// <summary>Yard job source 3 (ST-42, ST-42b, PL-30d): collect any free workshop output item, fullest first.</summary>
     public class YardWorkshopSourceTests
     {
         private static PointMm M(double x, double z) => PointMm.FromMetres(x, z);
@@ -62,20 +62,29 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void Threshold_JustBelowHalf_NoTrip_AtHalf_Trip()
+        public void OnePlankInSawpit_CollectedAtOnce_OneItemTrip()
         {
             SimWorld w = Make();
             Operation yard = BuiltYard(w, M(100, 100));
-            LedgerLocation store = Sawpit(w, M(60, 100), 4);
-            var src = new YardWorkshopSource();
-            Assert.IsNull(src.NextTrip(w, yard), "4/10 is below 0.5");
+            LedgerLocation store = Sawpit(w, M(60, 100), 1);
 
-            w.Inventory.Produce(store, Items.Plank, 1);
-            YardTrip t = src.NextTrip(w, yard);
-            Assert.IsNotNull(t, "5/10 is exactly the threshold");
+            YardTrip t = new YardWorkshopSource().NextTrip(w, yard);
+
+            Assert.IsNotNull(t, "any free output item is collected, no threshold");
             Assert.AreSame(store, t.Source);
             Assert.AreEqual(Items.Plank.Id, t.Item.Id);
-            Assert.AreEqual(5, t.Count);
+            Assert.AreEqual(1, t.Count);
+        }
+
+        [Test]
+        public void OnlyReservedPlank_NoTrip()
+        {
+            SimWorld w = Make();
+            Operation yard = BuiltYard(w, M(100, 100));
+            LedgerLocation store = Sawpit(w, M(60, 100), 1);
+            Assert.AreNotEqual(0, w.Inventory.ReserveStock(store, Items.Plank, 1, 999), "the one plank is reserved");
+
+            Assert.IsNull(new YardWorkshopSource().NextTrip(w, yard), "a reserved item is not free");
         }
 
         [Test]

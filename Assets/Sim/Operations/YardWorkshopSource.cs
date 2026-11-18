@@ -5,9 +5,10 @@ using LordsLegacy.Sim.Operations.Workshops;
 namespace LordsLegacy.Sim.Operations
 {
     /// <summary>
-    /// ST-42, source 3: workshop output stores at or above <c>YardCollectThreshold</c> full, fullest first (ties to the
-    /// lowest operation id). Only workshops with an input and an output count (ST-42b), so gathering huts are never
-    /// collected. Only the output store is read, never the input stock (PL-30d). Light items go by hand.
+    /// ST-42, source 3: workshop output stores at or above <c>YardCollectThreshold</c> full (0 by default, so any free
+    /// output item counts), fullest first (ties to the lowest operation id). Only workshops with an input and an output
+    /// count (ST-42b), so gathering huts are never collected. Only the output store is read, never the input stock
+    /// (PL-30d). Light items go by hand; <see cref="YardRoute.TripFrom"/> returns null with no free item.
     /// </summary>
     public sealed class YardWorkshopSource : IYardJobSource
     {

@@ -105,7 +105,7 @@ namespace LordsLegacy.Sim.Tests.Operations
         }
 
         [Test]
-        public void CampPlanksReachTheYard_SawpitCollectedOnceAtHalf_AStallTakesPlanksFromTheYard()
+        public void CampPlanksReachTheYard_SawpitLonePlankCollected_AStallTakesPlanksFromTheYard()
         {
             SimWorld w = NewWorld(100, 4);
             Fx fx = PlaceAndBuild(w, true, true, false);
@@ -120,21 +120,9 @@ namespace LordsLegacy.Sim.Tests.Operations
 
             Assign(w, fx.SawOp, 2); // only a working building is collected from
             LedgerLocation saw = fx.SawStore;
-            int half = (int)System.Math.Ceiling(saw.Capacity * w.Tuning.YardCollectThreshold);
-            w.Inventory.Produce(saw, Items.Plank, half - 1);
-            RunFor(w, 2 * 1440);
-            Assert.AreEqual(half - 1, saw.CountOf(Items.Plank.Id), "just below half: left alone");
-            Assert.AreEqual(10, fx.YardStore.CountOf(Items.Plank.Id));
-
             w.Inventory.Produce(saw, Items.Plank, 1);
-            Run(w, () => saw.CountOf(Items.Plank.Id) < half, 1440, "sawpit at half is collected");
-            RunFor(w, 1440);
-            int left = saw.CountOf(Items.Plank.Id);
-            RunFor(w, 2 * 1440);
-            Assert.Less(left, half);
-            Assert.Greater(left, 0, "collected at half, not emptied");
-            Assert.AreEqual(left, saw.CountOf(Items.Plank.Id), "below half again: nothing more is collected");
-            Assert.AreEqual(10 + half - left, fx.YardStore.CountOf(Items.Plank.Id), "what left the sawpit is in the yard");
+            Run(w, () => fx.YardStore.CountOf(Items.Plank.Id) == 11, 2 * 1440, "a single plank in the sawpit is collected into the yard (ST-42: any free output)");
+            Assert.AreEqual(0, saw.CountOf(Items.Plank.Id), "the sawpit is emptied");
 
             int yardBefore = fx.YardStore.CountOf(Items.Plank.Id);
             Assign(w, w.Operations.FindByModule(granary).Id, 3); // family 4 stays free to build the stall

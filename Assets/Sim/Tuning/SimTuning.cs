@@ -307,8 +307,8 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Families that move goods for one storage yard. Unit: families. Rule: ST-43 (PLACEHOLDER).</summary>
         public int StorageYardFamilySlots { get; set; } = 2;
 
-        /// <summary>Share of a workshop output store that must be full before the yard collects from it. Unit: fraction. Rule: ST-42 (PLACEHOLDER).</summary>
-        public double YardCollectThreshold { get; set; } = 0.5;
+        /// <summary>Share of a workshop output store that must be full before the yard collects from it; 0 = any free output item. Unit: fraction. Rule: ST-42 (owner 18/11/2026).</summary>
+        public double YardCollectThreshold { get; set; } = 0.0;
 
         /// <summary>Camp market walking range. Unit: metres. Rule: FD-11, MKT-06 (PLACEHOLDER).</summary>
         public double MarketRangeM { get; set; } = 630;

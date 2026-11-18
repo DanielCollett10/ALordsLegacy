@@ -137,7 +137,7 @@ namespace LordsLegacy.Game
         [Tooltip("ST-03 game minutes a yard takes to build")] [Range(1, 100000)] public int storageYardMinutes = 480;
         [Tooltip("ST-03 most General goods a yard holds")] [Range(1, 100000)] public int storageYardCapacity = 300;
         [Tooltip("ST-43 families that move goods for one yard")] [Range(0, 20)] public int storageYardFamilySlots = 2;
-        [Tooltip("ST-42 share of a workshop store that must be full before the yard collects")] [Range(0f, 1f)] public float yardCollectThreshold = 0.5f;
+        [Tooltip("ST-42 share of a workshop store that must be full before the yard collects (0 = any free output)")] [Range(0f, 1f)] public float yardCollectThreshold = 0f;
 
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
