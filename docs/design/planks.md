@@ -53,11 +53,14 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| PL-30 | A workshop keeps a **reserve of its input in the village**: it only fetches an input while the **total in storage** of that item is **above the reserve** (more than 20). Defaults: hewing station **20 logs**, sawpit **20 beams**. Without it, the hewers use up every log and the sawyers every beam, and only planks pile up | DECIDED (owner 17/11/2026; 20 PLACEHOLDER) |
+| PL-30 | A workshop keeps a **reserve of its input in the village**: it fetches an input only while the **total in storage** is **above the reserve**, one item per fetch, and never a fetch that would take the total below it. Example: reserve 60, 66 logs in storage: it takes up to 6 (or until its own stock is full); at 60 or fewer it does nothing, no fetching at all. Without a reserve, the hewers use up every log and the sawyers every beam | DECIDED (owner 17/11/2026, refined 18/11/2026) |
+| PL-30b | The reserve is a **player setting on each workshop**: a number input on its panel. Default **5** for every workshop input (tuning `WorkshopDefaultReserve`), from 0 up | DECIDED (owner 18/11/2026) |
+| PL-30c | Fetches already on the way count as taken, so several workshops or trips never overshoot the reserve together | PROPOSED |
+| PL-30d | An item in the workshop's own input stock is **committed**: it is only ever processed there, never counted in storage, never taken by a site or another building | DECIDED (owner 18/11/2026) |
 | PL-31 | "Total in storage" means everything held in stores, reserved or not: logs in log storage and the camp stockpile; beams in hewing stores and storage yards. Ground piles (including woodcutter piles), workshop input stock and items on the move are not counted: logs must be in storage | DECIDED (owner 17/11/2026) |
-| PL-32 | The reserve is tuning per workshop (`WorkshopDef`), 0 = no reserve (weaver and wattle yard default to 0). Status: *Keeping 20 logs in reserve*. A per-building setting on the panel can come with the UI tidy-up | PROPOSED |
+| PL-32 | Status when the reserve blocks fetching: *Waiting: 50 / 60 logs in storage*. The setting is saved per building | PROPOSED |
 | PL-33 | Work already fetched is finished; the reserve only stops new fetches | PROPOSED |
-| PL-34 | **No deadlock:** a reserve must be smaller than the store that feeds it. The hewing station's beam store rises from 20 to **30** (HW-04), so one hewing station alone can hold more than the 20-beam reserve and the sawpit runs without a yard. Tuning validation refuses a beam reserve ≥ the hewing store capacity. The log reserve can still stop hewing when every log is in use; the panel then says *Keeping 20 logs in reserve*, and the fix is more log storage | PROPOSED (lead 18/11/2026, after plan review) |
+| PL-34 | Stores: the hewing station's beam store drops from 20 to **10** (HW-04), and each workshop's own input stock holds **10** (was 6). With the default reserve of 5 a lone hewing station (10 beams) always feeds a sawpit, no yard needed. A player who sets a reserve higher than their storage can hold sees the *Waiting* status; that is their choice, not a deadlock in the rules | DECIDED (owner 18/11/2026; which stores PROPOSED) |
 
 ## Oxen
 
