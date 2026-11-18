@@ -1,7 +1,6 @@
 # Storage yard and general goods (M18)
 
-Where goods that are not logs or food live. Owner decisions 17/11/2026. M18, after planks and before the materials
-buildings (`future-goals.md`). INV-A1 categories: Log, Food, General.
+Where goods that are not logs or food live. Owner decisions 17/11/2026. M18, after planks and before the materials buildings (`future-goals.md`). INV-A1 categories: Log, Food, General.
 
 Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN = not decided.
 
@@ -21,14 +20,13 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 ## Yard families (M18)
 
-The yard is a granary for General goods. Its families plan trips with the same rules as granary families
-(`markets.md`, decision 0044), in this order of jobs each time one is idle:
+The yard is a granary for General goods. Its families plan trips with the same rules as granary families (`markets.md`, decision 0044), in this order of jobs each time one is idle:
 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | ST-40 | **1. Camp first:** while the camp General store holds goods, empty it into the yard as room allows. If the yard fills, the rest waits where it is (in the camp store, or in the dropped pile after ST-31) | PROPOSED |
 | ST-41 | **2. Loose goods:** pick up unowned General ground piles (dropped kit ST-23, camp leftovers ST-31, deconstruction refunds) | PROPOSED |
-| ST-42 | **3. Workshop output:** collect only from **workshops** (a building with an input and an output: hewing station, sawpit, later weaver and wattle yard) once the output store is **at least half full** (`YardCollectThreshold` 0.5). Fullest store first. Below half, the goods stay where the next workshop or site can use them nearby | DECIDED (owner 17/11/2026: workshops only; threshold PROPOSED) |
+| ST-42 | **3. Workshop output:** collect only from **workshops** (a building with an input and an output: hewing station, sawpit, later weaver and wattle yard) as soon as the output store holds **any free output item** (`YardCollectThreshold` 0; no half-full rule). Fullest store first. Owner 18/11/2026 rejected the half-full rule | DECIDED (owner 17/11/2026: workshops only; owner 18/11/2026: any output) |
 | ST-42b | Gathering huts (coppice hut, thatcher's hut) and the daub pit (no input) are **not** collected. Workshops and sites fetch from their stores directly | DECIDED (owner 17/11/2026) |
 | ST-43 | **Loads:** light items by hand, a per-item load from tuning (planks 2, rods 10, baskets 5, panels 2, thatch 1). **Beams by ox** (pool ox, 1 per trip, PL-21), same ox priority as workshops (construction first, HW-06) | PROPOSED |
 | ST-44 | Reserved stock (for a site or another fetch) is never collected. Collected goods are reserved on the yard's capacity before the trip starts, so a full yard means no trip | PROPOSED |
@@ -57,9 +55,6 @@ The yard is a granary for General goods. Its families plan trips with the same r
 | --- | --- | --- |
 | ST-30 | The camp **stays** while its General store holds goods and no storage yard exists, even if everyone is housed and its food is gone | DECIDED (owner 17/11/2026) |
 | ST-31 | When the camp's removal conditions are met (everyone housed, food handed over) **and** a storage yard exists, the camp is removed and its General goods are **dropped on the ground** (like the leftover pile, T-467). Storage yard families collect them | DECIDED (owner 17/11/2026) |
-
 | ST-32 | When the camp would be removed (everyone housed, food handed over) but stays only because its General store holds goods and no yard exists, the message log says once: *The camp stays until a storage yard can take its goods* | PROPOSED (after plan review 18/11/2026) |
 
-## Not decided
-
-- An accept list per item (GDD logistics settings). Not in M18 (ST-08).
+Not decided: an accept list per item (GDD logistics settings), not in M18 (ST-08).
