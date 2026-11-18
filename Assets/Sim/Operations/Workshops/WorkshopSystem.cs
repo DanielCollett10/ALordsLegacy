@@ -55,7 +55,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             int open = 0;
             foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
                 if (t.Def.Id == HandHaulTaskDefs.HaulId && !t.IsFinished) open++;
-            int families = WorkingFamilies(world, op);
+            int families = WorkingFamilies(world, op, def);
             for (int i = 0; i < def.Inputs.Count && open < families; i++)
             {
                 RecipeInput input = def.Inputs[i];
@@ -128,8 +128,9 @@ namespace LordsLegacy.Sim.Operations.Workshops
         }
 
         // Families of the operation with a working-age member: each may run one work task at a time.
-        private static int WorkingFamilies(SimWorld world, Operation op)
+        private static int WorkingFamilies(SimWorld world, Operation op, WorkshopDef def)
         {
+            double minAge = def.MinWorkAgeYears;
             int n = 0;
             foreach (int fid in op.FamilyIds)
             {
@@ -138,7 +139,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 foreach (int cid in fam.MemberIds)
                 {
                     Citizen c = world.People.FindCitizen(cid);
-                    if (c != null && c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears) { n++; break; }
+                    if (c != null && c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= minAge) { n++; break; }
                 }
             }
             return n;
@@ -152,10 +153,10 @@ namespace LordsLegacy.Sim.Operations.Workshops
             if (store == null) return;
             int minutes = Math.Max(1, ShiftMinutes(world) / def.BatchesPerFamilyDay);
             int open = OpenWorkCount(world, op);
-            int families = WorkingFamilies(world, op);
+            int families = WorkingFamilies(world, op, def);
             while (open < families && HasBatch(def, stocks) && store.FreeSpace >= def.OutputsPerBatch)
             {
-                var taskDef = new TaskDef(WorkTaskId, new[] { TaskStep.Work(minutes, true) },
+                var taskDef = new TaskDef(WorkTaskId, new[] { TaskStep.Work(minutes, !def.IsLightWork) },
                     EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None);
                 TaskRecord task = world.Tasks.Create(taskDef, op.Id, null, TaskPriority.Normal);
                 bool ok = true;
@@ -206,6 +207,8 @@ namespace LordsLegacy.Sim.Operations.Workshops
 
         internal static bool HasWorker(SimWorld world, Operation op)
         {
+            WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
+            double minAge = def == null ? OperationStatus.WorkingAgeYears : def.MinWorkAgeYears;
             foreach (int fid in op.FamilyIds)
             {
                 Family fam = world.People.FindFamily(fid);
@@ -213,7 +216,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 foreach (int cid in fam.MemberIds)
                 {
                     Citizen c = world.People.FindCitizen(cid);
-                    if (c != null && c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= OperationStatus.WorkingAgeYears) return true;
+                    if (c != null && c.AgeYears(world.Tick, world.Tuning.AgeingRate) >= minAge) return true;
                 }
             }
             return false;

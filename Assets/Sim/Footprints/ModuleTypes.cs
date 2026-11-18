@@ -35,6 +35,8 @@ namespace LordsLegacy.Sim.Footprints
                 case MarketStallId: return "Market stall";
                 case HewingStationId: return "Hewing station";
                 case SawpitId: return "Sawpit";
+                case WeaverId: return "Weaver";
+                case WattleYardId: return "Wattle yard";
                 case StorageYardId: return "Storage yard";
                 case CoppiceHutId: return "Coppice hut";
                 default: return typeId;
@@ -126,8 +128,21 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef CoppiceHut =
             new FootprintTypeDef(CoppiceHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 480));
 
+        /// <summary>Id of the weaver (MAT-20).</summary>
+        public const string WeaverId = "module.weaver";
+        /// <summary>Id of the wattle yard (MAT-22).</summary>
+        public const string WattleYardId = "module.wattle_yard";
+
+        /// <summary>Weaver: 6 × 4 m, blocks movement, clears trees, 3 m yard, 6 logs / 480 worker-minutes (MAT-20).</summary>
+        public static readonly FootprintTypeDef Weaver =
+            new FootprintTypeDef(WeaverId, 6000, 4000, true, true, recipe: new ConstructionRecipe(6, 480), yardMarginMm: 3000);
+
+        /// <summary>Wattle yard: 6 × 4 m, blocks movement, clears trees, 3 m yard, 6 logs / 480 worker-minutes (MAT-22).</summary>
+        public static readonly FootprintTypeDef WattleYard =
+            new FootprintTypeDef(WattleYardId, 6000, 4000, true, true, recipe: new ConstructionRecipe(6, 480), yardMarginMm: 3000);
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, StorageYard, CoppiceHut };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, Weaver, WattleYard, StorageYard, CoppiceHut };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)
