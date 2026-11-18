@@ -88,6 +88,36 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [Test]
+        public void GeneralGoodsTooltipListsRodsBasketsAndPanels()
+        {
+            // T-570: the Beams and Planks hover text lists every General item, M19 rods, baskets and panels included.
+            var w = _host.World;
+            var goods = w.Inventory.AddGoodsStore(LordsLegacy.Sim.Geometry.PointMm.FromMetres(62, 40));
+            w.Inventory.Produce(goods, Items.HazelRod, 3);
+            w.Inventory.Produce(goods, Items.Basket, 4);
+            w.Inventory.Produce(goods, Items.WattlePanel, 5);
+            _bar.Refresh();
+            StringAssert.StartsWith("General goods", _bar.BeamsTooltip);
+            StringAssert.Contains("\nHazel rod: 3", _bar.BeamsTooltip);
+            StringAssert.Contains("\nWillow rod: 0", _bar.BeamsTooltip);
+            StringAssert.Contains("\nBasket: 4", _bar.BeamsTooltip);
+            StringAssert.Contains("\nWattle panel: 5", _bar.BeamsTooltip);
+            Assert.AreEqual(_bar.BeamsTooltip, _bar.PlanksTooltip);
+            Assert.AreEqual(3, GoodsStats.Rods(w));
+            Assert.AreEqual(4, GoodsStats.Baskets(w));
+            Assert.AreEqual(5, GoodsStats.Panels(w));
+
+            // The hover path shows the same list in a visible label (runtime panels hide the built-in tooltip).
+            Assert.IsFalse(_bar.GoodsTipShown);
+            _bar.ShowGoodsTip(true);
+            Assert.IsTrue(_bar.GoodsTipShown, "Goods tip not shown on Beams hover.");
+            StringAssert.Contains("\nHazel rod: 3", _bar.GoodsTipText);
+            StringAssert.Contains("\nWattle panel: 5", _bar.GoodsTipText);
+            _bar.HideGoodsTip();
+            Assert.IsFalse(_bar.GoodsTipShown);
+        }
+
+        [Test]
         public void PopulationReadoutShowsFamiliesCitizensAndTooltipCounts()
         {
             var w = _host.World;
