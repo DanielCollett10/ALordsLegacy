@@ -39,6 +39,7 @@ namespace LordsLegacy.Sim.Footprints
                 case WattleYardId: return "Wattle yard";
                 case StorageYardId: return "Storage yard";
                 case CoppiceHutId: return "Coppice hut";
+                case ThatcherHutId: return "Thatcher's hut";
                 default: return typeId;
             }
         }
@@ -128,6 +129,16 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef CoppiceHut =
             new FootprintTypeDef(CoppiceHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 480));
 
+        /// <summary>Id of the thatcher's hut (MAT-39b).</summary>
+        public const string ThatcherHutId = "module.thatcher_hut";
+
+        /// <summary>
+        /// Thatcher's hut: 6 × 4 m, blocks movement, clears trees, 8 logs / 480 worker-minutes (MAT-39b). Its sheaf
+        /// <c>GoodsStore</c> (40 thatch, MAT-38) is created when it is built (<c>WorkshopBuildings.OnBuilt</c>).
+        /// </summary>
+        public static readonly FootprintTypeDef ThatcherHut =
+            new FootprintTypeDef(ThatcherHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 480));
+
         /// <summary>Id of the weaver (MAT-20).</summary>
         public const string WeaverId = "module.weaver";
         /// <summary>Id of the wattle yard (MAT-22).</summary>
@@ -142,7 +153,7 @@ namespace LordsLegacy.Sim.Footprints
             new FootprintTypeDef(WattleYardId, 6000, 4000, true, true, recipe: new ConstructionRecipe(6, 480), yardMarginMm: 3000);
 
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, Weaver, WattleYard, StorageYard, CoppiceHut };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, Weaver, WattleYard, StorageYard, CoppiceHut, ThatcherHut };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)

@@ -58,6 +58,7 @@ namespace LordsLegacy.Sim.Core
                 new LordsLegacy.Sim.Thatch.CuringSystem(),
                 new LordsLegacy.Sim.Foraging.ForagingSystem(),
                 new LordsLegacy.Sim.Coppice.CoppiceSystem(),
+                new LordsLegacy.Sim.Thatch.ThatchingSystem(),
                 new LordsLegacy.Sim.Markets.StallSystem(),
                 new LordsLegacy.Sim.Markets.StoreFamilySystem(),
                 new LordsLegacy.Sim.Operations.YardFamilySystem(LordsLegacy.Sim.Operations.YardJobs.Standard()),
