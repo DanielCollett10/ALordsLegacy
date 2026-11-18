@@ -4,7 +4,7 @@ namespace LordsLegacy.Sim.Save
 {
     /// <summary>
     /// The one ordered list of save sections after Core (decision 0034): Land, Structures, Ledger, Population,
-    /// Movement, Tasks. <see cref="SimSave"/> Write and Read both walk it in this order. A new section goes at the
+    /// Movement, Tasks, Curing (T-573, id 12, version 37, last). <see cref="SimSave"/> Write and Read both walk it in this order. A new section goes at the
     /// end unless it must come earlier, and that change is recorded in decision 0034.
     /// </summary>
     public static class SaveSections
@@ -24,6 +24,7 @@ namespace LordsLegacy.Sim.Save
                 new Sections.FoodSection(), // 4c Food (camp food store, larder ids; needs ledger, families, homes)
                 new Sections.MovementSection(), // 5 Movement (move orders, follow links, routine, work day, debug send)
                 new Sections.TasksSection(), // 6 Tasks (task board: records, steps, progress, id counter)
+                new Sections.CuringSection(), // 7 Curing (curing reed stooks; T-573, id 12, version 37)
             };
         }
     }
