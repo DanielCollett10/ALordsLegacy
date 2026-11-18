@@ -108,3 +108,10 @@ this list says what is still open.
   logs reserved for a site cannot be removed) is in code.
   > Implementation note (CN-51, CN-52): an unbuilt module is removed at once, as `RemoveModule` does, not marked. A built
   > module stops working as soon as it is marked. Shares and minutes are placeholders (CN-53).
+- **Recipes take more than one item (PL-12, decision 0046, T-514 to T-516).** `SiteMaterials` reserves every item at once.
+  The progress cap and the deconstruction refund (CN-54) count every recipe item, not logs only. A 50% refund is
+  floor(count × 50%) of each item, so a stall returns 1 plank.
+  > Implementation note (CN-21, PL-16, T-517): non-log items move by hand, `HandCarryPlanks` (2) per trip. Logs still never
+  > move by hand. Owner to confirm the hand-carry rule for other items.
+  > Implementation note (CN-20, PL-16, T-518): a market stall's plank carry goes to its granary family (assigned, age 8+),
+  > not to odd-jobbers. Every other carry is an odd-jobber task, as CN-20 says.

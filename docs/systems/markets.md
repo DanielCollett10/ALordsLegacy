@@ -34,6 +34,8 @@
 - A late switch-on gives a **short first Sunday**: no stall is built and stocked yet.
 - Stall stock is the market's stock; granary stock never counts (MK-32). Store families never take allotted food (MK-27).
 - Stall: 3 × 2 m, 2 planks (granary family carries; `SiteRecipe` keeps the log recipe for an old site holding logs), 60 min, holds 30 food, does not block movement. Store carry: 10 items, 10 min per load or unload.
+- Fewer than 2 planks in the village: no stall is placed, and the granary shows *Waiting for planks* (`MarketRegistry.NoPlanksFamilyIds`,
+  cleared each tick). No free slot: *No room at market*.
 - Deleting the market drops stall food as a ground pile. Removing a granary clears its supply flag.
 
 ## How to extend
@@ -51,6 +53,6 @@
 
 ## Tests
 
-- Sim `Sim.Tests/Markets/`: `MarketEndToEndTests` (one-way food path checked each tick; save mid-run byte-identical), `GranarySupplyTests`, `StallSystemTests`, `ForagerCollectTests`, `FoodHandoverTests`, `MarketRangeTests`, `MarketReportTests`, `DeconstructStallTests`, `StoreFamilySystemTests`.
+- Sim `Sim.Tests/Markets/`: `MarketEndToEndTests` (one-way food path checked each tick; save mid-run byte-identical), `GranarySupplyTests`, `StallSystemTests`, `StallCarryTests` (planks by the granary family, T-518), `ForagerCollectTests`, `FoodHandoverTests`, `MarketRangeTests`, `MarketReportTests`, `DeconstructStallTests`, `StoreFamilySystemTests`.
 - Also `Areas/MarketAreaTests`, `Food/AllotmentHandoverTests`, `Geometry/PolygonCentroidTests`, `StallGridTests`, `Start/CampRemovalTests`.
 - Unity PlayMode: `MarketPanelTests`, `MarketToolTests`, `MarketVisualsTests`. Gap: range tint only when selected (MK-41).

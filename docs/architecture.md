@@ -33,7 +33,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   Sunday allotment is a reservation, and the fetch trip is a task (decision 0042). Foragers deliver only to their own hut
   store (decisions 0043, narrowed by 0044). Routine phase: eating, `DepartureSystem`, `ArrivalSystem` (dawn: new family walks in with a month of food and moves in, decision 0045), the Sunday allotment and the Sunday trip. `GrowthReport` (read only) gives panels family status text, village counts and the current arrival reason; see systems/growth.md. Operations phase: bush regrowth and foraging.
 - **Markets** (`systems/markets.md`): one market area holds stall slots. Granary families carry food from forager huts into
-  the granary and from the granary to stalls (decision 0044). The camp hands its food over once a granary supplies the market,
+  the granary and from the granary to stalls (decision 0044). A stall's planks are carried by its granary family (T-518). The camp hands its food over once a granary supplies the market,
   then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both (decision 0049).
 - **Workshops** (`systems/workshops.md`, decisions 0046, 0047): hewing station and sawpit are data (`WorkshopDef`) run by one `WorkshopSystem`. `WorkshopReport` (panel text, stock, store, family) and `GoodsStats` (village Logs, Beams, Planks; reserved counts, workshop stock and ox loads do not) are read only.
 - **Passage and settlement log** (decision 0045): `Family.Passage` (None, Arriving, Leaving) marks families walking in or out;
@@ -118,6 +118,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-Storage yard (ST-*); plank production (PL-*: no sawyer or hewing task yet, planks exist as starting stock and construction items); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
+Storage yard (ST-*); the workshop input reserve (PL-30 to PL-33, M18); tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
 and backyards; artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
 status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.

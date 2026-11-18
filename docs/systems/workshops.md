@@ -16,6 +16,15 @@
 | `WorkshopReport` | Read model (T-525): `Of(world, footprintId)` gives `Name`, `StatusText`, `InputCount/InputCapacity`, `OutputCount/OutputCapacity`, `InputText`, `OutputText`, `FamilyId`, `FamilyName`, `IsBuilt`. `ConfirmText(world, typeId)` is the placement dialog text. Null for a non-workshop id. |
 | `GoodsStats` | Top bar totals (T-525): `Logs` (camp stockpile, built log storage, unowned piles, as `ConstructionSources` counts them), `Beams` and `Planks` (every `GoodsStore`). |
 
+## How a day runs
+
+- Fetch: a free ox takes one input load from the nearest source (`InputSources`) into the workshop's `WorkshopStock`
+  (`OxLoadForInput`). Both ends are reserved by the fetch task, so no load is double-booked.
+- Work: one `task.workshop_work` per working family, one input at a time. Minutes per input = `ShiftMinutes` ÷
+  `InputsPerDayPerFamily`, so a family works through 3 inputs a working day (3 logs hewn, or 3 beams sawn). Done = one input
+  consumed, outputs produced into the `GoodsStore`. Progress is kept overnight.
+- Gate: no fetch or work while unbuilt, paused or without a working-age member. A fetch needs room in the input stock; a work task needs room in the store.
+
 ## Rules for the totals
 
 - Reserved stock still counts (decision 0046): a log reserved for a site is still in the village.
@@ -32,4 +41,4 @@
 
 - Unity side (T-527): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct; the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.
 - A site that loses a carried load at sunset drops it on a pile the site owns, and may not reserve it again if no spare logs exist (seen in the end-to-end test; not fixed here).
-- Stall builds need an odd-jobber family (one with no workplace); with every family assigned, build tasks stay open.
+- Stall builds need an odd-jobber family to build (stall planks are carried by the granary family); with every family assigned, build tasks stay open.

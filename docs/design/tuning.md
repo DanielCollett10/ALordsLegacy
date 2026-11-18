@@ -177,6 +177,7 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 | Forager hut store capacity | 30 | food items (`ForagerHutCapacity`) | FD-23b |
 | Gather time per basket | 30 | game minutes (`GatherMinutesPerBasket`) | FD-24 |
 | Hand carry per trip | 10 | items (`HandCarryItems`) | FD-24, MKT-03e |
+| Plank hand carry per trip | 2 | planks, odd-jobber to a site (`HandCarryPlanks`) | PL-16 (PLACEHOLDER) |
 
 Food values in the tables above also map to `SimConfig` fields: starting meat 400 (`StartingMeat`), adult 1 and child
 0.5 rations per day (`AdultRations`, `ChildRations`), market range 630 m (`MarketRangeM`). The Foraging values are

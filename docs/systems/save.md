@@ -21,11 +21,11 @@ Core is written first. Then, in this order:
 
 | Order | Id | Section | Holds |
 |---|---|---|---|
-| 0 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares, forager and market tuning), road and area catalogs, entry point, settlement log (T-498). |
+| 0 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares, forager, market and timber/workshop tuning), road and area catalogs, entry point, settlement log (T-498). |
 | 1 | 2 | Land | Trees as changes, road network, areas. |
 | 2 | 10 | Bushes | Forage bushes: position, kind, baskets, emptied tick, reservation, id counter. Replaces the new-game scatter on load (T-421). |
 | 3 | 3 | Structures | Footprints, camp, operations (with supply flag), construction sites, deconstruction entries, pending operations. |
-| 4 | 4 | Ledger | Locations, reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
+| 4 | 4 | Ledger | Locations (incl. goods stores and workshop stock), reservations, journals, id counters. Re-attaches the camp stockpile, runs `Audit`. |
 | 5 | 5 | Population | Families (incl. Passage, T-498), citizens, oxen. |
 | 6 | 8 | Homes | Per house: footprint id, plot area id, family id (0 = Empty), reserved family id (T-504). Sets each family's `HomeHouseId`. |
 | 7 | 11 | Markets | The market record, stall footprint ids and stall-to-family links (T-456, T-459). |
@@ -33,7 +33,7 @@ Core is written first. Then, in this order:
 | 9 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
 | 10 | 7 | Tasks | Task records (by def id) and their steps, with bush and carrier ids (T-423). Stock-stall trips included. |
 
-Versions 9 to 27 each added a section or field (Food 9, Bushes 10, Markets 11, granary supply flag, stall families, family Passage and settlement log 22, plank/beam items and goods store 23, house reservation in Homes and `LastArrivalTick` in Core 24, camp General store id in Structures and `StartingPlanks` in Core 25, plank hand-carry tuning and task item ids 26 and 27, T-513 and T-517). See `SaveWriter.CurrentVersion`.
+Versions 9 to 27 each added a section or field (Food 9, Bushes 10, Markets 11, granary supply flag, stall families, family Passage and settlement log 22, plank/beam items and goods store 23, house reservation in Homes and `LastArrivalTick` in Core 24, camp General store id in Structures and `StartingPlanks` in Core 25, plank hand-carry tuning and task item ids 26 and 27, T-513 and T-517), 28 workshop stock location (T-520), 29 workshop tuning and work tasks (T-524). See `SaveWriter.CurrentVersion`.
 
 ## How data moves
 

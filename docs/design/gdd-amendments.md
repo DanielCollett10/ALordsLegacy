@@ -186,6 +186,8 @@ Markets are how food reaches households, so they arrive together with food.
 | MKT-03d | Each stall carries a **mix** of goods from its store: different foods from a granary; from storage yards later linen, clothes, shoes and fuel (charcoal, dried firewood) | DECIDED |
 | MKT-03e | Hand-carry capacity per trip is a tuning value (start: 10 items) and is now a key throughput number; see `tuning.md` for the throughput formula and table. Stall families work on Sundays (exception to the rest day) | PLACEHOLDER |
 | MKT-03f | Future: a **pack station** (depot) where goods are moved in bulk as a buffer between distant stores and markets | DECIDED (future) |
+
+> Implementation note (MKT-03, T-519): planks exist now (M17), so new stalls cost 2 planks, not 1 log. See `planks.md` PL-10.
 | MKT-04 | Market upgrade (later): fabric covers (needs linen), families assigned directly to the market instead of via a granary, more stalls in total | OPEN (idea) |
 | MKT-04b | Tier 3 idea: a travelling or moving market for remote towns | OPEN (idea) |
 | MKT-05 | Households outside every market's range **get nothing** from the allotment. In practice players build homes in range of a market | DECIDED (may change) |

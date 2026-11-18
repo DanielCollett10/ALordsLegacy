@@ -9,7 +9,7 @@ before they draw (decision 0028, `docs/design/placement.md`).
 
 - `PlacementRules.CanPlaceAreaVertex(world, areaTypeId, point)` and `CanPlaceRoadPoint(world, point)`.
 - `PlacementResult`: `Ok`, or `Reason` (`InsideArea` with `AreaName`, `OnRoad`, `OutsideMap`) and `Text` for the UI.
-- `StructurePlacement.Preview(world, typeId, centre, rotation)` (M14): for a standalone structure such as the granary. Checks the
+- `StructurePlacement.Preview(world, typeId, centre, rotation)` (M14): for a standalone structure such as the granary, the hewing station or the sawpit. Checks the
   whole plot (building plus yard) is clear of footprints, areas, roads and pile circles. Used by `PlaceStructure` and the structure tool.
 - `FixedPlots` (M15, T-471): the plot outline of each fixed structure (`Footprint.PlotPolygon`). `FindOverlapping`,
   `FindStrictlyInside` and `FindNearestSnapIncludingAreas` (areas and plots together, PL-13). Named "Granary 4" and so on.

@@ -33,6 +33,7 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 ## Gotchas
 
 - Unowned ground piles are construction sources. Site-owned piles are not (`construction.md`).
+- A `GoodsStore` takes General items only. For sites it is the only source of General items (planks, beams); logs never come from it. A `WorkshopStock` is never a source.
 - `Storage` capacity comes from the module type. A removed storage's logs stay in the ledger; `RemoveModule` refuses a storage
   with logs reserved for a site.
 - A food store's capacity comes from its type, or from `ForagerHutCapacity` for the forager hut. `FoodStats` and the granary panel read counts through the ledger.
@@ -41,5 +42,5 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 ## Tests
 
 `Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`,
-`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (save version 23). Food stores: `Sim.Tests/Food/FoodStoreTests.cs`.
+`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (General goods stores). Food stores: `Sim.Tests/Food/FoodStoreTests.cs`. Workshop stock: `Sim.Tests/Workshops/InputSourcesTests.cs`.
 Unity: `Assets/Tests/PlayMode/LogStacksTests.cs`.

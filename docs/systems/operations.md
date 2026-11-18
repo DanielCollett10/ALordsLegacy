@@ -10,12 +10,13 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 
 | Type | Role |
 |---|---|
-| `OperationTypeDef`, `OperationTypes` | Static types: `Woodcutting`, `Foraging`, `Granary` (area-less, `AreaId` 0, 2 slots, decision 0041; `FindByModule`). Not on a catalog (decision 0019). |
+| `OperationTypeDef`, `OperationTypes` | Static types: `Woodcutting`, `Foraging`, `Granary` (area-less, `AreaId` 0, 2 slots, decision 0041; `FindByModule`), and the hewing and sawing operations via `WorkshopOf` (area-less, 1 slot, T-521). Not on a catalog (decision 0019). |
 | `Operation`, `OperationRegistry` | Id, type, area, module footprints, families, oxen, work area, paused flag. Every change bumps `Version`. |
-| `OperationStatus` | `Of(world, op)`, computed never stored: Working / Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull. `Reported` adds WaitingForOx (display only). |
+| `OperationStatus` | `Of(world, op)`, computed never stored: Working / Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull, NoRoomAtMarket, WaitingForPlanks (granary). `Reported` adds WaitingForOx (display only). |
 | `WoodcuttingSystem` | Operations phase. Keeps one Open `task.fell_tree` per idle adult worker, aimed at the nearest free standing tree in the work region. |
 | `FellingOutcome` | After fell: tree Felled. On the last step: Stump plus logs (`floor(trunk ÷ StandardLogLengthM)`) in an operation pile. |
-| `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` for each own pile with logs: 1 to `OxLoadLogs` (1) per trip, any pile size (T-491). Early fetch off; each felled length is its own pile. `Workshops/WorkshopSystem` (T-523) runs after `ConstructionSystem` (deliveries get free oxen first): opens `task.fetch_input` when stock has room for `OxLoad*` and `InputSources` has free input. Sunset wind-down leaves a workshop-owned pile. T-524: also opens one heavy `task.workshop_work` per working family (stock has an input, store has room; both reserved), `WorkshopShiftMinutes / InputsPerDay` minutes, progress kept overnight; done = Consume 1 input, Produce outputs. `WorkshopStatus`: NoWorkers, WaitingForInput (Reported: WaitingForOx), WorkshopStoreFull. Save v29. |
+| `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` for each own pile with logs: 1 to `OxLoadLogs` (1) per trip, any pile size (T-491). Early fetch off; each felled length is its own pile. Sunset wind-down leaves an operation pile. |
+| `Workshops/WorkshopSystem` | Operations phase, after `ConstructionSystem`. Fetch and work tasks for hewing and sawpit. See `workshops.md`. |
 | `ModulePlacement`, `DraftModulePlacement` | Pure previews. The draft variant checks polygon and ghosts not yet in the world (decision 0037). |
 | `DesignateOperation`, `PlaceModules` | Commands: area + ordered modules (new operation), or modules for Expand. All or nothing. |
 | `DeconstructOperation` | Marks every module; the area goes when the last one is gone. |
@@ -52,8 +53,7 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 - A new operation type is an `OperationTypeDef` plus area types in `AreaTypes`. A new status reason goes in `OperationStatus.Of`. Compute status, never store it.
 
 ## Gotchas
-- `OperationStatus.Of` gates felling. Footprint and operation ids share the ledger owner field, so `RemoveModule` guards
-  against an operation seeing a site's pile as its own. Oxen stands hold `OxCapacity` = 1 (camp stand unlimited).
+- `OperationStatus.Of` gates felling. Footprint and operation ids share the ledger owner field, so `RemoveModule` guards against an operation seeing a site's pile as its own. Oxen stands hold `OxCapacity` = 1 (camp stand unlimited).
 
 ## Tests
 `Sim.Tests/Operations/` (`Woodcutting*`, `Foraging` incl. the full pipeline, `OperationStatus`, `OperationCommand`, `Haul*`, `Ox*`, `LogLoad`,
