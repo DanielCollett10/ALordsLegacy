@@ -1,5 +1,6 @@
 using System.Linq;
 using LordsLegacy.Sim.Commands;
+using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
@@ -144,6 +145,36 @@ namespace LordsLegacy.Sim.Tests.Operations
             src.NextTrip(w, yard);
 
             Assert.AreEqual(1, OpenFetches(w, yard));
+        }
+
+        [Test]
+        public void ConstructionDelivery_TakesTheOnlyFreeOxFirst_ThenYardBeamTripRuns_ThroughSimTicks()
+        {
+            SimWorld w = Make();
+            Operation yard = BuiltYard(w, M(100, 100));
+            LedgerLocation store = Hewing(w, M(60, 100), 8);
+            Assert.IsTrue(w.Execute(new AssignFamily(yard.Id, 2)).IsAccepted);
+            w.People.AddFamily(3, "Helpers", 40, 40); // unassigned: the site's helpers
+            for (int i = 0; i < 2; i++) w.People.AddCitizen(30 + i, "H" + i, Sex.Male, -4_000_000, 3, 40, 40);
+            LedgerLocation ys = w.Inventory.FindGoodsStore(yard.ModuleIds[0]);
+            w.Inventory.Produce(w.Inventory.AddStockpile(M(25, 25)), Items.Log, 20);
+            CommandResult r = w.Execute(new PlaceStructure(ModuleTypes.SawpitId, M(50, 50), 0));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+
+            w.Step(1);
+            TaskRecord deliver = w.Tasks.All.First(t => t.Def.Id == ConstructionTaskDefs.DeliverId);
+            Assert.IsTrue(deliver.OxId.HasValue, "the delivery holds the only ox in this tick");
+            Assert.AreEqual(0, OpenFetches(w, yard), "no yard beam task got the ox in that tick");
+
+            bool yardTask = false;
+            for (int i = 0; i < 40000 && ys.CountOf(Items.Beam.Id) == 0; i++)
+            {
+                w.Step(1);
+                if (OpenFetches(w, yard) > 0) yardTask = true;
+            }
+            Assert.IsTrue(yardTask, "the yard trip was made once the ox was free");
+            Assert.GreaterOrEqual(ys.CountOf(Items.Beam.Id), 1);
+            Assert.Less(store.CountOf(Items.Beam.Id), 8);
         }
 
         [Test]
