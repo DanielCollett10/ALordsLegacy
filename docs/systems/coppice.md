@@ -41,6 +41,11 @@ Design: `design/materials.md` MAT-10, MAT-11, MAT-13..18. Copied from foraging (
 
 Rods leave the hut by hand to the weaver (willow) and wattle yard (hazel and willow), never by the yard (ST-42b). Weaver baskets go to kit stores (`kit.md`) and wattle panels to the yard. `Scenarios/BasketChainScenarioTests` runs it from the start layout: coppice, weaver, wattle and yard staffed, panels in the yard, a 20 carry.
 
+## Config (T-570)
+
+The M19 tuning (stools, rods per cut, regrow, hand carry, weaver and wattle stock, kit slots) is in `SimConfig` and its asset
+(`Game/Config/SimConfig.asset`); the asset values equal the code defaults. Tests: `SimConfigTests.CoppiceWeaverWattleFieldsReachTuning`.
+
 ## Tests
 
 `Sim.Tests/Operations/CoppiceTests` (type, kind choice, store full, regrow, drops, save, full pipeline).

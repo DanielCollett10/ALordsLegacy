@@ -77,6 +77,39 @@ namespace LordsLegacy.Tests.EditMode
         }
 
         [Test]
+        public void CoppiceWeaverWattleFieldsReachTuning()
+        {
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                var d = new SimTuning();
+                var t0 = cfg.BuildTuning();
+                Assert.AreEqual(d.CoppiceRodsPerCut, t0.CoppiceRodsPerCut, "cw-1 default: rods per cut");
+                Assert.AreEqual(d.WattlePanelStore, t0.WattlePanelStore, "cw-1 default: panel store");
+                Assert.AreEqual(d.ForagerHutBasketSlots, t0.ForagerHutBasketSlots, "cw-1 default: forager basket slots");
+                cfg.hazelStoolCount = 11; cfg.willowStoolCount = 12; cfg.coppiceRodsPerCut = 13; cfg.coppiceRegrowDays = 14;
+                cfg.coppiceMinutesPerRod = 15; cfg.coppiceHutStorePerKind = 16; cfg.handCarryRods = 17;
+                cfg.handCarryBaskets = 18; cfg.handCarryPanels = 19; cfg.weaverWillowPerBasket = 20;
+                cfg.weaverBasketsPerDay = 21; cfg.weaverWillowStock = 22; cfg.weaverBasketStore = 23;
+                cfg.wattleHazelPerPanel = 24; cfg.wattleWillowPerPanel = 25; cfg.wattlePanelsPerDay = 26;
+                cfg.wattleHazelStock = 27; cfg.wattleWillowStock = 28; cfg.wattlePanelStore = 29;
+                cfg.foragerHutBasketSlots = 30; cfg.granaryBasketSlots = 31;
+                var t = cfg.BuildTuning();
+                Assert.AreEqual(11, t.HazelStoolCount); Assert.AreEqual(12, t.WillowStoolCount);
+                Assert.AreEqual(13, t.CoppiceRodsPerCut); Assert.AreEqual(14, t.CoppiceRegrowDays);
+                Assert.AreEqual(15, t.CoppiceMinutesPerRod); Assert.AreEqual(16, t.CoppiceHutStorePerKind);
+                Assert.AreEqual(17, t.HandCarryRods); Assert.AreEqual(18, t.HandCarryBaskets); Assert.AreEqual(19, t.HandCarryPanels);
+                Assert.AreEqual(20, t.WeaverWillowPerBasket); Assert.AreEqual(21, t.WeaverBasketsPerDay);
+                Assert.AreEqual(22, t.WeaverWillowStock); Assert.AreEqual(23, t.WeaverBasketStore);
+                Assert.AreEqual(24, t.WattleHazelPerPanel); Assert.AreEqual(25, t.WattleWillowPerPanel);
+                Assert.AreEqual(26, t.WattlePanelsPerDay); Assert.AreEqual(27, t.WattleHazelStock);
+                Assert.AreEqual(28, t.WattleWillowStock); Assert.AreEqual(29, t.WattlePanelStore);
+                Assert.AreEqual(30, t.ForagerHutBasketSlots); Assert.AreEqual(31, t.GranaryBasketSlots);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
         public void DefaultSimConfigBuildsCodeAreaCatalog()
         {
             var cfg = ScriptableObject.CreateInstance<SimConfig>();

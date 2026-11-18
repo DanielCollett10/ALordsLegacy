@@ -199,6 +199,25 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM19Wiring()
+        {
+            // T-570: coppice area and hut, weaver and wattle yard tools, and the draft tool that runs the coppice operation.
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+            var tools = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            foreach (string name in new[] { "CoppiceWorkAreaTool", "CoppiceAreaTool", "CoppiceDraftTool", "WeaverTool", "WattleYardTool" })
+            {
+                MonoBehaviour found = null;
+                foreach (var t in tools) if (t.name == name) found = t;
+                Assert.IsNotNull(found, name + " missing from the scene (run LordsLegacy/Scenes/Generate Game scene).");
+                AssertNoNullRefs(found);
+            }
+            Assert.IsNotNull(Object.FindFirstObjectByType<LordsLegacy.Game.Tools.OperationDraftTool>(), "OperationDraftTool missing.");
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneHasM15MarketAndPlotOverlayWired()
         {
             var load = SceneManager.LoadSceneAsync("Game");

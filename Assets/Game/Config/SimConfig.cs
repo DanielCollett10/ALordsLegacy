@@ -139,6 +139,29 @@ namespace LordsLegacy.Game
         [Tooltip("ST-43 families that move goods for one yard")] [Range(0, 20)] public int storageYardFamilySlots = 2;
         [Tooltip("ST-42 share of a workshop store that must be full before the yard collects (0 = any free output)")] [Range(0f, 1f)] public float yardCollectThreshold = 0f;
 
+        [Header("Coppice, weaver and wattle (M19, cw-1; MAT-14..24, MAT-53; PROPOSED tuning)")]
+        [Tooltip("MAT-15 hazel stools scattered at new game")] [Range(0, 1000)] public int hazelStoolCount = 40;
+        [Tooltip("MAT-15 willow stools scattered at new game")] [Range(0, 1000)] public int willowStoolCount = 20;
+        [Tooltip("MAT-16 rods one cut takes from a stool")] [Range(1, 100)] public int coppiceRodsPerCut = 10;
+        [Tooltip("MAT-16 days an emptied stool takes to regrow")] [Range(0, 3650)] public int coppiceRegrowDays = 30;
+        [Tooltip("MAT-17 game minutes to cut one rod")] [Range(1, 600)] public int coppiceMinutesPerRod = 6;
+        [Tooltip("MAT-14 most rods of each kind a coppice hut stores")] [Range(1, 10000)] public int coppiceHutStorePerKind = 40;
+        [Tooltip("MAT-23 most rods a person carries by hand on one trip")] [Range(1, 100)] public int handCarryRods = 10;
+        [Tooltip("MAT-23 most baskets a person carries by hand on one trip")] [Range(1, 100)] public int handCarryBaskets = 5;
+        [Tooltip("MAT-23 most wattle panels a person carries by hand on one trip")] [Range(1, 100)] public int handCarryPanels = 2;
+        [Tooltip("MAT-22 willow rods one basket takes")] [Range(1, 100)] public int weaverWillowPerBasket = 6;
+        [Tooltip("MAT-22 baskets one family weaves per day")] [Range(1, 100)] public int weaverBasketsPerDay = 4;
+        [Tooltip("MAT-24 most willow rods waiting in the weaver's input stock")] [Range(1, 1000)] public int weaverWillowStock = 30;
+        [Tooltip("MAT-24 most baskets the weaver's output store holds")] [Range(1, 1000)] public int weaverBasketStore = 10;
+        [Tooltip("MAT-22 hazel rods one wattle panel takes")] [Range(1, 100)] public int wattleHazelPerPanel = 6;
+        [Tooltip("MAT-22 willow rods one wattle panel takes")] [Range(1, 100)] public int wattleWillowPerPanel = 2;
+        [Tooltip("MAT-22 wattle panels one family makes per day")] [Range(1, 100)] public int wattlePanelsPerDay = 5;
+        [Tooltip("MAT-24 most hazel rods waiting in the wattle yard's input stock")] [Range(1, 1000)] public int wattleHazelStock = 30;
+        [Tooltip("MAT-24 most willow rods waiting in the wattle yard's input stock")] [Range(1, 1000)] public int wattleWillowStock = 10;
+        [Tooltip("MAT-24 most wattle panels the wattle yard's output store holds")] [Range(1, 1000)] public int wattlePanelStore = 20;
+        [Tooltip("MAT-53 baskets the forager hut keeps as kit, one per slot")] [Range(0, 100)] public int foragerHutBasketSlots = 5;
+        [Tooltip("MAT-53 baskets the granary keeps as kit, one per family slot")] [Range(0, 100)] public int granaryBasketSlots = 2;
+
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
         public sealed class ModuleRecipeConfig
@@ -195,6 +218,16 @@ namespace LordsLegacy.Game
             StorageYardLogs = storageYardLogs, StorageYardMinutes = storageYardMinutes,
             StorageYardCapacity = storageYardCapacity, StorageYardFamilySlots = storageYardFamilySlots,
             YardCollectThreshold = D(yardCollectThreshold),
+            HazelStoolCount = hazelStoolCount, WillowStoolCount = willowStoolCount,
+            CoppiceRodsPerCut = coppiceRodsPerCut, CoppiceRegrowDays = coppiceRegrowDays,
+            CoppiceMinutesPerRod = coppiceMinutesPerRod, CoppiceHutStorePerKind = coppiceHutStorePerKind,
+            HandCarryRods = handCarryRods, HandCarryBaskets = handCarryBaskets, HandCarryPanels = handCarryPanels,
+            WeaverWillowPerBasket = weaverWillowPerBasket, WeaverBasketsPerDay = weaverBasketsPerDay,
+            WeaverWillowStock = weaverWillowStock, WeaverBasketStore = weaverBasketStore,
+            WattleHazelPerPanel = wattleHazelPerPanel, WattleWillowPerPanel = wattleWillowPerPanel,
+            WattlePanelsPerDay = wattlePanelsPerDay, WattleHazelStock = wattleHazelStock,
+            WattleWillowStock = wattleWillowStock, WattlePanelStore = wattlePanelStore,
+            ForagerHutBasketSlots = foragerHutBasketSlots, GranaryBasketSlots = granaryBasketSlots,
         };
 
         /// <summary>Builds the road catalog from these values.</summary>
