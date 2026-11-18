@@ -37,6 +37,10 @@
 
 `TimberChainEndToEndTests` is the pipeline test: start layout with logs, a woodcutter, hewing station, sawpit, market and three granaries with six store families, all by real commands and ticks. The 10 starting planks go into five stalls, sawn planks are carried to the sixth, and it is built. Audit runs every 5 ticks.
 
+## Input reserve (T-537, PL-30..34)
+
+`InputReserve`: a fetch opens only if storage total (logs in Storage/Stockpile, beams in workshop GoodsStores; never piles, workshop stock, carried) minus stock reserved by open fetches minus the load is at least the reserve (tuning `WorkshopDefaultReserve` = 5, 0 = none). Own input stock is committed and uncounted; fetched work is always processed. Stocks: hewing store 10, input stocks 10. The reserve is not yet saved or per building (st-0b).
+
 ## Gaps and follow-ups
 
 - Unity side (T-527): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct; the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.

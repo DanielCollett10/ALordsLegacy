@@ -200,6 +200,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             var pool = new OxPool(world);
             while (stock.FreeSpace >= load)
             {
+                if (!InputReserve.Allows(world, op, def.Input, load)) return;
                 LedgerLocation source = _sources.Find(world, def.Input, fp.AccessPoint);
                 if (source == null || source.AvailableOf(def.Input.Id) < load) return;
                 Ox ox = pool.FindFor(op.Id, PointOf(world, source));

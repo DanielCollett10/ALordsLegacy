@@ -28,6 +28,7 @@ namespace LordsLegacy.Sim.Tests.Workshops
         {
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             SimTuning t = tuning ?? new SimTuning { StartHour = 8 };
+            t.WorkshopDefaultReserve = 0; // these tests are about work, not the input reserve (T-537)
             t.HewingStockCapacity = 500; t.SawingStockCapacity = 500;
             var w = SimWorld.FromMapData(map, t);
             w.People.AddFamily(3, "F3", 60, 60);
@@ -64,7 +65,7 @@ namespace LordsLegacy.Sim.Tests.Workshops
 
         private static (SimWorld w, int fp, Operation op) MakeDay(string type, int adults = 1)
         {
-            var r = Make(type, adults);
+            var r = Make(type, adults, 0, new SimTuning { StartHour = 8, HewingStoreCapacity = 500, SawingStoreCapacity = 500 });
             ShiftIsTheDay(r.w);
             r.w.Tuning.HewingStoreCapacity = 500; r.w.Tuning.SawingStoreCapacity = 500;
             return r;
