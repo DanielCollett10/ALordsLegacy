@@ -15,6 +15,7 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 | `FoodTripSystem` (`Food/`) | `task.fetch_food` (OwnerFamily, owner `-1000 - familyId`), opened each Sunday morning. Ignores shifts. See `food.md`. |
 | `ForagingSystem` (`Foraging/`) | `task.forage` (AssignedFamilyOnly, owner = operation, age 8+), holds a bush and a carrier. See `foraging.md`. |
 | `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectItems` (no item id: reserved, in proportion, never allotted food), walk, unload 10 min, `DepositItems`. Source: `ChooseStockSource`. |
+| `WorkshopSystem` (`Operations/Workshops/`) | `task.fetch_input` (AssignedFamilyOnly, owner = operation, `RequiredResource.Ox`: fetch ox, lead, load, lead, unload, return) and `task.workshop_work` (AssignedFamilyOnly, one heavy `Work` step, owner = operation). |
 | `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, and the one item trip pair `CollectItems`/`DepositItems` (an item id moves that item, none means a stock share). |
 | `TaskRecord`, `TaskPriority` | Id, def, state, owner, assignee, priority (Normal or High, set by `TaskBoard.SetPriority`), target, step index, ox, site, `BushId`, `CarrierId`. |
 | `DispatchSystem` | Dispatch phase. Hands Open tasks to idle workers, and runs the Sunday family trips (`RunFamilyTrips`). |
@@ -23,13 +24,12 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 
 ## State machine
 
-Open → Assigned → Active → Done, or Cancelled. Illegal transitions return false. `TaskBoard` also offers `ByOwner`,
-`ByAssignee`, `InState`, `IsBusy(citizenId)` and a `Version`. Tasks reserve a tree or bush with the task id as owner; cancel and completion release it.
+Open → Assigned → Active → Done, or Cancelled. Illegal transitions return false. `TaskBoard` also offers `ByOwner`, `ByAssignee`, `InState`, `IsBusy(citizenId)` and a `Version`. Tasks reserve a tree or bush with the task id as owner; cancel and completion release it.
 
 ## How data moves
 
-1. An operation or system opens a task (`WoodcuttingSystem`, `HaulSystem`, `ConstructionSystem`, `ForagingSystem`,
-   `FoodTripSystem`). House and granary deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`), not an operation id.
+1. An operation or system opens a task (`WoodcuttingSystem`, `HaulSystem`, `WorkshopSystem`, `ConstructionSystem`, `ForagingSystem`,
+   `FoodTripSystem`, `StoreFamilySystem`). House and granary deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`), not an operation id.
 2. `DispatchSystem` runs every `DispatchIntervalMinutes` (10). An idle worker (awake, no debug send, not busy, not mid-walk
    unless milling) takes the best Open task: pass 1 for the family whose workplace owns it, pass 2 for helper families.
    Ranking: priority, travel to the job, then id. Heavy tasks need age 14+, forage tasks 8+. An ox task is offered only once

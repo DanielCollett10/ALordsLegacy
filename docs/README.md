@@ -23,7 +23,7 @@ One line per system. The doc says how it fits together; folders are where the co
 | Roads | Freeform road network, validation, cutting and node moves. | [systems/roads.md](systems/roads.md) | `Assets/Sim/Roads` |
 | Areas | Drawn building and work areas, flattening, trimming, snapping. | [systems/areas.md](systems/areas.md) | `Assets/Sim/Areas` |
 | Growth | Families walk out after 30 hungry days and walk in when a house and a month of food allow; passage state, settlement log, panel read model. | [systems/growth.md](systems/growth.md) | `Assets/Sim/Growth`, `Assets/Sim/Arrivals`, `Assets/Sim/Roads/MapExits.cs` |
-| Placement | Pure yes or no for placing an area vertex, a road point or a standalone structure (granary). | [systems/placement.md](systems/placement.md) | `Assets/Sim/Placement` |
+| Placement | Pure yes or no for placing an area vertex, a road point or a standalone structure (granary, hewing station, sawpit). | [systems/placement.md](systems/placement.md) | `Assets/Sim/Placement` |
 | Forestry | Standing trees, felling state, reservations, clearing. | [systems/forestry.md](systems/forestry.md) | `Assets/Sim/Forestry` |
 | Navigation | Walkable grid, A* pathfinding, movement orders, ox following. | [systems/navigation.md](systems/navigation.md) | `Assets/Sim/Navigation` |
 | People | Families, citizens, oxen, daily routine, working day, debug send. | [systems/people.md](systems/people.md) | `Assets/Sim/People` |
@@ -34,8 +34,8 @@ One line per system. The doc says how it fits together; folders are where the co
 | Markets | Market area, stalls, granary families stocking stalls, camp handover and removal, Sunday allotment from stalls. | [systems/markets.md](systems/markets.md) | `Assets/Sim/Markets`, `Assets/Sim/Geometry/StallGrid.cs`, `Assets/Game/Tools/MarketTool.cs` |
 | Workshops | Hewing station and sawpit: one data-driven system, stock and store, status, panel read model, village timber totals. | [systems/workshops.md](systems/workshops.md) | `Assets/Sim/Operations/Workshops`, `Assets/Sim/Inventory/GoodsStats.cs` |
 | Footprints | Placed buildings, stands and standalone structures: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
-| Inventory | Ledger of logs by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
-| Construction | Sites that take delivered logs and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
+| Inventory | Ledger of items (logs, food, planks, beams) by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
+| Construction | Sites that reserve every recipe item, take logs by ox and planks by hand, and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
 | Homes | House plots along roads, a house built from logs, one homeless family moves in and out. | [systems/homes.md](systems/homes.md) | `Assets/Sim/Homes`, `Assets/Sim/Commands/DesignatePlot.cs`, `Assets/Sim/Areas/HousePlacement.cs` |
 | Start layout | The first camp, built through the normal commands. | [systems/start-layout.md](systems/start-layout.md) | `Assets/Sim/Start`, `Assets/Game/Config` |
 | Save and load | Byte-exact save sections, map check, Esc menu, autosave, scene reload. | [systems/save.md](systems/save.md) | `Assets/Sim/Save`, `Assets/Game/Saving`, `Assets/Game/UI/GameMenu` |
