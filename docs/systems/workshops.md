@@ -30,11 +30,11 @@
 
 - Reserved stock still counts (decision 0046): a log reserved for a site is still in the village.
 - A log on an ox, in a `WorkshopStock`, on a site or in an operation's own pile does not count (decision 0047). Beams waiting in a sawpit's stock are not village beams.
-- Status text: "Working", "Paused", "Missing hut", "No workers", "Waiting for logs/beams", "Waiting for ox", "Store full", "Under construction".
+- Status text: "Working", "Paused", "Missing hut", "No workers", "Waiting for logs/beams", "Waiting: N / R logs in storage" (reserve), "Waiting for ox", "Store full", "Under construction".
 
 ## Tests
 
-`Sim.Tests/Workshops/`: `WorkshopReportTests` (report, statuses, confirm text, `GoodsStats` rows), `WorkshopWorkTests`, `WorkshopSystemTests`, `InputSourcesTests`, `WorkshopDefTests`. `Operations/WorkshopPlacementTests` covers placement.
+`Sim.Tests/Workshops/`: `WorkshopReportTests` (report, statuses, confirm text, `GoodsStats` rows), `WorkshopWorkTests`, `WorkshopSystemTests`, `InputSourcesTests`, `WorkshopDefTests`, `InputReserveTests`, `WorkshopReserveSettingTests`. `Operations/WorkshopPlacementTests` covers placement.
 
 `TimberChainEndToEndTests` is the pipeline test: start layout with logs, a woodcutter, hewing station, sawpit, market and three granaries with six store families, all by real commands and ticks. The 10 starting planks go into five stalls, sawn planks are carried to the sixth, and it is built. Audit runs every 5 ticks.
 
@@ -44,10 +44,11 @@ Each fetch round picks the ox input with the lowest share of its stock (held plu
 
 ## Input reserve (T-537, PL-30..34)
 
-`InputReserve`: a fetch opens only if storage total (logs in Storage/Stockpile, beams in workshop GoodsStores; never piles, workshop stock, carried) minus stock reserved by open fetches minus the load is at least the reserve (tuning `WorkshopDefaultReserve` = 5, 0 = none). Own input stock is committed and uncounted; fetched work is always processed. Stocks: hewing store 10, input stocks 10. The reserve is saved (CoreSection, save v30) but not yet per building (st-0b).
+`InputReserve`: a fetch opens only if storage total (logs in Storage/Stockpile, beams in workshop GoodsStores; never piles, workshop stock, carried) minus stock reserved by open fetches minus the load is at least the reserve (tuning `WorkshopDefaultReserve` = 5, 0 = none). Own input stock is committed and uncounted; fetched work is always processed. Stocks: hewing store 10, input stocks 10.
+The player sets it per workshop and input (`SetWorkshopReserve`, 0..9999): stored on the operation (`Operation.Reserves`, Structures section, save v31); an unset input uses the tuning default. Yard and coppice-hut stores also count (see `storage.md`). Decision 0055.
 
 ## Gaps and follow-ups
 
-- Unity side (T-527): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct; the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.
+- Unity side (T-527, T-550): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct and the "Keep in storage" reserve field (text input, focus only on click, T-602); the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.
 - A site that loses a carried load at sunset drops it on a pile the site owns, and may not reserve it again if no spare logs exist (seen in the end-to-end test; not fixed here).
 - Stall builds need an odd-jobber family to build (stall planks are carried by the granary family); with every family assigned, build tasks stay open.

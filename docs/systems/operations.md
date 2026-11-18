@@ -26,6 +26,7 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 ## Foraging camp and granary
 
 - **Foraging camp** (`OperationTypes.Foraging`, `area.foraging`): a forager hut, no log storage, 300 m work circle (`foraging.md`).
+- **Storage yard** (`OperationTypes.StorageYard`): no area, one hut, 2 family slots; families run `YardFamilySystem` (`storage.md`).
 - **Granary** (`OperationTypes.Granary`): no area (`AreaId` 0). The granary footprint is its hut and it has 2 family slots.
   `SetGranarySupplies` sets `Operation.SuppliesMarket` (MK-10..12, T-458). Its families run `StoreFamilySystem` (`markets.md`).
 
@@ -45,8 +46,7 @@ It creates the tasks its families do and tracks the logs it makes (WC-*, decisio
 
 ## Rules
 
-- Felling stops when `LogLoad` (piles, storage, carried logs, reserved room, no double counting) reaches storage capacity.
-  It restarts when logs leave storage or a second storage adds capacity (to 40).
+- Felling stops when `LogLoad` (piles, storage, carried logs, reserved room, no double counting) reaches storage capacity; it restarts when logs leave storage or a second storage adds capacity (to 40).
 - `DeleteArea` refuses an operation area that still has modules ("Deconstruct its buildings first", CN-58), and a plot that still has a house ("Deconstruct the house first", HM-14b).
 
 ## Extending

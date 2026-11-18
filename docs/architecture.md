@@ -36,6 +36,8 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   the granary and from the granary to stalls (decision 0044). A stall's planks are carried by its granary family (T-518). The camp hands its food over once a granary supplies the market,
   then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both (decision 0049).
 - **Workshops** (`systems/workshops.md`, decisions 0046, 0047): hewing station and sawpit are data (`WorkshopDef`) run by one `WorkshopSystem`. `WorkshopReport` (panel text, stock, store, family) and `GoodsStats` (village Logs, Beams, Planks; reserved counts, workshop stock and ox loads do not) are read only. `StorageYardReport` (T-547) is the read-only yard panel model: per-item stock, families, computed ST-45 status and the ST-10 market text; its village totals come from `GoodsStats.GeneralByItem`.
+- **Storage yard** (`systems/storage.md`, decisions 0054, 0055): a General goods store. Yard families plan hand and ox trips
+  from an ordered list of `IYardJobSource`s. The workshop input reserve (`InputReserve`) gates fetches by storage total.
 - **Passage and settlement log** (decision 0045): `Family.Passage` (None, Arriving, Leaving) marks families walking in or out;
   readers check `IsInPassage`. `SettlementLog` on `SimWorld` keeps the last 20 (tick, text) entries, saved in the Core section.
 - **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.
@@ -118,6 +120,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-The storage yard Sim loop and workshop input reserve are built and proven end to end (M18, `systems/storage.md`); the yard's Unity panel and build button and a reserve control are not. Also not built: tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
+The Supplies market on the storage yard (ST-10) is a greyed placeholder: no household buys General goods yet (`systems/storage.md`). Also not built: tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
 and backyards; artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
 status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.

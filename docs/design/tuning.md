@@ -178,6 +178,7 @@ Winter (8 h daylight) roughly halves these. Containers (wishlist below) raise it
 | Gather time per basket | 30 | game minutes (`GatherMinutesPerBasket`) | FD-24 |
 | Hand carry per trip | 10 | items (`HandCarryItems`) | FD-24, MKT-03e |
 | Plank hand carry per trip | 2 | planks, odd-jobber to a site (`HandCarryPlanks`) | PL-16 (PLACEHOLDER) |
+| Other hand carry per trip | rods 10, baskets 5, panels 2 | items (`HandCarryRods`, `HandCarryBaskets`, `HandCarryPanels`) | ST-43 (PLACEHOLDER) |
 
 Food values in the tables above also map to `SimConfig` fields: starting meat 400 (`StartingMeat`), adult 1 and child
 0.5 rations per day (`AdultRations`, `ChildRations`), market range 630 m (`MarketRangeM`). The Foraging values are
@@ -193,11 +194,14 @@ PLACEHOLDER until playtested.
 | House (MVP-2) | 10 logs, 720 | worker-minutes | CON-A1, HM-06 |
 | House footprint / plot size | 6 × 8 m / 60–400 m² | m / m² | HM-03, HM-04 |
 | Granary | 6 logs, 600 | worker-minutes | CON-A1 |
+| Storage yard | 8 logs, 480; 8 × 6 m; 300 items in total; 2 family slots | worker-minutes; `StorageYardLogs`, `StorageYardMinutes`, `StorageYardCapacity`, `StorageYardFamilySlots` | ST-03, ST-05, ST-08 (PLACEHOLDER) |
+| Yard collect threshold | 0 | share of a workshop store full before the yard collects; 0 = any free item (`YardCollectThreshold`) | ST-42 |
+| Workshop input reserve | 5 | items kept in storage per workshop input; 0 = none; each workshop can be set (`WorkshopDefaultReserve`) | PL-30b |
 | Demolish refund / rebuild cost | 50% / 50% | of materials | BLD-11, MIL-08 |
 | Standard log length | 4 | m | TMB-04 |
 | Usable trunk length | 12–20 | m (3–5 logs) | TMB-06 |
 | Ox load | 1 (owner 17/11/2026; was 4) | logs per trip (`SimTuning.OxLoadLogs`, saved in Core; exposed in `SimConfig` as `oxLoadLogs`) | WCO-07 |
-| Workshop rates | hewing 3 logs/day → 1 beam each; sawing 3 beams/day → 3 planks each; stock 6, store 20 | `SimTuning.HewingLogsPerDay`, `HewingBeamsPerLog`, `SawingBeamsPerDay`, `SawingPlanksPerBeam`, `*StockCapacity`, `*StoreCapacity` (saved in Core) | HW-02, HW-05, PL-05 |
+| Workshop rates | hewing 3 logs/day → 1 beam each; sawing 3 beams/day → 3 planks each; input stock 10 each, hewing beam store 10, sawing plank store 20 | `SimTuning.HewingLogsPerDay`, `HewingBeamsPerLog`, `SawingBeamsPerDay`, `SawingPlanksPerBeam`, `*StockCapacity`, `*StoreCapacity` (saved in Core) | HW-02, HW-05, PL-05 |
 | Workshop shift | 0 = today's daylight window | minutes; work minutes per input = shift ÷ inputs per day (`SimTuning.WorkshopShiftMinutes`; >0 overrides). Default gives ~3 a day in every season. A sawpit's 20-plank store holds 18 (3 per beam, 2 slots left over) and then shows Store full | HW-05 |
 | Max builders per site | 4 | odd-jobbers building one site at once (`SimTuning.MaxBuildersPerSite`) | CN-23 |
 | Deconstruct time share | 0.5 | of the recipe's build minutes (hut 480) (`SimTuning.DeconstructTimeShare`, saved in Core) | CN-53 |

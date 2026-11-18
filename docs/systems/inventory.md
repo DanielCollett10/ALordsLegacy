@@ -1,6 +1,6 @@
 # Inventory (ledger)
 
-**Purpose:** every physical item (logs and food) has a location and a count. Items enter only by production and leave only by
+**Purpose:** every physical item (logs, food and General goods) has a location and a count. Items enter only by production and leave only by
 transfer or consumption, so nothing appears from nowhere (decision 0032, decision 0035).
 
 ## Key types and files
@@ -43,5 +43,5 @@ A new item is an `ItemDef` in `Items`. A new location kind needs its own save an
 ## Tests
 
 `Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`,
-`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (General goods stores). Food stores: `Sim.Tests/Food/FoodStoreTests.cs`. Workshop stock: `Sim.Tests/Workshops/InputSourcesTests.cs`.
+`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (General goods stores), `Sim.Tests/Inventory/HandLoadsTests.cs`. Food stores: `Sim.Tests/Food/FoodStoreTests.cs`. Workshop stock: `Sim.Tests/Workshops/InputSourcesTests.cs`.
 Unity: `Assets/Tests/PlayMode/LogStacksTests.cs`.

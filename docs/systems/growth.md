@@ -34,7 +34,7 @@
 
 ## Saved
 
-Passage (Population), `ReservedForFamilyId` (Homes), `LastArrivalTick`, `EntryPoint` and the settlement log (Core), `LastHungryTick` and `HungryDays` (Food). `MapExits` and `GrowthReport` are derived. Save version: `SaveWriter.CurrentVersion` (27).
+Passage (Population), `ReservedForFamilyId` (Homes), `LastArrivalTick`, `EntryPoint` and the settlement log (Core), `LastHungryTick` and `HungryDays` (Food). `MapExits` and `GrowthReport` are derived. Save version: see `save.md` (`SaveWriter.CurrentVersion`).
 
 ## Extending
 
