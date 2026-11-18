@@ -12,7 +12,7 @@
 | `WorkshopBuildings` | `IsWorkshop`; `OnBuilt` makes one `WorkshopStock` per recipe input (own capacity, `RecipeInput.StockCapacity`) and the `GoodsStore` (output) when the site finishes. |
 | Multi-input (T-558) | A work task starts only when every input has one batch available and the store has room for one batch; all reserved at start, all consumed and outputs produced on finish. Fetch runs the single-input path per input in recipe order (choice: cw-5c). Save v35. Tests inject a def via `OperationTypes.TestDefs`. |
 | `WorkshopSystem` | Operations phase, after construction. Opens `task.fetch_input` (ox, nearest free source) and one `task.workshop_work` per working family. |
-| `InputSources` | Where an ox may fetch from: logs share `ConstructionSources` plus woodcutting piles; beams come from workshop goods stores. Never a `WorkshopStock`. |
+| `InputSources` | Where an ox may fetch from: logs share `ConstructionSources` plus woodcutting piles; beams come from workshop goods stores; baskets and panels from working storage yards only (T-562). Never a `WorkshopStock`. |
 | `WorkshopStatus` | Computed status: Paused, MissingHut, NoWorkers, Working, WorkshopStoreFull, WaitingForInput (Reported: WaitingForOx). |
 | `WorkshopReport` | Read model (T-525): `Of(world, footprintId)` gives `Name`, `StatusText`, `InputCount/InputCapacity`, `OutputCount/OutputCapacity`, `InputText`, `OutputText`, `FamilyId`, `FamilyName`, `IsBuilt`. `ConfirmText(world, typeId)` is the placement dialog text. Null for a non-workshop id. |
 | `GoodsStats` | Top bar totals (T-525): `Logs` (camp stockpile, built log storage, unowned piles, as `ConstructionSources` counts them), `Beams` and `Planks` (every `GoodsStore`). |
