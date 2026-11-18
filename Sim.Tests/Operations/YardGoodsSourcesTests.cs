@@ -229,9 +229,9 @@ namespace LordsLegacy.Sim.Tests.Operations
         public void NearestYard_CampGoodsGoToTheNearerYardOnly_ThenTheFarOneWhenTheNearIsFull()
         {
             SimWorld w = Started();
+            w.Inventory.Produce(w.Camp.GeneralStoreLocation, Items.Plank, 5); // before the yards: an empty camp store closes once a yard exists (ST-04)
             Operation near = BuiltYard(w, NearYard);
             Operation far = BuiltYard(w, FarYard);
-            w.Inventory.Produce(w.Camp.GeneralStoreLocation, Items.Plank, 5);
             var camp = new YardCampStoreSource();
 
             Assert.IsNotNull(camp.NextTrip(w, near), "the nearer yard takes the trip");

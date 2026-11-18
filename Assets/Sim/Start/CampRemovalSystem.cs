@@ -15,7 +15,8 @@ namespace LordsLegacy.Sim.Start
     /// or food store moves to an unowned ground pile at the stockpile spot (unowned log piles stay construction sources),
     /// and oxen resting at the camp stand move to the nearest oxen stand, or rest where they are. If a camp location
     /// still has reserved or incoming items the removal waits for the next day. The General goods store (ST-02) blocks
-    /// removal while it holds any goods (ST-30); once empty it is dropped with the camp. <c>World.Camp</c> becomes null.
+    /// removal while it holds goods and no storage yard exists (ST-30, said once in the settlement log, ST-32). With a
+    /// yard the General goods drop in the same unowned pile (ST-31); once a yard exists an empty General store closes (ST-04). <c>World.Camp</c> becomes null.
     /// </summary>
     public sealed class CampRemovalSystem : ISimSystem
     {
@@ -42,14 +43,26 @@ namespace LordsLegacy.Sim.Start
         /// <summary>Removes the camp now if it is due and nothing is promised from its stores. Returns true when removed.</summary>
         public static bool TryRemove(SimWorld world)
         {
+            if (world.Camp == null) return false;
+            bool yard = YardExists(world);
+            CloseEmptyGeneralStore(world, yard);
             if (!IsDue(world)) return false;
             CampInfo camp = world.Camp;
             LedgerLocation stock = camp.StockpileLocation, food = camp.FoodStoreLocation, general = camp.GeneralStoreLocation;
+            if (general != null && general.Total > 0 && !yard)
+            {
+                // ST-30: with no yard the camp stays while the General store holds goods; ST-32: say so once.
+                if (!world.CampStaysMessageSaid)
+                {
+                    world.CampStaysMessageSaid = true;
+                    world.SettlementLog.Add(world.Tick, "The camp stays until a storage yard can take its goods");
+                }
+                return false;
+            }
             if (Promised(stock) || Promised(food) || Promised(general)) return false;
-            if (general != null && general.Total > 0) return false; // ST-30: the camp stays while the General store holds goods
 
             LedgerLocation pile = null;
-            foreach (LedgerLocation from in new[] { stock, food })
+            foreach (LedgerLocation from in new[] { stock, food, general }) // ST-31: General goods drop in the same unowned pile
             {
                 if (from == null) continue;
                 foreach (string id in new List<string>(from.Counts.Keys))
@@ -61,7 +74,6 @@ namespace LordsLegacy.Sim.Start
                 }
                 world.Inventory.RemoveEmptyLocation(from.Id);
             }
-            if (general != null) world.Inventory.RemoveEmptyLocation(general.Id);
 
             PointMm stand = camp.OxStand;
             world.Footprints.Remove(camp.FootprintId);
@@ -77,6 +89,23 @@ namespace LordsLegacy.Sim.Start
                 oxPool.Rest(ox);
             }
             return true;
+        }
+
+        /// <summary>True when a built (working) storage yard with a store exists (ST-31).</summary>
+        private static bool YardExists(SimWorld world)
+        {
+            foreach (Operation op in world.Operations.All)
+                if (op.TypeId == OperationTypes.StorageYardOpId && YardRoute.StoreOf(world, op) != null) return true;
+            return false;
+        }
+
+        /// <summary>ST-04: once a yard exists and the camp General store is empty and unpromised, the store is closed.</summary>
+        private static void CloseEmptyGeneralStore(SimWorld world, bool yard)
+        {
+            LedgerLocation general = world.Camp.GeneralStoreLocation;
+            if (!yard || general == null || general.Total > 0 || Promised(general)) return;
+            world.Inventory.RemoveEmptyLocation(general.Id);
+            world.Camp.CloseGeneralStore();
         }
 
         private static bool Promised(LedgerLocation l) =>
