@@ -51,6 +51,7 @@ namespace LordsLegacy.Sim.Operations
             jobs.Add(new YardCampStoreSource());
             jobs.Add(new YardPileSource());
             jobs.Add(new YardWorkshopSource());
+            jobs.Add(new YardBeamSource()); // beams by pool ox (ST-43); makes its own ox task
             return jobs;
         }
 
