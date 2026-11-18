@@ -85,6 +85,7 @@ namespace LordsLegacy.Sim.Construction
             foreach (Operation op in new List<Operation>(world.Operations.All))
                 foreach (int id in new List<int>(op.ModuleIds))
                     if (id == footprintId) { world.Operations.RemoveModule(op.Id, footprintId); owners.Add(op.Id); }
+            world.KitClaims.Release(footprintId); // decision 0052: the building's kit claim goes with it
             world.Footprints.Remove(footprintId);
             HouseRemoval.RemoveWithPlot(world, footprintId); // HM-14b: a house takes its plot with it (no-op otherwise)
             world.Deconstruction.Remove(footprintId);

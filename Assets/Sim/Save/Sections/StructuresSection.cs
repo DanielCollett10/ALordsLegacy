@@ -33,6 +33,7 @@ namespace LordsLegacy.Sim.Save.Sections
             WriteSites(world.Construction, w);
             WriteDeconstruction(world.Deconstruction, w);
             WritePendingOperations(world.Deconstruction, w);
+            WriteKitClaims(world, w);
         }
 
         /// <inheritdoc />
@@ -47,6 +48,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 ReadSites(world, r);
                 ReadDeconstruction(world, r);
                 ReadPendingOperations(world, r);
+                ReadKitClaims(world, r);
             }
             catch (InvalidOperationException e) { throw new SaveFormatException(e.Message); }
             catch (ArgumentException e) { throw new SaveFormatException(e.Message); }
@@ -233,6 +235,25 @@ namespace LordsLegacy.Sim.Save.Sections
             {
                 if (world.Operations.Get(id) == null) throw new SaveFormatException("Pending removal of missing operation " + id + ".");
                 world.Deconstruction.AddPendingOperation(id);
+            }
+        }
+
+        private static void WriteKitClaims(SimWorld world, SaveWriter w)
+        {
+            List<Kit.KitClaim> claims = world.KitClaims.Ordered();
+            w.WriteInt32(claims.Count);
+            foreach (Kit.KitClaim c in claims) { w.WriteInt32(c.BuildingId); w.WriteInt64(c.FirstClaimTick); }
+        }
+
+        private static void ReadKitClaims(SimWorld world, SaveReader r)
+        {
+            int n = r.ReadCount(12);
+            for (int i = 0; i < n; i++)
+            {
+                int building = r.ReadInt32();
+                long tick = r.ReadInt64();
+                if (world.Footprints.Get(building) == null) throw new SaveFormatException("Kit claim of missing building " + building + ".");
+                world.KitClaims.Claim(building, tick);
             }
         }
 
