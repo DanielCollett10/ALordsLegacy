@@ -15,6 +15,7 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 | `FoodTripSystem` (`Food/`) | `task.fetch_food` (OwnerFamily, owner `-1000 - familyId`), opened each Sunday morning. Ignores shifts. See `food.md`. |
 | `ForagingSystem` (`Foraging/`) | `task.forage` (AssignedFamilyOnly, owner = operation, age 8+), holds a bush and a carrier. See `foraging.md`. |
 | `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectItems` (no item id: reserved, in proportion, never allotted food), walk, unload 10 min, `DepositItems`. Source: `ChooseStockSource`. |
+| `YardFamilySystem` (`Operations/`), `HandHaulTaskDefs` | `task.haul_by_hand` (T-542, ST-43/44): the one store-to-store hand trip (same steps, hand load, stock and room reserved at planning, owner `OwnerFor`). Plans from the ordered `YardJobs` sources; none registered yet. |
 | `WorkshopSystem` (`Operations/Workshops/`) | `task.fetch_input` (AssignedFamilyOnly, owner = operation, `RequiredResource.Ox`: fetch ox, lead, load, lead, unload, return) and `task.workshop_work` (AssignedFamilyOnly, one heavy `Work` step, owner = operation). |
 | `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, and the one item trip pair `CollectItems`/`DepositItems` (an item id moves that item, none means a stock share). |
 | `TaskRecord`, `TaskPriority` | Id, def, state, owner, assignee, priority (Normal or High, set by `TaskBoard.SetPriority`), target, step index, ox, site, `BushId`, `CarrierId`. |
@@ -50,8 +51,7 @@ Haul and construction tasks carry extra rules (wind-down at the end of work, ear
 
 ## Gotchas
 
-- `RoutineSystem` ignores busy citizens and resumes when the task ends.
-- A task that needs an ox is not offered to a worker who is mid-tree (the worker is busy).
+- `RoutineSystem` ignores busy citizens and resumes when the task ends. An ox task is not offered to a busy (mid-tree) worker.
 - Runtime step state (walk orders, ox tracks, rest targets) is not saved; only the task record and steps are (`save.md`).
 - `DispatchSystem` cancels a forage task whose bush has gone or is no longer its own.
 

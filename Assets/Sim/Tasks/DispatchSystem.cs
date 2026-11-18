@@ -202,6 +202,7 @@ namespace LordsLegacy.Sim.Tasks
             }
             if (!forager && t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return false; // FD-23: 8 and over
             if (!forager && t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) return false; // MK-24: 8 and over
+            if (!forager && t.Def.Id == HandHaulTaskDefs.HaulId) return false; // same age rule as the stall trip
             switch (t.Def.Eligibility)
             {
                 case EligibilityPolicy.AssignedFamilyOnly:
