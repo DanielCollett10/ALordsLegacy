@@ -23,10 +23,19 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public int Count { get; }
         /// <summary>How it is fetched.</summary>
         public CarryClass Carry { get; }
+        /// <summary>Capacity of this input's own stock; 0 means the def's <see cref="WorkshopDef.InputStockCapacity"/>.</summary>
+        public int StockCapacity { get; }
 
         /// <summary>Creates an input line; count must be positive.</summary>
-        public RecipeInput(ItemDef item, int count, CarryClass carry)
+        public RecipeInput(ItemDef item, int count, CarryClass carry) : this(item, count, carry, 0)
         {
+        }
+
+        /// <summary>Creates an input line with its own stock capacity (0 = the def's default); count must be positive.</summary>
+        public RecipeInput(ItemDef item, int count, CarryClass carry, int stockCapacity)
+        {
+            if (stockCapacity < 0) throw new ArgumentOutOfRangeException(nameof(stockCapacity), "Must not be negative.");
+            StockCapacity = stockCapacity;
             Item = item ?? throw new ArgumentNullException(nameof(item));
             if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Must be positive.");
             Count = count;
@@ -69,6 +78,12 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public int BatchesPerFamilyDay { get; }
         /// <summary>The single input item (the input stock holds only this); null when the recipe has no or several inputs.</summary>
         public ItemDef Input => Inputs.Count == 1 ? Inputs[0].Item : null;
+        /// <summary>The first input item (the one panels and the reserve show); null when the recipe has no input.</summary>
+        public ItemDef FirstInput => Inputs.Count > 0 ? Inputs[0].Item : null;
+        /// <summary>Capacity of the stock of one input: its own, else <see cref="InputStockCapacity"/>.</summary>
+        public int StockCapacityOf(RecipeInput input) => input.StockCapacity > 0 ? input.StockCapacity : InputStockCapacity;
+        /// <summary>Output items made per batch, all lines together (room the store needs for one batch).</summary>
+        public int OutputsPerBatch { get { int n = 0; foreach (RecipeOutput o in Outputs) n += o.Count; return n; } }
         /// <summary>The first output item.</summary>
         public ItemDef Output => Outputs[0].Item;
         /// <summary>Output items made from one input item (first output's count per batch).</summary>

@@ -35,16 +35,37 @@ namespace LordsLegacy.Sim.Operations.Workshops
             foreach (Operation op in new List<Operation>(world.Operations.All))
             {
                 WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
-                if (def == null) continue;
-                WorkshopDef.RequireSingleInput(def);
+                if (def == null || def.Inputs.Count == 0) continue;
                 Footprint fp = HutOf(world, op);
                 if (fp == null || op.Paused || !world.IsWorking(fp.Id) || !HasWorker(world, op)) continue;
-                LedgerLocation stock = world.Inventory.FindWorkshopStock(fp.Id);
-                if (stock == null) continue;
+                List<LedgerLocation> stocks = StocksOf(world, fp, def);
+                if (stocks == null) continue;
                 AttachOxen(world, op, fp);
-                OpenWork(world, op, def, fp, stock);
-                OpenTasks(world, op, def, fp, stock);
+                OpenWork(world, op, def, fp, stocks);
+                for (int i = 0; i < def.Inputs.Count; i++)
+                    if (def.Inputs[i].Carry == CarryClass.Ox) OpenTasks(world, op, def, fp, def.Inputs[i], stocks[i]);
             }
+        }
+
+        /// <summary>The input stocks of a workshop in recipe order, or null when any is missing.</summary>
+        internal static List<LedgerLocation> StocksOf(SimWorld world, Footprint fp, WorkshopDef def)
+        {
+            var list = new List<LedgerLocation>(def.Inputs.Count);
+            foreach (RecipeInput input in def.Inputs)
+            {
+                LedgerLocation s = world.Inventory.FindWorkshopStock(fp.Id, input.Item.Id);
+                if (s == null) return null;
+                list.Add(s);
+            }
+            return list;
+        }
+
+        /// <summary>True when every input has one batch available (unreserved) in its stock.</summary>
+        internal static bool HasBatch(WorkshopDef def, IList<LedgerLocation> stocks)
+        {
+            for (int i = 0; i < def.Inputs.Count; i++)
+                if (stocks[i].AvailableOf(def.Inputs[i].Item.Id) < def.Inputs[i].Count) return false;
+            return true;
         }
 
         /// <summary>Id of the work task definition (T-524, HW-02, PL-05).</summary>
@@ -89,20 +110,24 @@ namespace LordsLegacy.Sim.Operations.Workshops
 
         // One work task per assigned family while the stock holds an input and the store has room for its outputs.
         // Work minutes per input = shift minutes / inputs per day (HW-02). Progress lives in the task, like a build's.
-        private static void OpenWork(SimWorld world, Operation op, WorkshopDef def, Footprint fp, LedgerLocation stock)
+        private static void OpenWork(SimWorld world, Operation op, WorkshopDef def, Footprint fp, IList<LedgerLocation> stocks)
         {
             LedgerLocation store = world.Inventory.FindGoodsStore(fp.Id);
             if (store == null) return;
-            int minutes = Math.Max(1, ShiftMinutes(world) / def.InputsPerDayPerFamily);
+            int minutes = Math.Max(1, ShiftMinutes(world) / def.BatchesPerFamilyDay);
             int open = OpenWorkCount(world, op);
             int families = WorkingFamilies(world, op);
-            while (open < families && stock.AvailableOf(def.Input.Id) >= 1 && store.FreeSpace >= def.OutputsPerInput)
+            while (open < families && HasBatch(def, stocks) && store.FreeSpace >= def.OutputsPerBatch)
             {
                 var taskDef = new TaskDef(WorkTaskId, new[] { TaskStep.Work(minutes, true) },
                     EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None);
                 TaskRecord task = world.Tasks.Create(taskDef, op.Id, null, TaskPriority.Normal);
-                if (world.Inventory.ReserveStock(stock, def.Input, 1, task.Id) == 0 ||
-                    world.Inventory.ReserveCapacity(store, def.Output, def.OutputsPerInput, task.Id) == 0)
+                bool ok = true;
+                for (int i = 0; ok && i < def.Inputs.Count; i++)
+                    ok = world.Inventory.ReserveStock(stocks[i], def.Inputs[i].Item, def.Inputs[i].Count, task.Id) != 0;
+                foreach (RecipeOutput o in def.Outputs)
+                    if (ok) ok = world.Inventory.ReserveCapacity(store, o.Item, o.Count, task.Id) != 0;
+                if (!ok)
                 {
                     world.Inventory.CancelOwner(task.Id);
                     world.Tasks.Cancel(task.Id);
@@ -120,10 +145,12 @@ namespace LordsLegacy.Sim.Operations.Workshops
             WorkshopDef def = op == null ? null : OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
             Footprint fp = def == null ? null : HutOf(world, op);
             if (fp == null) return;
-            LedgerLocation stock = world.Inventory.FindWorkshopStock(fp.Id);
+            List<LedgerLocation> stocks = StocksOf(world, fp, def);
             LedgerLocation store = world.Inventory.FindGoodsStore(fp.Id);
-            if (stock == null || store == null || !world.Inventory.Consume(stock, def.Input, 1)) return;
-            world.Inventory.Produce(store, def.Output, def.OutputsPerInput);
+            if (stocks == null || store == null || !HasBatch(def, stocks)) return;
+            for (int i = 0; i < def.Inputs.Count; i++)
+                world.Inventory.Consume(stocks[i], def.Inputs[i].Item, def.Inputs[i].Count);
+            foreach (RecipeOutput o in def.Outputs) world.Inventory.Produce(store, o.Item, o.Count);
         }
 
         /// <inheritdoc />
@@ -195,21 +222,23 @@ namespace LordsLegacy.Sim.Operations.Workshops
         }
 
         // One fetch per free ox while the stock has room for a whole load and a source has that much free input.
-        private void OpenTasks(SimWorld world, Operation op, WorkshopDef def, Footprint fp, LedgerLocation stock)
+        // This is the cw-5 single-input path, run once per input in recipe order (choice of input comes in cw-5c).
+        private void OpenTasks(SimWorld world, Operation op, WorkshopDef def, Footprint fp, RecipeInput input, LedgerLocation stock)
         {
+            ItemDef inItem = input.Item;
             int load = Math.Max(1, def.OxLoadForInput);
             var pool = new OxPool(world);
             while (stock.FreeSpace >= load)
             {
-                if (!InputReserve.Allows(world, op, def.Input, load)) return;
-                LedgerLocation source = _sources.Find(world, def.Input, fp.AccessPoint);
-                if (source == null || source.AvailableOf(def.Input.Id) < load) return;
+                if (!InputReserve.Allows(world, op, inItem, load)) return;
+                LedgerLocation source = _sources.Find(world, inItem, fp.AccessPoint);
+                if (source == null || source.AvailableOf(inItem.Id) < load) return;
                 Ox ox = pool.FindFor(op.Id, PointOf(world, source));
                 if (ox == null) return;
 
                 PathPoint pick = PathOf(PointOf(world, source));
                 PathPoint drop = new PathPoint(fp.AccessPoint.XMetres, fp.AccessPoint.ZMetres);
-                string item = def.Input.Id;
+                string item = inItem.Id;
                 var steps = new[]
                 {
                     TaskStep.FetchOx(),
@@ -221,8 +250,8 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 };
                 var taskDef = new TaskDef(FetchTaskId, steps, EligibilityPolicy.AssignedFamilyOnly, RequiredResource.Ox);
                 TaskRecord task = world.Tasks.Create(taskDef, op.Id, null, TaskPriority.Normal);
-                if (world.Inventory.ReserveStock(source, def.Input, load, task.Id) == 0 ||
-                    world.Inventory.ReserveCapacity(stock, def.Input, load, task.Id) == 0)
+                if (world.Inventory.ReserveStock(source, inItem, load, task.Id) == 0 ||
+                    world.Inventory.ReserveCapacity(stock, inItem, load, task.Id) == 0)
                 {
                     world.Inventory.CancelOwner(task.Id);
                     world.Tasks.Cancel(task.Id);

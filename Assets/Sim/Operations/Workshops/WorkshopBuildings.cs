@@ -17,7 +17,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
 
         /// <summary>True only for a def with at least one input and one output (ST-42b). A null def, or one with no input
         /// (a daub pit) or no output (a gathering hut), is not a workshop for yard collection.</summary>
-        public static bool IsWorkshop(WorkshopDef def) => def != null && def.Input != null && def.Output != null;
+        public static bool IsWorkshop(WorkshopDef def) => def != null && def.Inputs.Count > 0 && def.Outputs.Count > 0;
 
         /// <summary>True for a building whose built footprint holds a <see cref="LocationKind.GoodsStore"/>: a workshop or a storage yard (ST-07).</summary>
         public static bool HoldsGoods(FootprintTypeDef type) =>
@@ -48,7 +48,8 @@ namespace LordsLegacy.Sim.Operations.Workshops
             if (!IsWorkshop(fp.Type)) return;
             WorkshopDef def = OperationTypes.WorkshopOf(OperationTypes.WorkshopOperationFor(fp.Type.Id), world.Tuning);
             Ledger inv = world.Inventory;
-            if (inv.FindWorkshopStock(fp.Id) == null) inv.AddWorkshopStock(fp.Id, def.Input, def.InputStockCapacity);
+            foreach (RecipeInput input in def.Inputs) // one stock per input item, each with its own capacity (decision 0051)
+                if (inv.FindWorkshopStock(fp.Id, input.Item.Id) == null) inv.AddWorkshopStock(fp.Id, input.Item, def.StockCapacityOf(input));
             if (inv.FindGoodsStore(fp.Id) == null) inv.AddGoodsStore(def.OutputCapacity, fp.Id);
         }
     }

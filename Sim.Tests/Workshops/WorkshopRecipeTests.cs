@@ -46,15 +46,6 @@ namespace LordsLegacy.Sim.Tests.Workshops
         }
 
         [Test]
-        public void TwoInputRecipe_IsRefusedByWorkshopStatus()
-        {
-            var d = new WorkshopDef("workshop.test2",
-                new[] { new RecipeInput(Items.Log, 1, CarryClass.Ox), new RecipeInput(Items.Beam, 2, CarryClass.Hand) },
-                new[] { new RecipeOutput(Items.Plank, 1) }, 1, 5, 5, 1);
-            Assert.Throws<NotSupportedException>(() => WorkshopStatus.Of(null, null, d));
-        }
-
-        [Test]
         public void Recipe_RejectsNoOutputsAndZeroCounts()
         {
             Assert.Throws<ArgumentException>(() => new WorkshopDef("x", new RecipeInput[0], new RecipeOutput[0], 1, 1, 1, 1));

@@ -142,12 +142,29 @@ namespace LordsLegacy.Sim.Inventory
             return Add(l);
         }
 
-        /// <summary>Finds the workshop input stock bound to a footprint, or null (never creates).</summary>
+        /// <summary>Finds the first (lowest id) workshop input stock bound to a footprint, or null (never creates).</summary>
         public LedgerLocation FindWorkshopStock(int moduleId)
         {
             foreach (var l in _locations.Values)
                 if (l.Kind == LocationKind.WorkshopStock && l.ModuleId == moduleId) return l;
             return null;
+        }
+
+        /// <summary>Finds the workshop input stock of one input item bound to a footprint, or null (never creates).</summary>
+        public LedgerLocation FindWorkshopStock(int moduleId, string itemId)
+        {
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.WorkshopStock && l.ModuleId == moduleId && l.InputItemId == itemId) return l;
+            return null;
+        }
+
+        /// <summary>Every workshop input stock bound to a footprint, in id order (one per recipe input).</summary>
+        public List<LedgerLocation> WorkshopStocks(int moduleId)
+        {
+            var list = new List<LedgerLocation>();
+            foreach (var l in _locations.Values)
+                if (l.Kind == LocationKind.WorkshopStock && l.ModuleId == moduleId) list.Add(l);
+            return list;
         }
 
         /// <summary>Finds the Site location of a footprint, or null (never creates).</summary>

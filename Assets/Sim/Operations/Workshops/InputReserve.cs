@@ -19,7 +19,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public static int ReserveOf(SimWorld world, Operation op)
         {
             WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
-            return def == null ? Math.Max(0, world.Tuning.WorkshopDefaultReserve) : ReserveOf(world, op, def.Input);
+            return def == null ? Math.Max(0, world.Tuning.WorkshopDefaultReserve) : ReserveOf(world, op, def.FirstInput);
         }
 
         /// <summary>The reserve of <paramref name="op"/> for one input item.</summary>
