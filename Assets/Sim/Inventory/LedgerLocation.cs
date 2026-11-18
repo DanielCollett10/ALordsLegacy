@@ -96,6 +96,31 @@ namespace LordsLegacy.Sim.Inventory
             }
         }
 
+        /// <summary>
+        /// Per-item caps (MAT-14): most of one item held here, counting incoming. Items without an entry are limited only
+        /// by <see cref="Capacity"/>. Empty for every store that has no item caps.
+        /// </summary>
+        internal readonly SortedDictionary<string, int> ItemCaps = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+
+        /// <summary>The cap on one item, or <see cref="int.MaxValue"/> when it has none.</summary>
+        public int ItemCapOf(string itemId) => ItemCaps.TryGetValue(itemId, out int n) ? n : int.MaxValue;
+
+        /// <summary>Whether any item has its own cap.</summary>
+        public bool HasItemCaps => ItemCaps.Count > 0;
+
+        /// <summary>
+        /// Room left for one item: the smaller of <see cref="FreeSpace"/> and the item's own cap minus what is held and
+        /// incoming of it (never negative).
+        /// </summary>
+        public int FreeSpaceFor(string itemId)
+        {
+            int free = FreeSpace;
+            if (!ItemCaps.TryGetValue(itemId, out int cap)) return free;
+            long f = (long)cap - CountOf(itemId) - IncomingOf(itemId);
+            int itemFree = f < 0 ? 0 : (int)f;
+            return itemFree < free ? itemFree : free;
+        }
+
         /// <summary>Total number of items of any kind here.</summary>
         public int Total { get { int t = 0; foreach (var kv in Counts) t += kv.Value; return t; } }
 

@@ -31,7 +31,7 @@ namespace LordsLegacy.Sim.Inventory
         public int ReserveCapacity(LedgerLocation location, ItemDef item, int n, int owner)
         {
             Check(location, item, n);
-            if (RefusalReason(location, item) != null || location.FreeSpace < n) return 0;
+            if (RefusalReason(location, item) != null || location.FreeSpaceFor(item.Id) < n) return 0;
             Bump(location.IncomingCounts, item.Id, n);
             return AddReservation(ReservationKind.Capacity, location, item, n, owner);
         }
@@ -74,6 +74,7 @@ namespace LordsLegacy.Sim.Inventory
             if (from.AvailableOf(item.Id) < n - stockCovered) return false;
             int roomCovered = Math.Min(n, Matching(ReservationKind.Capacity, to, item, owner));
             if (to.Capacity != int.MaxValue && to.FreeSpace < n - roomCovered) return false;
+            if (to.HasItemCaps && to.FreeSpaceFor(item.Id) < n - roomCovered) return false;
 
             Consume(ReservationKind.Stock, from, item, stockCovered, owner);
             Consume(ReservationKind.Capacity, to, item, roomCovered, owner);
@@ -148,6 +149,9 @@ namespace LordsLegacy.Sim.Inventory
                     if (kv.Value > l.CountOf(kv.Key)) return "Location " + l.Id + " reserves " + kv.Value + " of " + kv.Key + " but holds " + l.CountOf(kv.Key);
                 if (l.Capacity != int.MaxValue && (long)l.Total + l.IncomingTotal > l.Capacity)
                     return "Location " + l.Id + " has incoming beyond capacity";
+                foreach (var cap in l.ItemCaps)
+                    if ((long)l.CountOf(cap.Key) + l.IncomingOf(cap.Key) > cap.Value)
+                        return "Location " + l.Id + " holds or expects more " + cap.Key + " than its item cap " + cap.Value;
             }
             var stock = new Dictionary<string, int>();
             var room = new Dictionary<string, int>();
