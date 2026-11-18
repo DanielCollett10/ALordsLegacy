@@ -27,6 +27,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public static void OnBuilt(SimWorld world, Footprint fp)
         {
             if (fp == null) return;
+            Kit.KitStores.OnBuilt(world, fp); // forager hut / granary kit store (decision 0052)
             if (fp.Type.Id == ModuleTypes.StorageYardId)
             {
                 // ST-03: the yard's one General store, capacity from tuning, created when it is built.
