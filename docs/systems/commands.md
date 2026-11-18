@@ -12,7 +12,7 @@
 | `CommandLog`, `CommandLogEntry` | `Commands/` | Append-only `(tick, command, result)`. Not saved. |
 
 Commands are in `Assets/Sim/Commands/`: `DrawRoad`, `DeleteRoadSegment`, `MoveRoadNode`, `DesignateArea`, `DeleteArea`,
-`DesignatePlot`, `DesignateOperation`, `DeconstructOperation`, `PlaceModule(s)`, `PlaceStructure` (granary, FD-30b), `RemoveModule`, `MarkForDeconstruction`,
+`DesignatePlot`, `DesignateOperation`, `DeconstructOperation`, `PlaceModule(s)`, `PlaceStructure` (granary FD-30b; hewing station, sawpit and storage yard, M17 and M18), `RemoveModule`, `MarkForDeconstruction`,
 `CancelDeconstruction`, `DeconstructStall` (unstaffed market stall only, MK-23b), `AssignFamily`, `UnassignFamily`, `AssignOx`, `UnassignOx`, `SetSitePriority`, `SendCitizenTo`,
 plus `OperationSettings` (pause, resume, work area, use default area), `SetGranarySupplies` (granary market flag, T-458), `SetWorkshopReserve` (workshop input reserve 0..9999, T-538).
 `DesignatePlot` makes the plot area, the house site and an Empty home in one all-or-nothing Apply (HM-05, decision 0037 pattern).
@@ -42,4 +42,4 @@ paused and never changes `Tick`. Unity calls it only through `SimHost.Execute`.
 
 `Sim.Tests/Commands/CommandPipelineTests.cs`, `Commands/SendCitizenToTests.cs`, `Areas/AreaCommandTests.cs`,
 `Roads/DrawRoadTests.cs`, `DeleteRoadSegmentTests.cs`, `MoveRoadNodeTests.cs`, `Operations/OperationCommandTests.cs`,
-`Operations/OxCommandTests.cs`, `Operations/PlaceRemoveConstructionTests.cs`, `Operations/SitePriorityTests.cs`, `Markets/GranarySupplyTests.cs`.
+`Operations/OxCommandTests.cs`, `Operations/PlaceRemoveConstructionTests.cs`, `Operations/SitePriorityTests.cs`, `Markets/GranarySupplyTests.cs`, `Workshops/WorkshopReserveSettingTests.cs`.
