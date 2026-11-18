@@ -171,6 +171,16 @@ namespace LordsLegacy.Tests.EditMode
             Assert.AreEqual(d.SawingStoreCapacity, t.SawingStoreCapacity);
             Assert.AreEqual(d.WorkshopShiftMinutes, t.WorkshopShiftMinutes);
             Assert.AreEqual(d.WorkshopDefaultReserve, t.WorkshopDefaultReserve);
+            Assert.AreEqual(10, t.HewingStoreCapacity);
+            Assert.AreEqual(10, t.HewingStockCapacity);
+            Assert.AreEqual(10, t.SawingStockCapacity);
+            Assert.AreEqual(d.StorageYardWidthM, t.StorageYardWidthM, 1e-6);
+            Assert.AreEqual(d.StorageYardDepthM, t.StorageYardDepthM, 1e-6);
+            Assert.AreEqual(d.StorageYardLogs, t.StorageYardLogs);
+            Assert.AreEqual(d.StorageYardMinutes, t.StorageYardMinutes);
+            Assert.AreEqual(d.StorageYardCapacity, t.StorageYardCapacity);
+            Assert.AreEqual(d.StorageYardFamilySlots, t.StorageYardFamilySlots);
+            Assert.AreEqual(d.YardCollectThreshold, t.YardCollectThreshold, 1e-6);
         }
 
         [Test]
@@ -197,6 +207,7 @@ namespace LordsLegacy.Tests.EditMode
             {
                 cfg.startingPlanks = 33; cfg.handCarryPlanks = 4; cfg.oxLoadBeams = 2; cfg.hewingLogsPerDay = 5;
                 cfg.sawingStoreCapacity = 77; cfg.workshopShiftMinutes = 480; cfg.workshopDefaultReserve = 9;
+                cfg.storageYardCapacity = 123; cfg.storageYardFamilySlots = 3; cfg.yardCollectThreshold = 0.75f;
                 var t = cfg.BuildTuning();
                 Assert.AreEqual(33, t.StartingPlanks);
                 Assert.AreEqual(4, t.HandCarryPlanks);
@@ -205,6 +216,9 @@ namespace LordsLegacy.Tests.EditMode
                 Assert.AreEqual(77, t.SawingStoreCapacity);
                 Assert.AreEqual(480, t.WorkshopShiftMinutes);
                 Assert.AreEqual(9, t.WorkshopDefaultReserve);
+                Assert.AreEqual(123, t.StorageYardCapacity);
+                Assert.AreEqual(3, t.StorageYardFamilySlots);
+                Assert.AreEqual(0.75, t.YardCollectThreshold, 1e-6);
             }
             finally { Object.DestroyImmediate(cfg); }
         }

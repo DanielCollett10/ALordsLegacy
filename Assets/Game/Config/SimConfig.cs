@@ -130,6 +130,15 @@ namespace LordsLegacy.Game
         [Tooltip("HW-05 workshop shift length, game minutes; 0 = the daylight work window")] [Range(0, 1440)] public int workshopShiftMinutes = 0;
         [Tooltip("PL-30b input a workshop leaves in storage (0 = none)")] [Range(0, 1000)] public int workshopDefaultReserve = 5;
 
+        [Header("Storage yard (ST-03, ST-42, ST-43; M18)")]
+        [Tooltip("ST-03 yard footprint width, metres")] [Range(1f, 100f)] public float storageYardWidthM = 8f;
+        [Tooltip("ST-03 yard footprint depth, metres")] [Range(1f, 100f)] public float storageYardDepthM = 6f;
+        [Tooltip("ST-03 logs a yard takes to build")] [Range(0, 100)] public int storageYardLogs = 8;
+        [Tooltip("ST-03 game minutes a yard takes to build")] [Range(1, 100000)] public int storageYardMinutes = 480;
+        [Tooltip("ST-03 most General goods a yard holds")] [Range(1, 100000)] public int storageYardCapacity = 300;
+        [Tooltip("ST-43 families that move goods for one yard")] [Range(0, 20)] public int storageYardFamilySlots = 2;
+        [Tooltip("ST-42 share of a workshop store that must be full before the yard collects")] [Range(0f, 1f)] public float yardCollectThreshold = 0.5f;
+
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
         public sealed class ModuleRecipeConfig
@@ -182,6 +191,10 @@ namespace LordsLegacy.Game
             SawingPlanksPerBeam = sawingPlanksPerBeam, SawingBeamsPerDay = sawingBeamsPerDay,
             SawingStockCapacity = sawingStockCapacity, SawingStoreCapacity = sawingStoreCapacity,
             WorkshopShiftMinutes = workshopShiftMinutes, WorkshopDefaultReserve = workshopDefaultReserve,
+            StorageYardWidthM = D(storageYardWidthM), StorageYardDepthM = D(storageYardDepthM),
+            StorageYardLogs = storageYardLogs, StorageYardMinutes = storageYardMinutes,
+            StorageYardCapacity = storageYardCapacity, StorageYardFamilySlots = storageYardFamilySlots,
+            YardCollectThreshold = D(yardCollectThreshold),
         };
 
         /// <summary>Builds the road catalog from these values.</summary>
