@@ -33,13 +33,15 @@ namespace LordsLegacy.Game
         public const string TextInputClass = "ui-text-input";
 
         private static int _releasedFrame = -1;
-        private static int _focusedFields;
+        // The text fields that currently hold focus. A set (not a counter) so a FocusIn that bubbles up from the
+        // inner input can be seen twice without drifting, and so a field that is removed cannot leave an open edit behind.
+        private static readonly System.Collections.Generic.HashSet<VisualElement> _editing = new System.Collections.Generic.HashSet<VisualElement>();
 
         /// <summary>
         /// True while a game text field is being edited, and for the rest of the frame in which it was released.
         /// Camera and tool hotkeys (which read the keyboard directly) must ignore the keyboard while this is true.
         /// </summary>
-        public static bool TextInputActive => _focusedFields > 0 || _releasedFrame == UnityEngine.Time.frameCount;
+        public static bool TextInputActive => _editing.Count > 0 || _releasedFrame == UnityEngine.Time.frameCount;
 
         /// <summary>The keyboard for game hotkeys: null while a text field is being edited.</summary>
         public static UnityEngine.InputSystem.Keyboard GameKeyboard => TextInputActive ? null : UnityEngine.InputSystem.Keyboard.current;
@@ -51,10 +53,11 @@ namespace LordsLegacy.Game
         public static void AllowTextInput(VisualElement field)
         {
             field.AddToClassList(TextInputClass);
-            field.RegisterCallback<FocusInEvent>(_ => _focusedFields++);
+            // FocusIn/FocusOut bubble from the inner input, so the field sees them for its own edit; Set makes repeats harmless.
+            field.RegisterCallback<FocusInEvent>(_ => _editing.Add(field));
             field.RegisterCallback<FocusOutEvent>(_ =>
             {
-                if (_focusedFields > 0) _focusedFields--;
+                _editing.Remove(field);
                 _releasedFrame = UnityEngine.Time.frameCount;
             });
             field.RegisterCallback<KeyDownEvent>(e =>
@@ -65,13 +68,25 @@ namespace LordsLegacy.Game
             }, TrickleDown.TrickleDown);
         }
 
-        /// <summary>Forgets any edit in progress (call when the UI is rebuilt, so a destroyed field cannot leave typing stuck on).</summary>
-        public static void ResetTextInput() => _focusedFields = 0;
+        /// <summary>Forgets edits in fields that are no longer in a panel (call when the UI is rebuilt, so a destroyed field cannot leave typing stuck on).</summary>
+        public static void ResetTextInput() => _editing.RemoveWhere(f => f == null || f.panel == null);
 
-        /// <summary>Takes keyboard focus off whatever is focused under <paramref name="field"/>'s panel.</summary>
+        /// <summary>
+        /// Takes keyboard focus off <paramref name="field"/> if it (or something inside it) is focused. Leaves focus
+        /// alone when it is somewhere else, so one field never blurs another control.
+        /// </summary>
         public static void ReleaseFocus(VisualElement field)
         {
-            field.panel?.focusController?.focusedElement?.Blur();
+            if (field?.panel?.focusController?.focusedElement is VisualElement focused && IsWithin(focused, field))
+                focused.Blur();
+        }
+
+        /// <summary>True when <paramref name="element"/> is <paramref name="ancestor"/> or one of its descendants.</summary>
+        public static bool IsWithin(VisualElement element, VisualElement ancestor)
+        {
+            for (var e = element; e != null; e = e.parent)
+                if (e == ancestor) return true;
+            return false;
         }
 
         /// <summary>Sets <c>focusable = false</c> on <paramref name="root"/> and every descendant, except text fields.</summary>
@@ -82,9 +97,13 @@ namespace LordsLegacy.Game
             foreach (var child in root.Children()) DisableFocus(child);
         }
 
+        // StopImmediatePropagation alone does not stop the focus change: the default action still moves focus to the
+        // only focusable element (the reserve box's input). PreventDefault and IgnoreEvent stop that default action.
         private static void StopNavigation<T>(EventBase<T> evt) where T : EventBase<T>, new()
         {
             evt.StopImmediatePropagation();
+            evt.PreventDefault();
+            (evt.target as VisualElement)?.panel?.focusController?.IgnoreEvent(evt);
         }
     }
 }

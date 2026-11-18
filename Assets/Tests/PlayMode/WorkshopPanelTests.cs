@@ -243,6 +243,50 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator OpenPanelDoesNotTakeFocusOnNavigationKeys()
+        {
+            int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
+            _agents.SelectWorkshop(hew);
+            yield return null;
+            Assert.IsTrue(_panel.IsShown);
+            var root = _ui.GetComponent<UIDocument>().rootVisualElement;
+            var field = _panel.ReserveField;
+            int before = field.value;
+
+            // Stand-ins for the Input System Navigate action from A, D, W, S and the arrow keys, sent with the panel open.
+            Vector2[] dirs = { Vector2.left, Vector2.right, Vector2.up, Vector2.down };
+            foreach (var dir in dirs)
+            {
+                var e = NavigationMoveEvent.GetPooled(dir);
+                e.target = root;
+                root.SendEvent(e);
+                e.Dispose();
+                yield return null;
+                Assert.IsFalse(UiFocusRules.TextInputActive, "navigation must not open a text edit");
+                Assert.IsNotNull(UiFocusRules.GameKeyboard);
+                var focused = root.panel.focusController.focusedElement as VisualElement;
+                Assert.IsFalse(focused != null && UiFocusRules.IsWithin(focused, field), "the reserve box must not get focus");
+            }
+            Assert.AreEqual(before, field.value, "the reserve value must not change");
+        }
+
+        [UnityTest]
+        public IEnumerator ClosingThePanelWhileEditingGivesTheKeyboardBack()
+        {
+            int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
+            _agents.SelectWorkshop(hew);
+            yield return null;
+            _panel.ReserveField.Q(className: TextInputBaseField<int>.inputUssClassName).Focus();
+            yield return null;
+            Assert.IsTrue(UiFocusRules.TextInputActive);
+            _panel.ClickClose();
+            yield return null;
+            yield return null;
+            Assert.IsFalse(UiFocusRules.TextInputActive, "closing must not leave the camera stuck");
+            Assert.IsNotNull(UiFocusRules.GameKeyboard);
+        }
+
+        [UnityTest]
         public IEnumerator StatusShowsWaitingTotalOverReserveWhenOnlyTheReserveBlocks()
         {
             var w = _host.World;
