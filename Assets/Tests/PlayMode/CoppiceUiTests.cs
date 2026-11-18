@@ -42,8 +42,9 @@ namespace LordsLegacy.Tests.PlayMode
                 AreaShape.Straight(new[] { M(90, 90), M(120, 90), M(120, 110), M(90, 110) }), AreaTypes.CoppiceId));
             Assert.IsTrue(r.IsAccepted, r.Text);
             _operation = w.Operations.FindByArea((int)r.Created[0]);
-            w.Footprints.Add(HutId, ModuleTypes.CoppiceHut, M(100, 100), 0);
+            var hut = w.Footprints.Add(HutId, ModuleTypes.CoppiceHut, M(100, 100), 0);
             w.Operations.AddModule(_operation.Id, HutId);
+            LordsLegacy.Sim.Operations.Workshops.WorkshopBuildings.OnBuilt(w, hut); // creates the rod store, as a finished build does
 
             _agentsGo = new GameObject("AgentPicker");
             _agents = _agentsGo.AddComponent<AgentPicker>();
