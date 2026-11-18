@@ -84,6 +84,8 @@ namespace LordsLegacy.EditorTools.Visuals
             (VisualSizes.ItemFoodCrate, "Cube.fbx", new Color(0.85f, 0.7f, 0.25f), 1f),
             (VisualSizes.ModuleHewingStation, "Cube.fbx", new Color(0.5f, 0.36f, 0.2f), 1f),
             (VisualSizes.ModuleSawpit, "Cube.fbx", new Color(0.62f, 0.5f, 0.3f), 1f),
+            (VisualSizes.ModuleWeaver, "Cube.fbx", new Color(0.55f, 0.6f, 0.3f), 1f),
+            (VisualSizes.ModuleWattleYard, "Cube.fbx", new Color(0.5f, 0.42f, 0.28f), 1f),
             (VisualSizes.ModuleStorageYard, "Cube.fbx", new Color(0.58f, 0.52f, 0.42f), 1f),
             (VisualSizes.ItemBeamStack, "Cube.fbx", new Color(0.55f, 0.38f, 0.2f), 1f),
             (VisualSizes.ItemPlankStack, "Cube.fbx", new Color(0.82f, 0.68f, 0.42f), 1f),

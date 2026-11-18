@@ -327,6 +327,9 @@ namespace LordsLegacy.EditorTools.Scenes
             // T-526: hewing station and sawpit use the same tool with their own type.
             CreateStructureTool("HewingStationTool", LordsLegacy.Game.Tools.StructureTool.HewingToolId, LordsLegacy.Sim.Footprints.ModuleTypes.HewingStationId, host, panel);
             CreateStructureTool("SawpitTool", LordsLegacy.Game.Tools.StructureTool.SawpitToolId, LordsLegacy.Sim.Footprints.ModuleTypes.SawpitId, host, panel);
+            // T-569: weaver and wattle yard.
+            CreateStructureTool("WeaverTool", LordsLegacy.Game.Tools.StructureTool.WeaverToolId, LordsLegacy.Sim.Footprints.ModuleTypes.WeaverId, host, panel);
+            CreateStructureTool("WattleYardTool", LordsLegacy.Game.Tools.StructureTool.WattleYardToolId, LordsLegacy.Sim.Footprints.ModuleTypes.WattleYardId, host, panel);
             // T-549: storage yard.
             CreateStructureTool("StorageYardTool", LordsLegacy.Game.Tools.StructureTool.StorageYardToolId, LordsLegacy.Sim.Footprints.ModuleTypes.StorageYardId, host, panel);
             return last;

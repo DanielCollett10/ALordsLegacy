@@ -109,6 +109,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsTrue(_op.IsShown);
             StringAssert.StartsWith("Forager camp", _op.Find<UnityEngine.UIElements.Label>("operation-title")?.text ?? "Forager camp");
             Assert.AreEqual("Hut store: 0 / 30", _op.StockLineText);
+            StringAssert.Contains("Baskets: 0 / " + w.Tuning.ForagerHutBasketSlots, _op.ModulesText);
             StringAssert.Contains("1 full, 0 empty", _op.TreesText);
             Assert.AreEqual(UnityEngine.UIElements.DisplayStyle.None, _op.Find<UnityEngine.UIElements.Label>("operation-logs").resolvedStyle.display);
             var store = w.Inventory.FindFoodStore(901);

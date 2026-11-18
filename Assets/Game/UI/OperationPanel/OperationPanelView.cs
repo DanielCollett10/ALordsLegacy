@@ -387,7 +387,8 @@ namespace LordsLegacy.Game
                 Footprint f = world.Footprints.Get(id);
                 if (f == null) continue;
                 string state = " - " + BuildStateText(world, id);
-                if (def != null && f.Type.Id == def.HutTypeId) { hut = true; sb.AppendLine((def.HutTypeId == ModuleTypes.ForagerHutId ? "Forager hut" : "Hut") + state); }
+                if (def != null && f.Type.Id == def.HutTypeId) { hut = true; sb.AppendLine((def.HutTypeId == ModuleTypes.ForagerHutId ? "Forager hut" : "Hut") + state);
+                    if (def.HutTypeId == ModuleTypes.ForagerHutId && world.IsBuilt(id)) sb.AppendLine(Sim.Foraging.ForagerHutReport.Of(world, id).BasketsText); }
                 else if (def != null && f.Type.Id == def.LogStorageTypeId) { storage = true; sb.AppendLine("Log storage (" + f.Type.LogCapacity + " logs)" + state); }
                 else sb.AppendLine(f.Type.Id + state);
             }

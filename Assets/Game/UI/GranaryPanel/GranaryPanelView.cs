@@ -28,7 +28,11 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _title, _state, _stock, _stored, _message, _suppliesReason, _waiting;
+        private Label _title, _state, _stock, _stored, _message, _suppliesReason, _waiting, _baskets;
+        /// <summary>The baskets line, e.g. "Baskets: 1 / 2" (T-569).</summary>
+        public string BasketsLineText => _baskets?.text ?? "";
+        /// <summary>The baskets label element, or null.</summary>
+        public Label BasketsLabel => _baskets;
         private Toggle _supplies;
         private Button _deconstruct, _close;
         private VisualElement _familyBox, _pickerBox;
@@ -344,6 +348,8 @@ namespace LordsLegacy.Game
             _state.text = StateLine(r);
             _stock.text = StockLines(r);
             _stored.text = StoredLine(r);
+            _baskets.text = r.BasketsText;
+            _baskets.style.display = r.IsBuilt ? DisplayStyle.Flex : DisplayStyle.None;
             _waiting.text = WaitingLine(host.World, OperationOfGranary(host.World, agents.SelectedGranaryId), r.IsBuilt);
             _waiting.style.display = _waiting.text.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshSupplies(host.World, r, OperationOfGranary(host.World, agents.SelectedGranaryId));
@@ -435,6 +441,7 @@ namespace LordsLegacy.Game
             _state = MakeLabel("granary-state", 12, false);
             _stock = MakeLabel("granary-stock", 12, false);
             _stored = MakeLabel("granary-stored", 12, false);
+            _baskets = MakeLabel("granary-baskets", 12, false);
             _waiting = MakeLabel("granary-waiting", 12, false);
             _waiting.style.color = new Color(200f / 255f, 170f / 255f, 120f / 255f);
             _waiting.style.display = DisplayStyle.None;
@@ -462,7 +469,7 @@ namespace LordsLegacy.Game
             _deconstruct.style.backgroundColor = new Color(70f / 255f, 58f / 255f, 44f / 255f);
             _deconstruct.clicked += ClickDeconstruct;
 
-            _panel.Add(_title); _panel.Add(_state); _panel.Add(_waiting); _panel.Add(_stock); _panel.Add(_stored);
+            _panel.Add(_title); _panel.Add(_state); _panel.Add(_waiting); _panel.Add(_stock); _panel.Add(_stored); _panel.Add(_baskets);
             _panel.Add(_supplies); _panel.Add(_suppliesReason);
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);

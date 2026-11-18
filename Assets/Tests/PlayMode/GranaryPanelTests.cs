@@ -141,6 +141,18 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator BuiltGranaryShowsBasketsAgainstSlots()
+        {
+            var w = _host.World;
+            w.Construction.Remove(_granaryId);
+            _agents.SelectGranary(_granaryId);
+            yield return null;
+            Assert.AreEqual("Baskets: 0 / " + w.Tuning.GranaryBasketSlots, _panel.BasketsLineText);
+            Assert.AreEqual(UnityEngine.UIElements.DisplayStyle.Flex, _panel.BasketsLabel.resolvedStyle.display);
+            Assert.Greater(_panel.BasketsLabel.worldBound.width, 0f);
+        }
+
+        [UnityTest]
         public IEnumerator ConfirmedDeconstructRemovesTheGranaryAndLeavesAFoodPile()
         {
             var w = _host.World;
