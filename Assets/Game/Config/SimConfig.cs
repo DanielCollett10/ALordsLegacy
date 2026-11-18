@@ -115,6 +115,20 @@ namespace LordsLegacy.Game
         [Tooltip("GR-21 tolerance for deciding a point is on the map edge, metres")] [Range(0f, 50f)] public float mapEdgeToleranceM = 2f;
         [Tooltip("WCO-07 most logs an ox carries per trip")] [Range(1, 100)] public int oxLoadLogs = 1;
 
+        [Header("Timber chain (HW-05, PL-14, PL-16, PL-21; decisions 0046, 0047)")]
+        [Tooltip("PL-14 planks in the camp General goods store at the start")] [Range(0, 10000)] public int startingPlanks = 10;
+        [Tooltip("PL-16 planks an odd-jobber carries to a site per trip")] [Range(1, 100)] public int handCarryPlanks = 2;
+        [Tooltip("PL-21 most beams an ox carries per trip")] [Range(1, 100)] public int oxLoadBeams = 1;
+        [Tooltip("HW-05 beams a hewing station makes from one log")] [Range(1, 100)] public int hewingBeamsPerLog = 1;
+        [Tooltip("HW-05 logs one family hews per day")] [Range(1, 100)] public int hewingLogsPerDay = 3;
+        [Tooltip("HW-05 most logs waiting in a hewing station's input stock")] [Range(1, 1000)] public int hewingStockCapacity = 6;
+        [Tooltip("HW-05 most beams a hewing station's output store holds")] [Range(1, 1000)] public int hewingStoreCapacity = 20;
+        [Tooltip("HW-05 planks a sawpit saws from one beam")] [Range(1, 100)] public int sawingPlanksPerBeam = 3;
+        [Tooltip("HW-05 beams one family saws per day")] [Range(1, 100)] public int sawingBeamsPerDay = 3;
+        [Tooltip("HW-05 most beams waiting in a sawpit's input stock")] [Range(1, 1000)] public int sawingStockCapacity = 6;
+        [Tooltip("HW-05 most planks a sawpit's output store holds")] [Range(1, 1000)] public int sawingStoreCapacity = 20;
+        [Tooltip("HW-05 workshop shift length, game minutes; 0 = the daylight work window")] [Range(0, 1440)] public int workshopShiftMinutes = 0;
+
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
         public sealed class ModuleRecipeConfig
@@ -161,6 +175,12 @@ namespace LordsLegacy.Game
             HungryDaysToLeave = hungryDaysToLeave, ArrivalFoodDays = arrivalFoodDays,
             ArrivalNoHungerDays = arrivalNoHungerDays, ArrivalGapDays = arrivalGapDays,
             MapEdgeToleranceM = D(mapEdgeToleranceM), OxLoadLogs = oxLoadLogs,
+            StartingPlanks = startingPlanks, HandCarryPlanks = handCarryPlanks, OxLoadBeams = oxLoadBeams,
+            HewingBeamsPerLog = hewingBeamsPerLog, HewingLogsPerDay = hewingLogsPerDay,
+            HewingStockCapacity = hewingStockCapacity, HewingStoreCapacity = hewingStoreCapacity,
+            SawingPlanksPerBeam = sawingPlanksPerBeam, SawingBeamsPerDay = sawingBeamsPerDay,
+            SawingStockCapacity = sawingStockCapacity, SawingStoreCapacity = sawingStoreCapacity,
+            WorkshopShiftMinutes = workshopShiftMinutes,
         };
 
         /// <summary>Builds the road catalog from these values.</summary>

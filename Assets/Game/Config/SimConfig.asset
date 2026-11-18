@@ -58,6 +58,18 @@ MonoBehaviour:
   arrivalGapDays: 7
   mapEdgeToleranceM: 2
   oxLoadLogs: 1
+  startingPlanks: 10
+  handCarryPlanks: 2
+  oxLoadBeams: 1
+  hewingBeamsPerLog: 1
+  hewingLogsPerDay: 3
+  hewingStockCapacity: 6
+  hewingStoreCapacity: 20
+  sawingPlanksPerBeam: 3
+  sawingBeamsPerDay: 3
+  sawingStockCapacity: 6
+  sawingStoreCapacity: 20
+  workshopShiftMinutes: 0
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
@@ -181,5 +193,11 @@ MonoBehaviour:
     logs: 8
     buildWorkerMinutes: 480
   - moduleId: module.market_stall
-    logs: 1
+    logs: 0
     buildWorkerMinutes: 60
+  - moduleId: module.hewing_station
+    logs: 6
+    buildWorkerMinutes: 480
+  - moduleId: module.sawpit
+    logs: 6
+    buildWorkerMinutes: 480
