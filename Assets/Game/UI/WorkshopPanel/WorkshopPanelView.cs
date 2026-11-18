@@ -177,7 +177,15 @@ namespace LordsLegacy.Game
             EnsureRows(r.Inputs.Count);
             var reserveOp = host.World.Operations.FindByModule(r.FootprintId);
             bool showReserve = r.IsBuilt && reserveOp != null;
-            for (int i = 0; i < _rows.Count; i++)
+            // Rows beyond this workshop's input count (left over from a bigger recipe) are hidden.
+            for (int i = r.Inputs.Count; i < _rows.Count; i++)
+            {
+                _rows[i].ItemId = null;
+                _rows[i].Stock.style.display = DisplayStyle.None;
+                _rows[i].Row.style.display = DisplayStyle.None;
+                UiFocusRules.ReleaseFocus(_rows[i].Field);
+            }
+            for (int i = 0; i < r.Inputs.Count; i++)
             {
                 var row = _rows[i];
                 var line = r.Inputs[i];

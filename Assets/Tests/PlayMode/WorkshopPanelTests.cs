@@ -220,6 +220,23 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SwitchingFromWattleYardToWeaverHidesTheExtraInputRow()
+        {
+            int yard = BuildWorkshop(ModuleTypes.WattleYardId, 811, 60, 60);
+            int weaver = BuildWorkshop(ModuleTypes.WeaverId, 812, 100, 100);
+            _agents.SelectWorkshop(yard);
+            yield return null;
+            _agents.SelectWorkshop(weaver);
+            yield return null;
+            Assert.AreEqual("Weaver", _panel.TitleText);
+            Assert.AreEqual(DisplayStyle.None, _panel.ReserveFieldOf(1).parent.resolvedStyle.display);
+            Assert.AreEqual("willow_rods", _panel.ReserveItemsText);
+            _agents.SelectWorkshop(yard);
+            yield return null;
+            Assert.AreEqual(DisplayStyle.Flex, _panel.ReserveFieldOf(1).parent.resolvedStyle.display);
+        }
+
+        [UnityTest]
         public IEnumerator WeaverPanelShowsRodsRecipeAndReserve()
         {
             int weaver = BuildWorkshop(ModuleTypes.WeaverId, 812, 100, 100);
