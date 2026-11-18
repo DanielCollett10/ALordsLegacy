@@ -78,6 +78,27 @@ MonoBehaviour:
   storageYardCapacity: 300
   storageYardFamilySlots: 2
   yardCollectThreshold: 0
+  hazelStoolCount: 40
+  willowStoolCount: 20
+  coppiceRodsPerCut: 10
+  coppiceRegrowDays: 30
+  coppiceMinutesPerRod: 6
+  coppiceHutStorePerKind: 40
+  handCarryRods: 10
+  handCarryBaskets: 5
+  handCarryPanels: 2
+  weaverWillowPerBasket: 6
+  weaverBasketsPerDay: 4
+  weaverWillowStock: 30
+  weaverBasketStore: 10
+  wattleHazelPerPanel: 6
+  wattleWillowPerPanel: 2
+  wattlePanelsPerDay: 5
+  wattleHazelStock: 30
+  wattleWillowStock: 10
+  wattlePanelStore: 20
+  foragerHutBasketSlots: 5
+  granaryBasketSlots: 2
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
@@ -231,6 +252,12 @@ MonoBehaviour:
     logs: 6
     buildWorkerMinutes: 480
   - moduleId: module.sawpit
+    logs: 6
+    buildWorkerMinutes: 480
+  - moduleId: module.weaver
+    logs: 6
+    buildWorkerMinutes: 480
+  - moduleId: module.wattle_yard
     logs: 6
     buildWorkerMinutes: 480
   - moduleId: module.storage_yard

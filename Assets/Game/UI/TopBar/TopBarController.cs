@@ -31,6 +31,7 @@ namespace LordsLegacy.Game
         /// <summary>"Planks: N" (T-527).</summary>
         public string PlanksText => _planksLabel == null ? "" : _planksLabel.text;
         private Label _populationTip;
+        private Label _goodsTip;
         private Button _pauseButton;
         private Button _steadyButton;
         private Button _snappingButton;
@@ -108,6 +109,7 @@ namespace LordsLegacy.Game
                 _foodLabel.parent.Insert(_foodLabel.parent.IndexOf(_foodLabel) + 1, _populationLabel);
             }
             BuildPopulationTip(root);
+            BuildGoodsTip(root);
             _pauseButton = root.Q<Button>("pause-button");
             _steadyButton = root.Q<Button>("steady-light-toggle");
             _snappingButton = root.Q<Button>("snapping-toggle");
@@ -131,8 +133,33 @@ namespace LordsLegacy.Game
         private void BuildPopulationTip(VisualElement root)
         {
             if (_populationLabel == null) return;
-            _populationTip = new Label { name = "population-tooltip", pickingMode = PickingMode.Ignore };
-            var s = _populationTip.style;
+            _populationTip = MakeTip(root, "population-tooltip");
+            _populationLabel.RegisterCallback<PointerEnterEvent>(e => ShowPopulationTip());
+            _populationLabel.RegisterCallback<PointerLeaveEvent>(e => HidePopulationTip());
+        }
+
+        // T-570: the General goods list on Beams and Planks. The built-in tooltip does not show in runtime panels, so hover
+        // draws this label, like the population tip.
+        private void BuildGoodsTip(VisualElement root)
+        {
+            _goodsTip = MakeTip(root, "goods-tooltip");
+            if (_beamsLabel != null)
+            {
+                _beamsLabel.RegisterCallback<PointerEnterEvent>(e => ShowGoodsTip(true));
+                _beamsLabel.RegisterCallback<PointerLeaveEvent>(e => HideGoodsTip());
+            }
+            if (_planksLabel != null)
+            {
+                _planksLabel.RegisterCallback<PointerEnterEvent>(e => ShowGoodsTip(false));
+                _planksLabel.RegisterCallback<PointerLeaveEvent>(e => HideGoodsTip());
+            }
+        }
+
+        // Hover label shared by the population and goods tips: hidden until shown, never takes the pointer.
+        private static Label MakeTip(VisualElement root, string name)
+        {
+            var tip = new Label { name = name, pickingMode = PickingMode.Ignore };
+            var s = tip.style;
             s.position = Position.Absolute;
             s.top = 52;
             s.paddingLeft = s.paddingRight = 8; s.paddingTop = s.paddingBottom = 6;
@@ -140,10 +167,31 @@ namespace LordsLegacy.Game
             s.backgroundColor = new Color(30f / 255f, 24f / 255f, 18f / 255f, 0.95f);
             s.fontSize = 14;
             s.display = DisplayStyle.None;
-            root.Add(_populationTip);
-            _populationLabel.RegisterCallback<PointerEnterEvent>(e => ShowPopulationTip());
-            _populationLabel.RegisterCallback<PointerLeaveEvent>(e => HidePopulationTip());
+            root.Add(tip);
+            return tip;
         }
+
+        /// <summary>Shows the General goods tip under Beams (<paramref name="beams"/> true) or Planks (T-570).</summary>
+        public void ShowGoodsTip(bool beams)
+        {
+            var label = beams ? _beamsLabel : _planksLabel;
+            if (_goodsTip == null || label == null) return;
+            _goodsTip.text = label.tooltip;
+            _goodsTip.style.left = Mathf.Max(0f, label.worldBound.x);
+            _goodsTip.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>Hides the General goods tip.</summary>
+        public void HideGoodsTip()
+        {
+            if (_goodsTip != null) _goodsTip.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>True while the General goods tip is shown (T-570).</summary>
+        public bool GoodsTipShown => _goodsTip != null && _goodsTip.style.display.value == DisplayStyle.Flex;
+
+        /// <summary>Text of the General goods tip (T-570).</summary>
+        public string GoodsTipText => _goodsTip == null ? "" : _goodsTip.text;
 
         /// <summary>Shows the population tooltip under the label (the hover path; also callable by tests).</summary>
         public void ShowPopulationTip()
@@ -263,6 +311,7 @@ namespace LordsLegacy.Game
             string general = GeneralGoodsTooltip(_host.World);
             if (_beamsLabel != null) { _beamsLabel.text = "Beams: " + Sim.Inventory.GoodsStats.Beams(_host.World); _beamsLabel.tooltip = general; }
             if (_planksLabel != null) { _planksLabel.text = "Planks: " + Sim.Inventory.GoodsStats.Planks(_host.World); _planksLabel.tooltip = general; }
+            if (GoodsTipShown) _goodsTip.text = general;
             if (_populationLabel != null)
             {
                 var report = Sim.Growth.GrowthReport.Of(_host.World);
