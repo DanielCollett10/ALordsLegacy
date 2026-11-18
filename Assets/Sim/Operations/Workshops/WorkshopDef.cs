@@ -157,5 +157,27 @@ namespace LordsLegacy.Sim.Operations.Workshops
             return new WorkshopDef("workshop.sawing", Items.Beam, Items.Plank, t.SawingPlanksPerBeam, t.SawingBeamsPerDay,
                 t.SawingStockCapacity, t.SawingStoreCapacity, t.OxLoadBeams);
         }
+
+        /// <summary>Weaver (MAT-20): 6 willow rods to 1 basket, 4 baskets per family-day, input 30, store 10. Rods go by hand.</summary>
+        public static WorkshopDef Weaving(SimTuning t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            return new WorkshopDef("workshop.weaving",
+                new[] { new RecipeInput(Items.WillowRod, 6, CarryClass.Hand, 30) },
+                new[] { new RecipeOutput(Items.Basket, 1) }, 4, 30, 10, Math.Max(1, t.HandCarryRods));
+        }
+
+        /// <summary>Wattle yard (MAT-22): 6 hazel + 2 willow rods to 1 panel, 5 panels per family-day, inputs 30 hazel and 10 willow, store 20.</summary>
+        public static WorkshopDef Wattling(SimTuning t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            return new WorkshopDef("workshop.wattling",
+                new[]
+                {
+                    new RecipeInput(Items.HazelRod, 6, CarryClass.Hand, 30),
+                    new RecipeInput(Items.WillowRod, 2, CarryClass.Hand, 10)
+                },
+                new[] { new RecipeOutput(Items.WattlePanel, 1) }, 5, 30, 20, Math.Max(1, t.HandCarryRods));
+        }
     }
 }

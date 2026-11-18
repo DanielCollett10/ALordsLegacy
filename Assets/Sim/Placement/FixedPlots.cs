@@ -18,7 +18,9 @@ namespace LordsLegacy.Sim.Placement
         {
             string kind = f.Type.Id == ModuleTypes.GranaryId ? "Granary"
                 : f.Type.Id == ModuleTypes.HewingStationId ? "Hewing station"
-                : f.Type.Id == ModuleTypes.SawpitId ? "Sawpit" : "Structure";
+                : f.Type.Id == ModuleTypes.SawpitId ? "Sawpit"
+                : f.Type.Id == ModuleTypes.WeaverId ? "Weaver"
+                : f.Type.Id == ModuleTypes.WattleYardId ? "Wattle yard" : "Structure";
             return kind + " " + f.Id;
         }
 
