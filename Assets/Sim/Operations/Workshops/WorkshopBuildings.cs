@@ -18,7 +18,14 @@ namespace LordsLegacy.Sim.Operations.Workshops
         /// <summary>Creates the stock and store of a just-built workshop footprint; does nothing for other types or if they exist.</summary>
         public static void OnBuilt(SimWorld world, Footprint fp)
         {
-            if (fp == null || !IsWorkshop(fp.Type)) return;
+            if (fp == null) return;
+            if (fp.Type.Id == ModuleTypes.StorageYardId)
+            {
+                // ST-03: the yard's one General store, capacity from tuning, created when it is built.
+                if (world.Inventory.FindGoodsStore(fp.Id) == null) world.Inventory.AddGoodsStore(world.Tuning.StorageYardCapacity, fp.Id);
+                return;
+            }
+            if (!IsWorkshop(fp.Type)) return;
             WorkshopDef def = OperationTypes.WorkshopOf(OperationTypes.WorkshopOperationFor(fp.Type.Id), world.Tuning);
             Ledger inv = world.Inventory;
             if (inv.FindWorkshopStock(fp.Id) == null) inv.AddWorkshopStock(fp.Id, def.Input, def.InputStockCapacity);

@@ -202,3 +202,6 @@ MonoBehaviour:
   - moduleId: module.sawpit
     logs: 6
     buildWorkerMinutes: 480
+  - moduleId: module.storage_yard
+    logs: 8
+    buildWorkerMinutes: 480

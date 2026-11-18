@@ -149,7 +149,7 @@ namespace LordsLegacy.Sim.Operations
         {
             Operation op = OperationOf(world, footprintId);
             // A granary operation has no area: its tasks stay helpers-only like a house's.
-            bool areaLess = op != null && (op.TypeId == OperationTypes.GranaryId || OperationTypes.WorkshopOperationFor(ModuleTypeOf(world, footprintId)) != null);
+            bool areaLess = op != null && (op.TypeId == OperationTypes.GranaryId || op.TypeId == OperationTypes.StorageYardOpId || OperationTypes.WorkshopOperationFor(ModuleTypeOf(world, footprintId)) != null);
             return op != null && !areaLess ? op.Id : DeconstructionWork.HouseOwnerId;
         }
 

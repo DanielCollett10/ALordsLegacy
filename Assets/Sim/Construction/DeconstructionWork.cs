@@ -69,7 +69,7 @@ namespace LordsLegacy.Sim.Construction
             foreach (LedgerLocation s in sources) if (s.Total > 0) hasContents = true;
             if (refunds.Count > 0 || hasContents)
             {
-                LedgerLocation pile = inv.GetOrAddGroundPile(fp.Centre, null);
+                LedgerLocation pile = inv.GetOrAddGroundPile(fp.Type.Id == ModuleTypes.StorageYardId ? fp.AccessPoint : fp.Centre, null);
                 foreach (LedgerLocation src in sources)
                     foreach (KeyValuePair<string, int> kv in new List<KeyValuePair<string, int>>(src.Counts))
                     {
@@ -101,7 +101,7 @@ namespace LordsLegacy.Sim.Construction
             foreach (int opId in operationIds)
             {
                 Operation op = world.Operations.Get(opId);
-                if (op == null || (op.TypeId != OperationTypes.GranaryId && OperationTypes.WorkshopOf(op.TypeId, world.Tuning) == null) || op.ModuleIds.Count > 0) continue;
+                if (op == null || (op.TypeId != OperationTypes.GranaryId && op.TypeId != OperationTypes.StorageYardOpId && OperationTypes.WorkshopOf(op.TypeId, world.Tuning) == null) || op.ModuleIds.Count > 0) continue;
                 foreach (int fid in new List<int>(op.FamilyIds)) new Commands.UnassignFamily(op.Id, fid).Apply(world);
                 world.Operations.Remove(op.Id);
             }
