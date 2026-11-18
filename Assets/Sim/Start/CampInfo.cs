@@ -52,6 +52,13 @@ namespace LordsLegacy.Sim.Start
 
         internal int PendingGeneralStoreLocationId { get; private set; }
 
+        /// <summary>Closes the General store (ST-04): drops the location and any pending load id so a later save writes 0.</summary>
+        internal void CloseGeneralStore()
+        {
+            GeneralStoreLocation = null;
+            PendingGeneralStoreLocationId = 0;
+        }
+
         /// <summary>Id of the camp footprint in <c>SimWorld.Footprints</c>.</summary>
         public int FootprintId { get; }
         /// <summary>Camp fire, world mm.</summary>

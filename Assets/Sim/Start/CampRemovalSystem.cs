@@ -105,7 +105,7 @@ namespace LordsLegacy.Sim.Start
             LedgerLocation general = world.Camp.GeneralStoreLocation;
             if (!yard || general == null || general.Total > 0 || Promised(general)) return;
             world.Inventory.RemoveEmptyLocation(general.Id);
-            world.Camp.GeneralStoreLocation = null;
+            world.Camp.CloseGeneralStore();
         }
 
         private static bool Promised(LedgerLocation l) =>

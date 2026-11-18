@@ -188,6 +188,42 @@ namespace LordsLegacy.Sim.Tests.Start
             Assert.IsNull(w.Camp);
         }
 
+        private static SimWorld Reload(SimWorld w) => SimSave.Read(SimSave.Write(w, "s", 1, Map.MapId, Map.ContentHash), Map);
+
+        private static void EmptyStoreAndRunToMidnight(SimWorld w)
+        {
+            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.Total);
+            for (int i = 0; i < 2000 && w.Camp?.GeneralStoreLocation != null; i++) w.Step(1);
+        }
+
+        [Test]
+        public void StoreClosedAfterLoad_SecondSaveLoads_WithNoGeneralStore()
+        {
+            SimWorld w = Make();
+            BuildYardThroughTicks(w);
+            SimWorld a = Reload(w);
+            EmptyStoreAndRunToMidnight(a);
+            Assert.IsNotNull(a.Camp);
+            Assert.IsNull(a.Camp.GeneralStoreLocation, "closed at midnight");
+
+            SimWorld b = null;
+            Assert.DoesNotThrow(() => b = Reload(a));
+            Assert.IsNull(b.Camp.GeneralStoreLocation);
+        }
+
+        [Test]
+        public void CampRemovedRightAfterLoad_WithYard_SavesAndLoads()
+        {
+            SimWorld w = Make();
+            BuildYardThroughTicks(w);
+            SimWorld a = Reload(w);
+            HouseEveryone(a);
+            Assert.IsTrue(CampRemovalSystem.TryRemove(a));
+            SimWorld b = null;
+            Assert.DoesNotThrow(() => b = Reload(a));
+            Assert.IsNull(b.Camp);
+        }
+
         [Test]
         public void SaveVersion_IsAtLeast33()
         {
