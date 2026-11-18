@@ -205,6 +205,21 @@ namespace LordsLegacy.Sim.Tests.Kit
         }
 
         [Test]
+        public void RemoveModuleCommand_DropsKitAsUnownedPile()
+        {
+            SimWorld w = World();
+            int fp = BuildGranary(w, 60, 60);
+            w.Inventory.Produce(KitStores.Find(w, fp), Items.Basket, 2);
+            CommandResult r = w.Execute(new RemoveModule(fp));
+            Assert.IsTrue(r.IsAccepted, r.Text);
+            Assert.IsNull(w.KitClaims.Get(fp));
+            LedgerLocation pile = w.Inventory.Locations.Single(l => l.Kind == LocationKind.GroundPile && l.CountOf(Items.Basket.Id) > 0);
+            Assert.IsNull(pile.OwnerOperationId);
+            Assert.AreEqual(2, pile.CountOf(Items.Basket.Id));
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        [Test]
         public void DropOnRemoval_NoKitStore_IsNoOp()
         {
             SimWorld w = World();
