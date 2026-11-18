@@ -78,7 +78,10 @@ namespace LordsLegacy.Sim.Tasks
             LedgerLocation carrier = t.CarrierId.HasValue ? world.Inventory.Get(t.CarrierId.Value) : null;
             if (carrier == null)
             {
-                carrier = world.Inventory.AddCarrier(System.Math.Max(1, world.Tuning.HandCarryItems));
+                // A trip with a borrowed basket carries double (MAT-54): the planned load is the deposit step's count.
+                int cap = System.Math.Max(1, world.Tuning.HandCarryItems);
+                foreach (TaskStep s in t.Def.Steps) if (s.Kind == StepKind.DepositForage && s.Count > cap) cap = s.Count;
+                carrier = world.Inventory.AddCarrier(cap);
                 world.Tasks.SetCarrier(t.Id, carrier.Id);
             }
             world.Inventory.Produce(carrier, item, 1);

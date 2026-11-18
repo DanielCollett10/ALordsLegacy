@@ -5,6 +5,7 @@ using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
+using LordsLegacy.Sim.Kit;
 using LordsLegacy.Sim.Navigation;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
@@ -42,6 +43,7 @@ namespace LordsLegacy.Sim.Markets
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
             Sweep(world);
+            KitLoans.ReleaseFinished(world);
             Market market = world.Markets.Current;
             if (!world.FoodHandedOver && SuppliesBuiltMarket(world, market)) world.FoodHandedOver = true;
             foreach (Operation op in new List<Operation>(world.Operations.All))
@@ -305,9 +307,26 @@ namespace LordsLegacy.Sim.Markets
                 if (room <= 0) break;
                 LedgerLocation source = ChooseForagerSource(world, granary, out int available);
                 if (source == null) break;
-                int n = Math.Min(Math.Min(Math.Max(1, world.Tuning.HandCarryItems), room), available);
+                int n = Math.Min(Math.Min(PlannedLoad(world, op), room), available);
                 world.Tasks.Create(BuildDef(world, source, granary, n), op.Id);
             }
+        }
+
+        // MAT-54: the load a new trip plans. Reserves a basket from the granary's kit for the task about to be created
+        // (its id is the board's next id); with one the hand load doubles, otherwise it is the normal load.
+        private static int PlannedLoad(SimWorld world, Operation op)
+        {
+            int hand = Math.Max(1, world.Tuning.HandCarryItems);
+            foreach (int m in op.ModuleIds)
+                if (world.IsWorking(m) && KitLoans.TryBorrow(world, m, world.Tasks.NextId)) return hand * KitLoans.Factor;
+            return hand;
+        }
+
+        /// <summary>The hand load of a running stock task: doubled while it holds a basket loan (MAT-54).</summary>
+        public static int LoadFor(SimWorld world, TaskRecord t)
+        {
+            int hand = Math.Max(1, world.Tuning.HandCarryItems);
+            return KitLoans.Holds(world, t.Id) ? hand * KitLoans.Factor : hand;
         }
 
         private static int OpenTrips(SimWorld world, Operation op)
@@ -334,7 +353,7 @@ namespace LordsLegacy.Sim.Markets
                     if (room <= 0) break;
                     LedgerLocation source = ChooseStockSource(world, op, out int available);
                     if (source == null) break;
-                    int n = Math.Min(Math.Min(Math.Max(1, world.Tuning.HandCarryItems), room), available);
+                    int n = Math.Min(Math.Min(PlannedLoad(world, op), room), available);
                     world.Tasks.Create(BuildDef(world, source, stallStore, n), op.Id);
                 }
             }

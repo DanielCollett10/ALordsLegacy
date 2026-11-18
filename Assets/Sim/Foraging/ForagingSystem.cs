@@ -6,6 +6,7 @@ using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Forestry;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Inventory;
+using LordsLegacy.Sim.Kit;
 using LordsLegacy.Sim.Navigation;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
@@ -40,6 +41,7 @@ namespace LordsLegacy.Sim.Foraging
                 else Refill(world, op);
             }
             ReleaseOrphanBushes(world);
+            KitLoans.ReleaseFinished(world);
         }
 
         /// <inheritdoc />
@@ -95,10 +97,14 @@ namespace LordsLegacy.Sim.Foraging
                 if (bush == null) return;
                 LedgerLocation store = ForagingStores.HutStoreWithRoom(world, op, out int room);
                 if (store == null) return;
-                int n = Math.Min(Math.Min(bush.Baskets, Math.Max(1, world.Tuning.HandCarryItems)), Math.Min(room, MaxBasketsPerTask));
+                // MAT-54: a basket borrowed from the hut's kit doubles the hand load; the loan is reserved before the task exists.
+                int hand = Math.Max(1, world.Tuning.HandCarryItems);
+                bool basket = KitLoans.TryBorrow(world, hut.Id, world.Tasks.NextId);
+                if (basket) hand *= KitLoans.Factor;
+                int n = Math.Min(Math.Min(bush.Baskets, hand), Math.Min(room, MaxBasketsPerTask));
                 Footprint storeFp = world.Footprints.Get(store.ModuleId);
                 TaskRecord task = world.Tasks.Create(BuildDef(world, bush, storeFp, store, n), op.Id);
-                if (!world.Bushes.Reserve(bush.Id, task.Id)) { world.Tasks.Cancel(task.Id); return; }
+                if (!world.Bushes.Reserve(bush.Id, task.Id)) { world.Tasks.Cancel(task.Id); KitLoans.ReleaseFinished(world); return; }
                 world.Tasks.SetBush(task.Id, bush.Id);
             }
         }
