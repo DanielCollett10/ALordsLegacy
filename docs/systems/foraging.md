@@ -51,8 +51,7 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 
 ## Basket loan (T-565, MAT-50..54)
 
-- `Kit/KitLoans` reserves one kit basket (stock reservation, owner `-3_000_000 - taskId`) at plan time. With it `ForagingSystem` and `StoreFamilySystem` plan 2 x `HandCarryItems`; without, the normal load.
-- `ReleaseFinished` frees loans of ended tasks each tick. The basket never moves in the ledger. Tests: `Kit/KitLoanTests`.
+- `Kit/KitLoans` reserves one kit basket at plan time (owner `-3_000_000 - taskId`): load is 2 x `HandCarryItems`, else normal. `ReleaseFinished` frees it when the task ends. Tests: `Kit/KitLoanTests`.
 
 ## Tests
 
