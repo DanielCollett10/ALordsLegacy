@@ -53,20 +53,28 @@ namespace LordsLegacy.Game
         public static void AllowTextInput(VisualElement field)
         {
             field.AddToClassList(TextInputClass);
-            // Neither the field nor its inner input may take focus from navigation keys (WASD, arrows, Tab).
-            // Only a pointer-down on the field opens the edit (BeginTextInput), so a navigation key can never land in it.
+            // The inner input stays focusable so a click focuses it natively. Focus that did not come from a pointer-down
+            // on the field (WASD, arrows, Tab) is blurred again in FocusIn, so a navigation key never opens an edit.
             var input = FirstFocusableDescendant(field);
             field.userData = input;
             field.focusable = false;
-            if (input != null) input.focusable = false;
-            field.RegisterCallback<PointerDownEvent>(_ => BeginTextInput(field), TrickleDown.TrickleDown);
+            field.RegisterCallback<PointerDownEvent>(_ => Allow(input), TrickleDown.TrickleDown);
             // FocusIn/FocusOut bubble from the inner input, so the field sees them for its own edit; Set makes repeats harmless.
-            field.RegisterCallback<FocusInEvent>(_ => _editing.Add(field));
+            field.RegisterCallback<FocusInEvent>(e =>
+            {
+                var target = e.target as VisualElement;
+                if (target == null) return;
+                if (target == _allowedInput && UnityEngine.Time.frameCount - _allowedFrame <= 1)
+                {
+                    _allowedInput = null;
+                    _editing.Add(field);
+                }
+                else target.Blur();
+            });
             field.RegisterCallback<FocusOutEvent>(_ =>
             {
-                _editing.Remove(field);
-                if (input != null) input.focusable = false;
-                _releasedFrame = UnityEngine.Time.frameCount;
+                // Only a real edit ending releases the camera; a rejected focus never added the field.
+                if (_editing.Remove(field)) _releasedFrame = UnityEngine.Time.frameCount;
             });
             field.RegisterCallback<KeyDownEvent>(e =>
             {
@@ -83,8 +91,18 @@ namespace LordsLegacy.Game
         public static void BeginTextInput(VisualElement field)
         {
             if (field?.userData is not VisualElement input) return;
-            input.focusable = true;
+            Allow(input);
             input.Focus();
+        }
+
+        // The one input the player has just pointed at, valid only for the frame of the pointer-down (see FocusIn above).
+        private static VisualElement _allowedInput;
+        private static int _allowedFrame = -1;
+
+        private static void Allow(VisualElement input)
+        {
+            _allowedInput = input;
+            _allowedFrame = UnityEngine.Time.frameCount;
         }
 
         // The inner input is the first focusable element under the field (found before the field is made unfocusable).
