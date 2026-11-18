@@ -148,6 +148,59 @@ namespace LordsLegacy.Sim.Tests.Workshops
             Assert.IsNull(w.Inventory.Audit());
         }
 
+        // A world with one built workshop whose only family member is `ageYears` old.
+        private static (SimWorld w, int fp, Operation op) MakeAged(string type, double ageYears)
+        {
+            var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
+            var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, WorkshopDefaultReserve = 0 });
+            w.People.AddFamily(3, "F3", 60, 60);
+            long birth = -(long)(ageYears / w.Tuning.AgeingRate * Citizen.TicksPerYear);
+            w.People.AddCitizen(30, "K", Sex.Male, birth, 3, 60, 60);
+            int id = w.Footprints.Add(100, ModuleTypes.Find(type), M(60, 60), 0).Id;
+            Operation op = w.Operations.Create(OperationTypes.WorkshopOperationFor(type), 0);
+            w.Operations.AddModule(op.Id, id);
+            WorkshopBuildings.OnBuilt(w, w.Footprints.Get(id));
+            Assert.IsTrue(w.Execute(new AssignFamily(op.Id, 3)).IsAccepted);
+            return (w, id, op);
+        }
+
+        private static void Feed(SimWorld w, int id, WorkshopDef def)
+        {
+            foreach (RecipeInput i in def.Inputs)
+                w.Inventory.Produce(w.Inventory.FindWorkshopStock(id, i.Item.Id), i.Item, i.Count * 3);
+        }
+
+        [TestCase(ModuleTypes.WeaverId, 10.0, true)]
+        [TestCase(ModuleTypes.WeaverId, 8.5, true)]
+        [TestCase(ModuleTypes.WeaverId, 5.0, false)]
+        [TestCase(ModuleTypes.WattleYardId, 10.0, true)]
+        [TestCase(ModuleTypes.WattleYardId, 5.0, false)]
+        [TestCase(ModuleTypes.HewingStationId, 10.0, false)]
+        [TestCase(ModuleTypes.HewingStationId, 20.0, true)]
+        [TestCase(ModuleTypes.SawpitId, 10.0, false)]
+        public void WorkerAge_LightWorkshopsFromEight_HeavyOnesFromFourteen(string type, double age, bool works)
+        {
+            var (w, id, op) = MakeAged(type, age);
+            WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, w.Tuning);
+            Assert.AreEqual(works, WorkshopSystem.HasWorker(w, op), "HasWorker");
+            Assert.AreEqual(!works, OperationStatus.Of(w, op) == OperationState.NoWorkers, "NoWorkers exactly when nobody is old enough");
+            Feed(w, id, def);
+            w.Step(2 * Day);
+            int made = w.Inventory.FindGoodsStore(id).CountOf(def.Output.Id);
+            if (works) Assert.Greater(made, 0, "a child of working-light age makes goods");
+            else Assert.AreEqual(0, made, "too young to work here");
+        }
+
+        [Test]
+        public void LightWorkshops_MinAgeIsForagerMinAge_HeavyOnesStayFourteen()
+        {
+            var t = new SimTuning();
+            Assert.AreEqual(t.ForagerMinAge, WorkshopDef.Weaving(t).MinWorkAgeYears);
+            Assert.AreEqual(t.ForagerMinAge, WorkshopDef.Wattling(t).MinWorkAgeYears);
+            Assert.AreEqual(OperationStatus.WorkingAgeYears, WorkshopDef.Hewing(t).MinWorkAgeYears);
+            Assert.AreEqual(OperationStatus.WorkingAgeYears, WorkshopDef.Sawing(t).MinWorkAgeYears);
+        }
+
         [Test]
         public void WattleYard_WorkingDay_MakesPanelsFromSixHazelAndTwoWillow()
         {
