@@ -56,6 +56,25 @@ namespace LordsLegacy.Game
         /// <summary>Population tooltip: arriving and leaving counts and the arrival reason (T-509).</summary>
         public string PopulationTooltip => _populationLabel == null ? "" : _populationLabel.tooltip;
 
+        /// <summary>Tooltip of the Beams readout (T-551).</summary>
+        public string BeamsTooltip => _beamsLabel == null ? "" : _beamsLabel.tooltip;
+
+        /// <summary>Tooltip of the Planks readout (T-551).</summary>
+        public string PlanksTooltip => _planksLabel == null ? "" : _planksLabel.tooltip;
+
+        /// <summary>Every General item in the village, one "Name: N" line each (T-551, extends T-525 totals).</summary>
+        public static string GeneralGoodsTooltip(Sim.Core.SimWorld world)
+        {
+            var sb = new System.Text.StringBuilder("General goods");
+            foreach (var kv in Sim.Inventory.GoodsStats.GeneralByItem(world))
+            {
+                string name = kv.Key.StartsWith("item.") ? kv.Key.Substring(5) : kv.Key;
+                name = char.ToUpperInvariant(name[0]) + name.Substring(1).Replace('_', ' ');
+                sb.Append('\n').Append(name).Append(": ").Append(kv.Value);
+            }
+            return sb.ToString();
+        }
+
         /// <summary>Builds the population tooltip from a growth report.</summary>
         public static string PopulationTooltipOf(Sim.Growth.GrowthReport r) =>
             "Families: " + r.Families + "\nArriving: " + r.Arriving + "\nLeaving: " + r.Leaving + "\nNext family: "
@@ -241,8 +260,9 @@ namespace LordsLegacy.Game
                 _foodLabel.tooltip = FoodText.Tooltip(_host.World);
             }
             if (_logsLabel != null) _logsLabel.text = "Logs: " + Sim.Inventory.GoodsStats.Logs(_host.World);
-            if (_beamsLabel != null) _beamsLabel.text = "Beams: " + Sim.Inventory.GoodsStats.Beams(_host.World);
-            if (_planksLabel != null) _planksLabel.text = "Planks: " + Sim.Inventory.GoodsStats.Planks(_host.World);
+            string general = GeneralGoodsTooltip(_host.World);
+            if (_beamsLabel != null) { _beamsLabel.text = "Beams: " + Sim.Inventory.GoodsStats.Beams(_host.World); _beamsLabel.tooltip = general; }
+            if (_planksLabel != null) { _planksLabel.text = "Planks: " + Sim.Inventory.GoodsStats.Planks(_host.World); _planksLabel.tooltip = general; }
             if (_populationLabel != null)
             {
                 var report = Sim.Growth.GrowthReport.Of(_host.World);
