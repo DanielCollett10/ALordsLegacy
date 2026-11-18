@@ -97,14 +97,14 @@ namespace LordsLegacy.Tests.PlayMode
         {
             var w = _host.World;
             int yard = BuildYard(901, 100, 100);
-            w.Inventory.Produce(w.Inventory.FindGoodsStore(yard), Items.Log, 4);
+            w.Inventory.Produce(w.Inventory.FindGoodsStore(yard), Items.Plank, 4);
             Assert.IsTrue(_agents.ClickAt(ScreenOf(100f, 100f)));
             Assert.IsTrue(_agents.HasYard);
             yield return null;
             Assert.IsTrue(_panel.IsShown);
             Assert.AreEqual("Storage yard", _panel.TitleText);
             Assert.AreEqual("No workers", _panel.StatusText);
-            StringAssert.Contains("Log: 4", _panel.StockText);
+            StringAssert.Contains("Plank: 4", _panel.StockText);
             Assert.AreEqual("Stored: 4 / " + w.Tuning.StorageYardCapacity, _panel.StoredText);
             Assert.IsFalse(_panel.SuppliesToggle.enabledSelf, "Supplies market is greyed.");
             Assert.AreEqual("No demand yet", _panel.SuppliesToggle.tooltip);

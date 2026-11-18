@@ -40,7 +40,7 @@ namespace LordsLegacy.Game
         public string TitleText => _title?.text ?? "";
         /// <summary>Status line (ST-45), e.g. "No workers".</summary>
         public string StatusText => _status?.text ?? "";
-        /// <summary>One line per General item, e.g. "Log: 4".</summary>
+        /// <summary>One line per General item, e.g. "Plank: 4".</summary>
         public string StockText => _stock?.text ?? "";
         /// <summary>Total line, e.g. "Stored: 43 / 300".</summary>
         public string StoredText => _stored?.text ?? "";
