@@ -118,6 +118,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-Storage yard (ST-*); the workshop input reserve (PL-30 to PL-33, M18); tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
+The storage yard Sim loop and workshop input reserve are built and proven end to end (M18, `systems/storage.md`); the yard's Unity panel and build button and a reserve control are not. Also not built: tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
 and backyards; artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
 status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.
