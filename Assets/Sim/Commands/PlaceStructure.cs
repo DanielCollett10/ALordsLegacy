@@ -63,6 +63,12 @@ namespace LordsLegacy.Sim.Commands
                 world.Operations.AddModule(op.Id, fp.Id);
             }
 
+            if (type.Id == ModuleTypes.StorageYardId)
+            {
+                Operation op = world.Operations.Create(OperationTypes.StorageYardOpId, 0);
+                world.Operations.AddModule(op.Id, fp.Id);
+            }
+
             string workshopOp = OperationTypes.WorkshopOperationFor(type.Id);
             if (workshopOp != null)
             {
