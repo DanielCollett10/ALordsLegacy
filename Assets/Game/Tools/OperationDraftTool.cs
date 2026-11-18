@@ -28,6 +28,8 @@ namespace LordsLegacy.Game.Tools
         public const string WoodcutterToolId = "woodcutter";
         /// <summary>Build bar id of the forager entry.</summary>
         public const string ForagerToolId = "forager";
+        /// <summary>Build bar id of the coppice entry.</summary>
+        public const string CoppiceToolId = "coppice";
         /// <summary>Degrees one Q / E press turns the ghost.</summary>
         public const double RotateStepDeg = 15.0;
         /// <summary>Degrees one Shift + Q / E press turns the ghost.</summary>
@@ -362,6 +364,7 @@ namespace LordsLegacy.Game.Tools
             {
                 case ModuleTypes.WoodcuttingHutId: return "Hut";
                 case ModuleTypes.ForagerHutId: return "Forager hut";
+                case ModuleTypes.CoppiceHutId: return "Coppice hut";
                 case ModuleTypes.LogStorageId: return "Log storage";
                 case ModuleTypes.OxenStandId: return "Oxen stand";
                 default: return typeId;

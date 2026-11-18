@@ -202,8 +202,9 @@ namespace LordsLegacy.Game
             if (op == null) { Hide(); return; }
             var def = OperationTypes.Find(op.TypeId);
 
-            bool forage = op.TypeId == OperationTypes.ForagingId;
-            _title.text = (forage ? "Forager camp " : "Woodcutter ") + op.Id;
+            bool coppice = op.TypeId == OperationTypes.CoppiceId;
+            bool forage = op.TypeId == OperationTypes.ForagingId || coppice; // no logs, oxen or trees: a hut with a food / rod store
+            _title.text = (coppice ? "Coppice hut " : forage ? "Forager camp " : "Woodcutter ") + op.Id;
             _status.text = "Status: " + StateText(OperationStatus.Reported(world, op));
             _modules.text = ModuleText(world, op);
             RebuildPriority(world, op);
@@ -214,10 +215,10 @@ namespace LordsLegacy.Game
             _logs.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
             _causes.text = forage ? "" : CauseText(world, op);
             _causes.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
-            _stock.text = forage ? HutStoreText(world, op) : StockText(world, op);
+            _stock.text = coppice ? RodStoreText(world, op) : forage ? HutStoreText(world, op) : StockText(world, op);
             RebuildOxen(world, op);
             var region = OperationStatus.WorkRegion(world, op);
-            _trees.text = forage ? BushText(world, region)
+            _trees.text = coppice ? StoolText(world, op) : forage ? BushText(world, region)
                 : "Standing trees in work area: " + (region == null ? 0 : world.Trees.CountStandingIn(region));
             _workArea.text = op.WorkAreaId.HasValue ? "Work area: drawn (area " + op.WorkAreaId.Value + ")"
                 : "Work area: default circle round the hut" + (def != null ? " (" + def.DefaultWorkRadiusM.ToString("0") + " m)" : "");
@@ -327,6 +328,27 @@ namespace LordsLegacy.Game
             return s;
         }
 
+        /// <summary>Coppice hut store line, e.g. "Rods: hazel: 12 / 40, willow: 0 / 40" (rods out of 40 each).</summary>
+        public static string RodStoreText(Sim.Core.SimWorld world, Operation op)
+        {
+            var hut = OperationStatus.Hut(world, op);
+            var report = hut == null ? null : Sim.Coppice.CoppiceReport.Of(world, hut.Id);
+            if (report == null) return "Rods: none";
+            var sb = new StringBuilder("Rods: ");
+            for (int i = 0; i < report.Kinds.Count; i++) sb.Append(i > 0 ? ", " : "").Append(report.Kinds[i].StockText);
+            return sb.ToString();
+        }
+
+        private static string StoolText(Sim.Core.SimWorld world, Operation op)
+        {
+            var hut = OperationStatus.Hut(world, op);
+            var report = hut == null ? null : Sim.Coppice.CoppiceReport.Of(world, hut.Id);
+            if (report == null) return "Stools in work area: none";
+            var sb = new StringBuilder("Stools in work area:");
+            foreach (var k in report.Kinds) sb.Append('\n').Append(k.Name).Append(": ").Append(k.StoolsText);
+            return sb.ToString();
+        }
+
         private static string BushText(Sim.Core.SimWorld world, TreeRegion region)
         {
             int full = 0, empty = 0;
@@ -347,6 +369,7 @@ namespace LordsLegacy.Game
                 case OperationState.NoWorkers: return "No workers";
                 case OperationState.NoTrees: return "No trees";
                 case OperationState.NoBushes: return "No bushes";
+                case OperationState.NoStools: return "No stools";
                 case OperationState.StorageFull: return "Storage full";
                 case OperationState.WaitingForOx: return "Waiting for ox";
                 case OperationState.NoRoomAtMarket: return "No room at market";

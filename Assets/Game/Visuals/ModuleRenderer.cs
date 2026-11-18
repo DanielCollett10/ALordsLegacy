@@ -38,7 +38,8 @@ namespace LordsLegacy.Game.Visuals
             switch (moduleTypeId)
             {
                 case ModuleTypes.WoodcuttingHutId:
-                case ModuleTypes.ForagerHutId: return VisualSizes.ModuleHut;
+                case ModuleTypes.ForagerHutId:
+                case ModuleTypes.CoppiceHutId: return VisualSizes.ModuleHut;
                 case ModuleTypes.OxenStandId: return VisualSizes.ModuleOxenStand;
                 case ModuleTypes.HouseId: return VisualSizes.ModuleHouse;
                 case ModuleTypes.MarketStallId: return VisualSizes.ModuleMarketStall;

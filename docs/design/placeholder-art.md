@@ -43,6 +43,9 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | Thing | Where | Today |
 | --- | --- | --- |
 | Forage bush, full / empty (berry and mushroom alike) | `BushRenderer` | Built-in sphere, green / brown material |
+| Hazel stool, with rods / cut (T-568) | `BushRenderer` | Built-in cylinder 0.9 × 1.6 m olive green / 0.7 × 0.35 m brown stump while regrowing |
+| Willow stool, with rods / cut (T-568) | `BushRenderer` | Built-in cylinder 1.0 × 2.0 m yellow-green / 0.7 × 0.35 m pale stump while regrowing |
+| Coppice hut (own model, T-568) | `ModuleRenderer.VisualIdOf` | Reuses woodcutting hut |
 | Forager hut (own model) | `ModuleRenderer.VisualIdOf` | Reuses woodcutting hut |
 | Granary (own model) | `ModuleRenderer.VisualIdOf` | Falls back to log storage |
 | Food items (meat, berries, mushrooms) on carriers and in stores | — | Not drawn |

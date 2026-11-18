@@ -561,7 +561,8 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNull(_host.World.Deconstruction.Get(1));
             ConfirmDialog.Confirm();
             Assert.IsNotNull(_host.World.Deconstruction.Get(1));
-            Assert.IsNotNull(_host.World.Deconstruction.Get(2));
+            // The log storage has an empty recipe (0 minutes), so marking it takes it down at once (CN-53).
+            Assert.IsNull(_host.World.Footprints.Get(2));
             Assert.IsTrue(_host.World.Deconstruction.IsOperationPending(_op.Id));
         }
     }
