@@ -232,7 +232,7 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsTrue(_panel.ReserveField.focusable);
             Assert.IsFalse(_panel.AssignButton.focusable);
             Assert.IsFalse(UiFocusRules.TextInputActive);
-            _panel.ReserveField.Q(className: TextField.inputUssClassName).Focus();
+            _panel.ReserveField.Q(className: TextInputBaseField<int>.inputUssClassName).Focus();
             yield return null;
             Assert.IsTrue(UiFocusRules.TextInputActive, "typing blocks game hotkeys");
             Assert.IsNull(UiFocusRules.GameKeyboard);

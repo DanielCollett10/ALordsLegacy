@@ -322,7 +322,7 @@ namespace LordsLegacy.Game
             _reserveField = new IntegerField { name = "workshop-reserve", isDelayed = true };
             _reserveField.style.width = 64;
             _reserveField.style.marginLeft = _reserveField.style.marginRight = 4;
-            var input = _reserveField.Q(className: TextField.inputUssClassName);
+            var input = _reserveField.Q(className: TextInputBaseField<int>.inputUssClassName);
             if (input != null)
             {
                 input.style.color = light;
