@@ -36,6 +36,38 @@ namespace LordsLegacy.Sim.Foraging
                 if (!edge && roll >= t.BushClearingChance) continue;
                 world.Bushes.Add(x, z, (BushKind)kindRoll, t.BushBaskets);
             }
+            ScatterStools(world, rng, b);
+        }
+
+        /// <summary>
+        /// Hazel stools at the forest edge, willow stools on <see cref="LowGround"/> (decision 0050, MAT-13/15/16).
+        /// Runs after the forage pass on the same random stream, so forage bushes keep their positions.
+        /// </summary>
+        private static void ScatterStools(SimWorld world, SimRandom rng, Bounds2 b)
+        {
+            SimTuning t = world.Tuning;
+            LowGround low = null;
+            Place(world, rng, b, BushKind.HazelStool, t.HazelStoolCount, null);
+            if (t.WillowStoolCount > 0) low = new LowGround(world.Terrain);
+            Place(world, rng, b, BushKind.WillowStool, t.WillowStoolCount, low);
+        }
+
+        private static void Place(SimWorld world, SimRandom rng, Bounds2 b, BushKind kind, int count, LowGround low)
+        {
+            SimTuning t = world.Tuning;
+            int placed = 0;
+            int attempts = count * 40;
+            for (int i = 0; i < attempts && placed < count; i++)
+            {
+                float x = b.MinX + (float)(rng.NextDouble() * (b.MaxX - b.MinX));
+                float z = b.MinZ + (float)(rng.NextDouble() * (b.MaxZ - b.MinZ));
+                if (world.Terrain.SlopeDegAt(x, z) > t.MaxWalkSlopeDeg) continue;
+                if (world.Trees.QueryRadius(x, z, (float)t.BushTreeClearM).Count > 0) continue;
+                if (low != null) { if (!low.Contains(x, z)) continue; }
+                else if (world.Trees.QueryRadius(x, z, (float)t.BushEdgeM).Count == 0) continue;
+                world.Bushes.Add(x, z, kind, BushKinds.FullUnits(kind, t));
+                placed++;
+            }
         }
     }
 }

@@ -45,7 +45,7 @@ namespace LordsLegacy.Sim.Tests.Save
         public void Scatter_StartsFullWithTunedBaskets()
         {
             var (w, _) = Make(new SimTuning { BushBaskets = 5 });
-            Assert.IsTrue(w.Bushes.All.All(b => b.Baskets == 5));
+            Assert.IsTrue(w.Bushes.All.Where(b => !BushKinds.IsStool(b.Kind)).All(b => b.Baskets == 5));
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace LordsLegacy.Sim.Tests.Save
             Assert.IsTrue(r.Reserve(b.Id, 7));
             Assert.IsTrue(r.Reserve(b.Id, 7), "same owner again");
             Assert.IsFalse(r.Reserve(b.Id, 8));
-            Assert.IsNull(r.NearestAvailable(1, 1));
+            Assert.IsNull(r.NearestAvailable(1, 1, BushKind.Berries, BushKind.Mushrooms));
             Assert.IsTrue(r.Release(b.Id));
             Assert.IsTrue(r.Reserve(b.Id, 8));
             Assert.IsFalse(r.Reserve(999, 1), "unknown id");
