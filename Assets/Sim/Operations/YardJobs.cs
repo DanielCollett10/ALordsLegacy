@@ -50,6 +50,7 @@ namespace LordsLegacy.Sim.Operations
             var jobs = new YardJobs();
             jobs.Add(new YardCampStoreSource());
             jobs.Add(new YardPileSource());
+            jobs.Add(new YardWorkshopSource());
             return jobs;
         }
 

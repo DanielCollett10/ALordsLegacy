@@ -15,6 +15,10 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public static bool IsWorkshop(FootprintTypeDef type) =>
             type != null && OperationTypes.WorkshopOperationFor(type.Id) != null;
 
+        /// <summary>True only for a def with at least one input and one output (ST-42b). A null def, or one with no input
+        /// (a daub pit) or no output (a gathering hut), is not a workshop for yard collection.</summary>
+        public static bool IsWorkshop(WorkshopDef def) => def != null && def.Input != null && def.Output != null;
+
         /// <summary>True for a building whose built footprint holds a <see cref="LocationKind.GoodsStore"/>: a workshop or a storage yard (ST-07).</summary>
         public static bool HoldsGoods(FootprintTypeDef type) =>
             IsWorkshop(type) || (type != null && type.Id == ModuleTypes.StorageYardId);
