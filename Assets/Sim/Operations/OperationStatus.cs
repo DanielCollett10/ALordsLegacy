@@ -38,6 +38,8 @@ namespace LordsLegacy.Sim.Operations
         WaitingForInput = 11,
         /// <summary>A workshop's output store has no room for another input's outputs (T-524, PL-05).</summary>
         WorkshopStoreFull = 12,
+        /// <summary>No stool with rods left in the work region (coppice, MAT-18).</summary>
+        NoStools = 13,
     }
 
     /// <summary>Computes operation status from world state. Nothing here is stored (GDD section 5).</summary>
@@ -50,6 +52,7 @@ namespace LordsLegacy.Sim.Operations
         public static OperationState Of(SimWorld world, Operation op)
         {
             if (op.TypeId == OperationTypes.ForagingId) return Foraging.ForagingStatus.Of(world, op);
+            if (op.TypeId == OperationTypes.CoppiceId) return Coppice.CoppiceStatus.Of(world, op);
             Workshops.WorkshopDef shop = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
             if (shop != null) return Workshops.WorkshopStatus.Of(world, op, shop);
             if (op.Paused) return OperationState.Paused;

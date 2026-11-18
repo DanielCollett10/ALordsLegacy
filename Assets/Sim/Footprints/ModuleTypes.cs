@@ -36,6 +36,7 @@ namespace LordsLegacy.Sim.Footprints
                 case HewingStationId: return "Hewing station";
                 case SawpitId: return "Sawpit";
                 case StorageYardId: return "Storage yard";
+                case CoppiceHutId: return "Coppice hut";
                 default: return typeId;
             }
         }
@@ -115,8 +116,18 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef StorageYard =
             new FootprintTypeDef(StorageYardId, 8000, 6000, true, true, recipe: new ConstructionRecipe(8, 480), yardMarginMm: 3000);
 
+        /// <summary>Id of the coppice hut (MAT-10).</summary>
+        public const string CoppiceHutId = "module.coppice_hut";
+
+        /// <summary>
+        /// Coppice hut: 6 × 4 m, blocks movement, clears trees, 8 logs / 480 worker-minutes (MAT-10). Its rod
+        /// <c>GoodsStore</c> (capped per kind, MAT-14) is created when it is built (<c>WorkshopBuildings.OnBuilt</c>).
+        /// </summary>
+        public static readonly FootprintTypeDef CoppiceHut =
+            new FootprintTypeDef(CoppiceHutId, 6000, 4000, true, true, recipe: new ConstructionRecipe(8, 480));
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, StorageYard };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, StorageYard, CoppiceHut };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)
