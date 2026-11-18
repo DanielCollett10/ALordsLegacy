@@ -32,12 +32,26 @@ namespace LordsLegacy.Sim.Tests.Start
             return w;
         }
 
-        /// <summary>Uses up the starting planks so the camp's General store is empty (T-513).</summary>
+        /// <summary>Uses up only the starting thatch and panels (T-577), for tests that count planks in the camp General store.</summary>
+        internal static void UseHouseGoodsUp(SimWorld w)
+        {
+            LedgerLocation general = w.Camp.GeneralStoreLocation;
+            foreach (ItemDef item in new[] { Items.Thatch, Items.WattlePanel })
+            {
+                int n = general.CountOf(item.Id);
+                if (n > 0) w.Inventory.Consume(general, item, n);
+            }
+        }
+
+        /// <summary>Uses up the starting planks, thatch and panels so the camp's General store is empty (T-513, T-577).</summary>
         internal static void UsePlanksUp(SimWorld w)
         {
             LedgerLocation general = w.Camp.GeneralStoreLocation;
-            int n = general.CountOf(Items.Plank.Id);
-            if (n > 0) w.Inventory.Consume(general, Items.Plank, n);
+            foreach (ItemDef item in new[] { Items.Plank, Items.Thatch, Items.WattlePanel })
+            {
+                int n = general.CountOf(item.Id);
+                if (n > 0) w.Inventory.Consume(general, item, n);
+            }
         }
 
         private static Family AddFamily(SimWorld w, int id)

@@ -42,6 +42,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             var map = new MapData("flat", new HeightGrid(0f, 0f, 2f, 101, 101, new float[101 * 101]), new MapTree[0]);
             var w = SimWorld.FromMapData(map, new SimTuning { StartHour = 8, StartingPlanks = 0 });
             StartLayoutApplier.Apply(w, Layout());
+            Start.NoCampTests.UseHouseGoodsUp(w); // T-577: these tests count planks only
             return w;
         }
 

@@ -26,7 +26,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning());
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
-            if (logs > 0) w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, logs);
+            if (logs > 0) Support.HouseStock.Add(w, M(60, 40), logs);
             return w;
         }
 
@@ -75,7 +75,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             int house = (int)r.Created[1];
             Assert.AreEqual(ModuleTypes.HouseId, w.Footprints.Get(house).Type.Id);
             Assert.IsNotNull(w.Construction.Get(house));
-            Assert.AreEqual(10, w.Construction.Get(house).ReservationIds.Sum(id => w.Inventory.GetReservation(id).Count));
+            Assert.AreEqual(30, w.Construction.Get(house).ReservationIds.Sum(id => w.Inventory.GetReservation(id).Count));
             HomeRecord h = w.Homes.Get(house);
             Assert.AreEqual((int)r.Created[0], h.PlotAreaId);
             Assert.AreEqual(0, h.FamilyId);
@@ -88,7 +88,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             var w = SimWorld.FromMapData(map, new SimTuning());
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
-            w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, 10);
+            Support.HouseStock.Add(w, M(60, 40), 10);
             CommandResult r = w.Execute(new DesignatePlot(Plot(w, 30)));
             Assert.IsTrue(r.IsAccepted, r.Text);
             Assert.AreEqual(1, r.RemovedTreeIds.Length);

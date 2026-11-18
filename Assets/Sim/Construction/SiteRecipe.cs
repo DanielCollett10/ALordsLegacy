@@ -19,24 +19,44 @@ namespace LordsLegacy.Sim.Construction
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
             if (fp == null) throw new ArgumentNullException(nameof(fp));
-            if (fp.Type.Id != ModuleTypes.MarketStallId) return fp.Type.ConstructionRecipe;
+            bool stall = fp.Type.Id == ModuleTypes.MarketStallId;
+            bool house = fp.Type.Id == ModuleTypes.HouseId;
+            if (!stall && !house) return fp.Type.ConstructionRecipe;
             ConstructionSite site = world.Construction.Get(fp.Id);
-            return site != null && HoldsLogs(world, site) ? ModuleTypes.MarketStallLogRecipe : fp.Type.ConstructionRecipe;
+            if (site == null) return fp.Type.ConstructionRecipe;
+            if (stall) return HoldsLogs(world, site) ? ModuleTypes.MarketStallLogRecipe : fp.Type.ConstructionRecipe;
+            // T-577, MAT-40b: a house placed before thatch and panels holds logs but neither of those.
+            bool old = HoldsLogs(world, site) && !Holds(world, site, Items.Thatch.Id) && !Holds(world, site, Items.WattlePanel.Id);
+            return old ? ModuleTypes.HouseLogRecipe : fp.Type.ConstructionRecipe;
         }
 
         // Logs on the site, used up by the build, reserved for it, or on their way to it by a live delivery task.
         private static bool HoldsLogs(SimWorld world, ConstructionSite site)
         {
-            if (site.ConsumedOf(Items.Log.Id) > 0) return true;
+            if (Holds(world, site, Items.Log.Id)) return true;
+            foreach (TaskRecord t in world.Tasks.All)
+                if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeliverId && t.SiteFootprintId == site.FootprintId) return true;
+            return false;
+        }
+
+        // The item is on the site, used up by the build, reserved for it, or carried to it by a live hand-carry task.
+        private static bool Holds(SimWorld world, ConstructionSite site, string itemId)
+        {
+            if (site.ConsumedOf(itemId) > 0) return true;
             LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
-            if (loc != null && loc.CountOf(Items.Log.Id) > 0) return true;
+            if (loc != null && loc.CountOf(itemId) > 0) return true;
             foreach (int id in site.ReservationIds)
             {
                 Reservation r = world.Inventory.GetReservation(id);
-                if (r != null && r.ItemId == Items.Log.Id) return true;
+                if (r != null && r.ItemId == itemId) return true;
             }
+            if (itemId == Items.Log.Id) return false;
             foreach (TaskRecord t in world.Tasks.All)
-                if (!t.IsFinished && t.Def.Id == ConstructionTaskDefs.DeliverId && t.SiteFootprintId == site.FootprintId) return true;
+            {
+                if (t.IsFinished || t.Def.Id != ConstructionTaskDefs.CarryId || t.SiteFootprintId != site.FootprintId) continue;
+                foreach (TaskStep s in t.Def.Steps)
+                    if (s.Kind == StepKind.DepositItems && s.ItemId == itemId) return true;
+            }
             return false;
         }
     }

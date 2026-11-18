@@ -45,6 +45,7 @@ namespace LordsLegacy.Sim.Tests.Operations
             var w = SimWorld.FromMapData(_map, new SimTuning { StartHour = 8, BushCount = 0, StartingMeat = 400 });
             StartLayoutApplier.Apply(w, new StartLayout(M(150, 150), 0, new PointMm(0, 0), new PointMm(6000, 0), new PointMm(-6000, 0),
                 new PointMm[0], new StartFamily[0], 2, stock: new[] { new StartStock(Items.Log, logs) }));
+            Start.NoCampTests.UseHouseGoodsUp(w); // T-577: these tests count planks only
             for (int fam = 1; fam <= families; fam++)
             {
                 Family f = w.People.AddFamily(fam, "F" + fam, 150, 150);

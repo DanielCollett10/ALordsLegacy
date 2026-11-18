@@ -28,7 +28,7 @@ namespace LordsLegacy.Sim.Tests.Growth
             var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning());
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(150, 50) }, new[] { M(20, 50), M(85, 50), M(150, 50) });
-            w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, 400);
+            Support.HouseStock.Add(w, M(60, 40), 400);
             w.EntryPoint = M(20, 50);
             int used = Place(w, 25);
             freeHouse = Place(w, 50);

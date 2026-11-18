@@ -50,6 +50,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
                 fams.Add(new StartFamily("F" + i, M(-9 + 3 * i, 8), new[] { Adult("A" + i, Sex.Male), Adult("B" + i, Sex.Female) }));
             StartLayoutApplier.Apply(w, new StartLayout(M(0, 0), 0, M(0, 0), M(6, 0), M(-6, 0), new PointMm[0], fams, 2,
                 stock: new[] { new StartStock(Items.Log, 40) }));
+            LordsLegacy.Sim.Tests.Start.NoCampTests.UseHouseGoodsUp(w); // T-577: the chain must make its own panels, not collect the camp's 90
             return w;
         }
 

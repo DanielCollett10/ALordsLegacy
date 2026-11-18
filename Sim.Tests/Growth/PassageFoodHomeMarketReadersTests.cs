@@ -111,7 +111,7 @@ namespace LordsLegacy.Sim.Tests.Growth
             var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning());
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
-            w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, 20);
+            Support.HouseStock.Add(w, M(60, 40), 20);
             Family leaving = w.People.AddFamily(1, "L", 10, 10);
             w.People.AddCitizen(10, "L0", Sex.Male, Adult, 1, 10, 10);
             leaving.Passage = FamilyPassage.Leaving;

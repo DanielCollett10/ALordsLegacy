@@ -56,9 +56,20 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef OxenStand =
             new FootprintTypeDef(OxenStandId, 3000, 3000, false, true, oxCapacity: 1, recipe: new ConstructionRecipe(1, 60));
 
-        /// <summary>House: 6 × 8 m, blocks movement, clears trees, 10 logs / 720 worker-minutes (HM-04, HM-06).</summary>
+        /// <summary>
+        /// House: 6 × 8 m, blocks movement, clears trees, 10 logs + 10 thatch + 10 wattle panels / 720 worker-minutes
+        /// (HM-04, HM-06, MAT-40, MAT-40b).
+        /// </summary>
         public static readonly FootprintTypeDef House =
-            new FootprintTypeDef(HouseId, 6000, 8000, true, true, recipe: new ConstructionRecipe(10, 720));
+            new FootprintTypeDef(HouseId, 6000, 8000, true, true, recipe: new ConstructionRecipe(new[]
+            {
+                new KeyValuePair<string, int>(Inventory.Items.Log.Id, 10),
+                new KeyValuePair<string, int>(Inventory.Items.Thatch.Id, 10),
+                new KeyValuePair<string, int>(Inventory.Items.WattlePanel.Id, 10),
+            }, 720));
+
+        /// <summary>The house's old recipe, 10 logs / 720 worker-minutes. Only an unbuilt house placed before thatch and panels keeps it (MAT-40b); see <c>SiteRecipe</c>.</summary>
+        public static readonly ConstructionRecipe HouseLogRecipe = new ConstructionRecipe(10, 720);
 
         /// <summary>
         /// Granary: 8 × 6 m building that blocks movement, with a walkable 5 m yard (plot 18 × 16 m), clears trees,

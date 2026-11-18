@@ -81,7 +81,7 @@ namespace LordsLegacy.Sim.Tests.Start
         public void NoYard_EmptyGeneralStore_CampGoesWithoutTheMessage()
         {
             SimWorld w = Make();
-            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.Total);
+            NoCampTests.UsePlanksUp(w);
             HouseEveryone(w);
             Assert.IsTrue(CampRemovalSystem.TryRemove(w));
             Assert.AreEqual(0, LogCount(w));
@@ -157,7 +157,7 @@ namespace LordsLegacy.Sim.Tests.Start
             BuildYardThroughTicks(w);
             LedgerLocation general = w.Camp.GeneralStoreLocation;
             int id = general.Id;
-            w.Inventory.Consume(general, Items.Plank, general.Total);
+            NoCampTests.UsePlanksUp(w);
 
             Assert.IsFalse(CampRemovalSystem.TryRemove(w), "family still homeless");
 
@@ -171,7 +171,7 @@ namespace LordsLegacy.Sim.Tests.Start
         public void NoYard_EmptyGeneralStore_StoreStaysOpen()
         {
             SimWorld w = Make();
-            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.Total);
+            NoCampTests.UsePlanksUp(w);
             CampRemovalSystem.TryRemove(w);
             Assert.IsNotNull(w.Camp.GeneralStoreLocation);
         }
@@ -181,7 +181,7 @@ namespace LordsLegacy.Sim.Tests.Start
         {
             SimWorld w = Make();
             BuildYardThroughTicks(w);
-            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.Total);
+            NoCampTests.UsePlanksUp(w);
             CampRemovalSystem.TryRemove(w);
             HouseEveryone(w);
             Assert.IsTrue(CampRemovalSystem.TryRemove(w));
@@ -192,7 +192,7 @@ namespace LordsLegacy.Sim.Tests.Start
 
         private static void EmptyStoreAndRunToMidnight(SimWorld w)
         {
-            w.Inventory.Consume(w.Camp.GeneralStoreLocation, Items.Plank, w.Camp.GeneralStoreLocation.Total);
+            NoCampTests.UsePlanksUp(w);
             for (int i = 0; i < 2000 && w.Camp?.GeneralStoreLocation != null; i++) w.Step(1);
         }
 
