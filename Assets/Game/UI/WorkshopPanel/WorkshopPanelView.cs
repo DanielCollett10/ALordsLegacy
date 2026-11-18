@@ -145,9 +145,9 @@ namespace LordsLegacy.Game
             if (_panel == null) return;
             var agents = Agents();
             var host = Host();
-            if (agents == null || !agents.HasWorkshop || host == null || !host.IsInitialized) { _panel.style.display = DisplayStyle.None; return; }
+            if (agents == null || !agents.HasWorkshop || host == null || !host.IsInitialized) { Hide(); return; }
             var r = WorkshopReport.Of(host.World, agents.SelectedWorkshopId);
-            if (r == null) { _panel.style.display = DisplayStyle.None; return; }
+            if (r == null) { Hide(); return; }
             _title.text = r.Name;
             _status.text = r.StatusText;
             _input.text = r.InputText;
@@ -162,6 +162,7 @@ namespace LordsLegacy.Game
                 int reserve = InputReserve.ReserveOf(host.World, reserveOp);
                 if (!UiFocusRules.TextInputActive && _reserveField.value != reserve) _reserveField.SetValueWithoutNotify(reserve);
             }
+            else if (_reserveField != null) UiFocusRules.ReleaseFocus(_reserveField);
             bool hasFamily = r.FamilyId != 0;
             _assign.style.display = !hasFamily ? DisplayStyle.Flex : DisplayStyle.None;
             _assign.SetEnabled(r.IsBuilt);
@@ -172,6 +173,13 @@ namespace LordsLegacy.Game
             _deconstruct.text = r.IsBuilt ? "Deconstruct" : "Cancel workshop";
             RebuildPicker(host.World, !hasFamily && r.IsBuilt);
             _panel.style.display = DisplayStyle.Flex;
+        }
+
+        // Hiding the panel ends any reserve edit, so the keyboard goes back to the camera (T-602).
+        private void Hide()
+        {
+            if (_reserveField != null) UiFocusRules.ReleaseFocus(_reserveField);
+            _panel.style.display = DisplayStyle.None;
         }
 
         private void RebuildPicker(SimWorld world, bool allowed)
