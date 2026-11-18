@@ -106,6 +106,15 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(3, GoodsStats.Rods(w));
             Assert.AreEqual(4, GoodsStats.Baskets(w));
             Assert.AreEqual(5, GoodsStats.Panels(w));
+
+            // The hover path shows the same list in a visible label (runtime panels hide the built-in tooltip).
+            Assert.IsFalse(_bar.GoodsTipShown);
+            _bar.ShowGoodsTip(true);
+            Assert.IsTrue(_bar.GoodsTipShown, "Goods tip not shown on Beams hover.");
+            StringAssert.Contains("\nHazel rod: 3", _bar.GoodsTipText);
+            StringAssert.Contains("\nWattle panel: 5", _bar.GoodsTipText);
+            _bar.HideGoodsTip();
+            Assert.IsFalse(_bar.GoodsTipShown);
         }
 
         [Test]
