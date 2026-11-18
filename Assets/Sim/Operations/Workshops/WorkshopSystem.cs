@@ -44,6 +44,42 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 if (def.Inputs.Count > 0) AttachOxen(world, op, fp);
                 OpenWork(world, op, def, fp, stocks);
                 if (def.Inputs.Count > 0) OpenTasks(world, op, def, fp, stocks);
+                if (def.Inputs.Count > 0) OpenHandTasks(world, op, def, fp, stocks);
+            }
+        }
+
+        // Hand-carried inputs (decision 0051, MAT-23): the workshop's own family fetches up to the item's hand load with the
+        // shared task.haul_by_hand, one open trip per working family. The reserve counts the trip's n items as taken.
+        private void OpenHandTasks(SimWorld world, Operation op, WorkshopDef def, Footprint fp, IList<LedgerLocation> stocks)
+        {
+            int open = 0;
+            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
+                if (t.Def.Id == HandHaulTaskDefs.HaulId && !t.IsFinished) open++;
+            int families = WorkingFamilies(world, op);
+            for (int i = 0; i < def.Inputs.Count && open < families; i++)
+            {
+                RecipeInput input = def.Inputs[i];
+                if (input.Carry != CarryClass.Hand) continue;
+                int? hand = HandLoads.For(input.Item, world.Tuning);
+                if (!hand.HasValue) continue;
+                LedgerLocation stock = stocks[i];
+                while (open < families)
+                {
+                    LedgerLocation src = _sources.Find(world, input.Item, fp.AccessPoint);
+                    if (src == null) break;
+                    int n = Math.Min(Math.Min(Math.Max(1, hand.Value), src.AvailableOf(input.Item.Id)), stock.FreeSpace);
+                    if (n <= 0 || !InputReserve.Allows(world, op, input.Item, n)) break;
+                    TaskRecord task = world.Tasks.Create(HandHaulTaskDefs.Build(world, src, stock, input.Item, n), op.Id);
+                    int owner = HandHaulTaskDefs.OwnerFor(task.Id);
+                    if (world.Inventory.ReserveStock(src, input.Item, n, owner) == 0 ||
+                        world.Inventory.ReserveCapacity(stock, input.Item, n, owner) == 0)
+                    {
+                        world.Inventory.CancelOwner(owner);
+                        world.Tasks.Cancel(task.Id);
+                        break;
+                    }
+                    open++;
+                }
             }
         }
 
