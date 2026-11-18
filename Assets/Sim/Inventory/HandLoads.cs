@@ -20,6 +20,9 @@ namespace LordsLegacy.Sim.Inventory
             if (item == null || tuning == null) return null;
             if (item.Id == Items.Beam.Id) return null;
             if (item.Id == Items.Plank.Id) return tuning.HandCarryPlanks;
+            if (item.Id == Items.WillowRod.Id || item.Id == Items.HazelRod.Id) return tuning.HandCarryRods;
+            if (item.Id == Items.Basket.Id) return tuning.HandCarryBaskets;
+            if (item.Id == Items.WattlePanel.Id) return tuning.HandCarryPanels;
             return item.Category == ItemCategory.General ? tuning.HandCarryItems : (int?)null;
         }
     }

@@ -23,8 +23,23 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>A hewed beam (decision 0046).</summary>
         public static readonly ItemDef Beam = new ItemDef("item.beam", ItemCategory.General);
 
+        /// <summary>A willow rod cut from a willow stool (MAT-01).</summary>
+        public static readonly ItemDef WillowRod = new ItemDef("item.willow_rod", ItemCategory.General);
+
+        /// <summary>A hazel rod cut from a hazel stool (MAT-01).</summary>
+        public static readonly ItemDef HazelRod = new ItemDef("item.hazel_rod", ItemCategory.General);
+
+        /// <summary>A willow basket made by the weaver (MAT-03).</summary>
+        public static readonly ItemDef Basket = new ItemDef("item.basket", ItemCategory.General);
+
+        /// <summary>A wattle panel made by the wattle yard (MAT-04).</summary>
+        public static readonly ItemDef WattlePanel = new ItemDef("item.wattle_panel", ItemCategory.General);
+
         /// <summary>All built-in items.</summary>
-        public static IReadOnlyList<ItemDef> All { get; } = new[] { Log, Meat, Berries, Mushrooms, Plank, Beam };
+        public static IReadOnlyList<ItemDef> All { get; } = new[]
+        {
+            Log, Meat, Berries, Mushrooms, Plank, Beam, WillowRod, HazelRod, Basket, WattlePanel,
+        };
 
         /// <summary>Finds an item by id, or null.</summary>
         public static ItemDef Find(string id)
