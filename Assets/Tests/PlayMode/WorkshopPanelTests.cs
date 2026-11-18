@@ -184,6 +184,82 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ReserveFieldShowsCaptionAndItemsAndSetsTheReserve()
+        {
+            var w = _host.World;
+            int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
+            int opId = w.Operations.FindByModule(hew).Id;
+            _agents.SelectWorkshop(hew);
+            yield return null;
+            var field = _panel.ReserveField;
+            Assert.AreEqual(DisplayStyle.Flex, _panel.ReserveRow.resolvedStyle.display);
+            Assert.AreEqual("Keep in storage:", _panel.PanelElement.Q<Label>("workshop-reserve-caption").text);
+            Assert.AreEqual("logs", _panel.ReserveItemsText);
+            Assert.AreEqual(w.Tuning.WorkshopDefaultReserve, field.value);
+            Assert.Greater(field.worldBound.width, 0f);
+            field.value = 17;
+            yield return null;
+            Assert.AreEqual(17, InputReserve.ReserveOf(w, w.Operations.Get(opId), Items.Log));
+            Assert.AreEqual("", _panel.MessageText);
+            Assert.AreEqual(17, field.value);
+        }
+
+        [UnityTest]
+        public IEnumerator RefusedReserveShowsTheReasonAndSnapsBack()
+        {
+            var w = _host.World;
+            int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
+            int opId = w.Operations.FindByModule(hew).Id;
+            _agents.SelectWorkshop(hew);
+            yield return null;
+            int before = _panel.ReserveField.value;
+            _panel.ReserveField.value = -3;
+            yield return null;
+            Assert.AreEqual("Reserve must be 0 to " + SetWorkshopReserve.MaxReserve, _panel.MessageText);
+            Assert.AreEqual(before, InputReserve.ReserveOf(w, w.Operations.Get(opId), Items.Log));
+            Assert.AreEqual(before, _panel.ReserveField.value);
+            _panel.ReserveField.value = SetWorkshopReserve.MaxReserve + 1;
+            yield return null;
+            Assert.AreEqual(before, _panel.ReserveField.value);
+        }
+
+        [UnityTest]
+        public IEnumerator ReserveFieldIsFocusableButTheRestOfThePanelIsNot()
+        {
+            int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
+            _agents.SelectWorkshop(hew);
+            yield return null;
+            Assert.IsTrue(_panel.ReserveField.focusable);
+            Assert.IsFalse(_panel.AssignButton.focusable);
+            Assert.IsFalse(UiFocusRules.TextInputActive);
+            _panel.ReserveField.Q(className: TextField.inputUssClassName).Focus();
+            yield return null;
+            Assert.IsTrue(UiFocusRules.TextInputActive, "typing blocks game hotkeys");
+            Assert.IsNull(UiFocusRules.GameKeyboard);
+            UiFocusRules.ReleaseFocus(_panel.ReserveField);
+            yield return null;
+            yield return null;
+            Assert.IsFalse(UiFocusRules.TextInputActive);
+        }
+
+        [UnityTest]
+        public IEnumerator StatusShowsWaitingTotalOverReserveWhenOnlyTheReserveBlocks()
+        {
+            var w = _host.World;
+            AddFamily(3, "Archer");
+            for (int i = 0; i < 3; i++) w.People.AddOx(50 + i, "O" + i, 40, 44 + i).State = OxState.Resting(40000, 44000 + 1000 * i);
+            int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 60, 60);
+            int opId = w.Operations.FindByModule(hew).Id;
+            Assert.IsTrue(w.Execute(new AssignFamily(opId, 3)).IsAccepted);
+            w.Inventory.Produce(w.Inventory.AddStockpile(M(20, 20)), Items.Log, 5);
+            Assert.IsTrue(w.Execute(new SetWorkshopReserve(opId, Items.Log.Id, 5)).IsAccepted);
+            w.Step(1);
+            _agents.SelectWorkshop(hew);
+            yield return null;
+            Assert.AreEqual("Waiting: 5 / 5 logs in storage", _panel.StatusText);
+        }
+
+        [UnityTest]
         public IEnumerator CloseButtonClearsTheSelectionAndHidesThePanel()
         {
             int hew = BuildWorkshop(ModuleTypes.HewingStationId, 801, 100, 100);
