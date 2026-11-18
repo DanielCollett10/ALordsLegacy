@@ -48,7 +48,11 @@ namespace LordsLegacy.Sim.Commands
             Operation op = world.Operations.FindByArea(AreaId);
             if (op != null)
             {
-                foreach (int moduleId in op.ModuleIds) world.Footprints.Remove(moduleId);
+                foreach (int moduleId in op.ModuleIds)
+                {
+                    LordsLegacy.Sim.Kit.KitStores.DropOnRemoval(world, moduleId);
+                    world.Footprints.Remove(moduleId);
+                }
                 world.Operations.Remove(op.Id);
             }
             return CommandResult.Accepted(removed: new long[] { AreaId });

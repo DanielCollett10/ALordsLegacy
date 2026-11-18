@@ -40,8 +40,7 @@ Sim: `Assets/Sim/Operations/` (yard planner and sources), `Operations/Workshops/
 
 ## Gotchas
 
-- Storage counts logs in Storage and Stockpile, beams in workshop and yard stores, and rods in coppice and yard stores. Piles, input stock, sites and carried goods do not count.
-- `WorkshopStock` is never a source. "Collecting" in ST-45 includes beam trips.
+- Storage counts logs in Storage and Stockpile, beams in workshop and yard stores, and rods in coppice and yard stores. Piles, input stock, sites and carried goods do not count. `WorkshopStock` is never a source. "Collecting" in ST-45 includes beam trips.
 - Demolishing a yard drops its stock at the access point as an unowned pile.
 - The Supplies market is greyed out ("No demand yet", ST-10). Yard status is computed on each read and never saved.
 
@@ -49,6 +48,11 @@ Sim: `Assets/Sim/Operations/` (yard planner and sources), `Operations/Workshops/
 
 - Thatch is not an item, so ST-43's thatch load is unused. ST-45 has seven statuses; the design lists five.
 - No yard case in `SimSaveRoundTripTests`; `StorageYardEndToEndTests` covers a mid-run save and reload.
+
+## Kit fetch and drop (T-564, ST-21..23)
+
+- `Kit/KitFetchSystem` (after `YardFamilySystem`): a kit store with free slots holds a claim, a full one closes it. Oldest claim first, the building's own family gets `task.haul_by_hand` from the nearest camp General store, working yard or weaver store.
+- `KitStores.DropOnRemoval` runs on deconstruct, `RemoveModule` and `DeleteArea`: the claim closes and the kit becomes an unowned ground pile at the access point for yard families.
 
 ## Tests
 
