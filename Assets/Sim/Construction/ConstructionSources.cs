@@ -109,7 +109,7 @@ namespace LordsLegacy.Sim.Construction
         }
 
         /// <summary>Where a goods store lies: its footprint's centre when bound to one (workshop, yard), else its own position.</summary>
-        private static PointMm StorePosition(SimWorld world, LedgerLocation l)
+        internal static PointMm StorePosition(SimWorld world, LedgerLocation l)
         {
             Footprint f = l.ModuleId == 0 ? null : world.Footprints.Get(l.ModuleId);
             return f != null ? f.Centre : l.Position;
