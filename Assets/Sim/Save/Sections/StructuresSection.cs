@@ -122,13 +122,17 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(o.WorkAreaId ?? 0);
                 w.WriteBool(o.Paused);
                 w.WriteBool(o.SuppliesMarket);
+                w.WriteInt32(o.ReserveOverrides.Count);
+                var keys = new List<string>(o.ReserveOverrides.Keys);
+                keys.Sort(StringComparer.Ordinal);
+                foreach (string key in keys) { w.WriteString(key); w.WriteInt32(o.ReserveOverrides[key]); }
             }
         }
 
         private static void ReadOperations(OperationRegistry ops, SaveReader r)
         {
             int next = r.ReadInt32();
-            int count = r.ReadCount(27);
+            int count = r.ReadCount(31);
             for (int i = 0; i < count; i++)
             {
                 int id = r.ReadInt32();
@@ -139,7 +143,10 @@ namespace LordsLegacy.Sim.Save.Sections
                 int work = r.ReadInt32();
                 bool paused = r.ReadBool();
                 bool supplies = r.ReadBool();
-                ops.RestoreOperation(id, type, area, modules, families, oxen, hasWork ? work : (int?)null, paused, supplies);
+                int nRes = r.ReadCount(8);
+                var reserves = new List<KeyValuePair<string, int>>();
+                for (int k = 0; k < nRes; k++) { string item = r.ReadString(); reserves.Add(new KeyValuePair<string, int>(item, r.ReadInt32())); }
+                ops.RestoreOperation(id, type, area, modules, families, oxen, hasWork ? work : (int?)null, paused, supplies, reserves);
             }
             ops.RestoreNextId(next);
         }

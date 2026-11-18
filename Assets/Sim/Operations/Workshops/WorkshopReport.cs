@@ -78,7 +78,13 @@ namespace LordsLegacy.Sim.Operations.Workshops
             }
             if (!r.IsBuilt) r.StatusText = "Under construction";
             else if (op == null) { r.State = OperationState.NoWorkers; r.StatusText = TextOf(r.State, r.InputName); }
-            else { r.State = OperationStatus.Reported(world, op); r.StatusText = TextOf(r.State, r.InputName); }
+            else
+            {
+                r.State = OperationStatus.Reported(world, op);
+                r.StatusText = r.State == OperationState.WaitingForInput && WorkshopStatus.BlockedOnlyByReserve(world, op, def)
+                    ? "Waiting: " + InputReserve.InStorage(world, def.Input) + " / " + InputReserve.ReserveOf(world, op, def.Input) + " " + r.InputName + "s in storage"
+                    : TextOf(r.State, r.InputName);
+            }
             return r;
         }
 

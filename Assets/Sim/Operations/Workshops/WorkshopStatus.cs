@@ -29,6 +29,21 @@ namespace LordsLegacy.Sim.Operations.Workshops
         }
 
         /// <summary>
+        /// True when the stock is empty, no fetch is under way, a source holds a free load of input, and only the reserve
+        /// stops a fetch (PL-32). Free load means the source has the load itself, ignoring the reserve.
+        /// </summary>
+        public static bool BlockedOnlyByReserve(SimWorld world, Operation op, WorkshopDef def)
+        {
+            Footprint fp = WorkshopSystem.HutOf(world, op);
+            if (fp == null) return false;
+            foreach (TaskRecord t in world.Tasks.ByOwner(op.Id))
+                if (t.Def.Id == WorkshopSystem.FetchTaskId && !t.IsFinished) return false;
+            LedgerLocation source = InputSources.CreateDefault().Find(world, def.Input, fp.AccessPoint);
+            int load = System.Math.Max(1, def.OxLoadForInput);
+            return source != null && source.AvailableOf(def.Input.Id) >= load && !InputReserve.Allows(world, op, def.Input, load);
+        }
+
+        /// <summary>
         /// True when the stock is empty, no fetch is under way, and a source holds a free load of input but no ox is
         /// available to carry it (the fetch is never opened without an ox). Used by <see cref="OperationStatus.Reported"/>.
         /// </summary>

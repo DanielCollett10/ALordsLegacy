@@ -15,8 +15,19 @@ namespace LordsLegacy.Sim.Operations.Workshops
     /// </summary>
     public static class InputReserve
     {
-        /// <summary>The reserve of a workshop's input; 0 means none. Per-building setting comes in st-0b, until then the tuning default.</summary>
-        public static int ReserveOf(SimWorld world, Operation op) => Math.Max(0, world.Tuning.WorkshopDefaultReserve);
+        /// <summary>The reserve of a workshop's input; 0 means none. The player's setting (PL-30b), else the tuning default.</summary>
+        public static int ReserveOf(SimWorld world, Operation op)
+        {
+            WorkshopDef def = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
+            return def == null ? Math.Max(0, world.Tuning.WorkshopDefaultReserve) : ReserveOf(world, op, def.Input);
+        }
+
+        /// <summary>The reserve of <paramref name="op"/> for one input item.</summary>
+        public static int ReserveOf(SimWorld world, Operation op, ItemDef item)
+        {
+            int v;
+            return Math.Max(0, op.Reserves.TryGetValue(item.Id, out v) ? v : world.Tuning.WorkshopDefaultReserve);
+        }
 
         /// <summary>Items of <paramref name="item"/> in counted storage (PL-31).</summary>
         public static int InStorage(SimWorld world, ItemDef item)

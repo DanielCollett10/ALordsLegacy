@@ -31,6 +31,11 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>True when a built granary supplies the town's market (MK-10, markets.md). Only granaries use it.</summary>
         public bool SuppliesMarket { get; internal set; }
 
+        internal readonly Dictionary<string, int> ReserveOverrides = new Dictionary<string, int>();
+
+        /// <summary>The player-set reserves by input item id; items not listed use the tuning default (PL-30b).</summary>
+        public IReadOnlyDictionary<string, int> Reserves => ReserveOverrides;
+
         internal Operation(int id, string typeId, int areaId)
         {
             Id = id; TypeId = typeId; AreaId = areaId;

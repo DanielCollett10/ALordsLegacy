@@ -33,7 +33,7 @@ Core is written first. Then, in this order:
 | 9 | 6 | Movement | Move orders, follow links, debug sends, routine state, work-day plans. |
 | 10 | 7 | Tasks | Task records (by def id) and their steps, with bush and carrier ids (T-423). Stock-stall trips included. |
 
-Versions 9 to 27 each added a section or field (Food 9, Bushes 10, Markets 11, granary supply flag, stall families, family Passage and settlement log 22, plank/beam items and goods store 23, house reservation in Homes and `LastArrivalTick` in Core 24, camp General store id in Structures and `StartingPlanks` in Core 25, plank hand-carry tuning and task item ids 26 and 27, T-513 and T-517), 28 workshop stock location (T-520), 29 workshop tuning and work tasks (T-524). See `SaveWriter.CurrentVersion`.
+Versions 9 to 27 each added a section or field (Food 9, Bushes 10, Markets 11, granary supply flag, stall families, family Passage and settlement log 22, plank/beam items and goods store 23, house reservation in Homes and `LastArrivalTick` in Core 24, camp General store id in Structures and `StartingPlanks` in Core 25, plank hand-carry tuning and task item ids 26 and 27, T-513 and T-517), 28 workshop stock location (T-520), 29 workshop tuning and work tasks (T-524), 31 per-operation workshop reserves in Structures (T-538). See `SaveWriter.CurrentVersion`.
 
 ## How data moves
 

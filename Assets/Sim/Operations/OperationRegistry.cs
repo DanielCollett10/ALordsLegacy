@@ -52,7 +52,8 @@ namespace LordsLegacy.Sim.Operations
 
         /// <summary>Adds an operation with all its saved state when loading a save.</summary>
         internal void RestoreOperation(int id, string typeId, int areaId, IEnumerable<int> modules, IEnumerable<int> families,
-            IEnumerable<int> oxen, int? workAreaId, bool paused, bool suppliesMarket)
+            IEnumerable<int> oxen, int? workAreaId, bool paused, bool suppliesMarket,
+            IEnumerable<KeyValuePair<string, int>> reserves = null)
         {
             if (typeId == null) throw new ArgumentNullException(nameof(typeId));
             if (_byId.ContainsKey(id)) throw new InvalidOperationException("Operation id already restored: " + id);
@@ -61,6 +62,7 @@ namespace LordsLegacy.Sim.Operations
             o.ModuleIdList.AddRange(modules);
             o.FamilyIdList.AddRange(families);
             o.OxIdList.AddRange(oxen);
+            if (reserves != null) foreach (KeyValuePair<string, int> kv in reserves) o.ReserveOverrides[kv.Key] = kv.Value;
             _byId.Add(id, o);
             if (id >= _nextId) _nextId = id + 1;
         }
@@ -138,6 +140,19 @@ namespace LordsLegacy.Sim.Operations
             Operation o = Get(operationId);
             if (o == null || o.SuppliesMarket == on) return false;
             o.SuppliesMarket = on;
+            Version++;
+            return true;
+        }
+
+        /// <summary>Sets a workshop's input reserve for one item (PL-30b). False if unknown op or unchanged.</summary>
+        public bool SetReserve(int operationId, string itemId, int amount, int defaultAmount)
+        {
+            Operation o = Get(operationId);
+            if (o == null) return false;
+            int current;
+            if (!o.ReserveOverrides.TryGetValue(itemId, out current)) current = defaultAmount;
+            if (current == amount) return false;
+            o.ReserveOverrides[itemId] = amount;
             Version++;
             return true;
         }
