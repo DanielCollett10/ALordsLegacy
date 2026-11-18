@@ -16,6 +16,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
         /// <summary>The status of <paramref name="op"/>, which must be a workshop operation.</summary>
         public static OperationState Of(SimWorld world, Operation op, WorkshopDef def)
         {
+            WorkshopDef.RequireSingleInput(def);
             if (op.Paused) return OperationState.Paused;
             Footprint fp = WorkshopSystem.HutOf(world, op);
             if (fp == null || !world.IsWorking(fp.Id)) return OperationState.MissingHut;

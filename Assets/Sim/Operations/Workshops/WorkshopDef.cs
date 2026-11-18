@@ -1,46 +1,124 @@
 using System;
+using System.Collections.Generic;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Tuning;
 
 namespace LordsLegacy.Sim.Operations.Workshops
 {
+    /// <summary>How a recipe input reaches the workshop (decision 0051).</summary>
+    public enum CarryClass
+    {
+        /// <summary>Fetched by ox.</summary>
+        Ox,
+        /// <summary>Carried by hand.</summary>
+        Hand
+    }
+
+    /// <summary>One recipe input: item, count per batch and how it is carried.</summary>
+    public readonly struct RecipeInput
+    {
+        /// <summary>The item.</summary>
+        public ItemDef Item { get; }
+        /// <summary>Items consumed per batch.</summary>
+        public int Count { get; }
+        /// <summary>How it is fetched.</summary>
+        public CarryClass Carry { get; }
+
+        /// <summary>Creates an input line; count must be positive.</summary>
+        public RecipeInput(ItemDef item, int count, CarryClass carry)
+        {
+            Item = item ?? throw new ArgumentNullException(nameof(item));
+            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Must be positive.");
+            Count = count;
+            Carry = carry;
+        }
+    }
+
+    /// <summary>One recipe output: item and count per batch.</summary>
+    public readonly struct RecipeOutput
+    {
+        /// <summary>The item.</summary>
+        public ItemDef Item { get; }
+        /// <summary>Items made per batch.</summary>
+        public int Count { get; }
+
+        /// <summary>Creates an output line; count must be positive.</summary>
+        public RecipeOutput(ItemDef item, int count)
+        {
+            Item = item ?? throw new ArgumentNullException(nameof(item));
+            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Must be positive.");
+            Count = count;
+        }
+    }
+
     /// <summary>
-    /// A workshop as data (decision 0047, HW-05): what it takes in, what it makes and how fast. One shared workshop
-    /// system runs every def. Built from <see cref="SimTuning"/> so every number is tunable; a def is a snapshot,
-    /// so rebuild it after changing tuning.
+    /// A workshop as data (decision 0047, HW-05; recipes decision 0051): what it takes in, what it makes and how fast.
+    /// One shared workshop system runs every def. Built from <see cref="SimTuning"/> so every number is tunable; a def
+    /// is a snapshot, so rebuild it after changing tuning. The reserve is not part of the def: it stays a per-building,
+    /// per-input setting (see <see cref="InputReserve"/>).
     /// </summary>
     public sealed class WorkshopDef
     {
         /// <summary>Stable id, "workshop.hewing" or "workshop.sawing".</summary>
         public string Id { get; }
-        /// <summary>The item the workshop works on (the input stock holds only this).</summary>
-        public ItemDef Input { get; }
-        /// <summary>The item the workshop makes.</summary>
-        public ItemDef Output { get; }
-        /// <summary>Output items made from one input item.</summary>
-        public int OutputsPerInput { get; }
-        /// <summary>Input items one family works through per day.</summary>
-        public int InputsPerDayPerFamily { get; }
+        /// <summary>Recipe inputs per batch; may be empty.</summary>
+        public IReadOnlyList<RecipeInput> Inputs { get; }
+        /// <summary>Recipe outputs per batch; at least one.</summary>
+        public IReadOnlyList<RecipeOutput> Outputs { get; }
+        /// <summary>Batches one family completes per day.</summary>
+        public int BatchesPerFamilyDay { get; }
+        /// <summary>The single input item (the input stock holds only this); null when the recipe has no or several inputs.</summary>
+        public ItemDef Input => Inputs.Count == 1 ? Inputs[0].Item : null;
+        /// <summary>The first output item.</summary>
+        public ItemDef Output => Outputs[0].Item;
+        /// <summary>Output items made from one input item (first output's count per batch).</summary>
+        public int OutputsPerInput => Outputs[0].Count;
+        /// <summary>Input items one family works through per day (single-input recipes: batches times input count).</summary>
+        public int InputsPerDayPerFamily => Inputs.Count == 1 ? BatchesPerFamilyDay * Inputs[0].Count : BatchesPerFamilyDay;
         /// <summary>Most input items waiting in the workshop's input stock.</summary>
         public int InputStockCapacity { get; }
         /// <summary>Most output items the workshop's store holds.</summary>
         public int OutputCapacity { get; }
         /// <summary>Input items an ox carries per trip to this workshop.</summary>
         public int OxLoadForInput { get; }
+        /// <summary>True when the recipe has exactly one input and one output (all the workshop system runs so far).</summary>
+        public bool IsSingleInput => Inputs.Count == 1 && Outputs.Count == 1;
 
-        /// <summary>Creates a def; every count must be positive.</summary>
+        /// <summary>Creates a single-input def (one input item per batch, fetched by ox); every count must be positive.</summary>
         public WorkshopDef(string id, ItemDef input, ItemDef output, int outputsPerInput, int inputsPerDayPerFamily,
+            int inputStockCapacity, int outputCapacity, int oxLoadForInput)
+            : this(id, new[] { new RecipeInput(input, 1, CarryClass.Ox) }, new[] { new RecipeOutput(output, outputsPerInput) },
+                inputsPerDayPerFamily, inputStockCapacity, outputCapacity, oxLoadForInput)
+        {
+        }
+
+        /// <summary>Creates a def from a recipe; inputs may be empty, outputs need at least one line, counts must be positive.</summary>
+        public WorkshopDef(string id, IList<RecipeInput> inputs, IList<RecipeOutput> outputs, int batchesPerFamilyDay,
             int inputStockCapacity, int outputCapacity, int oxLoadForInput)
         {
             if (string.IsNullOrEmpty(id)) throw new ArgumentException("Id is required.", nameof(id));
+            if (inputs == null) throw new ArgumentNullException(nameof(inputs));
+            if (outputs == null) throw new ArgumentNullException(nameof(outputs));
+            if (outputs.Count == 0) throw new ArgumentException("At least one output is required.", nameof(outputs));
             Id = id;
-            Input = input ?? throw new ArgumentNullException(nameof(input));
-            Output = output ?? throw new ArgumentNullException(nameof(output));
-            OutputsPerInput = Positive(outputsPerInput, nameof(outputsPerInput));
-            InputsPerDayPerFamily = Positive(inputsPerDayPerFamily, nameof(inputsPerDayPerFamily));
+            Inputs = new List<RecipeInput>(inputs);
+            Outputs = new List<RecipeOutput>(outputs);
+            BatchesPerFamilyDay = Positive(batchesPerFamilyDay, nameof(batchesPerFamilyDay));
             InputStockCapacity = Positive(inputStockCapacity, nameof(inputStockCapacity));
             OutputCapacity = Positive(outputCapacity, nameof(outputCapacity));
             OxLoadForInput = Positive(oxLoadForInput, nameof(oxLoadForInput));
+        }
+
+        /// <summary>
+        /// Throws <see cref="NotSupportedException"/> unless the def is a single-input, single-output recipe.
+        /// Multi-input and no-input recipes wait for cw-5b/cw-5c.
+        /// </summary>
+        public static void RequireSingleInput(WorkshopDef def)
+        {
+            if (def == null) throw new ArgumentNullException(nameof(def));
+            if (!def.IsSingleInput)
+                throw new NotSupportedException("Workshop '" + def.Id + "' has " + def.Inputs.Count + " inputs and "
+                    + def.Outputs.Count + " outputs; only single-input, single-output recipes are supported until cw-5b/cw-5c.");
         }
 
         private static int Positive(int v, string name)
@@ -49,7 +127,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             return v;
         }
 
-        /// <summary>Hewing station: Log to Beam, every number from tuning.</summary>
+        /// <summary>Hewing station: 1 Log to Beams, every number from tuning.</summary>
         public static WorkshopDef Hewing(SimTuning t)
         {
             if (t == null) throw new ArgumentNullException(nameof(t));
@@ -57,7 +135,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 t.HewingStockCapacity, t.HewingStoreCapacity, t.OxLoadLogs);
         }
 
-        /// <summary>Sawpit: Beam to Plank, every number from tuning.</summary>
+        /// <summary>Sawpit: 1 Beam to Planks, every number from tuning.</summary>
         public static WorkshopDef Sawing(SimTuning t)
         {
             if (t == null) throw new ArgumentNullException(nameof(t));
