@@ -206,7 +206,7 @@ namespace LordsLegacy.Game
         {
             TryAcquireTerrain();
             if (GameMenuState.IsOpen) return;
-            var kb = Keyboard.current;
+            var kb = LordsLegacy.Game.UiFocusRules.GameKeyboard;
             var mouse = Mouse.current;
             float dt = Time.unscaledDeltaTime;
             if (kb != null)
