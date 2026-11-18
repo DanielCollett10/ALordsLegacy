@@ -47,6 +47,23 @@ namespace LordsLegacy.Sim.Operations
             familySlots: 2,
             defaultWorkRadiusM: 300);
 
+        /// <summary>Id of the coppice operation.</summary>
+        public const string CoppiceId = "operation.coppice";
+
+        /// <summary>Coppice hut: coppice building area with a mandatory coppice hut (its rod store), 2 family slots and a 300 m default work circle (MAT-10).</summary>
+        public static readonly OperationTypeDef Coppice = new OperationTypeDef(
+            CoppiceId,
+            buildingAreaTypeId: AreaTypes.CoppiceId,
+            workAreaTypeId: AreaTypes.CoppiceWorkId,
+            hutTypeId: ModuleTypes.CoppiceHutId,
+            hutCount: 1,
+            logStorageTypeId: null,
+            minLogStorageCount: 0,
+            oxenStandTypeId: null,
+            maxOxenStands: 0,
+            familySlots: 2,
+            defaultWorkRadiusM: 300);
+
         /// <summary>Id of the granary operation.</summary>
         public const string GranaryId = "operation.granary";
 
@@ -110,7 +127,7 @@ namespace LordsLegacy.Sim.Operations
         }
 
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, StorageYard };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, StorageYard, Coppice };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)

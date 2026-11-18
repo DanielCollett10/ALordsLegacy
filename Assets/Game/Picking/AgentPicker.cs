@@ -195,7 +195,7 @@ namespace LordsLegacy.Game
         {
             var host = Host();
             var fp = host != null && host.IsInitialized ? host.World.Footprints.Get(footprintId) : null;
-            if (fp == null || !LordsLegacy.Sim.Operations.Workshops.WorkshopBuildings.IsWorkshop(fp.Type)) { ClearWorkshop(); return; }
+            if (fp == null || !LordsLegacy.Sim.Operations.Workshops.WorkshopBuildings.HoldsGoods(fp.Type)) { ClearWorkshop(); return; }
             bool changed = _hasSelection || _operationId.HasValue || _houseId.HasValue || _granaryId.HasValue || _marketId.HasValue || _workshopId != footprintId;
             _hasSelection = false;
             _operationId = null;
@@ -219,9 +219,25 @@ namespace LordsLegacy.Game
         {
             footprintId = 0;
             var fp = world.Footprints.FindAt(ground);
-            if (fp == null || !LordsLegacy.Sim.Operations.Workshops.WorkshopBuildings.IsWorkshop(fp.Type)) return false;
+            if (fp == null || !LordsLegacy.Sim.Operations.Workshops.WorkshopBuildings.HoldsGoods(fp.Type)) return false;
             footprintId = fp.Id;
             return true;
+        }
+
+        /// <summary>
+        /// True when a storage yard is selected (T-549). A yard shares the workshop selection slot (both hold a goods store
+        /// and have their own panel); <see cref="HasWorkshop"/> is true for it too, and the workshop panel hides itself
+        /// because <c>WorkshopReport.Of</c> is null for a yard.
+        /// </summary>
+        public bool HasYard
+        {
+            get
+            {
+                var host = Host();
+                if (!_workshopId.HasValue || host == null || !host.IsInitialized) return false;
+                var fp = host.World.Footprints.Get(_workshopId.Value);
+                return fp != null && fp.Type.Id == ModuleTypes.StorageYardId;
+            }
         }
 
         /// <summary>True when a market is selected (T-476).</summary>

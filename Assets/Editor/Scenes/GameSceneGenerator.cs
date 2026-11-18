@@ -313,6 +313,8 @@ namespace LordsLegacy.EditorTools.Scenes
             // T-526: hewing station and sawpit use the same tool with their own type.
             CreateStructureTool("HewingStationTool", LordsLegacy.Game.Tools.StructureTool.HewingToolId, LordsLegacy.Sim.Footprints.ModuleTypes.HewingStationId, host, panel);
             CreateStructureTool("SawpitTool", LordsLegacy.Game.Tools.StructureTool.SawpitToolId, LordsLegacy.Sim.Footprints.ModuleTypes.SawpitId, host, panel);
+            // T-549: storage yard.
+            CreateStructureTool("StorageYardTool", LordsLegacy.Game.Tools.StructureTool.StorageYardToolId, LordsLegacy.Sim.Footprints.ModuleTypes.StorageYardId, host, panel);
             return last;
         }
 
@@ -393,6 +395,11 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(workshopPanel, "_host", host);
             SetRef(workshopPanel, "_agents", agents);
             SetRef(workshopPanel, "_controller", controller);
+            var yardGo = CreateUiDocument("StorageYardPanel", null);
+            var yardPanel = yardGo.AddComponent<StorageYardPanelView>();
+            SetRef(yardPanel, "_host", host);
+            SetRef(yardPanel, "_agents", agents);
+            SetRef(yardPanel, "_controller", controller);
             var marketGo = CreateUiDocument("MarketPanel", null);
             var marketPanel = marketGo.AddComponent<MarketPanelView>();
             SetRef(marketPanel, "_host", host);
