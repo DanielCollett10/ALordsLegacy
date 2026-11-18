@@ -42,6 +42,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(l.Capacity);
                 w.WriteString(l.InputItemId ?? "");
                 WriteMap(w, l.Counts);
+                WritePairs(w, l.ItemCaps);
             }
             n = 0;
             foreach (Reservation unused in led.Reservations) n++;
@@ -76,7 +77,7 @@ namespace LordsLegacy.Sim.Save.Sections
             Ledger led = world.Inventory;
             int nextLoc = r.ReadInt32();
             int nextRes = r.ReadInt32();
-            int count = r.ReadCount(41);
+            int count = r.ReadCount(45);
             for (int i = 0; i < count; i++)
             {
                 int id = r.ReadInt32();
@@ -89,9 +90,10 @@ namespace LordsLegacy.Sim.Save.Sections
                 int capacity = r.ReadInt32();
                 string input = r.ReadString();
                 List<KeyValuePair<string, int>> counts = ReadPairs(r);
+                List<KeyValuePair<string, int>> itemCaps = ReadPairs(r);
                 if (kind < (int)LocationKind.GroundPile || kind > (int)LocationKind.WorkshopStock) throw new SaveFormatException("Bad location kind " + kind + ".");
                 if (id >= nextLoc) throw new SaveFormatException("Location id " + id + " is not below the id counter " + nextLoc + ".");
-                led.RestoreLocation(id, (LocationKind)kind, new PointMm(x, z), hasOwner ? owner : (int?)null, module, capacity, counts, input.Length == 0 ? null : input);
+                led.RestoreLocation(id, (LocationKind)kind, new PointMm(x, z), hasOwner ? owner : (int?)null, module, capacity, counts, input.Length == 0 ? null : input, itemCaps);
             }
             int resCount = r.ReadCount(24);
             for (int i = 0; i < resCount; i++)

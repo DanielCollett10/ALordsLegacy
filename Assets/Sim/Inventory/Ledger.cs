@@ -108,6 +108,17 @@ namespace LordsLegacy.Sim.Inventory
             return Add(new LedgerLocation(_nextId++, LocationKind.GoodsStore, default, null, moduleId, capacity));
         }
 
+        /// <summary>Caps one item at a goods store (MAT-14, a coppice hut's 40 willow and 40 hazel); the total capacity still applies.</summary>
+        public void SetItemCap(LedgerLocation store, ItemDef item, int cap)
+        {
+            if (store == null) throw new ArgumentNullException(nameof(store));
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (store.Kind != LocationKind.GoodsStore) throw new InvalidOperationException("Item caps are for goods stores.");
+            if (cap <= 0) throw new ArgumentOutOfRangeException(nameof(cap), "Must be positive.");
+            store.ItemCaps[item.Id] = cap;
+            Version++;
+        }
+
         /// <summary>Finds the goods store bound to a footprint (a workshop's output store), or null (never creates).</summary>
         public LedgerLocation FindGoodsStore(int moduleId)
         {
@@ -193,6 +204,8 @@ namespace LordsLegacy.Sim.Inventory
             if (refusal != null) throw new InvalidOperationException(refusal);
             if (location.Capacity != int.MaxValue && (long)location.Total + n > location.Capacity)
                 throw new InvalidOperationException("Location " + location.Id + " would exceed its capacity of " + location.Capacity + ".");
+            if (location.ItemCaps.TryGetValue(item.Id, out int itemCap) && (long)location.CountOf(item.Id) + n > itemCap)
+                throw new InvalidOperationException("Location " + location.Id + " would exceed its cap of " + itemCap + " " + item.Id + ".");
             location.Counts.TryGetValue(item.Id, out int have);
             location.Counts[item.Id] = checked(have + n);
             _produced.TryGetValue(item.Id, out int made);
