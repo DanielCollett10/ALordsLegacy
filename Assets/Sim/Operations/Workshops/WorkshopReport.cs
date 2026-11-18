@@ -56,14 +56,14 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 FootprintId = footprintId,
                 Name = ModuleTypes.DisplayName(fp.Type.Id),
                 IsBuilt = world.IsBuilt(footprintId),
-                InputName = ShortName(def.FirstInput),
+                InputName = def.FirstInput == null ? "" : ShortName(def.FirstInput),
                 OutputName = ShortName(def.Output),
                 InputCapacity = def.InputStockCapacity,
                 OutputCapacity = def.OutputCapacity,
             };
             LedgerLocation stock = world.Inventory.FindWorkshopStock(footprintId);
             LedgerLocation store = world.Inventory.FindGoodsStore(footprintId);
-            if (stock != null) { r.InputCount = stock.CountOf(def.FirstInput.Id); r.InputCapacity = stock.Capacity; }
+            if (stock != null && def.FirstInput != null) { r.InputCount = stock.CountOf(def.FirstInput.Id); r.InputCapacity = stock.Capacity; }
             if (store != null) { r.OutputCount = store.CountOf(def.Output.Id); r.OutputCapacity = store.Capacity; }
             Operation op = world.Operations.FindByModule(footprintId);
             if (op != null)
@@ -81,9 +81,11 @@ namespace LordsLegacy.Sim.Operations.Workshops
             else
             {
                 r.State = OperationStatus.Reported(world, op);
-                r.StatusText = r.State == OperationState.WaitingForInput && WorkshopStatus.BlockedOnlyByReserve(world, op, def)
-                    ? "Waiting: " + InputReserve.InStorage(world, def.FirstInput) + " / " + InputReserve.ReserveOf(world, op, def.FirstInput) + " " + r.InputName + "s in storage"
-                    : TextOf(r.State, r.InputName);
+                RecipeInput? missing = r.State == OperationState.WaitingForInput ? WorkshopStatus.FirstMissing(world, fp, def) : null;
+                string missingName = missing.HasValue ? ShortName(missing.Value.Item) : r.InputName;
+                r.StatusText = missing.HasValue && WorkshopStatus.BlockedOnlyByReserve(world, op, def)
+                    ? "Waiting: " + InputReserve.InStorage(world, missing.Value.Item) + " / " + InputReserve.ReserveOf(world, op, missing.Value.Item) + " " + missingName + "s in storage"
+                    : TextOf(r.State, missingName);
             }
             return r;
         }
@@ -112,7 +114,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
             if (!WorkshopBuildings.IsWorkshop(type)) return null;
             WorkshopDef def = OperationTypes.WorkshopOf(OperationTypes.WorkshopOperationFor(typeId), world.Tuning);
             return "Build a " + ModuleTypes.DisplayName(typeId).ToLowerInvariant() + "?\nCosts " + type.ConstructionRecipe.Logs
-                + " logs.\nTurns " + def.InputsPerDayPerFamily + " " + ShortName(def.FirstInput) + "s a day into "
+                + " logs.\nTurns " + def.InputsPerDayPerFamily + " " + (def.FirstInput == null ? "item" : ShortName(def.FirstInput)) + "s a day into "
                 + def.InputsPerDayPerFamily * def.OutputsPerInput + " " + ShortName(def.Output) + "s. One family works it.";
         }
     }

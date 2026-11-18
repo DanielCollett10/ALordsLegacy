@@ -38,6 +38,10 @@
 
 `TimberChainEndToEndTests` is the pipeline test: start layout with logs, a woodcutter, hewing station, sawpit, market and three granaries with six store families, all by real commands and ticks. The 10 starting planks go into five stalls, sawn planks are carried to the sixth, and it is built. Audit runs every 5 ticks.
 
+## Fetch choice and zero inputs (T-559)
+
+Each fetch round picks the ox input with the lowest share of its stock (held plus incoming, ties in recipe order), skipping inputs with no room, no source, or blocked by their own reserve. A def with no inputs never fetches and opens work whenever a family is assigned and the store has room for a batch; it shows only Working, No workers or Store full. "Waiting for X" names the first missing input; the reserve status names that item too. Hand inputs are not fetched yet.
+
 ## Input reserve (T-537, PL-30..34)
 
 `InputReserve`: a fetch opens only if storage total (logs in Storage/Stockpile, beams in workshop GoodsStores; never piles, workshop stock, carried) minus stock reserved by open fetches minus the load is at least the reserve (tuning `WorkshopDefaultReserve` = 5, 0 = none). Own input stock is committed and uncounted; fetched work is always processed. Stocks: hewing store 10, input stocks 10. The reserve is saved (CoreSection, save v30) but not yet per building (st-0b).
