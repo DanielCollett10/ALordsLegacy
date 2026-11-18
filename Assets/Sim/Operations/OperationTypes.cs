@@ -64,6 +64,23 @@ namespace LordsLegacy.Sim.Operations
             familySlots: 2,
             defaultWorkRadiusM: 300);
 
+        /// <summary>Id of the thatching operation.</summary>
+        public const string ThatchingId = "operation.thatching";
+
+        /// <summary>Thatcher's hut: building area with a mandatory hut (its sheaf store), 2 family slots and a 300 m default work circle (MAT-39b).</summary>
+        public static readonly OperationTypeDef Thatching = new OperationTypeDef(
+            ThatchingId,
+            buildingAreaTypeId: AreaTypes.ThatchingId,
+            workAreaTypeId: AreaTypes.ThatchingWorkId,
+            hutTypeId: ModuleTypes.ThatcherHutId,
+            hutCount: 1,
+            logStorageTypeId: null,
+            minLogStorageCount: 0,
+            oxenStandTypeId: null,
+            maxOxenStands: 0,
+            familySlots: 2,
+            defaultWorkRadiusM: 300);
+
         /// <summary>Id of the granary operation.</summary>
         public const string GranaryId = "operation.granary";
 
@@ -152,7 +169,7 @@ namespace LordsLegacy.Sim.Operations
         }
 
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, Weaving, Wattling, StorageYard, Coppice };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, Weaving, Wattling, StorageYard, Coppice, Thatching };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)

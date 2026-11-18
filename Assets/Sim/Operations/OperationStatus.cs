@@ -53,6 +53,7 @@ namespace LordsLegacy.Sim.Operations
         {
             if (op.TypeId == OperationTypes.ForagingId) return Foraging.ForagingStatus.Of(world, op);
             if (op.TypeId == OperationTypes.CoppiceId) return Coppice.CoppiceStatus.Of(world, op);
+            if (op.TypeId == OperationTypes.ThatchingId) return Thatch.ThatchingStatus.Of(world, op);
             Workshops.WorkshopDef shop = OperationTypes.WorkshopOf(op.TypeId, world.Tuning);
             if (shop != null) return Workshops.WorkshopStatus.Of(world, op, shop);
             if (op.Paused) return OperationState.Paused;
