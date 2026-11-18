@@ -169,6 +169,27 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.StorageYardCapacity);
             w.WriteInt32(t.StorageYardFamilySlots);
             w.WriteDouble(t.YardCollectThreshold);
+            w.WriteInt32(t.HazelStoolCount); // T-553
+            w.WriteInt32(t.WillowStoolCount);
+            w.WriteInt32(t.CoppiceRodsPerCut);
+            w.WriteInt32(t.CoppiceRegrowDays);
+            w.WriteInt32(t.CoppiceMinutesPerRod);
+            w.WriteInt32(t.CoppiceHutStorePerKind);
+            w.WriteInt32(t.HandCarryRods);
+            w.WriteInt32(t.HandCarryBaskets);
+            w.WriteInt32(t.HandCarryPanels);
+            w.WriteInt32(t.WeaverWillowPerBasket);
+            w.WriteInt32(t.WeaverBasketsPerDay);
+            w.WriteInt32(t.WeaverWillowStock);
+            w.WriteInt32(t.WeaverBasketStore);
+            w.WriteInt32(t.WattleHazelPerPanel);
+            w.WriteInt32(t.WattleWillowPerPanel);
+            w.WriteInt32(t.WattlePanelsPerDay);
+            w.WriteInt32(t.WattleHazelStock);
+            w.WriteInt32(t.WattleWillowStock);
+            w.WriteInt32(t.WattlePanelStore);
+            w.WriteInt32(t.ForagerHutBasketSlots);
+            w.WriteInt32(t.GranaryBasketSlots);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -261,6 +282,27 @@ namespace LordsLegacy.Sim.Save.Sections
             t.StorageYardCapacity = r.ReadInt32();
             t.StorageYardFamilySlots = r.ReadInt32();
             t.YardCollectThreshold = r.ReadDouble();
+            t.HazelStoolCount = r.ReadInt32(); // T-553
+            t.WillowStoolCount = r.ReadInt32();
+            t.CoppiceRodsPerCut = r.ReadInt32();
+            t.CoppiceRegrowDays = r.ReadInt32();
+            t.CoppiceMinutesPerRod = r.ReadInt32();
+            t.CoppiceHutStorePerKind = r.ReadInt32();
+            t.HandCarryRods = r.ReadInt32();
+            t.HandCarryBaskets = r.ReadInt32();
+            t.HandCarryPanels = r.ReadInt32();
+            t.WeaverWillowPerBasket = r.ReadInt32();
+            t.WeaverBasketsPerDay = r.ReadInt32();
+            t.WeaverWillowStock = r.ReadInt32();
+            t.WeaverBasketStore = r.ReadInt32();
+            t.WattleHazelPerPanel = r.ReadInt32();
+            t.WattleWillowPerPanel = r.ReadInt32();
+            t.WattlePanelsPerDay = r.ReadInt32();
+            t.WattleHazelStock = r.ReadInt32();
+            t.WattleWillowStock = r.ReadInt32();
+            t.WattlePanelStore = r.ReadInt32();
+            t.ForagerHutBasketSlots = r.ReadInt32();
+            t.GranaryBasketSlots = r.ReadInt32();
             return t;
         }
 

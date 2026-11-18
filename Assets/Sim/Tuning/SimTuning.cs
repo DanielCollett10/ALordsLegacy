@@ -343,6 +343,69 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Planks (or other light non-log materials) an odd-jobber carries to a site per trip. Unit: items. Rule: PL-16, decision 0046 (PLACEHOLDER).</summary>
         public int HandCarryPlanks { get; set; } = 2;
 
+        /// <summary>Hazel stools scattered at new game. Unit: stools. Rule: MAT-15 (PROPOSED, tuning).</summary>
+        public int HazelStoolCount { get; set; } = 40;
+
+        /// <summary>Willow stools scattered at new game. Unit: stools. Rule: MAT-15 (PROPOSED, tuning).</summary>
+        public int WillowStoolCount { get; set; } = 20;
+
+        /// <summary>Rods one cut takes from a stool. Unit: rods. Rule: MAT-16 (PROPOSED, tuning).</summary>
+        public int CoppiceRodsPerCut { get; set; } = 10;
+
+        /// <summary>Days an emptied stool takes to regrow. Unit: game days. Rule: MAT-16 (PROPOSED, tuning).</summary>
+        public int CoppiceRegrowDays { get; set; } = 30;
+
+        /// <summary>Game minutes to cut one rod. Unit: minutes. Rule: MAT-17 (PROPOSED, tuning).</summary>
+        public int CoppiceMinutesPerRod { get; set; } = 6;
+
+        /// <summary>Most rods of each kind a coppice hut stores. Unit: rods. Rule: MAT-14 (DECIDED).</summary>
+        public int CoppiceHutStorePerKind { get; set; } = 40;
+
+        /// <summary>Most rods a person carries by hand on one trip. Unit: rods. Rule: MAT-23 (PROPOSED, tuning).</summary>
+        public int HandCarryRods { get; set; } = 10;
+
+        /// <summary>Most baskets a person carries by hand on one trip. Unit: baskets. Rule: MAT-23 (PROPOSED, tuning).</summary>
+        public int HandCarryBaskets { get; set; } = 5;
+
+        /// <summary>Most wattle panels a person carries by hand on one trip. Unit: panels. Rule: MAT-23 (PROPOSED, tuning).</summary>
+        public int HandCarryPanels { get; set; } = 2;
+
+        /// <summary>Willow rods one basket takes. Unit: rods. Rule: MAT-22 (PROPOSED, tuning).</summary>
+        public int WeaverWillowPerBasket { get; set; } = 6;
+
+        /// <summary>Baskets one family weaves per day. Unit: baskets per day. Rule: MAT-22 (PROPOSED, tuning).</summary>
+        public int WeaverBasketsPerDay { get; set; } = 4;
+
+        /// <summary>Most willow rods waiting in the weaver's input stock. Unit: rods. Rule: MAT-24 (PROPOSED, tuning).</summary>
+        public int WeaverWillowStock { get; set; } = 30;
+
+        /// <summary>Most baskets the weaver's output store holds. Unit: baskets. Rule: MAT-24 (PROPOSED, tuning).</summary>
+        public int WeaverBasketStore { get; set; } = 10;
+
+        /// <summary>Hazel rods one wattle panel takes. Unit: rods. Rule: MAT-22 (PROPOSED, tuning).</summary>
+        public int WattleHazelPerPanel { get; set; } = 6;
+
+        /// <summary>Willow rods one wattle panel takes. Unit: rods. Rule: MAT-22 (PROPOSED, tuning).</summary>
+        public int WattleWillowPerPanel { get; set; } = 2;
+
+        /// <summary>Wattle panels one family makes per day. Unit: panels per day. Rule: MAT-22 (PROPOSED, tuning).</summary>
+        public int WattlePanelsPerDay { get; set; } = 5;
+
+        /// <summary>Most hazel rods waiting in the wattle yard's input stock. Unit: rods. Rule: MAT-24 (PROPOSED, tuning).</summary>
+        public int WattleHazelStock { get; set; } = 30;
+
+        /// <summary>Most willow rods waiting in the wattle yard's input stock. Unit: rods. Rule: MAT-24 (PROPOSED, tuning).</summary>
+        public int WattleWillowStock { get; set; } = 10;
+
+        /// <summary>Most wattle panels the wattle yard's output store holds. Unit: panels. Rule: MAT-24 (PROPOSED, tuning).</summary>
+        public int WattlePanelStore { get; set; } = 20;
+
+        /// <summary>Baskets the forage hut keeps as kit, one per slot. Unit: baskets. Rule: MAT-53 (PROPOSED, tuning).</summary>
+        public int ForagerHutBasketSlots { get; set; } = 5;
+
+        /// <summary>Baskets the granary keeps as kit, one per family slot. Unit: baskets. Rule: MAT-53 (PROPOSED, tuning).</summary>
+        public int GranaryBasketSlots { get; set; } = 2;
+
         /// <summary>Baskets a forage bush holds when full. Unit: baskets. Rule: FD-21 (PLACEHOLDER).</summary>
         public int BushBaskets { get; set; } = 3;
 
