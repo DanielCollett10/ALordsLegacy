@@ -192,6 +192,18 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.WattlePanelStore);
             w.WriteInt32(t.ForagerHutBasketSlots);
             w.WriteInt32(t.GranaryBasketSlots);
+            w.WriteInt32(t.ReedBedCount); // T-572
+            w.WriteInt32(t.ReedSheavesPerCut);
+            w.WriteInt32(t.ReedRegrowDays);
+            w.WriteInt32(t.ThatchCutMinutesPerBundle);
+            w.WriteInt32(t.ThatchOffSeasonFactor);
+            w.WriteInt32(t.ThatchCureDays);
+            w.WriteInt32(t.ThatcherHutStore);
+            w.WriteDouble(t.ThatcherHutWidthM);
+            w.WriteDouble(t.ThatcherHutDepthM);
+            w.WriteInt32(t.ThatcherHutLogs);
+            w.WriteInt32(t.ThatcherHutMinutes);
+            w.WriteInt32(t.HandCarryThatch);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -305,6 +317,18 @@ namespace LordsLegacy.Sim.Save.Sections
             t.WattlePanelStore = r.ReadInt32();
             t.ForagerHutBasketSlots = r.ReadInt32();
             t.GranaryBasketSlots = r.ReadInt32();
+            t.ReedBedCount = r.ReadInt32(); // T-572
+            t.ReedSheavesPerCut = r.ReadInt32();
+            t.ReedRegrowDays = r.ReadInt32();
+            t.ThatchCutMinutesPerBundle = r.ReadInt32();
+            t.ThatchOffSeasonFactor = r.ReadInt32();
+            t.ThatchCureDays = r.ReadInt32();
+            t.ThatcherHutStore = r.ReadInt32();
+            t.ThatcherHutWidthM = r.ReadDouble();
+            t.ThatcherHutDepthM = r.ReadDouble();
+            t.ThatcherHutLogs = r.ReadInt32();
+            t.ThatcherHutMinutes = r.ReadInt32();
+            t.HandCarryThatch = r.ReadInt32();
             return t;
         }
 

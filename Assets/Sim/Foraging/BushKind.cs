@@ -12,7 +12,9 @@ namespace LordsLegacy.Sim.Foraging
         /// <summary>Hazel stool, cut for rods (MAT-13).</summary>
         HazelStool = 2,
         /// <summary>Willow stool, cut for rods (MAT-15).</summary>
-        WillowStool = 3
+        WillowStool = 3,
+        /// <summary>Reed bed on low flat ground, cut for thatch sheaves (MAT-34, MAT-39a).</summary>
+        ReedBed = 4
     }
 
     /// <summary>Per-kind tuning lookups for bushes.</summary>
@@ -28,6 +30,7 @@ namespace LordsLegacy.Sim.Foraging
             {
                 case BushKind.HazelStool:
                 case BushKind.WillowStool: return t.CoppiceRodsPerCut;
+                case BushKind.ReedBed: return t.ReedSheavesPerCut;
                 default: return t.BushBaskets;
             }
         }
@@ -39,6 +42,7 @@ namespace LordsLegacy.Sim.Foraging
             {
                 case BushKind.HazelStool:
                 case BushKind.WillowStool: return t.CoppiceRegrowDays;
+                case BushKind.ReedBed: return t.ReedRegrowDays;
                 default: return t.BushRegrowDays;
             }
         }

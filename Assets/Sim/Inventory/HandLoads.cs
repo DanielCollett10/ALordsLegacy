@@ -23,6 +23,7 @@ namespace LordsLegacy.Sim.Inventory
             if (item.Id == Items.WillowRod.Id || item.Id == Items.HazelRod.Id) return tuning.HandCarryRods;
             if (item.Id == Items.Basket.Id) return tuning.HandCarryBaskets;
             if (item.Id == Items.WattlePanel.Id) return tuning.HandCarryPanels;
+            if (item.Id == Items.Thatch.Id) return tuning.HandCarryThatch;
             return item.Category == ItemCategory.General ? tuning.HandCarryItems : (int?)null;
         }
     }

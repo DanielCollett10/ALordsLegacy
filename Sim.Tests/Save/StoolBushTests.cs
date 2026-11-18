@@ -93,6 +93,45 @@ namespace LordsLegacy.Sim.Tests.Save
         }
 
         [Test]
+        public void Reed_OnLowGround_FullAtSheavesPerCut_RegrowNinetyDays()
+        {
+            var (w, _) = MakeRidge();
+            var reeds = w.Bushes.All.Where(b => b.Kind == BushKind.ReedBed).ToList();
+            Assert.Greater(reeds.Count, 0);
+            var low = new LowGround(w.Terrain);
+            Assert.IsTrue(reeds.All(b => low.Contains(b.X, b.Z) && b.Baskets == 8));
+            Assert.AreEqual(8, BushKinds.FullUnits(BushKind.ReedBed, w.Tuning));
+            Assert.AreEqual(90, BushKinds.RegrowDays(BushKind.ReedBed, w.Tuning));
+            Assert.IsFalse(BushKinds.IsStool(BushKind.ReedBed));
+        }
+
+        [Test]
+        public void Reed_NotMovedByStoolCounts()
+        {
+            var (a, _) = MakeRidge();
+            var (c, _) = MakeRidge(new SimTuning { HazelStoolCount = 0, WillowStoolCount = 0 });
+            Assert.AreEqual(
+                a.Bushes.All.Where(x => x.Kind == BushKind.ReedBed).Select(x => (x.X, x.Z)),
+                c.Bushes.All.Where(x => x.Kind == BushKind.ReedBed).Select(x => (x.X, x.Z)));
+        }
+
+        [Test]
+        public void Reed_RoundTrip_KeepsKind_AndThatchTuning()
+        {
+            var (w, _) = MakeRidge();
+            Assert.Greater(w.Bushes.All.Count(b => b.Kind == BushKind.ReedBed), 0);
+            var (_, map) = MakeRidge();
+            byte[] bytes = SimSave.Write(w, "s", 1, map.MapId, map.ContentHash);
+            SimWorld back = SimSave.Read(bytes, map);
+            Assert.AreEqual(w.Bushes.All.Count(b => b.Kind == BushKind.ReedBed), back.Bushes.All.Count(b => b.Kind == BushKind.ReedBed));
+            Assert.AreEqual(30, back.Tuning.ThatchCutMinutesPerBundle);
+            Assert.AreEqual(4, back.Tuning.ThatchOffSeasonFactor);
+            Assert.AreEqual(7, back.Tuning.ThatchCureDays);
+            Assert.AreEqual(40, back.Tuning.ThatcherHutStore);
+            Assert.AreEqual(1, LordsLegacy.Sim.Inventory.HandLoads.For(LordsLegacy.Sim.Inventory.Items.Thatch, back.Tuning));
+        }
+
+        [Test]
         public void LowGround_Grid_QuarterLowestAndFlatOnly()
         {
             // 11x11 grid, height = ix (0..10), so the 25th percentile is about 2.5 m and slope is 45 degrees.
