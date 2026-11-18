@@ -71,6 +71,13 @@ MonoBehaviour:
   sawingStoreCapacity: 20
   workshopShiftMinutes: 0
   workshopDefaultReserve: 5
+  storageYardWidthM: 8
+  storageYardDepthM: 6
+  storageYardLogs: 8
+  storageYardMinutes: 480
+  storageYardCapacity: 300
+  storageYardFamilySlots: 2
+  yardCollectThreshold: 0.5
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5
@@ -174,6 +181,30 @@ MonoBehaviour:
     clearsTrees: 1
     blocksRoads: 1
     nearRoadReachM: 10
+  - id: area.coppice
+    namePrefix: Coppice hut
+    kind: 0
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 5000
+    limitSlope: 1
+    maxSlopeDegrees: 10
+    clearsTrees: 1
+    blocksRoads: 1
+    nearRoadReachM: 10
+  - id: area.work_coppice
+    namePrefix: Coppice work area
+    kind: 1
+    minPoints: 4
+    maxPoints: 8
+    minAreaM2: 100
+    maxAreaM2: 400000
+    limitSlope: 0
+    maxSlopeDegrees: 10
+    clearsTrees: 0
+    blocksRoads: 0
+    nearRoadReachM: 10
   moduleRecipes:
   - moduleId: module.woodcutting_hut
     logs: 8
@@ -203,5 +234,8 @@ MonoBehaviour:
     logs: 6
     buildWorkerMinutes: 480
   - moduleId: module.storage_yard
+    logs: 8
+    buildWorkerMinutes: 480
+  - moduleId: module.coppice_hut
     logs: 8
     buildWorkerMinutes: 480

@@ -2483,8 +2483,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 100133}
-  - component: {fileID: 100135}
   - component: {fileID: 100134}
+  - component: {fileID: 100135}
   m_Layer: 0
   m_Name: StorageYardPanel
   m_TagString: Untagged
@@ -2516,21 +2516,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 100132}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 100174}
-  m_Name: 
-  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.StorageYardPanelView
-  _host: {fileID: 100131}
-  _agents: {fileID: 100002}
-  _controller: {fileID: 100151}
---- !u!114 &100135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100132}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
@@ -2545,6 +2530,21 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
+--- !u!114 &100135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe656061f5b31924f9c8ac74c4e0c78d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: LordsLegacy.Game::LordsLegacy.Game.StorageYardPanelView
+  _host: {fileID: 100131}
+  _agents: {fileID: 100002}
+  _controller: {fileID: 100151}
 --- !u!1 &100136
 GameObject:
   m_ObjectHideFlags: 0
@@ -3214,18 +3214,3 @@ MonoBehaviour:
   _host: {fileID: 100131}
   _agents: {fileID: 100002}
   _controller: {fileID: 100151}
---- !u!115 &100174
-MonoScript:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 7
-  m_DefaultReferences: {}
-  m_Icon: {fileID: 0}
-  m_Type: 0
-  m_ExecutionOrder: 0
-  m_ClassName: StorageYardPanelView
-  m_Namespace: LordsLegacy.Game
-  m_AssemblyName: LordsLegacy.Game

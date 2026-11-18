@@ -1,5 +1,6 @@
 using System.Collections;
 using LordsLegacy.Game;
+using LordsLegacy.Game.Tools;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -178,6 +179,23 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.IsNotNull(panel, "WorkshopPanelView missing (run LordsLegacy/Scenes/Generate Game scene).");
             AssertNoNullRefs(panel);
             Assert.IsNotNull(panel.GetComponent<UnityEngine.UIElements.UIDocument>(), "WorkshopPanel has no UIDocument.");
+        }
+
+        [UnityTest]
+        public IEnumerator GameSceneHasStorageYard()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+            var panel = Object.FindFirstObjectByType<StorageYardPanelView>();
+            Assert.IsNotNull(panel, "StorageYardPanelView missing (run LordsLegacy/Scenes/Generate Game scene).");
+            AssertNoNullRefs(panel);
+            Assert.IsNotNull(panel.GetComponent<UnityEngine.UIElements.UIDocument>(), "StorageYardPanel has no UIDocument.");
+            bool tool = false;
+            foreach (var t in Object.FindObjectsByType<StructureTool>(FindObjectsSortMode.None))
+                if (t.name == "StorageYardTool") tool = true;
+            Assert.IsTrue(tool, "StorageYardTool missing from the scene.");
         }
 
         [UnityTest]
