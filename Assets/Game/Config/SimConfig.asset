@@ -193,5 +193,11 @@ MonoBehaviour:
     logs: 8
     buildWorkerMinutes: 480
   - moduleId: module.market_stall
-    logs: 1
+    logs: 0
     buildWorkerMinutes: 60
+  - moduleId: module.hewing_station
+    logs: 6
+    buildWorkerMinutes: 480
+  - moduleId: module.sawpit
+    logs: 6
+    buildWorkerMinutes: 480
