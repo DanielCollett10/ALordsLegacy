@@ -96,6 +96,10 @@ namespace LordsLegacy.Sim.Operations.Workshops
         public int OutputCapacity { get; }
         /// <summary>Input items an ox carries per trip to this workshop.</summary>
         public int OxLoadForInput { get; }
+        /// <summary>Youngest age in years that may work here; light work is 8+ (MAT-23), the default is <see cref="OperationStatus.WorkingAgeYears"/>.</summary>
+        public double MinWorkAgeYears { get; private set; } = OperationStatus.WorkingAgeYears;
+        /// <summary>True when the work task is light work, so citizens under working age may take it (MAT-23).</summary>
+        public bool IsLightWork => MinWorkAgeYears < OperationStatus.WorkingAgeYears;
         /// <summary>True when the recipe has exactly one input and one output (all the workshop system runs so far).</summary>
         public bool IsSingleInput => Inputs.Count == 1 && Outputs.Count == 1;
 
@@ -136,6 +140,13 @@ namespace LordsLegacy.Sim.Operations.Workshops
                     + def.Outputs.Count + " outputs; only single-input, single-output recipes are supported until cw-5b/cw-5c.");
         }
 
+        /// <summary>Sets the youngest working age (light work) and returns this def.</summary>
+        public WorkshopDef WithMinWorkAge(double years)
+        {
+            MinWorkAgeYears = years;
+            return this;
+        }
+
         private static int Positive(int v, string name)
         {
             if (v <= 0) throw new ArgumentOutOfRangeException(name, "Must be positive.");
@@ -156,6 +167,28 @@ namespace LordsLegacy.Sim.Operations.Workshops
             if (t == null) throw new ArgumentNullException(nameof(t));
             return new WorkshopDef("workshop.sawing", Items.Beam, Items.Plank, t.SawingPlanksPerBeam, t.SawingBeamsPerDay,
                 t.SawingStockCapacity, t.SawingStoreCapacity, t.OxLoadBeams);
+        }
+
+        /// <summary>Weaver (MAT-20): 6 willow rods to 1 basket, 4 baskets per family-day, input 30, store 10. Rods go by hand.</summary>
+        public static WorkshopDef Weaving(SimTuning t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            return new WorkshopDef("workshop.weaving",
+                new[] { new RecipeInput(Items.WillowRod, 6, CarryClass.Hand, 30) },
+                new[] { new RecipeOutput(Items.Basket, 1) }, 4, 30, 10, Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
+        }
+
+        /// <summary>Wattle yard (MAT-22): 6 hazel + 2 willow rods to 1 panel, 5 panels per family-day, inputs 30 hazel and 10 willow, store 20.</summary>
+        public static WorkshopDef Wattling(SimTuning t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            return new WorkshopDef("workshop.wattling",
+                new[]
+                {
+                    new RecipeInput(Items.HazelRod, 6, CarryClass.Hand, 30),
+                    new RecipeInput(Items.WillowRod, 2, CarryClass.Hand, 10)
+                },
+                new[] { new RecipeOutput(Items.WattlePanel, 1) }, 5, 30, 20, Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
         }
     }
 }

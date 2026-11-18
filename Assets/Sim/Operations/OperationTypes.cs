@@ -113,12 +113,31 @@ namespace LordsLegacy.Sim.Operations
         /// <summary>Test seam: defs that replace a workshop operation type's def (a multi-input recipe before one ships). Null in play; set only by tests.</summary>
         internal static Dictionary<string, Workshops.WorkshopDef> TestDefs;
 
+        /// <summary>Id of the weaving operation.</summary>
+        public const string WeavingId = "operation.weaving";
+        /// <summary>Id of the wattle yard operation.</summary>
+        public const string WattlingId = "operation.wattling";
+
+        /// <summary>Weaver: an area-less operation that owns the weaver footprint as its hut, 1 family slot (MAT-20).</summary>
+        public static readonly OperationTypeDef Weaving = new OperationTypeDef(
+            WeavingId, buildingAreaTypeId: null, workAreaTypeId: null, hutTypeId: ModuleTypes.WeaverId, hutCount: 1,
+            logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
+            familySlots: 1, defaultWorkRadiusM: 0);
+
+        /// <summary>Wattle yard: an area-less operation that owns the yard footprint as its hut, 1 family slot (MAT-22).</summary>
+        public static readonly OperationTypeDef Wattling = new OperationTypeDef(
+            WattlingId, buildingAreaTypeId: null, workAreaTypeId: null, hutTypeId: ModuleTypes.WattleYardId, hutCount: 1,
+            logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
+            familySlots: 1, defaultWorkRadiusM: 0);
+
         /// <summary>The workshop def an operation type carries (decision 0047), or null for a non-workshop type.</summary>
         public static Workshops.WorkshopDef WorkshopOf(string operationTypeId, Tuning.SimTuning t)
         {
             if (TestDefs != null && operationTypeId != null && TestDefs.TryGetValue(operationTypeId, out Workshops.WorkshopDef over)) return over;
             if (operationTypeId == HewingId) return Workshops.WorkshopDef.Hewing(t);
             if (operationTypeId == SawingId) return Workshops.WorkshopDef.Sawing(t);
+            if (operationTypeId == WeavingId) return Workshops.WorkshopDef.Weaving(t);
+            if (operationTypeId == WattlingId) return Workshops.WorkshopDef.Wattling(t);
             return null;
         }
 
@@ -127,11 +146,13 @@ namespace LordsLegacy.Sim.Operations
         {
             if (moduleTypeId == ModuleTypes.HewingStationId) return HewingId;
             if (moduleTypeId == ModuleTypes.SawpitId) return SawingId;
+            if (moduleTypeId == ModuleTypes.WeaverId) return WeavingId;
+            if (moduleTypeId == ModuleTypes.WattleYardId) return WattlingId;
             return null;
         }
 
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, StorageYard, Coppice };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, Weaving, Wattling, StorageYard, Coppice };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)
