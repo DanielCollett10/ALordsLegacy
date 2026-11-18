@@ -63,9 +63,10 @@ namespace LordsLegacy.Sim.Tests.Operations
         public void StandardSources_CampStoreAskedBeforeLoosePiles()
         {
             IReadOnlyList<IYardJobSource> s = YardJobs.Standard().Sources;
-            Assert.AreEqual(2, s.Count);
+            Assert.AreEqual(3, s.Count);
             Assert.IsInstanceOf<YardCampStoreSource>(s[0], "ST-40 is asked first");
             Assert.IsInstanceOf<YardPileSource>(s[1], "ST-41 is asked second");
+            Assert.IsInstanceOf<YardWorkshopSource>(s[2], "ST-42 is asked third");
         }
 
         [Test]
