@@ -67,13 +67,13 @@ namespace LordsLegacy.Sim.Foraging
         }
 
         /// <summary>The nearest bush with baskets that nobody has reserved, or null. Ties go to the lowest id.</summary>
-        public BushRecord NearestAvailable(float x, float z)
+        public BushRecord NearestAvailable(float x, float z, params BushKind[] kinds)
         {
             BushRecord best = null;
             double bestD = double.MaxValue;
             foreach (var b in _byId.Values)
             {
-                if (b.Baskets <= 0 || b.ReservedBy.HasValue) continue;
+                if (b.Baskets <= 0 || b.ReservedBy.HasValue || Array.IndexOf(kinds, b.Kind) < 0) continue;
                 double dx = b.X - x, dz = b.Z - z, d = dx * dx + dz * dz;
                 if (d < bestD) { best = b; bestD = d; }
             }
@@ -81,21 +81,21 @@ namespace LordsLegacy.Sim.Foraging
         }
 
         /// <summary>True when any bush with baskets left (reserved or not) lies inside the region.</summary>
-        public bool AnyWithBasketsIn(Forestry.TreeRegion region)
+        public bool AnyWithBasketsIn(Forestry.TreeRegion region, params BushKind[] kinds)
         {
             foreach (var b in _byId.Values)
-                if (b.Baskets > 0 && region.Contains(b.X, b.Z)) return true;
+                if (b.Baskets > 0 && Array.IndexOf(kinds, b.Kind) >= 0 && region.Contains(b.X, b.Z)) return true;
             return false;
         }
 
         /// <summary>The nearest unreserved bush with baskets inside the region, or null. Ties go to the lowest id.</summary>
-        public BushRecord NearestAvailable(float x, float z, Forestry.TreeRegion region)
+        public BushRecord NearestAvailable(float x, float z, Forestry.TreeRegion region, params BushKind[] kinds)
         {
             BushRecord best = null;
             double bestD = double.MaxValue;
             foreach (var b in _byId.Values)
             {
-                if (b.Baskets <= 0 || b.ReservedBy.HasValue || !region.Contains(b.X, b.Z)) continue;
+                if (b.Baskets <= 0 || b.ReservedBy.HasValue || Array.IndexOf(kinds, b.Kind) < 0 || !region.Contains(b.X, b.Z)) continue;
                 double dx = b.X - x, dz = b.Z - z, d = dx * dx + dz * dz;
                 if (d < bestD) { best = b; bestD = d; }
             }
@@ -105,12 +105,12 @@ namespace LordsLegacy.Sim.Foraging
         /// <summary>Refills every emptied bush whose regrow time has passed (FD-21). Returns how many regrew.</summary>
         public int Regrow(long tick, SimTuning tuning)
         {
-            long wait = (long)tuning.BushRegrowDays * TicksPerDay;
             int n = 0;
             foreach (var b in _byId.Values)
             {
+                long wait = (long)BushKinds.RegrowDays(b.Kind, tuning) * TicksPerDay;
                 if (b.Baskets > 0 || tick - b.EmptiedAtTick < wait) continue;
-                b.Baskets = tuning.BushBaskets;
+                b.Baskets = BushKinds.FullUnits(b.Kind, tuning);
                 n++;
             }
             if (n > 0) Version++;
