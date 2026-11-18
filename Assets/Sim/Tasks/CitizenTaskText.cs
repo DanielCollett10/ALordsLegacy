@@ -86,6 +86,7 @@ namespace LordsLegacy.Sim.Tasks
         {
             if (t.Def.Id == WoodcuttingSystem.FellTaskId) return FellVerb;
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) return "Foraging";
+            if (t.Def.Id == Coppice.CoppiceSystem.CoppiceTaskId) return "Cutting rods";
             if (t.Def.Id == HandHaulTaskDefs.HaulId) return "Hauling goods";
             return ConstructionTaskDefs.VerbFor(t.Def.Id, Footprints.ModuleTypes.DisplayName(t.Subject)) ?? "Working";
         }
@@ -93,6 +94,7 @@ namespace LordsLegacy.Sim.Tasks
         private static string OperationName(string typeId)
         {
             if (typeId == OperationTypes.ForagingId) return "Foraging camp";
+            if (typeId == OperationTypes.CoppiceId) return "Coppice hut";
             if (typeId == OperationTypes.GranaryId) return "Granary";
             return typeId == OperationTypes.WoodcuttingId ? "Woodcutter" : "Operation";
         }

@@ -104,6 +104,19 @@ namespace LordsLegacy.Sim.Areas
         public static readonly AreaTypeDef ForagingWork =
             new AreaTypeDef(ForagingWorkId, "Foraging work area", AreaKind.Work, 4, 8, 100, 400000, null, false, false);
 
+        /// <summary>Id of the coppice building area (MAT-10).</summary>
+        public const string CoppiceId = "area.coppice";
+        /// <summary>Id of the coppice work area (MAT-10).</summary>
+        public const string CoppiceWorkId = "area.work_coppice";
+
+        /// <summary>Coppice building area: same limits as the foraging camp (MAT-10).</summary>
+        public static readonly AreaTypeDef Coppice =
+            new AreaTypeDef(CoppiceId, "Coppice hut", AreaKind.Building, 4, 8, 100, 5000, 10, true, true);
+
+        /// <summary>Coppice work area: same limits as the foraging work area (MAT-10).</summary>
+        public static readonly AreaTypeDef CoppiceWork =
+            new AreaTypeDef(CoppiceWorkId, "Coppice work area", AreaKind.Work, 4, 8, 100, 400000, null, false, false);
+
         /// <summary>Id of the market building area (MK-01).</summary>
         public const string MarketId = "area.market";
 
@@ -112,7 +125,7 @@ namespace LordsLegacy.Sim.Areas
             new AreaTypeDef(MarketId, "Market", AreaKind.Building, 4, 8, 100, 2000, 10, true, true);
 
         /// <summary>All area types, in definition order.</summary>
-        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot, Foraging, ForagingWork, Market };
+        public static readonly IReadOnlyList<AreaTypeDef> All = new[] { Test, TestWork, Woodcutting, WoodcuttingWork, Plot, Foraging, ForagingWork, Market, Coppice, CoppiceWork };
 
         /// <summary>The default definitions as a catalog; a world built without catalogs uses this (decision 0019).</summary>
         public static readonly AreaTypeCatalog DefaultCatalog = new AreaTypeCatalog(All);

@@ -61,6 +61,7 @@ namespace LordsLegacy.Sim.Tasks
                 return;
             }
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) { StepForage(world, t, c); return; }
+            if (t.Def.Id == Coppice.CoppiceSystem.CoppiceTaskId) { StepCoppice(world, t, c); return; }
             if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) { StepStock(world, t, c); return; }
             if (t.Def.Id == ConstructionTaskDefs.CarryId) { StepCarry(world, t, c); return; }
             if (t.Def.Id == HandHaulTaskDefs.HaulId) { StepHaul(world, t, c); return; }
@@ -194,6 +195,7 @@ namespace LordsLegacy.Sim.Tasks
             _drop.Remove(t.Id);
             if (t.Def.Id == FoodTripSystem.FetchFoodTaskId) FailFoodTrip(world, t, c);
             if (t.Def.Id == Foraging.ForagingSystem.ForageTaskId) FailForage(world, t, c);
+            if (t.Def.Id == Coppice.CoppiceSystem.CoppiceTaskId) FailCoppice(world, t, c);
             if (t.Def.Id == Markets.StoreFamilySystem.StockStallTaskId) FailStock(world, t, c);
             if (t.Def.Id == ConstructionTaskDefs.CarryId) FailCarry(world, t, c);
             if (t.Def.Id == HandHaulTaskDefs.HaulId) FailHaul(world, t, c);

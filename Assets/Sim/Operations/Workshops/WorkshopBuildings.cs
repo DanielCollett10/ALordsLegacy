@@ -21,7 +21,7 @@ namespace LordsLegacy.Sim.Operations.Workshops
 
         /// <summary>True for a building whose built footprint holds a <see cref="LocationKind.GoodsStore"/>: a workshop or a storage yard (ST-07).</summary>
         public static bool HoldsGoods(FootprintTypeDef type) =>
-            IsWorkshop(type) || (type != null && type.Id == ModuleTypes.StorageYardId);
+            IsWorkshop(type) || (type != null && (type.Id == ModuleTypes.StorageYardId || type.Id == ModuleTypes.CoppiceHutId));
 
         /// <summary>Creates the stock and store of a just-built workshop footprint; does nothing for other types or if they exist.</summary>
         public static void OnBuilt(SimWorld world, Footprint fp)
@@ -31,6 +31,18 @@ namespace LordsLegacy.Sim.Operations.Workshops
             {
                 // ST-03: the yard's one General store, capacity from tuning, created when it is built.
                 if (world.Inventory.FindGoodsStore(fp.Id) == null) world.Inventory.AddGoodsStore(world.Tuning.StorageYardCapacity, fp.Id);
+                return;
+            }
+            if (fp.Type.Id == ModuleTypes.CoppiceHutId)
+            {
+                // MAT-14: the hut's own rod store, capped per kind. The yard never collects from it (ST-42b).
+                if (world.Inventory.FindGoodsStore(fp.Id) == null)
+                {
+                    int per = System.Math.Max(1, world.Tuning.CoppiceHutStorePerKind);
+                    LedgerLocation s = world.Inventory.AddGoodsStore(per * 2, fp.Id);
+                    world.Inventory.SetItemCap(s, Items.HazelRod, per);
+                    world.Inventory.SetItemCap(s, Items.WillowRod, per);
+                }
                 return;
             }
             if (!IsWorkshop(fp.Type)) return;
