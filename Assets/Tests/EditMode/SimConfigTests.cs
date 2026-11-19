@@ -87,6 +87,9 @@ namespace LordsLegacy.Tests.EditMode
                 Assert.AreEqual(d.CoppiceRodsPerCut, t0.CoppiceRodsPerCut, "cw-1 default: rods per cut");
                 Assert.AreEqual(d.WattlePanelStore, t0.WattlePanelStore, "cw-1 default: panel store");
                 Assert.AreEqual(d.ForagerHutBasketSlots, t0.ForagerHutBasketSlots, "cw-1 default: forager basket slots");
+                Assert.AreEqual(d.HandCarryDaub, t0.HandCarryDaub, "default: daub hand load");
+                Assert.AreEqual(d.DaubPerDay, t0.DaubPerDay, "default: daub per day");
+                Assert.AreEqual(d.DaubPitStore, t0.DaubPitStore, "default: daub pit store");
                 cfg.hazelStoolCount = 11; cfg.willowStoolCount = 12; cfg.coppiceRodsPerCut = 13; cfg.coppiceRegrowDays = 14;
                 cfg.coppiceMinutesPerRod = 15; cfg.coppiceHutStorePerKind = 16; cfg.handCarryRods = 17;
                 cfg.handCarryBaskets = 18; cfg.handCarryPanels = 19; cfg.weaverWillowPerBasket = 20;
@@ -94,6 +97,7 @@ namespace LordsLegacy.Tests.EditMode
                 cfg.wattleHazelPerPanel = 24; cfg.wattleWillowPerPanel = 25; cfg.wattlePanelsPerDay = 26;
                 cfg.wattleHazelStock = 27; cfg.wattleWillowStock = 28; cfg.wattlePanelStore = 29;
                 cfg.foragerHutBasketSlots = 30; cfg.granaryBasketSlots = 31;
+                cfg.handCarryDaub = 32; cfg.daubPerDay = 33; cfg.daubPitStore = 34;
                 var t = cfg.BuildTuning();
                 Assert.AreEqual(11, t.HazelStoolCount); Assert.AreEqual(12, t.WillowStoolCount);
                 Assert.AreEqual(13, t.CoppiceRodsPerCut); Assert.AreEqual(14, t.CoppiceRegrowDays);
@@ -105,6 +109,7 @@ namespace LordsLegacy.Tests.EditMode
                 Assert.AreEqual(26, t.WattlePanelsPerDay); Assert.AreEqual(27, t.WattleHazelStock);
                 Assert.AreEqual(28, t.WattleWillowStock); Assert.AreEqual(29, t.WattlePanelStore);
                 Assert.AreEqual(30, t.ForagerHutBasketSlots); Assert.AreEqual(31, t.GranaryBasketSlots);
+                Assert.AreEqual(32, t.HandCarryDaub); Assert.AreEqual(33, t.DaubPerDay); Assert.AreEqual(34, t.DaubPitStore);
             }
             finally { Object.DestroyImmediate(cfg); }
         }
