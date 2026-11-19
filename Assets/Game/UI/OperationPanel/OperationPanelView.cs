@@ -9,6 +9,7 @@ using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Operations;
 using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Tasks;
+using LordsLegacy.Sim.Thatch;
 using LordsLegacy.Game.Visuals;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -37,6 +38,9 @@ namespace LordsLegacy.Game
         private string _prioritySignature = "";
         private Label _title, _status, _modules, _workers, _logs, _causes, _trees, _workArea, _message, _stock;
         private Button _pause, _close, _oxenTab;
+        private VisualElement _thatchBox;
+        private Label _stooks, _dry;
+        private Toggle _grain;
         private string _signature = "", _oxenSignature = "";
         private bool _oxenOpen;
 
@@ -203,9 +207,11 @@ namespace LordsLegacy.Game
             var def = OperationTypes.Find(op.TypeId);
 
             bool coppice = op.TypeId == OperationTypes.CoppiceId;
-            bool forage = op.TypeId == OperationTypes.ForagingId || coppice; // no logs, oxen or trees: a hut with a food / rod store
-            _title.text = (coppice ? "Coppice hut " : forage ? "Forager camp " : "Woodcutter ") + op.Id;
-            _status.text = "Status: " + StateText(OperationStatus.Reported(world, op));
+            bool thatch = op.TypeId == OperationTypes.ThatchingId;
+            bool forage = op.TypeId == OperationTypes.ForagingId || coppice || thatch; // no logs, oxen or trees: a hut with a store
+            _title.text = (thatch ? "Thatcher's hut " : coppice ? "Coppice hut " : forage ? "Forager camp " : "Woodcutter ") + op.Id;
+            _status.text = "Status: " + (thatch ? ThatchStatusText(world, op) : StateText(OperationStatus.Reported(world, op)));
+            RefreshThatch(world, op, thatch);
             _modules.text = ModuleText(world, op);
             RebuildPriority(world, op);
             RebuildDeconstruct(world, op);
@@ -215,10 +221,10 @@ namespace LordsLegacy.Game
             _logs.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
             _causes.text = forage ? "" : CauseText(world, op);
             _causes.style.display = forage ? DisplayStyle.None : DisplayStyle.Flex;
-            _stock.text = coppice ? RodStoreText(world, op) : forage ? HutStoreText(world, op) : StockText(world, op);
+            _stock.text = thatch ? ThatchStoreText(world, op) : coppice ? RodStoreText(world, op) : forage ? HutStoreText(world, op) : StockText(world, op);
             RebuildOxen(world, op);
             var region = OperationStatus.WorkRegion(world, op);
-            _trees.text = coppice ? StoolText(world, op) : forage ? BushText(world, region)
+            _trees.text = thatch ? ReedBedText(world, region) : coppice ? StoolText(world, op) : forage ? BushText(world, region)
                 : "Standing trees in work area: " + (region == null ? 0 : world.Trees.CountStandingIn(region));
             _workArea.text = op.WorkAreaId.HasValue ? "Work area: drawn (area " + op.WorkAreaId.Value + ")"
                 : "Work area: default circle round the hut" + (def != null ? " (" + def.DefaultWorkRadiusM.ToString("0") + " m)" : "");
@@ -337,6 +343,46 @@ namespace LordsLegacy.Game
             var sb = new StringBuilder("Rods: ");
             for (int i = 0; i < report.Kinds.Count; i++) sb.Append(i > 0 ? ", " : "").Append(report.Kinds[i].StockText);
             return sb.ToString();
+        }
+
+        private ThatchingReport ThatchReportOf(Sim.Core.SimWorld world, Operation op)
+        {
+            var hut = OperationStatus.Hut(world, op);
+            return hut == null ? null : ThatchingReport.Of(world, hut.Id);
+        }
+
+        /// <summary>Thatcher status text, e.g. "Cutting (slow season)", "No reed beds", "Store full" (MAT-39e).</summary>
+        public static string ThatchStatusText(Sim.Core.SimWorld world, Operation op)
+            => ThatchingStatus.TextOf(world, ThatchingStatus.Of(world, op));
+
+        /// <summary>Thatcher's hut store line, e.g. "Store: 3 / 40" (thatch sheaves).</summary>
+        public static string ThatchStoreText(Sim.Core.SimWorld world, Operation op)
+        {
+            var hut = OperationStatus.Hut(world, op);
+            var report = hut == null ? null : ThatchingReport.Of(world, hut.Id);
+            return report == null ? "Store: none" : report.StoreText;
+        }
+
+        /// <summary>Reed beds in the work area line, e.g. "Reed beds in work area: 3 ready, 1 regrowing".</summary>
+        public static string ReedBedText(Sim.Core.SimWorld world, TreeRegion region)
+        {
+            int full = 0, empty = 0;
+            if (region != null)
+                foreach (var b in world.Bushes.All)
+                    if (b.Kind == Sim.Foraging.BushKind.ReedBed && region.Contains(b.X, b.Z)) { if (b.Baskets > 0) full++; else empty++; }
+            return "Reed beds in work area: " + full + " ready, " + empty + " regrowing";
+        }
+
+        // Thatcher rows: stooks curing and dry, and the grown-grain toggle, greyed while it needs farming (MAT-31).
+        private void RefreshThatch(Sim.Core.SimWorld world, Operation op, bool thatch)
+        {
+            _thatchBox.style.display = thatch ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!thatch) return;
+            var report = ThatchReportOf(world, op);
+            _stooks.text = report == null ? "Stooks curing: none" : report.StooksText + "\n" + report.NextStookText;
+            _dry.text = report == null ? "Dry sheaves: 0" : report.DryText;
+            _grain.label = "Grown grain: " + (report == null ? "Needs farming" : report.GrainSourceText);
+            _grain.SetEnabled(report != null && report.GrainSourceAvailable);
         }
 
         private static string StoolText(Sim.Core.SimWorld world, Operation op)
@@ -825,6 +871,15 @@ namespace LordsLegacy.Game
             _panel.Add(MakeLabel("operation-families-heading", 12, "Families"));
             _panel.Add(_familyBox); _panel.Add(_pickerBox);
             _panel.Add(MakeLabel("operation-workers-heading", 12, "Workers"));
+            _stooks = MakeLabel("thatch-stooks", 12, "");
+            _dry = MakeLabel("thatch-dry", 12, "");
+            _grain = new Toggle { name = "thatch-grain", label = "Grown grain: Needs farming" };
+            _grain.style.color = new Color(160f / 255f, 150f / 255f, 130f / 255f);
+            _grain.SetEnabled(false);
+            _thatchBox = new VisualElement { name = "thatch-box" };
+            _thatchBox.style.display = DisplayStyle.None;
+            _thatchBox.Add(_stooks); _thatchBox.Add(_dry); _thatchBox.Add(_grain);
+            _panel.Add(_thatchBox);
             _panel.Add(_workers); _panel.Add(_logs); _panel.Add(_causes); _panel.Add(_trees); _panel.Add(_workArea);
             _panel.Add(areaRow); _panel.Add(expand); _panel.Add(deconOp); _panel.Add(_pause); _panel.Add(_oxenTab); _panel.Add(_oxenBox); _panel.Add(stock);
             _panel.Add(_message); _panel.Add(_close);
