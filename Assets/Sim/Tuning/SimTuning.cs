@@ -268,6 +268,9 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Planks placed in the camp General goods store at the start (ST-02). Unit: planks. Rule: PL-14.</summary>
         public int StartingPlanks { get; set; } = 10;
 
+        /// <summary>Daub placed in the camp General goods store at the start: nine houses' worth. Unit: daub. Rule: HL-04 (DECIDED).</summary>
+        public int StartingDaub { get; set; } = 90;
+
         /// <summary>Rations an adult (14+) eats per day. Unit: rations per day. Rule: FD-04.</summary>
         public double AdultRations { get; set; } = 1.0;
 

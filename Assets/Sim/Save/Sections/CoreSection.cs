@@ -207,6 +207,7 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.HandCarryDaub); // T-583
             w.WriteInt32(t.DaubPerDay);
             w.WriteInt32(t.DaubPitStore);
+            w.WriteInt32(t.StartingDaub); // T-584
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -335,6 +336,7 @@ namespace LordsLegacy.Sim.Save.Sections
             t.HandCarryDaub = r.ReadInt32(); // T-583
             t.DaubPerDay = r.ReadInt32();
             t.DaubPitStore = r.ReadInt32();
+            t.StartingDaub = r.ReadInt32(); // T-584
             return t;
         }
 

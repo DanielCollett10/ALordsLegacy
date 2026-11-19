@@ -74,6 +74,17 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly ConstructionRecipe HouseLogRecipe = new ConstructionRecipe(10, 720);
 
         /// <summary>
+        /// The house's recipe before daub (MAT-40): 10 logs + 10 thatch + 10 panels / 720 worker-minutes. An unbuilt house placed
+        /// before daub (HL-04) keeps it; see <c>SiteRecipe</c>.
+        /// </summary>
+        public static readonly ConstructionRecipe HouseNoDaubRecipe = new ConstructionRecipe(new[]
+        {
+            new KeyValuePair<string, int>(Inventory.Items.Log.Id, 10),
+            new KeyValuePair<string, int>(Inventory.Items.Thatch.Id, 10),
+            new KeyValuePair<string, int>(Inventory.Items.WattlePanel.Id, 10),
+        }, 720);
+
+        /// <summary>
         /// Granary: 8 × 6 m building that blocks movement, with a walkable 5 m yard (plot 18 × 16 m), clears trees,
         /// holds 100 food items, 8 logs / 600 worker-minutes (FD-30, FD-30b, FOOD-04, CON-A1).
         /// </summary>

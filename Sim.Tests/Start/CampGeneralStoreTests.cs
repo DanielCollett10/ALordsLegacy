@@ -55,8 +55,17 @@ namespace LordsLegacy.Sim.Tests.Start
         {
             SimWorld w = NewGame(Map());
             Assert.AreEqual(90, w.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
-            Assert.AreEqual(StartLayoutApplier.StartingDaub, w.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
+            Assert.AreEqual(w.Tuning.StartingDaub, w.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
             Assert.IsNull(w.Inventory.Audit());
+        }
+
+        [Test]
+        public void StartingDaub_TuningSetsTheStock()
+        {
+            SimWorld w = NewGame(Map(), new SimTuning { StartHour = 8, StartingDaub = 12 });
+            Assert.AreEqual(12, w.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
+            SimWorld none = NewGame(Map(), new SimTuning { StartHour = 8, StartingDaub = 0 });
+            Assert.AreEqual(0, none.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
         }
 
         [Test]

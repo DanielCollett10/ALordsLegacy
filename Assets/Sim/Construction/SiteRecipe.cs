@@ -25,11 +25,13 @@ namespace LordsLegacy.Sim.Construction
             ConstructionSite site = world.Construction.Get(fp.Id);
             if (site == null) return fp.Type.ConstructionRecipe;
             if (stall) return HoldsLogs(world, site) ? ModuleTypes.MarketStallLogRecipe : fp.Type.ConstructionRecipe;
-            // T-577, MAT-40b: a house placed before thatch and panels holds logs but none of those. HL-04: daub is newer
-            // still, so a site holding any of the four items is on the current recipe.
-            bool old = HoldsLogs(world, site) && !Holds(world, site, Items.Thatch.Id) && !Holds(world, site, Items.WattlePanel.Id)
-                && !Holds(world, site, Items.Daub.Id);
-            return old ? ModuleTypes.HouseLogRecipe : fp.Type.ConstructionRecipe;
+            // A new house reserves all four items at placement, and every item stays held (reserved, carried, on site or
+            // used up) until the build ends. So a house that holds no daub was placed before daub (HL-04) and keeps the
+            // older recipe, derived from the saved site; nothing new is saved.
+            if (!HoldsLogs(world, site) || Holds(world, site, Items.Daub.Id)) return fp.Type.ConstructionRecipe;
+            // T-577, MAT-40b: before thatch and panels a house held logs only; after them, logs, thatch and panels.
+            bool thatchEra = Holds(world, site, Items.Thatch.Id) || Holds(world, site, Items.WattlePanel.Id);
+            return thatchEra ? ModuleTypes.HouseNoDaubRecipe : ModuleTypes.HouseLogRecipe;
         }
 
         // Logs on the site, used up by the build, reserved for it, or on their way to it by a live delivery task.

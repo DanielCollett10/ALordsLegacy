@@ -16,8 +16,6 @@ namespace LordsLegacy.Sim.Start
         public const int StartingThatch = 90;
         /// <summary>Wattle panels in the camp General store at the start (MAT-36).</summary>
         public const int StartingPanels = 90;
-        /// <summary>Daub in the camp General store at the start (HL-04): nine houses' worth.</summary>
-        public const int StartingDaub = 90;
 
         /// <summary>
         /// Adds the camp footprint (removing trees under it), draws the trunk road through
@@ -56,7 +54,7 @@ namespace LordsLegacy.Sim.Start
 
             world.Inventory.Produce(generalStore, Items.Thatch, StartingThatch);
             world.Inventory.Produce(generalStore, Items.WattlePanel, StartingPanels);
-            world.Inventory.Produce(generalStore, Items.Daub, StartingDaub);
+            if (world.Tuning.StartingDaub > 0) world.Inventory.Produce(generalStore, Items.Daub, world.Tuning.StartingDaub); // HL-04
 
             world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), stockpileSpot,
                 ToWorld(layout, layout.OxStand), stockpile)

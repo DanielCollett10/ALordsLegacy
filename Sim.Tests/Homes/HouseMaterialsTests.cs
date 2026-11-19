@@ -172,6 +172,49 @@ namespace LordsLegacy.Sim.Tests.Homes
             Assert.AreEqual(0, w.Tasks.All.Count(t => t.Def.Id == ConstructionTaskDefs.CarryId && t.State != TaskState.Done && t.State != TaskState.Cancelled));
         }
 
+        // HL-04, "older sites keep their recipe": a site placed in the thatch era holds logs, thatch and panels but no daub.
+        // It keeps the 3-item recipe and is built without ever asking for daub.
+        [Test]
+        public void ThatchEraSite_HoldingLogsThatchAndPanelsButNoDaub_KeepsTheThreeItemRecipe_AndIsBuilt()
+        {
+            SimWorld w = Make(out LedgerLocation goods);
+            int house = Place(w);
+            ConstructionSite site = w.Construction.Get(house);
+            foreach (int id in site.ReservationIds.ToList())
+            {
+                if (w.Inventory.GetReservation(id).ItemId != Items.Daub.Id) continue;
+                w.Inventory.Release(id);
+                site.ReservationIds.Remove(id);
+            }
+            ConstructionRecipe r = SiteRecipe.Of(w, w.Footprints.Get(house));
+            Assert.AreSame(ModuleTypes.HouseNoDaubRecipe, r);
+            Assert.AreEqual(3, r.Items.Count);
+            Assert.IsFalse(r.Items.ContainsKey(Items.Daub.Id));
+            Assert.AreEqual(720, r.BuildWorkerMinutes);
+            for (int i = 0; i < MaxTicks && w.Construction.Get(house) != null; i++) w.Step(1);
+            Assert.IsTrue(w.IsBuilt(house), "built on the 3-item recipe");
+            Assert.AreEqual(0, goods.CountOf(Items.Thatch.Id), "thatch used");
+            Assert.AreEqual(0, goods.CountOf(Items.WattlePanel.Id), "panels used");
+            Assert.AreEqual(10, goods.CountOf(Items.Daub.Id), "daub untouched");
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        // The derivation must not mistake a new site for an old one: a new site holds daub from placement to the end of the build.
+        [Test]
+        public void NewSite_KeepsTheDaubRecipeAtEveryTickOfItsBuild()
+        {
+            SimWorld w = Make(out _);
+            int house = Place(w);
+            int ticks = 0;
+            for (; ticks < MaxTicks && w.Construction.Get(house) != null; ticks++)
+            {
+                Assert.AreSame(ModuleTypes.House.ConstructionRecipe, SiteRecipe.Of(w, w.Footprints.Get(house)), "tick " + ticks);
+                w.Step(1);
+            }
+            Assert.IsTrue(w.IsBuilt(house));
+            Assert.Greater(ticks, 0);
+        }
+
         [Test]
         public void OldSiteRecipe_IsAHouseOnly_NewSiteWithNothingYetDelivered_UsesTheNewRecipe()
         {
