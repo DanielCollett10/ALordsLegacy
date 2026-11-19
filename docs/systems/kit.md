@@ -9,7 +9,7 @@ Design: `design/materials.md` MAT-50..54, ST-20..25. Decision 0052 (kit is reser
 
 | Type | Role |
 |---|---|
-| `KitStores` | Kit store lookup. `OnBuilt` makes a goods store keyed by the building, slots from `ForagerHutBasketSlots` / `GranaryBasketSlots` (2 each). `BasketsHeld`. |
+| `KitStores` | Kit store lookup. `OnBuilt` makes a goods store keyed by the building, with a per-item cap from `ForagerHutBasketSlots` (5) or `GranaryBasketSlots` (2). `BasketsHeld`. |
 | `KitClaims` | Queue of buildings with free slots, oldest first, ties to the lower id (ST-24). Saved in the Structures section. |
 | `KitFetchSystem` | Operations phase. Serves claims oldest first with a hand haul by the building's own assigned family, from the nearest unreserved basket: camp General store, working yard or weaver store. Reserves source and slots. |
 | `KitLoans` | `TryBorrow` reserves one kit basket for a task (owner `-3_000_000 - taskId`). `Factor` = 2. `ReleaseFinished` frees it when the task ends. |

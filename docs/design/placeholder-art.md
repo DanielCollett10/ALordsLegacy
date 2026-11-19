@@ -32,6 +32,8 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | `visual.module.hewing_station` | Hewing station (T-526) | 6 × 2.2 × 4 | `ModuleRenderer` | Placeholder |
 | `visual.module.sawpit` | Sawpit (T-526) | 6 × 1.4 × 4 | `ModuleRenderer` | Placeholder |
 | `visual.module.storage_yard` | Storage yard (T-549) | 8 × 0.8 × 6 | `ModuleRenderer` | Placeholder |
+| `visual.module.weaver` | Weaver (T-569) | 6 × 2 × 4 | `ModuleRenderer` | Placeholder |
+| `visual.module.wattle_yard` | Wattle yard (T-569) | 6 × 1.6 × 4 | `ModuleRenderer` | Placeholder |
 | `visual.item.beam_stack` | Beams in a hewing station's store; height grows with fill | 1.2 × 0.5 × 0.6 | `ModuleRenderer` | Placeholder |
 | `visual.item.plank_stack` | Planks in a sawpit's store; height grows with fill | 1.2 × 0.4 × 0.6 | `ModuleRenderer` | Placeholder |
 | `visual.construction.scaffold` | Building site scaffold | footprint × 2.6 | `ConstructionRenderer` | Placeholder |
@@ -45,7 +47,7 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | Forage bush, full / empty (berry and mushroom alike) | `BushRenderer` | Built-in sphere, green / brown material |
 | Hazel stool, with rods / cut (T-568) | `BushRenderer` | Built-in cylinder 0.9 × 1.6 m olive green / 0.7 × 0.35 m brown stump while regrowing |
 | Willow stool, with rods / cut (T-568) | `BushRenderer` | Built-in cylinder 1.0 × 2.0 m yellow-green / 0.7 × 0.35 m pale stump while regrowing |
-| Coppice hut (own model, T-568) | `ModuleRenderer.VisualIdOf` | Reuses woodcutting hut |
+| Coppice hut (T-568) | `ModuleRenderer.VisualIdOf` | No own model: draws the woodcutting hut box |
 | Forager hut (own model) | `ModuleRenderer.VisualIdOf` | Reuses woodcutting hut |
 | Granary (own model) | `ModuleRenderer.VisualIdOf` | Falls back to log storage |
 | Food items (meat, berries, mushrooms) on carriers and in stores | — | Not drawn |

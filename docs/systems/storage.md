@@ -26,7 +26,7 @@ Sim: `Assets/Sim/Operations/` (yard planner and sources), `Operations/Workshops/
 
 ## Rules
 
-- A GoodsStore takes General items only, with one capacity across items (ST-08).
+- A GoodsStore takes General items only. Its capacity is shared across items (ST-08); kit and coppice stores also cap each item (T-555).
 - Any free workshop output is collected, fullest store first (`YardCollectThreshold` 0). Never coppice huts, the daub pit, input stock or reserved stock.
 - Beams go by ox only. With no free pool ox the panel says "Waiting for ox".
 - Reserve: a fetch opens only if storage total − fetches on the way − load ≥ reserve. Default 5, 0 = none, per operation in `Operation.Reserves`.
@@ -46,8 +46,7 @@ Sim: `Assets/Sim/Operations/` (yard planner and sources), `Operations/Workshops/
 
 ## Gaps
 
-- Thatch is not an item, so ST-43's thatch load is unused. ST-45 has seven statuses; the design lists five.
-- No yard case in `SimSaveRoundTripTests`; `StorageYardEndToEndTests` covers a mid-run save and reload.
+- ST-45 has seven statuses (the design lists five). No yard case in `SimSaveRoundTripTests`; `StorageYardEndToEndTests` covers a mid-run save and reload.
 
 ## Kit fetch and drop (T-564, ST-21..23)
 

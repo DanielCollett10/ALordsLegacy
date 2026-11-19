@@ -14,8 +14,9 @@ Operations and food systems create tasks; the dispatcher assigns them; the step 
 | `ConstructionTaskDefs` | `task.deliver_materials` (ox, logs), `task.carry_materials` (on foot, other items), `task.build`, `task.deconstruct` (all HelpersOnly; heavy steps). A market stall's carry is AssignedFamilyOnly for the stall's granary family (age 8+, not heavy, owner = granary op, taken before `stock_stall`; T-518). |
 | `FoodTripSystem` (`Food/`) | `task.fetch_food` (OwnerFamily, owner `-1000 - familyId`), opened each Sunday morning. Ignores shifts. See `food.md`. |
 | `ForagingSystem` (`Foraging/`) | `task.forage` (AssignedFamilyOnly, owner = operation, age 8+), holds a bush and a carrier. See `foraging.md`. `ThatchingSystem` (`Thatch/`, T-574): `task.cut_reed` (AssignedFamilyOnly, heavy 14+, owner = operation, reserves a reed bed; winter 30 min a bundle, x4 otherwise; ends as one curing stook). |
+| `CoppiceSystem` (`Coppice/`) | `task.coppice` (AssignedFamilyOnly, owner = hut operation, age 8+, light): walk to a stool, `Work` per rod, walk to the hut, `DepositForage`. Reserves a stool. See `coppice.md`. |
 | `StoreFamilySystem` (`Markets/`) | `task.stock_stall` (AssignedFamilyOnly, owner = granary operation, age 8+): walk, load 10 min, `CollectItems` (no item id: reserved, in proportion, never allotted food), walk, unload 10 min, `DepositItems`. Source: `ChooseStockSource`. |
-| `YardFamilySystem` (`Operations/`), `HandHaulTaskDefs` | `task.haul_by_hand` (T-542, ST-43/44): the one store-to-store hand trip (same steps, hand load, stock and room reserved at planning, owner `OwnerFor`). Plans from the ordered `YardJobs.Standard()` sources: camp General store first (`YardCampStoreSource`, ST-40), then unowned General piles (`YardPileSource`, ST-41). Both go to the nearest yard with room (ST-09, `YardRoute`); beams are skipped. Beams go by ox instead: `YardBeamSource` opens a `task.fetch_input` (ox, reserved at planning) and no hand trip. See `storage.md`. |
+| `YardFamilySystem` (`Operations/`), `HandHaulTaskDefs` | `task.haul_by_hand` (T-542, ST-43/44): the one store-to-store hand trip (same steps, hand load, stock and room reserved at planning, owner `OwnerFor`). Plans from the ordered `YardJobs.Standard()` sources: camp General store first (`YardCampStoreSource`, ST-40), then unowned General piles (`YardPileSource`, ST-41). Both go to the nearest yard with room (ST-09, `YardRoute`); beams are skipped. Beams go by ox instead: `YardBeamSource` opens a `task.fetch_input` (ox, reserved at planning) and no hand trip. Kit fetches and workshop hand inputs use this same task. See `storage.md`. |
 | `WorkshopSystem` (`Operations/Workshops/`) | `task.fetch_input` (AssignedFamilyOnly, owner = operation, `RequiredResource.Ox`: fetch ox, lead, load, lead, unload, return) and `task.workshop_work` (AssignedFamilyOnly, one heavy `Work` step, owner = operation). |
 | `TaskStep` | `MoveTo`, `Work(duration)` (heavy flag, stage id), ox steps `FetchOx`, `LeadTo`, `LoadOx`, `UnloadOx`, `ReturnOx`, food steps `WalkTo`, `CollectFood`, `DepositFood`, `DepositForage`, and the one item trip pair `CollectItems`/`DepositItems` (an item id moves that item, none means a stock share). |
 | `TaskRecord`, `TaskPriority` | Id, def, state, owner, assignee, priority (Normal or High, set by `TaskBoard.SetPriority`), target, step index, ox, site, `BushId`, `CarrierId`. |
@@ -30,7 +31,7 @@ Open → Assigned → Active → Done, or Cancelled. Illegal transitions return 
 ## How data moves
 
 1. An operation or system opens a task (`WoodcuttingSystem`, `HaulSystem`, `WorkshopSystem`, `ConstructionSystem`, `ForagingSystem`,
-   `FoodTripSystem`, `StoreFamilySystem`). House and granary deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`), not an operation id.
+   `FoodTripSystem`, `StoreFamilySystem`, `CoppiceSystem`). House and granary deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`), not an operation id.
 2. `DispatchSystem` runs every `DispatchIntervalMinutes` (10). An idle worker (awake, no debug send, not busy, not mid-walk
    unless milling) takes the best Open task: pass 1 for the family whose workplace owns it, pass 2 for helper families.
    Ranking: priority, travel to the job, then id. Heavy tasks need age 14+, forage tasks 8+. An ox task is offered only once
@@ -40,8 +41,7 @@ Open → Assigned → Active → Done, or Cancelled. Illegal transitions return 
    produce items on the carrier (`foraging.md`).
 4. Felling outcomes run from the step runner (`FellingOutcome`); build steps add progress through
    `ConstructionProgress.Work`. A target gone, no assignee, or a failed move cancels the task and frees the worker.
-5. A worker off shift has its Active task skipped (not cancelled), and `RoutineSystem` takes the worker home.
-   Food trips ignore shifts.
+5. A worker off shift has its Active task skipped (not cancelled) and `RoutineSystem` takes them home. Food trips ignore shifts.
 
 Haul and construction tasks carry extra rules (wind-down at the end of work, early fetch): see `operations.md` and `construction.md`.
 
@@ -57,4 +57,4 @@ Haul and construction tasks carry extra rules (wind-down at the end of work, ear
 
 ## Tests
 
-`Sim.Tests/TaskBoardTests.cs`, `Tasks/` (DispatchAndStepRunner, Ox, CitizenTaskText, ConstructionTaskDefs), `Operations/HaulSystemTests.cs`, `Save/TasksSectionTests.cs`, `Food/FoodTripTests.cs`, `Operations/ForagingTests.cs`.
+`Sim.Tests/TaskBoardTests.cs`, `Tasks/` (DispatchAndStepRunner, Ox, CitizenTaskText, ConstructionTaskDefs), `Operations/HaulSystemTests.cs`, `Save/TasksSectionTests.cs`, `Food/FoodTripTests.cs`, `Operations/ForagingTests.cs`, `Operations/CoppiceTests.cs`.
