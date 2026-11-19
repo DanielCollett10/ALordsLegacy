@@ -22,7 +22,7 @@ wireframes come later. UI Toolkit only. The UI reads Sim state and sends command
 > are still greyed. This note replaces the M8 line above for House.
 | UIB-03 | Clicking a button activates its tool and highlights the button. Clicking the active button again, or Escape with nothing in progress, deactivates it. Only one tool is active at a time | DECIDED |
 | UIB-04 | Switching tools discards any unconfirmed draft | DECIDED |
-| UIB-06 | **Escape** goes to the active tool first. If the tool has a draft, it cancels the draft and Escape stops there. Only when the tool reports it is idle does the ToolController deactivate the tool | DECIDED |
+| UIB-06 | **Escape** goes to the active tool first. If the tool has a draft, it cancels the draft and Escape stops there. Only when the tool reports it is idle does the ToolController deactivate the tool. **Amended M22a:** see the tool-input contract (UIT-01..05) below | DECIDED |
 | UIB-05 | Clicks on UI never pass through to the ground (no point placed under a button) | DECIDED |
 
 ## Tool panel (just above the build bar, while drawing)
@@ -52,7 +52,8 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
   (camp stockpile, log storages and unowned ground piles), *Planks: N* (all General goods stores). Each new resource
   gets its own label for now. Later (direction DECIDED, not scheduled): compress into three hover menus, **Food** (every
   food type), **Construction goods** (logs, planks, thatch, panels…) and **General** (everything else), to be refined
-  after it is built.
+  after it is built. **M22a:** built as the spec's hover panels UIW-10..13 (Citizens, Food, Construction, Goods); rows come
+  from item definitions, so a new item appears without UI work.
 - **Snapping: On/Off** toggle on the right (UI-02). It is a presentation setting (`ViewSettings`), not Sim state.
   Default On. Pressing **Alt** toggles it, exactly like clicking the button (not a hold).
 
@@ -64,9 +65,9 @@ Shown only while a tool has a draft, as in `source/drawing-an-area-snapped-to-ro
 | Left-drag | move a placed point; with no draft, on a confirmed road node: move the node (RD-17) | move a point; drag the edge handle to bend |
 | Hover | cursor ring (RD-18); with no draft, node handles show on the road under the cursor | cursor sphere, ghost edges, road snap dots (AR-20..22) |
 | Double-click / Enter | finish and confirm | close / confirm |
-| Right-click | cancel the draft; with no draft: delete the segment under the cursor | on a point: remove it; elsewhere: cancel the draft; with no draft: delete the area under the cursor |
-| Backspace | remove the last point | remove the last point |
-| Escape | cancel the draft or a node drag (node goes back), or leave the tool | same |
+| Right-click | UIT-01 (from M22a; no delete) | UIT-01 (from M22a; no delete) |
+| Backspace | UIT-01 | UIT-01 |
+| Escape | cancel a node drag (node goes back), else UIT-01 | UIT-01 |
 | Alt (press) | toggle snapping on/off | same |
 | Middle mouse, scroll, keys | camera (unchanged) | camera (unchanged) |
 | Middle-drag | camera orbit: turn and tilt | same |
@@ -100,4 +101,35 @@ never on a right press or drag. Right-drag is kept free for a possible later use
 | CAM-A2 | **Scroll** zooms as now: in = down towards the ground, out = up | DECIDED |
 | CAM-A3 | The camera never goes below the ground (Sim terrain height + clearance) or outside the map, while orbiting, tilting, zooming or panning. If a tilt would push it into a hill, it is held above the ground | DECIDED |
 | CAM-A4 | **Q/E rotation is removed.** Q and E are left free (no binding) for now | DECIDED |
-| CAM-A5 | **Right-click** (no drag) cancels: a tool draft first; later, it closes the topmost unpinned popup (UI-03/04). In road or area mode with no draft, it deletes the object under the cursor (roads.md, areas.md). Right-drag does nothing for now (kept free) | DECIDED |
+| CAM-A5 | **Right-click** (no drag) cancels: a tool draft first; later, it closes the topmost unpinned popup (UI-03/04). ~~In road or area mode with no draft, it deletes the object under the cursor.~~ **Amended M22a:** right-click never deletes; it follows UIT-01. Right-drag does nothing for now (kept free) | DECIDED |
+
+## Tool-input contract (M22a, direction 19/11/2026; amends UIB-06, CAM-A5 and the input summary)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| UIT-01 | **Right-click, Backspace and Escape** all do the first of these that applies, one step per press: (1) pop the last step of the placement in progress (road node, area point, module ghost); with no steps left, cancel the placement; (2) deselect the building or tool; (3) close the open category | DECIDED |
+| UIT-02 | Escape with nothing to undo, no tool and no category open goes on to the next owner as today (close the topmost unpinned panel, then the Esc menu) | DECIDED |
+| UIT-03 | **No right-click delete.** Right-click never removes a confirmed road, area or building | DECIDED |
+| UIT-04 | **Demolish road**: while the road tool is active a "Demolish road" button shows just above the build bar. Clicking it enters demolish mode (cursor highlights the segment under it in red); a left click demolishes that segment. Right-click / Backspace / Escape leaves demolish mode first, then follows UIT-01 | DECIDED |
+| UIT-05 | **Plots and areas** are removed from their own panel (house panel: Remove plot; operation panel: Deconstruct operation). Unbuilt modules are removed in Modules Management (UIM-01) | DECIDED |
+
+Every `ITool` implements the contract through one shared step (`ToolController.Back()`), so a new tool cannot get it wrong.
+
+## Modules Management (M22a)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| UIM-01 | Modules Management is the operation panel's **Modules** tab plus the Expand flow. Placing modules supports undo (UIT-01 pops the last ghost). Unbuilt modules are cancelled from their module card there | DECIDED |
+| UIM-02 | Standalone buildings (granary, yard, workshops, house) keep Deconstruct on their own panel. Operation panels list modules only; the hut's Deconstruct operation stays in the General tab | DECIDED |
+| UIM-03 | Module ghosts snap to curved area edges and into corners (presentation snap, decision 0017); the Sim still validates | DECIDED |
+| UIM-04 | A work area opens only from its owning building's panel (Draw work area / select from the panel). Clicking a work area on the ground selects nothing | DECIDED |
+
+## Building panels: shared template (M22a; decision 0057)
+
+| ID | Rule | Tag |
+| --- | --- | --- |
+| UIS-01 | **Every building panel uses the shared template** (`MVPv2_UI_Wireframe_Spec.md` section 5, UIW-30..33): movable box, title "Name n", status line, Pin and Close, sections with upper-case headings, General / Modules tabs where the building has modules, the construction view (UIW-50) while unbuilt. A panel that cannot fit the template needs a decision record before it is built | DECIDED |
+| UIS-02 | Panels read `*Report` read models only (never `SimWorld` collections directly), so a known/reported state layer can be added later | DECIDED |
+| UIS-03 | The template also covers panels the spec does not draw: house, market, citizen, thatcher, daub pit. The consistency audit (M22a) lists each panel against the spec | DECIDED |
+| UIS-04 | One unpinned panel at a time: selecting something else replaces it. Pinned panels stay until closed. At most 4 pinned panels; pinning a 5th unpins the oldest | PROPOSED |
+| UIS-05 | Every tool button and building has a tooltip built from `ToolInfo` (cost, needs, produces), shown through one shared tooltip service | DECIDED |
