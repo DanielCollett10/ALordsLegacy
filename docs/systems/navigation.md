@@ -45,4 +45,4 @@ leader if the cell is blocked or off the map.
 ## Tests
 
 `Sim.Tests/Navigation/` (`NavGridTests`, `GridPathfinderTests`, `MovementSystemTests`, `FollowMovementTests`),
-`Sim.Tests/Save/MovementSectionTests.cs`.
+`Sim.Tests/Save/MovementSectionTests.cs`, `Navigation/FenceNavTests`. `Scenarios/DaubFenceLevel2ScenarioTests` (T-592) walks a family out of a fenced plot to work: no step crosses the `FenceLine`, they leave by the open frontage.
