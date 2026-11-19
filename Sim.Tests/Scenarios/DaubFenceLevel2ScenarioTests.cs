@@ -66,8 +66,14 @@ namespace LordsLegacy.Sim.Tests.Scenarios
 
         private static byte[] Bytes(SimWorld w, MapData map) => SimSave.Write(w, "s", 1, map.MapId, map.ContentHash);
 
-        // The plot is x 30..50, z 51.25..61.25 with its frontage on the z = 51.25 edge.
-        private static bool InPlot(double x, double z) => x > 30 && x < 50 && z > 51.25 && z < 61.25;
+        // The plot corners; edge 0 (corner 0 to corner 1) is the open frontage on the road, the other three sides are fenced.
+        private static readonly PointMm[] PlotCorners = { M(30, 51.25), M(50, 51.25), M(50, 61.25), M(30, 61.25) };
+        private static double MinX => PlotCorners.Min(p => p.XMetres);
+        private static double MaxX => PlotCorners.Max(p => p.XMetres);
+        private static double MinZ => PlotCorners.Min(p => p.ZMetres);
+        private static double MaxZ => PlotCorners.Max(p => p.ZMetres);
+        private static double FrontageZ => PlotCorners[0].ZMetres;
+        private static bool InPlot(double x, double z) => x > MinX && x < MaxX && z > MinZ && z < MaxZ;
 
         private const double FenceClearance = 0.05; // metres: a step ending on, touching or running along a fence run also fails
 
@@ -120,7 +126,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
             int road = w.Roads.Segments.First().Id;
             var shape = new AreaShape(
-                new[] { M(30, 51.25), M(50, 51.25), M(50, 61.25), M(30, 61.25) },
+                PlotCorners,
                 new[] { AreaEdge.FollowsRoad(road, RoadSide.Left), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() });
             CommandResult hr = w.Execute(new DesignatePlot(shape));
             Assert.IsTrue(hr.IsAccepted, hr.Text);
@@ -172,10 +178,10 @@ namespace LordsLegacy.Sim.Tests.Scenarios
                         Assert.IsFalse(CrossesFence(line, px, pz, c.X, c.Z), "member " + c.Id + " crossed or touched the fence at tick " + w.Tick);
                         if (InPlot(px, pz) && !InPlot(c.X, c.Z))
                         {
-                            // The step leaves the plot: it must cross the open frontage edge (z = 51.25, between the fenced sides).
-                            double t = (51.25 - pz) / (c.Z - pz);
+                            // The step leaves the plot: it must cross the open frontage edge (corner 0 to corner 1, between the fenced sides).
+                            double t = (FrontageZ - pz) / (c.Z - pz);
                             double xAt = px + t * (c.X - px);
-                            Assert.IsTrue(c.Z <= 51.25 && t >= 0 && t <= 1 && xAt > 30 && xAt < 50,
+                            Assert.IsTrue(c.Z <= FrontageZ && t >= 0 && t <= 1 && xAt > MinX && xAt < MaxX,
                                 "member " + c.Id + " left the plot at x=" + xAt + " tick " + w.Tick + ", not through the frontage");
                             exits++;
                         }
