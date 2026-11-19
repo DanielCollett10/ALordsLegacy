@@ -40,6 +40,8 @@ paused and never changes `Tick`. Unity calls it only through `SimHost.Execute`.
 
 - `BuildFence(homeId)` (T-586): built, unfenced house only; adds a `footprint.fence` footprint and site (panels via `SiteMaterials`) and sets `HomeRecord.FenceFootprintId`. Fence goes with its house (`HouseFence.Remove`).
 
+- `UpgradeHousehold(familyId)` (T-590): housed, not-in-passage family whose `HouseholdNeedsReport` is Eligible (derived each call, never stored); raises `Family.Level` by one, free in M21, logs "The <name> household reached level N". The only thing that raises a level.
+
 ## Tests
 
 `Sim.Tests/Commands/CommandPipelineTests.cs`, `Commands/SendCitizenToTests.cs`, `Areas/AreaCommandTests.cs`,
