@@ -32,5 +32,6 @@ Operation `operation.thatching` (`OperationTypes.Thatching`, areas `AreaTypes.Th
 
 ## Tests
 
-`Sim.Tests/Operations/ThatchingTests.cs`, `SheafCollectingTests.cs`, `Sim.Tests/Save/CuringSectionTests.cs`. Save section id 12, version 37.
+`Sim.Tests/Operations/ThatchingTests.cs`, `SheafCollectingTests.cs`, `Sim.Tests/Save/CuringSectionTests.cs`.
+End to end: `Sim.Tests/Scenarios/ThatchChainScenarioTests.cs` (T-579): a December hut is built by command, cuts, cures 7 days and fills its store; a house is then built from that thatch and yard panels; summer cuts at least 3x slower; ledger and curing audited every tick; save mid-cure is byte-identical. Save section id 12, version 37.
 Unity: none yet. No build-bar entry, panel text or thatch test exists in `Assets/Game` or `Assets/Tests`.
