@@ -103,6 +103,7 @@ MonoBehaviour:
   startingDaub: 90
   fencePanelLengthM: 2
   fenceMinutesPerPanel: 20
+  diverseFoodTypes: 2
   foragerHutBasketSlots: 5
   granaryBasketSlots: 2
   reedBedCount: 20

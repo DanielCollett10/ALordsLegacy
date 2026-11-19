@@ -29,7 +29,9 @@ namespace LordsLegacy.Sim.Tests.Homes
             var needs = HouseholdLevels.Get(2).Needs;
             Assert.AreEqual(4, needs.Count);
             Assert.AreEqual(NeedKind.DiverseFood, needs[0].Kind);
-            Assert.AreEqual(2, needs[0].Amount);
+            Assert.AreEqual(0, needs[0].Amount, "the threshold is tuning, not level data");
+            Assert.AreEqual(2, needs[0].Required(new LordsLegacy.Sim.Tuning.SimTuning()), "HSE-09 default");
+            Assert.AreEqual(3, needs[0].Required(new LordsLegacy.Sim.Tuning.SimTuning { DiverseFoodTypes = 3 }));
             Assert.AreEqual(1, needs.Count(n => n.Kind == NeedKind.FencedPlot));
             Assert.AreEqual(2, needs.Count(n => n.Kind == NeedKind.AlwaysMet));
         }

@@ -33,8 +33,11 @@ namespace LordsLegacy.Sim.Homes
         /// <summary>Short name shown to the player.</summary>
         public string Label { get; }
 
-        /// <summary>Threshold for the kind (the food types needed for DiverseFood; 0 otherwise).</summary>
+        /// <summary>Fixed threshold for the kind; 0 when the number is tuning (DiverseFood: see <see cref="Required"/>).</summary>
         public int Amount { get; }
+
+        /// <summary>The threshold in force: <c>SimTuning.DiverseFoodTypes</c> for DiverseFood, else <see cref="Amount"/> (HSE-09).</summary>
+        public int Required(Tuning.SimTuning tuning) => Kind == NeedKind.DiverseFood ? tuning.DiverseFoodTypes : Amount;
     }
 
     /// <summary>A household level as data (HSE-09, HL-21): its number, its needs and the cost of upgrading to it.</summary>
@@ -73,7 +76,7 @@ namespace LordsLegacy.Sim.Homes
             new HouseholdLevelDef(1, "Household", new NeedDef[0], ConstructionRecipe.Empty),
             new HouseholdLevelDef(2, "Settled household", new[]
             {
-                new NeedDef(NeedKind.DiverseFood, "Diverse food", 2),
+                new NeedDef(NeedKind.DiverseFood, "Diverse food"),
                 new NeedDef(NeedKind.FencedPlot, "Fenced plot"),
                 new NeedDef(NeedKind.AlwaysMet, "Water"),
                 new NeedDef(NeedKind.AlwaysMet, "Church"),
