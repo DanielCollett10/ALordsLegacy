@@ -50,3 +50,4 @@ properties (follow the mirror rule).
 | HP-03 | The house sits on the front edge as HM-04 describes (centred, set 1 m back), facing the forecourt | DECIDED |
 | HP-04 | **Fence (replaces HL-10/HL-12c):** the fence runs round the **whole plot**, with a gate at the forecourt. Where the front edge meets a neighbouring house, that stretch is left open as an **alley**: household traffic only, not part of the road network (RA-32), but it passes access on (RA-04). The fence cost (HL-11) counts fenced length only | DECIDED (shape overhaul later) |
 | HP-05 | Bug: a plot beside a road **and** another plot is refused. It must be accepted | DECIDED |
+| HP-06 | A plot with a built or building fence never changes shape. Anything that would trim or reshape it (today only area trimming by a new road, which M22c already refuses across plots) is refused with *Remove the fence first*. This closes the M21 gap where the drawn line moved but the paid panel count did not | PROPOSED |

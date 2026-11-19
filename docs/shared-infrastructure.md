@@ -3,7 +3,7 @@
 Before writing a new type, check this list. If your need is here, extend the listed piece; if it almost fits, extend it
 rather than copy it. A review fails a task that duplicates one of these. Items marked (M22x) arrive in that milestone.
 Architecture tests (`Sim.Tests/Architecture`, `Assets/Tests/EditMode/Architecture`) enforce the rows marked *tested*.
-Copies of code are found by `pwsh Tools/dup-scan.ps1` (jscpd, decision 0061); run it before reporting a large task.
+Copies of code are found by `pwsh Tools/dup-scan.ps1` (jscpd, decision 0062); run it before reporting a large task.
 
 ## Sim
 
