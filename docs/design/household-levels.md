@@ -43,5 +43,5 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 > Owner kept this as the rule on 19/11/2026.
 
 > Owner 19/11/2026 (HL-01): the daub pit's yard is **5 m**, like the granary. Task dp-1 changes it from the 3 m below.
-> Implementation note (HL-01): the daub pit uses a 3 m yard, like the workshops, not the granary's 5 m. Its recipe (4 logs,
-> 240 min) and size are hard-coded in `ModuleTypes.DaubPit`, not read from `SimTuning`. Output (HL-02) is tuned.
+> Implementation note (HL-01): the daub pit's yard is now 5 m, like the granary (T-627; was 3 m, like the workshops).
+> Its recipe (4 logs, 240 min), size and yard are hard-coded in `ModuleTypes.DaubPit`, not read from `SimTuning`. Output (HL-02) is tuned.
