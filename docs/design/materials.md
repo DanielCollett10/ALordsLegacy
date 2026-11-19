@@ -77,8 +77,11 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-41 | Wattle panels also build the plot's perimeter fence (panels by perimeter length, OPEN), which is **not** required to move in | DECIDED (fence with tier-1 houses) |
 | MAT-42 | Daub (earth or clay) and household levels 1–2 come with tier-1 houses (HSE-20..23) | DECIDED (M21, `household-levels.md`) |
 
-> Implementation note (MAT-40): the house recipe (10 logs, 10 thatch, 10 wattle panels, 720 min) is hard-coded in
-> `ModuleTypes.House`, not read from `SimTuning`. The values match the rule. Daub (MAT-42) is not built yet.
+> Implementation note (MAT-40): the house recipe (10 logs, 10 thatch, 10 wattle panels, 10 daub, 720 min) is hard-coded in
+> `ModuleTypes.House`, not read from `SimTuning`. The values match the rule. Daub is built in M21 (daub pit, HL-01, MAT-42).
+>
+> Implementation note (MAT-41): the fence is paid by the length of fenced edge (every plot edge except road frontage, HL-11),
+> not the whole perimeter. Decide whether that is the intended rule (`systems/homes.md`, `milestones/M21.md`).
 
 ## Baskets
 

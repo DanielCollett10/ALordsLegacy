@@ -192,7 +192,10 @@ PLACEHOLDER until playtested.
 | Oxen stand | 1 log, 60 | worker-minutes | CON-A1 |
 | Starting planks | 10 | planks in the camp General goods store (`StartingPlanks`) | PL-14, ST-02 |
 | Starting daub | 90 | daub in the camp General goods store (`StartingDaub`, save v38) | HL-04 |
-| House (MVP-2) | 10 logs, 720 | worker-minutes | CON-A1, HM-06 |
+| Daub pit | 10 daub a day, store 20, hand carry 2 | daub (`DaubPerDay`, `DaubPitStore`, `HandCarryDaub`) | HL-01, HL-02 (PROPOSED) |
+| Fence | 1 wattle panel per 2 m of fenced edge, 20 min a panel | `FencePanelLengthM`, `FenceMinutesPerPanel` | HL-11 (PROPOSED) |
+| Level 2 diverse food | 2 food types in the last Sunday allotment | `DiverseFoodTypes` | HSE-09 (PROPOSED) |
+| House (MVP-2) | 10 logs, 10 thatch, 10 panels, 10 daub; 720 | worker-minutes | CON-A1, HM-06, HL-04 |
 | House footprint / plot size | 6 × 8 m / 60–400 m² | m / m² | HM-03, HM-04 |
 | Granary | 6 logs, 600 | worker-minutes | CON-A1 |
 | Storage yard | 8 logs, 480; 8 × 6 m; 300 items in total; 2 family slots | worker-minutes; `StorageYardLogs`, `StorageYardMinutes`, `StorageYardCapacity`, `StorageYardFamilySlots` | ST-03, ST-05, ST-08 (PLACEHOLDER) |

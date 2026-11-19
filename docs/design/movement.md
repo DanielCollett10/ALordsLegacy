@@ -19,6 +19,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default. OPEN = not decided.
 | MOV-08 | On a road, speed is multiplied by the road type's speed multiplier (ROAD-10). Being "on a road" means standing inside its corridor (`CorridorPolygon`) | DECIDED |
 | MOV-09 | Road multiplier **1.25×** (dirt path; replaces ROAD-10's 1.5). The walk animation plays faster by the same factor, so feet don't slide and a road walker looks brisk, not jogging. Later road types keep their multipliers in brisk-walk range | DECIDED (value PLACEHOLDER) |
 
+> Implementation note (MOV-05): M21 built a first form of this for house fences. A built fence blocks along its line, with the
+> road frontage open as the gate (HL-12, `systems/navigation.md`). Building-area fences are still not built.
+
 ## Getting there
 
 | ID | Rule | Tag |

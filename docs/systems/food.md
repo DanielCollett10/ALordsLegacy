@@ -20,7 +20,7 @@ camp until the handover, then the town's stalls), eat daily, and show Hungry whe
 | `FoodStats`, `FoodStock` | Village totals for the top bar. |
 | `GranaryReport` | Read model for the granary panel: state, stock, supplies toggle, `ConfirmText`. |
 
-Family fields: `LarderLocationId`, `CarriedRations`, `IsHungry`, `TripCarrierId`, `AllotmentReservationIds`. Ledger kind `FoodStore` refuses non-food.
+Family fields: `LarderLocationId`, `CarriedRations`, `IsHungry`, `TripCarrierId`, `AllotmentReservationIds`, `AllotmentFoodTypes` (distinct food items in the allotment, T-589, read by household levels). Ledger kind `FoodStore` refuses non-food.
 
 ## Data flow
 

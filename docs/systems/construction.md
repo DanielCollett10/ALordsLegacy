@@ -30,6 +30,9 @@ last log is in and the work is done, the site becomes a built footprint (decisio
    A 0-minute recipe (log storage) is removed when marked; an unbuilt module is cancelled at once. Cancelling a mark loses
    its progress. Marking a hut unassigns its families (CN-56).
 7. **Houses (T-407, 0040):** a marked house evicts its family to the camp fire; finish or unbuilt cancel removes its plot (HM-14b). Deliver and build tasks use owner -1 (`DeconstructionWork.HouseOwnerId`) and pool oxen; the house is built like any module.
+7b. **Fences (M21, T-586, decision 0053):** `BuildFence` reserves the panels with `SiteMaterials` and adds a site for the
+   `footprint.fence` marker. Its recipe is `HouseFence.RecipeOf` (plot-derived, read by `SiteRecipe` and `ConstructionSystem`).
+   Removing the house cancels that site or refunds the built panels (`HouseFence.Remove`).
 8. **Granary (M14, 0041):** tasks use owner -1 like a house's. Its deconstruction removes its operation (`food.md`).
 
 ## Rules

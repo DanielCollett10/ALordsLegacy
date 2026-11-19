@@ -1,60 +1,60 @@
 # Homes
 
-**Purpose:** a house on a plot along a road, built like any module, that takes one homeless family. The family's home
-point moves to the house; a family with a house is no longer Homeless (homes.md HM-*, decision 0040).
+**Purpose:** a house on a plot along a road, built like any module, that takes one homeless family. A built house can be
+fenced, and its household can rise to level 2 (decisions 0040, 0053, 0061). Design: `design/homes.md`, `design/household-levels.md`.
 
 ## Key types and files
 
-`Assets/Sim/Homes/` (`LordsLegacy.Sim.Homes`), plus the plot and house code in `Areas/`, `Commands/`, `Footprints/`.
-
 | Type | File | Role |
 |---|---|---|
-| `HomeRegistry`, `HomeRecord` | `Homes/HomeRegistry.cs` | One record per house: house footprint id, plot area id, family id (0 = Empty). `SimWorld.Homes`. `Version` bumps on change. |
-| `MoveInSystem` | `Homes/MoveInSystem.cs` | Operations phase, last. Each Empty, Built, unreserved house takes a Homeless family (`Choose`, pure). Skips families in passage. `HomeRecord.ReservedForFamilyId` (T-504) holds a house for an arriving family; `Growth/ArrivalRules.Check` picks it. |
-| `HouseRemoval` | `Homes/HouseRemoval.cs` | `Evict` (family out, house Empty) and `RemoveWithPlot` (home and plot area go). |
-| `Family.HomeHouseId` | `People/Family.cs` | Set by the registry. `IsHomeless` is `!HomeHouseId.HasValue`. |
-| `DesignatePlot` | `Commands/DesignatePlot.cs` | Plot, house site and Empty home in one all-or-nothing `Apply`. |
-| `HousePlacement`, `HousePlacementResult` | `Areas/HousePlacement.cs` | Pure: puts the 6 × 8 m house on the longest road-frontage edge, 1 m back. |
-| `AreaTypes.Plot` (`area.plot`) | `Areas/AreaTypes.cs` | Building, 4–8 points, 60–400 m², 10° max slope, needs road frontage. |
-| `ModuleTypes.House` | `Footprints/ModuleTypes.cs` | 6 × 8 m, blocks movement. Recipe 10 logs + 10 thatch + 10 panels + 10 daub, 720 min (MAT-40, HL-04). |
-| `SiteMaterials`, `BuildCost` | `Construction/` | Shortfall text for the whole recipe ("Not enough thatch (have 0, need 10)"). |
-| `HomesSection` | `Save/Sections/HomesSection.cs` | Save section id 8 (see `save.md`). |
-| `HousePanelView`, `PlotTool` | `Assets/Game/UI/HousePanel/`, `Assets/Game/Tools/` | Unity side: house panel (delivery lines while unbuilt) and the plot tool. |
+| `HomeRegistry`, `HomeRecord`, `HomesSection` | `Homes/`, `Save/Sections/` | One record per house: house, plot, family (0 = Empty), fence footprint (0 = none). Section 8. |
+| `MoveInSystem`, `HouseRemoval` | `Homes/` | Move-in (operations phase, last). `Evict`, and `RemoveWithPlot` (home, plot, fence). |
+| `HouseFence`, `FenceState`, `FenceLine` | `Homes/`, `Areas/FenceLine.cs` | Fence state and removal. The fence line is derived from the plot, never saved. |
+| `Family.Level`, `Family.AllotmentFoodTypes` | `People/Family.cs` | Household level, and food types in the last Sunday allotment. |
+| `HouseholdLevels`, `NeedDef` | `Homes/HouseholdLevels.cs` | Level table as data. |
+| `HouseholdNeedsReport`, `HouseReport`, `HouseholdLevelCounts` | `Homes/` | Read only: needs and Upgrade, panel model, families per level. |
+| `DesignatePlot`, `BuildFence`, `UpgradeHousehold` | `Commands/` | Plot and house; fence a built house; raise an eligible family. |
+| `ModuleTypes.House`, `ModuleTypes.Fence` | `Footprints/ModuleTypes.cs` | House 6 × 8 m, 10 logs, 10 thatch, 10 panels, 10 daub, 720 min. Fence: 1 m marker, not in `All`. |
+| `HousePanelView`, `PlotTool` | `Assets/Game/UI/HousePanel/`, `Assets/Game/Tools/` | House panel and plot tool. |
 
 ## Lifecycle
 
-1. **Plot:** `PlotTool` (build bar `house`) draws the plot with `AreaTool` and shows the house ghost from `HousePlacement`.
-   Confirm sends `DesignatePlot`. The Sim refuses an invalid plot, no room, or any short recipe item. Trees under the plot are cleared.
-2. **Build:** the site reserves logs, thatch and panels. Its deliver and build tasks use owner `HouseOwnerId` (-1) and
-   pool oxen (`construction.md`).
-3. **Move in:** when the house is Built, `MoveInSystem` picks a Homeless family with members. Families with a workplace
-   come first, nearest workplace to the house; else the lowest family id. Home point becomes the house access point; larder food moves in (`Larders.OnMoveIn`).
-4. **Live:** the routine has a housed family mill about its house access point, not the camp (`RoutineSystem`), and commute
-   from it (`WorkDay`). `CampRenderer` draws a tent only for Homeless families.
-5. **Deconstruct:** marking a built house evicts its family at once (`HouseRemoval.Evict`: home point to the fire, larder food back via `Larders.OnEvict`).
-   Finishing the deconstruction, or cancelling an unbuilt site (`RemoveModule`), calls `RemoveWithPlot`: home and plot go.
-6. **Delete plot:** `DeleteArea` refuses a plot that still has a home: "Deconstruct the house first".
+1. **Plot:** `PlotTool` sends `DesignatePlot`. Refused for a bad plot, no room or a short item. Trees under it are cleared.
+2. **Build:** the site reserves logs, thatch, panels and daub (owner `-1`, oxen pooled; `construction.md`).
+3. **Move in:** a Built house takes a Homeless family with members. Workplace families first, nearest first, else lowest id.
+4. **Live and deconstruct:** the family mills at the house access point. Marking evicts it at once. The teardown, or cancelling
+   an unbuilt site, runs `RemoveWithPlot`. A plot with a home cannot be deleted.
+
+## Fence (decision 0053)
+
+- The house panel's **Build fence** shows on a Built, unfenced house. `BuildFence` also refuses a house being taken down,
+  a plot with no fence line, or short panels.
+- It adds a `footprint.fence` marker at the frontage access point, a site with panels reserved by `SiteMaterials`, and sets `FenceFootprintId`.
+- Recipe per plot: `ceil(length / FencePanelLengthM)` panels, `FenceMinutesPerPanel` each. The line is every plot edge except road frontage.
+  Only a Built fence blocks `NavGrid` (`navigation.md`); `ModuleRenderer.AddFences` draws it once built.
+
+## Household levels (decision 0061)
+
+- **Level 2 needs:** DiverseFood (last allotment has `DiverseFoodTypes` food types, not Hungry), FencedPlot (fence Built),
+  Water and Church (always met).
+- `HouseholdNeedsReport.Of` derives them on each read. Eligible: housed, not in passage, below the top level, all needs met.
+- `UpgradeHousehold` re-checks, raises `Family.Level` by one and logs it. Free in M21 (`UpgradeCost` is empty).
 
 ## Extending
 
-- A second family per house, or a choice of family: change `HomeRegistry.MoveIn` and `MoveInSystem.Choose`, not the callers.
-- A new house tier: a new `FootprintTypeDef` in `ModuleTypes`, plus a plot type in `AreaTypes` if its shape differs.
-- Any new saved home state goes in `HomesSection` and `SimSaveRoundTripTests` in the same task (decision 0034).
+- A second family per house, or a family choice: `HomeRegistry.MoveIn` and `MoveInSystem.Choose`.
+- A new tier: a `FootprintTypeDef` in `ModuleTypes`, plus a plot type in `AreaTypes` if the shape differs.
+- A new level or need: a `HouseholdLevels` entry and a `NeedKind` case in `HouseholdNeedsReport.Check`.
 
 ## Gotchas
 
-- The tent spot is not saved: an evicted family's home point is the camp fire. With no camp it is `RoughSleep.Spot`.
-- An unbuilt house placed before M20 keeps the logs-only recipe (`ModuleTypes.HouseLogRecipe`, `SiteRecipe`, MAT-40b).
-- The plot's own refusals come from `AreaValidator` ("A plot must face a road", "Too small for a house") before `HousePlacement`.
-- `MoveInSystem` retries every tick, so an Empty house fills as soon as a Homeless family exists. Families with no members never move in.
-- Houses are footprints, so `ModuleRenderer` draws them, but they are not operation modules (HM-20).
-
-## Fence (T-586, decision 0053)
-`HomeRecord.FenceFootprintId` (0 = none, saved in Homes, save v39). `HouseFence.StateOf` gives None / Building / Built. `HouseRemoval.RemoveWithPlot` removes the fence: site cancelled, or built panels refunded by `DeconstructRefundShare` as a ground pile at the marker. `SiteRecipe` derives the fence recipe from the plot. Read only (T-591): `HouseReport.Of` (house panel: fence state and progress, level, needs, Upgrade availability and blocker); `HouseholdLevelCounts.Of` (families by level, HL-26).
+- The tent spot is not saved (an evicted family's home point is the camp fire, or `RoughSleep.Spot`). `MoveInSystem` retries every tick; families with no members never move in.
+- Old sites keep their older recipe: logs only (`HouseLogRecipe`), or no daub (`HouseNoDaubRecipe`). See `construction.md`.
+- `AllotmentFoodTypes` is 0 until the first Sunday allotment, so DiverseFood cannot be met before then.
 
 ## Tests
 
-- Sim: `Homes/HouseholdLevelTests` (`HouseholdLevels` defs, `Family.Level`, save v40), `Homes/BuildFenceTests`, `Scenarios/DaubFenceLevel2ScenarioTests` (T-592: daub pit, house, fence, two foods, UpgradeHousehold to level 2, real commands and ticks, audited, save mid-fence), `Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`
-  (recipe, reservations, shortfall, hand carry, old-site recipe). `Areas/HousePlacementTests`, `PlotTypeTests`.
-- Unity PlayMode: `PlotToolTests`, `HousePlotGateTests` (greyed entry, refusal text), `HousePanelTests`, `HouseVisualsTests`, `GameSceneTests`.
-- Gap: no round-trip test saves a house with a family (see `save.md`).
+- Sim: `Homes/HouseholdLevel*Tests`, `HouseReportTests`, `UpgradeHouseholdTests`, `BuildFenceTests`, `DesignatePlotTests`,
+  `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`; `Areas/FenceLineTests`, `Navigation/FenceNavTests`, `Food/AllotmentTests`.
+- End to end: `Scenarios/DaubFenceLevel2ScenarioTests` (daub, house, fence, level 2; audited, saved mid-fence).
+- Unity: PlayMode `HousePanelTests`, `TopBarTests`, `GameSceneTests`. Gap: no round-trip test with a house and family.

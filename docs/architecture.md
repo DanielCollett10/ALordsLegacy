@@ -28,14 +28,14 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   (validation never mutates), applies only if accepted, works while paused, never changes `Tick`, and is
   logged. A rejected command changes nothing. A change with several parts is one batch command that validates
   all parts first (`DesignateOperation`, `PlaceModules`, decision 0037).
-- **Homes** (`systems/homes.md`): `DesignatePlot` makes the plot, house site and an Empty `HomeRegistry` record in one Apply; `MoveInSystem` (operations phase) moves Homeless families into Built houses (HM-11). Saved by `HomesSection`. `HouseReport` (house panel) and `HouseholdLevelCounts` (top bar, via `GrowthReport.Levels`) are read only. M21 chain (daub pit, house, `BuildFence`, two food types, `UpgradeHousehold` to level 2) is proved end to end by `Scenarios/DaubFenceLevel2ScenarioTests` (T-592). `HouseRemoval` evicts the family when a house is marked and removes home and plot when it goes (HM-14, HM-14b; decision 0040).
+- **Homes** (`systems/homes.md`): `DesignatePlot` makes the plot, house site and an Empty `HomeRegistry` record in one Apply; `MoveInSystem` (operations phase) moves Homeless families into Built houses (HM-11). Saved by `HomesSection`. `HouseReport` (house panel) and `HouseholdLevelCounts` (top bar, via `GrowthReport.Levels`) are read only. A built house can take a wattle fence (`BuildFence`, decision 0053). A household rises to level 2 with `UpgradeHousehold` once `HouseholdNeedsReport` says its needs are met (decision 0061); the level is saved in `PopulationSection`. `HouseRemoval` evicts the family when a house is marked and removes home, plot and fence when it goes (HM-14, HM-14b; decision 0040).
 - **Food and foraging** (`systems/food.md`, `systems/foraging.md`): food is ledger stock in larders and food stores. The
   Sunday allotment is a reservation, and the fetch trip is a task (decision 0042). Foragers deliver only to their own hut
   store (decisions 0043, narrowed by 0044). Routine phase: eating, `DepartureSystem`, `ArrivalSystem` (dawn: new family walks in with a month of food and moves in, decision 0045), the Sunday allotment and the Sunday trip. `GrowthReport` (read only) gives panels family status text, village counts and the current arrival reason; see systems/growth.md. Operations phase: bush regrowth and foraging.
 - **Markets** (`systems/markets.md`): one market area holds stall slots. Granary families carry food from forager huts into
   the granary and from the granary to stalls (decision 0044). A stall's planks are carried by its granary family (T-518). The camp hands its food over once a granary supplies the market,
   then is removed. Sunday households draw from the camp before the handover and from stalls in range after it, never both (decision 0049).
-- **Workshops** (`systems/workshops.md`, decisions 0046, 0047): hewing station, sawpit, weaver and wattle yard are data (`WorkshopDef`, a recipe of one or more inputs, decision 0051) run by one `WorkshopSystem`. `WorkshopReport` (panel text, stock, store, family) and `GoodsStats` (village Logs, Beams, Planks; reserved counts, workshop stock and ox loads do not) are read only. `StorageYardReport` (T-547) is the read-only yard panel model: per-item stock, families, computed ST-45 status and the ST-10 market text; its village totals come from `GoodsStats.GeneralByItem`.
+- **Workshops** (`systems/workshops.md`, decisions 0046, 0047): hewing station, sawpit, weaver, wattle yard and daub pit are data (`WorkshopDef`, a recipe of one or more inputs, decision 0051) run by one `WorkshopSystem`. `WorkshopReport` (panel text, stock, store, family) and `GoodsStats` (village Logs, Beams, Planks; reserved counts, workshop stock and ox loads do not) are read only. `StorageYardReport` (T-547) is the read-only yard panel model: per-item stock, families, computed ST-45 status and the ST-10 market text; its village totals come from `GoodsStats.GeneralByItem`.
 - **M19 baskets** (`systems/coppice.md`, `systems/kit.md`, decision 0052): coppice hut rods go by hand to the weaver and wattle yard; baskets go to forager hut and granary kit stores, and a borrowed basket doubles that trip's carry (`KitFetchSystem`, `KitLoans`). Panels reach the yard. `Scenarios/BasketChainScenarioTests` proves the chain from the start layout.
 - **Thatch** (`systems/thatch.md`): reed beds are bush kinds. `ThatchingSystem` cuts them into stooks, `CuringSystem` dries
   the stooks, and `SheafCollecting` carries the dry sheaves to the thatcher's hut store. Houses draw that thatch plus yard panels (end-to-end test: `Scenarios/ThatchChainScenarioTests`).
@@ -56,7 +56,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   Each keeps journals, and `Audit()` checks that the sums agree.
 - **Determinism:** no static mutable state, no `DateTime.Now`, no `System.Random`. `SimRandom` is a seeded
   PCG in Sim code. Geometry is integer millimetres (`PointMm`), with distances as doubles.
-- **Tuning:** every balancing number is in `SimTuning`. Sim code should never hard-code one. Known exceptions: module recipes (`ModuleTypes`) and the weaver and wattle recipes (`WorkshopDef`), tracked as M19 and M20 debt. The save stores the
+- **Tuning:** every balancing number is in `SimTuning`. Sim code should never hard-code one. Known exception: module recipes and sizes in `ModuleTypes` (house, daub pit, fence marker and the others), tracked as M19 to M21 debt. The save stores the
   tuning the world was created with.
 
 ## Data flow
@@ -123,6 +123,6 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 
 ## Not built yet
 
-The Supplies market on the storage yard (ST-10) is a greyed placeholder: no household buys General goods yet (`systems/storage.md`). Also not built: tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
+The Supplies market on the storage yard (ST-10) is a greyed placeholder: no household buys General goods yet (`systems/storage.md`). Household upgrade costs and level 2 benefits (HL-23, HL-25), and the whole-plot fence with a forecourt gate (HP-04). Also not built: tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
 and backyards; grown grain from fields (MAT-31) and carts (MAT-35); artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
 status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.
