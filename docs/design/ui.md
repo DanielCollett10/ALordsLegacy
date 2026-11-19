@@ -115,7 +115,7 @@ never on a right press or drag. Right-drag is kept free for a possible later use
 
 Every `ITool` implements the contract through one shared step (`ToolController.Back()`), so a new tool cannot get it wrong.
 
-## Modules Management (M22a)
+## Modules Management (M22b; module undo in M22a)
 
 | ID | Rule | Tag |
 | --- | --- | --- |
@@ -124,13 +124,13 @@ Every `ITool` implements the contract through one shared step (`ToolController.B
 | UIM-03 | Module ghosts snap to curved area edges and into corners (presentation snap, decision 0017); the Sim still validates | DECIDED |
 | UIM-04 | A work area opens only from its owning building's panel (Draw work area / select from the panel). Clicking a work area on the ground selects nothing | DECIDED |
 
-## Building panels: shared template (M22a; decision 0057)
+## Building panels: shared template (M22b; decision 0057)
 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | UIS-01 | **Every building panel uses the shared template** (`MVPv2_UI_Wireframe_Spec.md` section 5, UIW-30..33): movable box, title "Name n", status line, Pin and Close, sections with upper-case headings, General / Modules tabs where the building has modules, the construction view (UIW-50) while unbuilt. A panel that cannot fit the template needs a decision record before it is built | DECIDED |
 | UIS-02 | Panels read `*Report` read models only (never `SimWorld` collections directly), so a known/reported state layer can be added later | DECIDED |
-| UIS-03 | The template also covers panels the spec does not draw: house, market, citizen, thatcher, daub pit. The consistency audit (M22a) lists each panel against the spec | DECIDED |
+| UIS-03 | The template also covers panels the spec does not draw: house, market, citizen, thatcher, daub pit. The consistency audit (M22b) lists each panel against the spec | DECIDED |
 | UIS-04 | One unpinned panel at a time: selecting something else replaces it. Pinned panels stay until closed. At most 4 pinned panels; pinning a 5th unpins the oldest | DECIDED (owner 19/11/2026) |
 | UIS-06 | **Debug category**: Test area and Test work area sit in a Debug category on the category bar, shown only in editor and development builds | DECIDED (owner 19/11/2026) |
 | UIS-05 | Every tool button and building has a tooltip built from `ToolInfo` (cost, needs, produces), shown through one shared tooltip service | DECIDED |

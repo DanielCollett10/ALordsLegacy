@@ -11,6 +11,6 @@ thatcher rows inside the operation panel), each with its own layout, buttons and
 - A new panel that cannot fit the template needs its own decision record first (design rule `ui.md` UIS-01).
 
 **Consequences.**
-- M22a converts every existing panel, including M20 thatcher, M21 daub pit and the house Upgrade.
+- M22b converts every existing panel, including M20 thatcher, M21 daub pit and the house Upgrade.
 - PlayMode tests look up section and label names from the frame, so names follow one scheme: `panel-<section>-<item>`.
 - Layout changes happen once, in the frame. A one-off panel layout is a review failure.

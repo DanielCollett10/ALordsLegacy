@@ -1,4 +1,4 @@
-# Road access (M22b; movement rules built in M23a)
+# Road access (M22d; movement rules built in M23a)
 
 Owner direction 19/11/2026 (`docs/direction/m22-m24-direction.md`) and owner answers the same day. Amends homes.md HM-02
 and HM-04, household-levels.md HL-10, HL-12 and HL-12c, and GDD HSE-01. All distances are PLACEHOLDER `SimTuning`

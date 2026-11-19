@@ -17,7 +17,7 @@ MVP-1-01 where they disagree.
 
 ## The camp hands over and goes (owner 16/11/2026, M15)
 
-> **Amended M22b (owner direction 19/11/2026); these lines win over CMP-20, CMP-21, CMP-23 and CMP-24 below:**
+> **Amended M22d (owner direction 19/11/2026); these lines win over CMP-20, CMP-21, CMP-23 and CMP-24 below:**
 > - **CMP-20a** Citizens eat from the camp until a **built market and a built granary both exist**. That is the handover. The granary's Supplies market toggle no longer triggers it.
 > - **CMP-21a** At the handover everyone eats from the market. Granary families carry the camp's food into a granary, as in CMP-21.
 > - **CMP-23a** The camp stays while any family is homeless. Once all are housed **and** the handover has happened, the camp is removed.

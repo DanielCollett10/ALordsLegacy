@@ -13,6 +13,8 @@ Owner decisions from the 19/11 direction session. Nothing here is a ticket; the 
 | M24 Code check | Debt and tidy | Panel and tool consolidation; Unity hierarchy tidy; doc debt; unused `Weaver*`/`Wattle*` tuning fields | |
 | After M24 | Placeholder graphics pass, then World MVP (FG-01..03, FG-07, FG-09) | | |
 
+**Split 19/11/2026 (planner, after plan review).** M22a becomes three milestones, each with its own play check: **M22a** SimLog, bars, tooltips, tool input, 64x. **M22b** shared panels and every panel conversion (gated on M21 closing, T-595). **M22c** roads respecting buildings, and the Oxen post. The old M22b (houses, access, camp) becomes **M22d**. M23a, M23b and M24 get tasks once M22d is planned in detail and their design docs exist.
+
 Dependencies: `SimLog` before M23. Shared panel and `ToolInfo` before further panels; M20 and M21 panels convert in M22a. Road Access status and alert (M22b) before road-only carrier pathing (M23a). On-site presence before the haul board. M21's fence and gate rules (HL-10, HL-12, HL-12c) are built on road frontage; M22b reworks them.
 
 ## Tool-input contract (amends ui.md UIB-06, CAM-A5)
