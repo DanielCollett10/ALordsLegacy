@@ -32,19 +32,24 @@ Design: `design/materials.md` MAT-10, MAT-11, MAT-13..18. Copied from foraging (
 - The yard never collects from this store (ST-42b); `HoldsGoods` counts it as storage for the rod reserve.
 - No new Sim state: no save bump. Hut store caps are in the Ledger section.
 
-## Gaps
+## Unity (T-568)
 
-- No Unity UI, build-bar entry, art or `OperationPanelView` text for `NoStools` yet. The SimConfig asset and its EditMode
-  tests list area and module types by `All`, so they need the new types.
+- Build bar `coppice` (`OperationDraftTool`, area then hut). `OperationPanelView` shows the hut's rods line
+  ("Rods: hazel: 12 / 40, willow: 0 / 40") and "No stools".
+- Stools are drawn by `BushRenderer` as primitives (hazel and willow, stump while regrowing). The hut reuses the woodcutting
+  hut box (`design/placeholder-art.md`).
 
 ## Rods onward (T-567)
 
-Rods leave the hut by hand to the weaver (willow) and wattle yard (hazel and willow), never by the yard (ST-42b). Weaver baskets go to kit stores (`kit.md`) and wattle panels to the yard. `Scenarios/BasketChainScenarioTests` runs it from the start layout: coppice, weaver, wattle and yard staffed, panels in the yard, a 20 carry.
+Rods leave the hut by hand to the weaver (willow) and wattle yard (hazel and willow), never by the yard (ST-42b). The
+weaver and wattle yard are in `workshops.md`. Weaver baskets go to kit stores (`kit.md`) and wattle panels to the yard.
+`Scenarios/BasketChainScenarioTests` runs the chain from the start layout: a 20 carry.
 
 ## Config (T-570)
 
-The M19 tuning (stools, rods per cut, regrow, hand carry, weaver and wattle stock, kit slots) is in `SimConfig` and its asset
-(`Game/Config/SimConfig.asset`); the asset values equal the code defaults. Tests: `SimConfigTests.CoppiceWeaverWattleFieldsReachTuning`.
+The M19 coppice tuning (stools, rods per cut, regrow, minutes per rod, store per kind) is in `SimConfig` and its asset
+(`Game/Config/SimConfig.asset`). The asset values equal the code defaults. Test:
+`SimConfigTests.CoppiceWeaverWattleFieldsReachTuning`.
 
 ## Tests
 

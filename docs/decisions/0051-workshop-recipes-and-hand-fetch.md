@@ -18,4 +18,9 @@ M21 needs a daub pit with no input at all (`design/household-levels.md` HL-01).
 - Status *Waiting for <item>* names the first missing input.
 
 **Consequences.** Weaver, wattle yard and daub pit are data plus a footprint type. Hewing and sawpit tests must still pass
-unchanged after the refactor; the refactor bumps the save version once.
+unchanged after the refactor; the refactor bumps the save version once. Save v35 added per-input stock.
+Rods for hand fetch come from the nearest coppice hut or working yard store (`RodFinder`). Weaver and wattle numbers
+are still hard-coded in `WorkshopDef`, not read from `SimTuning` (see the M19 gap and `design/materials.md`).
+
+> Implementation note (T-560): hand inputs use the shared `task.haul_by_hand` (`HandHaulTaskDefs`), not a new `task.fetch_input_hand`.
+> The yard and kit hand trips use the same task.

@@ -40,6 +40,10 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-24 | Stores: weaver input 30 willow, output 10 baskets; wattle yard input 30 hazel + 10 willow, output 20 panels | PROPOSED |
 | MAT-25 | The **willow box** is not built until something uses it (no play without a use) | PROPOSED |
 
+> Implementation note (MAT-22, MAT-24): `WorkshopDef.Weaving` and `Wattling` hard-code the recipe and store numbers (weaver 6 rods,
+> 4 a day, stores 30 and 10; wattle 6 hazel and 2 willow, 5 a day, stores 30, 10 and 20). The `Weaver*` and `Wattle*` tuning
+> fields (`SimTuning`, `SimConfig`, saved in Core) are never read, so changing them does nothing. Owner decides: wire them in, or remove them.
+
 ## Thatcher's hut
 
 | ID | Rule | Tag |
@@ -77,6 +81,8 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-51 | Baskets **do not wear out** yet. Made at the weaver, they go to general goods: the camp's general store, or the storage yard once one is built (`storage.md`) | DECIDED (owner 17/11/2026) |
 | MAT-52 | Baskets are **claimed by buildings**, not by people: a forager hut or granary claims baskets into its kit store (`storage.md` ST-20..24), and its carriers use them. A carrier with a basket from its building's kit carries double | DECIDED (owner 17/11/2026) |
 | MAT-53 | Kit slots: forager hut **5 baskets**, granary **2** (one per family slot). The storage yard and coppice hut are not basket users in M19 | PROPOSED |
+
+> Implementation note (MAT-53): kit slots are per building, from tuning (`ForagerHutBasketSlots` 5, `GranaryBasketSlots` 2). The code does not tie them to family slots.
 | MAT-54 | Doubling applies to the forage pick plan (10 → 20, still capped by bush and store room) and the granary's food carry (10 → 20). Same minutes per load | PROPOSED |
 
 ## Gaps (17/11/2026)

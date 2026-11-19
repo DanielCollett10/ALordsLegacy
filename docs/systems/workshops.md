@@ -1,6 +1,8 @@
 # Workshops
 
-**Purpose:** the hewing station (log to beam) and the sawpit (beam to planks): placement, stock and store, the shared system that fetches and works, and the read models panels use. Design: `design/planks.md` (HW-01..06, PL-01..05). Decisions 0046, 0047.
+**Purpose:** the hewing station (log to beam), the sawpit (beam to planks), the weaver (willow rods to baskets) and the wattle
+yard (hazel and willow rods to panels): placement, stock and store, the shared system that fetches and works, and the read
+models panels use. Design: `design/planks.md` (HW, PL), `design/materials.md` (MAT-20..24). Decisions 0046, 0047, 0051, 0055.
 
 ## Key types and files
 
@@ -8,51 +10,51 @@
 
 | Type | Role |
 |---|---|
-| `WorkshopDef` | Data: input, output, outputs per input, inputs per day per family, stock and store capacity, ox load. `Hewing(t)` and `Sawing(t)` read every number from `SimTuning`. |
-| `WorkshopBuildings` | `IsWorkshop`; `OnBuilt` makes one `WorkshopStock` per recipe input (own capacity, `RecipeInput.StockCapacity`) and the `GoodsStore` (output) when the site finishes. |
-| Multi-input (T-558) | A work task starts only when every input has one batch available and the store has room for one batch; all reserved at start, all consumed and outputs produced on finish. Fetch runs the single-input path per input in recipe order (choice: cw-5c). Save v35. Tests inject a def via `OperationTypes.TestDefs`. |
-| `WorkshopSystem` | Operations phase, after construction. Opens `task.fetch_input` (ox, nearest free source) and one `task.workshop_work` per working family. |
-| `InputSources` | Where an ox may fetch from: logs share `ConstructionSources` plus woodcutting piles; beams come from workshop goods stores; baskets and panels from working storage yards only (T-562). Never a `WorkshopStock`. |
+| `WorkshopDef` | Data: a recipe (inputs with count and carry class, outputs), batches per family-day, stock and store capacity, min work age. `Hewing(t)`, `Sawing(t)`, `Weaving(t)`, `Wattling(t)`. Hewing and sawing read `SimTuning`; weaving and wattling hard-code theirs (see gaps). |
+| `WorkshopBuildings` | `IsWorkshop`; `OnBuilt` makes one `WorkshopStock` per recipe input and the output `GoodsStore`. |
+| `WorkshopSystem` | Operations phase, after construction. Opens `task.fetch_input` (ox) and `task.haul_by_hand` (hand) fetch trips, and one `task.workshop_work` per working family. |
+| `InputSources` | Where each input may come from. Logs: `ConstructionSources` plus woodcutting piles. Beams: workshop goods stores. Rods: coppice hut and working yard stores. Baskets and panels: working yards only (T-562). Never a `WorkshopStock`. |
+| `InputReserve` | Village reserve per input (PL-31): a fetch opens only while storage total minus open fetches minus the load is at least the reserve. |
 | `WorkshopStatus` | Computed status: Paused, MissingHut, NoWorkers, Working, WorkshopStoreFull, WaitingForInput (Reported: WaitingForOx). |
-| `WorkshopReport` | Read model (T-525): `Of(world, footprintId)` gives `Name`, `StatusText`, `InputCount/InputCapacity`, `OutputCount/OutputCapacity`, `InputText`, `OutputText`, `FamilyId`, `FamilyName`, `IsBuilt`. `ConfirmText(world, typeId)` is the placement dialog text. Null for a non-workshop id. |
-| `GoodsStats` | Top bar totals (T-525): `Logs` (camp stockpile, built log storage, unowned piles, as `ConstructionSources` counts them), `Beams` and `Planks` (every `GoodsStore`). |
+| `WorkshopReport` | Read model: `Name`, `StatusText`, `Inputs` (one line per input: stock, cap, reserve, `InStorage`), output counts, `RecipeText`, family. `ConfirmText` for placement. Null for a non-workshop id. |
+| `GoodsStats` | Totals: `Logs`, `Beams`, `Planks` (top bar); `Rods`, `Baskets`, `Panels` and `GeneralByItem` count every goods store, kit and coppice stores too. The top bar lists General goods in the Beams and Planks tooltips. |
 
 ## How a day runs
 
-- Fetch: a free ox takes one input load from the nearest source (`InputSources`) into the workshop's `WorkshopStock`
-  (`OxLoadForInput`). Both ends are reserved by the fetch task, so no load is double-booked.
-- Work: one `task.workshop_work` per working family, one input at a time. Minutes per input = `ShiftMinutes` ÷
-  `InputsPerDayPerFamily`, so a family works through 3 inputs a working day (3 logs hewn, or 3 beams sawn). Done = one input
-  consumed, outputs produced into the `GoodsStore`. Progress is kept overnight.
-- Gate: no fetch or work while unbuilt, paused or without a working-age member. A fetch needs room in the input stock; a work task needs room in the store.
+- Fetch: a free ox takes one input load (`OxLoadForInput`). A hand fetch carries up to the item's hand load (`HandLoads`).
+  The fetch task reserves both ends, so no load is double-booked.
+- Choice: each round takes the input with the lowest share of its stock (held plus incoming; ties in recipe order), skipping an
+  input with no room, no source or a blocked reserve. A def with no inputs never fetches.
+- Work: one `task.workshop_work` per working family. A batch starts only when every input has one batch in stock and the output
+  store has room for one batch. Inputs are consumed and outputs produced on finish. Progress is kept overnight.
+- Gate: no fetch or work while unbuilt, paused or without a working-age member.
+
+## Hand inputs (T-560, decision 0051)
+
+A `CarryClass.Hand` input is fetched by the workshop's own family through the shared `task.haul_by_hand` (`HandHaulTaskDefs`),
+one open trip per working family, up to the item's hand load. The reserve counts a trip's items as already taken. Rods come from
+the coppice hut or yard store nearest first (`RodFinder`). Decision 0051 named a separate task id; the code shares the haul task.
 
 ## Rules for the totals
 
-- Reserved stock still counts (decision 0046): a log reserved for a site is still in the village.
-- A log on an ox, in a `WorkshopStock`, on a site or in an operation's own pile does not count (decision 0047). Beams waiting in a sawpit's stock are not village beams.
-- Status text: "Working", "Paused", "Missing hut", "No workers", "Waiting for logs/beams", "Waiting: N / R logs in storage" (reserve), "Waiting for ox", "Store full", "Under construction".
-
-## Tests
-
-`Sim.Tests/Workshops/`: `WorkshopReportTests` (report, statuses, confirm text, `GoodsStats` rows), `WorkshopWorkTests`, `WorkshopSystemTests`, `InputSourcesTests`, `WorkshopDefTests`, `InputReserveTests`, `WorkshopReserveSettingTests`. `Operations/WorkshopPlacementTests` covers placement.
-
-`TimberChainEndToEndTests` is the pipeline test: start layout with logs, a woodcutter, hewing station, sawpit, market and three granaries with six store families, all by real commands and ticks. The 10 starting planks go into five stalls, sawn planks are carried to the sixth, and it is built. Audit runs every 5 ticks.
-
-## Fetch choice and zero inputs (T-559)
-
-Each fetch round picks the ox input with the lowest share of its stock (held plus incoming, ties in recipe order), skipping inputs with no room, no source, or blocked by their own reserve. A def with no inputs never fetches and opens work whenever a family is assigned and the store has room for a batch; it shows only Working, No workers or Store full. "Waiting for X" names the first missing input; the reserve status names that item too. Hand inputs are not fetched yet.
-
-## Input reserve (T-537, PL-30..34)
-
-`InputReserve`: a fetch opens only if storage total (logs in Storage/Stockpile, beams in workshop GoodsStores; never piles, workshop stock, carried) minus stock reserved by open fetches minus the load is at least the reserve (tuning `WorkshopDefaultReserve` = 5, 0 = none). Own input stock is committed and uncounted; fetched work is always processed. Stocks: hewing store 10, input stocks 10.
-The player sets it per workshop and input (`SetWorkshopReserve`, 0..9999): stored on the operation (`Operation.Reserves`, Structures section, save v31); an unset input uses the tuning default. Yard and coppice-hut stores also count (see `storage.md`). Decision 0055.
-
-## Read models for M19 (T-566, read only)
-
-`WorkshopReport.Inputs` (one `WorkshopInputLine` per recipe input: stock, stock cap, reserve, `InStorage`, per batch) and `RecipeText`. `GoodsStats.Rods/Baskets/Panels` count every goods store (kit stores too). `CoppiceReport` (status, per-kind rods out of 40, stools available/regrowing in the work area), `ForagerHutReport` and `GranaryReport.BasketsHeld/BasketSlots` (loaned baskets still count as held). Tests: `Workshops/KitReadModelTests`.
+- Reserved stock still counts (decision 0046). A log on an ox, in a `WorkshopStock`, on a site or in an operation pile does not
+  count (decision 0047).
+- Status text: "Working", "Paused", "Missing hut", "No workers", "Waiting for logs/beams", "Waiting: N / R logs in storage"
+  (reserve), "Waiting for ox", "Store full", "Under construction".
 
 ## Gaps and follow-ups
 
-- Unity side (T-527, T-550): `WorkshopPanelView` (picked via `AgentPicker.SelectWorkshop`) shows `WorkshopReport` with Assign/Unassign/Deconstruct and the "Keep in storage" reserve field (text input, focus only on click, T-602); the granary panel shows "Waiting for planks"; the top bar has Logs/Beams/Planks labels from `GoodsStats`. PlayMode tests: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.
-- A site that loses a carried load at sunset drops it on a pile the site owns, and may not reserve it again if no spare logs exist (seen in the end-to-end test; not fixed here).
-- Stall builds need an odd-jobber family to build (stall planks are carried by the granary family); with every family assigned, build tasks stay open.
+- **Weaver and wattle numbers are hard-coded** in `WorkshopDef.Weaving` (6 rods, 4 a day, stores 30 and 10) and `Wattling`
+  (6 hazel and 2 willow, 5 a day, stores 30, 10 and 20). The `Weaver*` and `Wattle*` tuning fields (T-570) are saved and
+  shown in SimConfig, but no code reads them. Owner decision; see the implementation note in `design/materials.md`.
+- Unity: `WorkshopPanelView` (via `AgentPicker.SelectWorkshop`) shows the report, Assign/Unassign/Deconstruct and the reserve field
+  (focus only on click, T-602). The granary panel shows "Waiting for planks".
+- A site that loses a carried load at sunset drops it on a pile it owns (open from M18).
+- Stall builds need an odd-jobber family; with every family assigned, build tasks stay open.
+
+## Tests
+
+`Sim.Tests/Workshops/`: `WorkshopRecipeTests`, `MultiInputWorkshopTests`, `WorkshopFetchChoiceTests`, `WorkshopHandFetchTests`,
+`WeaverWattleYardTests`, `WorkshopEquivalenceTests`, `InputReserveTests`, `WorkshopReserveSettingTests`, `KitReadModelTests`,
+`InputSourcesTests`, `WorkshopReportTests`. `Operations/WorkshopPlacementTests`. Pipeline: `TimberChainEndToEndTests`.
+Unity PlayMode: `WorkshopPanelTests`, `GranaryPanelTests`, `TopBarTests`.

@@ -26,6 +26,9 @@ transfer or consumption, so nothing appears from nowhere (decision 0032, decisio
 - Per location and item: `TotalOf`, `ReservedOf`, `IncomingOf`, `AvailableOf` (total − reserved), `FreeSpace` (capacity − total − incoming).
 - `Audit()` returns null when consistent. It checks location sums against the produced and consumed journals, and checks
   reservations and capacity.
+- Per-item caps (T-555): `Ledger.SetItemCap(store, item, cap)`, read with `LedgerLocation.ItemCapOf`. `Produce` throws past
+  the cap, and `ReserveCapacity` and `FreeSpaceFor` respect it. Coppice hut stores cap each rod at 40; kit stores cap baskets
+  at their slot count. The cap is saved with the location.
 
 ## Extending
 
@@ -47,5 +50,5 @@ A basket is a General item. Kit stores (`kit.md`) are goods stores keyed by the 
 ## Tests
 
 `Sim.Tests/LedgerTests.cs`, `LedgerReservationTests.cs`, `Sim.Tests/Operations/LogLoadTests.cs`, `Sim.Tests/Save/LedgerSectionTests.cs`,
-`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (General goods stores), `Sim.Tests/Inventory/HandLoadsTests.cs`. Food stores: `Sim.Tests/Food/FoodStoreTests.cs`. Workshop stock: `Sim.Tests/Workshops/InputSourcesTests.cs`.
+`Sim.Tests/Save/LedgerFoodTests.cs`, `Sim.Tests/Inventory/GoodsStoreTests.cs` (General goods stores), `Inventory/HandLoadsTests.cs`, `Inventory/ItemCapTests.cs`, `Inventory/RodBasketPanelTests.cs`. Food stores: `Sim.Tests/Food/FoodStoreTests.cs`. Workshop stock: `Sim.Tests/Workshops/InputSourcesTests.cs`.
 Unity: `Assets/Tests/PlayMode/LogStacksTests.cs`.

@@ -15,7 +15,7 @@
 | `WalkBob` | Placeholder walk bob. Rate depends on metres walked per tick and `ViewSettings.WalkStepsPerMetre`. |
 | `CampRenderer` | Tents, fire, log pile and tie post from `World.Camp`. One tent per Homeless family; nothing once the camp is removed (CMP-23). Rebuilds on footprint, camp, family or `Homes.Version` changes. |
 | `ModuleRenderer` | Woodcutting modules, forager huts, houses (`visual.module.house`) and standalone structures (granary, hewing station, sawpit, storage yard), stretched to the footprint. Market stalls, with food crates by fill. Beam stacks beside hewing stations and plank stacks beside sawpits, height by `StackFill` (T-526). Skips unbuilt footprints. |
-| `BushRenderer` | Forage bushes from `BushRegistry`, instanced. Rebuilds only on `Bushes.Version` (not on reservations). |
+| `BushRenderer` | Bushes from `BushRegistry`, instanced: forage bushes as spheres, coppice stools as cylinders (stump while cut), reed beds. Rebuilds only on `Bushes.Version` (not on reservations). |
 | `LogPileRenderer` | One log per ledger log in every location. Piles and stockpile stack at their point; storages along the footprint's X; ox carriers drag logs behind the ox. |
 | `ConstructionRenderer` | Scaffold per unbuilt site, height from `ConstructionProgress.Fraction`. |
 | `RoadRenderer` | One mesh per `RoadSegment`, rebuilt on `RoadNetwork.Version`. Preview mesh red where `InvalidRanges` apply. |
