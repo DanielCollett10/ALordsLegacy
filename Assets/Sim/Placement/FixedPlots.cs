@@ -20,7 +20,8 @@ namespace LordsLegacy.Sim.Placement
                 : f.Type.Id == ModuleTypes.HewingStationId ? "Hewing station"
                 : f.Type.Id == ModuleTypes.SawpitId ? "Sawpit"
                 : f.Type.Id == ModuleTypes.WeaverId ? "Weaver"
-                : f.Type.Id == ModuleTypes.WattleYardId ? "Wattle yard" : "Structure";
+                : f.Type.Id == ModuleTypes.WattleYardId ? "Wattle yard"
+                : f.Type.Id == ModuleTypes.DaubPitId ? "Daub pit" : "Structure";
             return kind + " " + f.Id;
         }
 

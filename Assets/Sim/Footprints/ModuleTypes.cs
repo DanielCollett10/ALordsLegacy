@@ -37,6 +37,7 @@ namespace LordsLegacy.Sim.Footprints
                 case SawpitId: return "Sawpit";
                 case WeaverId: return "Weaver";
                 case WattleYardId: return "Wattle yard";
+                case DaubPitId: return "Daub pit";
                 case StorageYardId: return "Storage yard";
                 case CoppiceHutId: return "Coppice hut";
                 case ThatcherHutId: return "Thatcher's hut";
@@ -163,8 +164,15 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef WattleYard =
             new FootprintTypeDef(WattleYardId, 6000, 4000, true, true, recipe: new ConstructionRecipe(6, 480), yardMarginMm: 3000);
 
+        /// <summary>Id of the daub pit (HL-01).</summary>
+        public const string DaubPitId = "module.daub_pit";
+
+        /// <summary>Daub pit: 4 x 4 m, blocks movement, clears trees, 3 m yard, 4 logs / 240 worker-minutes (HL-01).</summary>
+        public static readonly FootprintTypeDef DaubPit =
+            new FootprintTypeDef(DaubPitId, 4000, 4000, true, true, recipe: new ConstructionRecipe(4, 240), yardMarginMm: 3000);
+
         /// <summary>All module types.</summary>
-        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, Weaver, WattleYard, StorageYard, CoppiceHut, ThatcherHut };
+        public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, Weaver, WattleYard, StorageYard, CoppiceHut, ThatcherHut, DaubPit };
 
         /// <summary>Finds a module type by id, or null if unknown.</summary>
         public static FootprintTypeDef Find(string id)

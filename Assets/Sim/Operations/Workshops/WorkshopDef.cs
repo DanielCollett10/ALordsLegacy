@@ -178,6 +178,14 @@ namespace LordsLegacy.Sim.Operations.Workshops
                 new[] { new RecipeOutput(Items.Basket, 1) }, 4, 30, 10, Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
         }
 
+        /// <summary>Daub pit (HL-01, HL-02): no input, 10 daub per family-day, store 20. Light work from the forager age.</summary>
+        public static WorkshopDef Daubing(SimTuning t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            return new WorkshopDef("workshop.daubing", new RecipeInput[0],
+                new[] { new RecipeOutput(Items.Daub, 1) }, 10, 1, 20, HandLoads.DaubPerTrip).WithMinWorkAge(t.ForagerMinAge);
+        }
+
         /// <summary>Wattle yard (MAT-22): 6 hazel + 2 willow rods to 1 panel, 5 panels per family-day, inputs 30 hazel and 10 willow, store 20.</summary>
         public static WorkshopDef Wattling(SimTuning t)
         {
