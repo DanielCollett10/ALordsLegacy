@@ -49,9 +49,13 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 - `MoveInSystem` retries every tick, so an Empty house fills as soon as a Homeless family exists. Families with no members never move in.
 - Houses are footprints, so `ModuleRenderer` draws them, but they are not operation modules (HM-20).
 
+## Fence (T-586, decision 0053)
+
+`HomeRecord.FenceFootprintId` (0 = none, saved in Homes, save v39). `HouseFence.StateOf` gives None / Building / Built. `HouseRemoval.RemoveWithPlot` removes the fence: site cancelled, or built panels refunded by `DeconstructRefundShare` as a ground pile at the marker. `SiteRecipe` derives the fence recipe from the plot.
+
 ## Tests
 
-- Sim: `Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`
+- Sim: `Homes/BuildFenceTests`, `Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`
   (recipe, reservations, shortfall, hand carry, old-site recipe). `Areas/HousePlacementTests`, `PlotTypeTests`.
 - Unity PlayMode: `PlotToolTests`, `HousePlotGateTests` (greyed entry, refusal text), `HousePanelTests`, `HouseVisualsTests`, `GameSceneTests`.
 - Gap: no round-trip test saves a house with a family (see `save.md`).

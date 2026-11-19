@@ -38,6 +38,8 @@ paused and never changes `Tick`. Unity calls it only through `SimHost.Execute`.
 - `RemovedTreeIds` tells the view which trees went; trees do not return on `DeleteArea`.
 - `DeleteArea` refuses a plot that still has a home ("Deconstruct the house first", HM-14b). Deconstruct the house to remove it.
 
+- `BuildFence(homeId)` (T-586): built, unfenced house only; adds a `footprint.fence` footprint and site (panels via `SiteMaterials`) and sets `HomeRecord.FenceFootprintId`. Fence goes with its house (`HouseFence.Remove`).
+
 ## Tests
 
 `Sim.Tests/Commands/CommandPipelineTests.cs`, `Commands/SendCitizenToTests.cs`, `Areas/AreaCommandTests.cs`,

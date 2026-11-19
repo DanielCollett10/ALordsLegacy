@@ -20,10 +20,13 @@ namespace LordsLegacy.Sim.Homes
         /// <summary>Id of the arriving family this house is held for (GR-22), or 0 for none. Saved by the Homes section.</summary>
         public int ReservedForFamilyId { get; internal set; }
 
-        internal HomeRecord(int houseFootprintId, int plotAreaId, int familyId, int reservedForFamilyId = 0)
+        /// <summary>Footprint id of the house's fence (decision 0053), or 0 for none. Saved by the Homes section.</summary>
+        public int FenceFootprintId { get; internal set; }
+
+        internal HomeRecord(int houseFootprintId, int plotAreaId, int familyId, int reservedForFamilyId = 0, int fenceFootprintId = 0)
         {
             HouseFootprintId = houseFootprintId; PlotAreaId = plotAreaId; FamilyId = familyId;
-            ReservedForFamilyId = reservedForFamilyId;
+            ReservedForFamilyId = reservedForFamilyId; FenceFootprintId = fenceFootprintId;
         }
     }
 
@@ -59,6 +62,22 @@ namespace LordsLegacy.Sim.Homes
         {
             foreach (HomeRecord h in _homes.Values) if (h.PlotAreaId == plotAreaId) return h;
             return null;
+        }
+
+        /// <summary>The home whose fence is this footprint, or null.</summary>
+        public HomeRecord FindByFence(int fenceFootprintId)
+        {
+            if (fenceFootprintId == 0) return null;
+            foreach (HomeRecord h in _homes.Values) if (h.FenceFootprintId == fenceFootprintId) return h;
+            return null;
+        }
+
+        /// <summary>Links a house to its fence footprint (0 clears the link).</summary>
+        public void SetFence(HomeRecord home, int fenceFootprintId)
+        {
+            if (home == null) throw new ArgumentNullException(nameof(home));
+            home.FenceFootprintId = fenceFootprintId;
+            Version++;
         }
 
         /// <summary>Adds an Empty home. Throws if the house already has one.</summary>
@@ -122,10 +141,10 @@ namespace LordsLegacy.Sim.Homes
         }
 
         /// <summary>Restore: adds a record with its family; the family's link is set by <see cref="CheckLinks"/>' caller.</summary>
-        internal void Restore(int houseFootprintId, int plotAreaId, int familyId, int reservedForFamilyId = 0)
+        internal void Restore(int houseFootprintId, int plotAreaId, int familyId, int reservedForFamilyId = 0, int fenceFootprintId = 0)
         {
             if (_homes.ContainsKey(houseFootprintId)) throw new ArgumentException("Duplicate house " + houseFootprintId);
-            _homes.Add(houseFootprintId, new HomeRecord(houseFootprintId, plotAreaId, familyId, reservedForFamilyId));
+            _homes.Add(houseFootprintId, new HomeRecord(houseFootprintId, plotAreaId, familyId, reservedForFamilyId, fenceFootprintId));
             Version++;
         }
     }

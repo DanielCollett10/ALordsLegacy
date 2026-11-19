@@ -92,7 +92,7 @@ namespace LordsLegacy.Sim.Operations
             TaskPriority priority = site.Priority == ConstructionPriority.High ? TaskPriority.High : TaskPriority.Normal;
             for (int i = 0; i < want; i++)
             {
-                TaskDef def = ConstructionTaskDefs.Build(Math.Max(1, fp.Type.ConstructionRecipe.BuildWorkerMinutes));
+                TaskDef def = ConstructionTaskDefs.Build(Math.Max(1, (Homes.HouseFence.RecipeOf(world, fp) ?? fp.Type.ConstructionRecipe).BuildWorkerMinutes));
                 TaskRecord task = world.Tasks.Create(def, owner, null, priority, fp.Type.Id);
                 world.Tasks.SetSite(task.Id, fp.Id);
             }

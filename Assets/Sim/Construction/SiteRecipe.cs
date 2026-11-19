@@ -19,6 +19,8 @@ namespace LordsLegacy.Sim.Construction
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
             if (fp == null) throw new ArgumentNullException(nameof(fp));
+            ConstructionRecipe fence = Homes.HouseFence.RecipeOf(world, fp); // decision 0053: derived from the plot
+            if (fence != null) return fence;
             bool stall = fp.Type.Id == ModuleTypes.MarketStallId;
             bool house = fp.Type.Id == ModuleTypes.HouseId;
             if (!stall && !house) return fp.Type.ConstructionRecipe;
