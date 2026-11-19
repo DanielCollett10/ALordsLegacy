@@ -10,6 +10,9 @@ namespace LordsLegacy.Sim.Construction
         /// <summary>All sites in footprint id order.</summary>
         public IEnumerable<ConstructionSite> Sites => _sites.Values;
 
+        /// <summary>Increases whenever a site is added or removed (a footprint becomes Built). Not saved; used by nav sync.</summary>
+        public int Version { get; private set; }
+
         /// <summary>Number of unbuilt footprints.</summary>
         public int Count => _sites.Count;
 
@@ -20,6 +23,7 @@ namespace LordsLegacy.Sim.Construction
             if (_sites.ContainsKey(site.FootprintId))
                 throw new System.InvalidOperationException("Footprint " + site.FootprintId + " already has a site.");
             _sites.Add(site.FootprintId, site);
+            Version++;
             return site;
         }
 
@@ -27,6 +31,11 @@ namespace LordsLegacy.Sim.Construction
         public ConstructionSite Get(int footprintId) => _sites.TryGetValue(footprintId, out var s) ? s : null;
 
         /// <summary>Removes a site (the footprint becomes Built). Returns false if there was none.</summary>
-        public bool Remove(int footprintId) => _sites.Remove(footprintId);
+        public bool Remove(int footprintId)
+        {
+            if (!_sites.Remove(footprintId)) return false;
+            Version++;
+            return true;
+        }
     }
 }
