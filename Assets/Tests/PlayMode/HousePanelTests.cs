@@ -47,6 +47,7 @@ namespace LordsLegacy.Tests.PlayMode
             var goods = w.Inventory.AddGoodsStore(M(60, 40));
             w.Inventory.Produce(goods, Items.Thatch, 20);
             w.Inventory.Produce(goods, Items.WattlePanel, 20);
+            w.Inventory.Produce(goods, Items.Daub, 20); // HL-04: the house recipe also needs 10 daub
             var family = w.People.AddFamily(1, "Archer", 10, 10);
             w.People.AddCitizen(1, "Alda", Sex.Female, -4_000_000, 1, 10, 10);
             w.People.AddCitizen(2, "Bran", Sex.Male, -4_000_000, 1, 10, 10);
