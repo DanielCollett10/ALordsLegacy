@@ -50,10 +50,12 @@ namespace LordsLegacy.Tests.PlayMode
             if (logs > 0)
             {
                 // The house recipe needs logs, thatch and wattle panels (MAT-40), so stock all three.
+                // Thatch and panels are General items: they come only from goods stores (decision 0046).
                 var pile = w.Inventory.AddStockpile(PointMm.FromMetres(60, 40));
                 w.Inventory.Produce(pile, Items.Log, logs);
-                w.Inventory.Produce(pile, Items.Thatch, logs);
-                w.Inventory.Produce(pile, Items.WattlePanel, logs);
+                var goods = w.Inventory.AddGoodsStore(PointMm.FromMetres(60, 40));
+                w.Inventory.Produce(goods, Items.Thatch, logs);
+                w.Inventory.Produce(goods, Items.WattlePanel, logs);
             }
             _camGo = new GameObject("TestCam");
             _cam = _camGo.AddComponent<Camera>();
