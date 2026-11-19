@@ -86,6 +86,7 @@ Roads treat static footprints as obstacles and show static areas while drawing. 
 - Citizen schedule and agency (needs per week, home chores, per-profession hours). Needs its own design doc. Cheap first step: shift windows as data in `WorkDay`.
 - Multi-person tasks; builders' yard; carts; Oxen post upgrades (stable, large stable).
 - Wattle fence variety; ground-clearance stage; alert when no oxen are free for building.
+- More dynamic house placement on the plot (position, orientation and size varied) for a more appealing townscape (owner 19/11/2026). Needs its own design pass; HM-04 and HP-03 stay the rule until then.
 - Post-World: regional map, imperfect information, military, regional transport and trade routes, administration.
 
 ## Open (resolved 19/11/2026)

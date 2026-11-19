@@ -74,14 +74,14 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-40 | A house costs **10 logs + 10 thatch sheaves + 10 wattle panels** (placeholder; replaces HM-06's 10 logs) | DECIDED (owner 17/11/2026) |
 | MAT-40b | Logs stay at **10** for now (replaces PL-11's 5). A house site placed before the switch keeps its old recipe (like stalls, PL-13) | DECIDED (owner 17/11/2026) |
 | MAT-43 | Thatch is carried by hand **1 a trip**, panels **2 a trip**, by odd-jobbers (PL-16) | PROPOSED |
-| MAT-41 | Wattle panels also build the plot's perimeter fence (panels by perimeter length, OPEN), which is **not** required to move in | DECIDED (fence with tier-1 houses) |
+| MAT-41 | Wattle panels also build the plot's fence, paid by the **length of fenced edge** (owner 19/11/2026; open stretches such as the gate and alleys, road-access.md HP-04, are not paid for). The fence is **not** required to move in | DECIDED (fence with tier-1 houses) |
 | MAT-42 | Daub (earth or clay) and household levels 1–2 come with tier-1 houses (HSE-20..23) | DECIDED (M21, `household-levels.md`) |
 
 > Implementation note (MAT-40): the house recipe (10 logs, 10 thatch, 10 wattle panels, 10 daub, 720 min) is hard-coded in
 > `ModuleTypes.House`, not read from `SimTuning`. The values match the rule. Daub is built in M21 (daub pit, HL-01, MAT-42).
 >
 > Implementation note (MAT-41): the fence is paid by the length of fenced edge (every plot edge except road frontage, HL-11),
-> not the whole perimeter. Decide whether that is the intended rule (`systems/homes.md`, `milestones/M21.md`).
+> not the whole perimeter. Owner kept this as the rule on 19/11/2026.
 
 ## Baskets
 

@@ -31,7 +31,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | --- | --- | --- |
 | HL-20 | The level is stored on the **household** (the family). It starts at 1 and never drops (HSE-10). Moving house keeps it | PROPOSED |
 | HL-21 | Levels and needs are data (HSE-09). **Level 2 needs:** *Diverse food*: the family's last Sunday allotment held **2 or more food types** and it is not Hungry (HSE-12 made per household). *Fenced plot* (HL-12). *Water* and *Church*: counted as met (HSE-19) | PROPOSED |
-| HL-22 | Needs are checked once a day. The house panel shows each need ticked or not. When every level 2 need is met the household is **eligible** and the panel shows an **Upgrade** button. The player presses it and the household becomes level 2; the message log says so. Nothing is automatic (HSE-20) | DECIDED (owner 17/11/2026) |
+| HL-22 | **Owner 19/11/2026: needs are derived whenever they are read (panel, `UpgradeHousehold`), not checked once a day; this replaces the daily check below.** Was: Needs are checked once a day. The house panel shows each need ticked or not. When every level 2 need is met the household is **eligible** and the panel shows an **Upgrade** button. The player presses it and the household becomes level 2; the message log says so. Nothing is automatic (HSE-20) | DECIDED (owner 17/11/2026) |
 | HL-23 | In M21 the Upgrade button **costs nothing and is instant**. Renovation materials, labour and the tier 2 house look are added to the same button later (the draft was 10 beams + 6 planks + 10 daub) | DECIDED (owner 17/11/2026: upgrade costs after M21) |
 | HL-25 | Level 2 **gives nothing yet**. Artisan backyards and house upgrades come after M21 | DECIDED (owner 17/11/2026) |
 | HL-26 | The top bar tooltip shows households by level | PROPOSED |
@@ -39,8 +39,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 > Note (HL-22, HL-23): the player always orders the upgrade (HSE-20). M21 has the button without a cost; the
 > renovation cost joins it later, so no level 2 household ever skips the button.
 
-> Implementation note (HL-22): needs are not checked once a day. `HouseholdNeedsReport` derives them on each read, for the
-> panel and for `UpgradeHousehold`, so they are always current and there is no daily job. The owner decides which to keep.
+> Implementation note (HL-22): `HouseholdNeedsReport` derives needs on each read, for the panel and for `UpgradeHousehold`.
+> Owner kept this as the rule on 19/11/2026.
 
+> Owner 19/11/2026 (HL-01): the daub pit's yard is **5 m**, like the granary. Task dp-1 changes it from the 3 m below.
 > Implementation note (HL-01): the daub pit uses a 3 m yard, like the workshops, not the granary's 5 m. Its recipe (4 logs,
 > 240 min) and size are hard-coded in `ModuleTypes.DaubPit`, not read from `SimTuning`. Output (HL-02) is tuned.
