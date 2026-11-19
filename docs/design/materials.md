@@ -63,6 +63,10 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-39d | After 7 days the stook is **dry**. Collect trips (1 sheaf each, MAT-35) carry dry sheaves home; collecting comes **before** new cutting when the hut has room. Hut full: cutting and collecting stop (*Store full*), stooks wait | PROPOSED |
 | MAT-39e | Status lines: No workers, Cutting (slow season), No reed beds, Store full, plus *n stooks curing* on the panel | PROPOSED |
 
+> Implementation note (MAT-39b): `ModuleTypes.ThatcherHut` hard-codes 6 × 4 m, 8 logs and 480 min. `SimTuning.ThatcherHutWidthM`,
+> `ThatcherHutDepthM`, `ThatcherHutLogs` and `ThatcherHutMinutes` are saved and shown in SimConfig, but nothing reads them. Only
+> `ThatcherHutStore` (MAT-38) is live. Owner decides: wire them in, or remove them.
+
 ## Houses
 
 | ID | Rule | Tag |
@@ -72,6 +76,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | MAT-43 | Thatch is carried by hand **1 a trip**, panels **2 a trip**, by odd-jobbers (PL-16) | PROPOSED |
 | MAT-41 | Wattle panels also build the plot's perimeter fence (panels by perimeter length, OPEN), which is **not** required to move in | DECIDED (fence with tier-1 houses) |
 | MAT-42 | Daub (earth or clay) and household levels 1–2 come with tier-1 houses (HSE-20..23) | DECIDED (M21, `household-levels.md`) |
+
+> Implementation note (MAT-40): the house recipe (10 logs, 10 thatch, 10 wattle panels, 720 min) is hard-coded in
+> `ModuleTypes.House`, not read from `SimTuning`. The values match the rule. Daub (MAT-42) is not built yet.
 
 ## Baskets
 

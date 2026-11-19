@@ -36,8 +36,6 @@ The yard is a granary for General goods. Its families plan trips with the same r
 > Waiting for ox (a beam trip has no free ox), Moving camp goods, Collecting, Yard full, Idle. Under construction and
 > Waiting for ox are not in this table. The owner decides whether to keep them.
 >
-> Implementation note (ST-43): thatch has no item yet, so its hand load (1) is not in `HandLoads`.
->
 > Implementation note (ST-42, ST-21): the yard collects the weaver's baskets and the wattle yard's panels (T-562), and
 > `KitFetchSystem` claims baskets from the weaver store too. ST-42b holds: coppice huts are never collected.
 

@@ -10,10 +10,10 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 
 | Type | Role |
 |---|---|
-| `BushRecord`, `BushKind` | Position, kind, baskets, emptied tick, `ReservedBy` task id. Kinds: Berries and Mushrooms (forage), HazelStool and WillowStool (coppice, `coppice.md`), ReedBed (`thatch.md`). |
+| `BushRecord`, `BushKind` | Position, kind, baskets, emptied tick, `ReservedBy` task id. Kinds: Berries and Mushrooms (forage), HazelStool and WillowStool (`coppice.md`), ReedBed (`thatch.md`). Regrow days per kind via `BushKinds`. |
 | `BushRegistry` | All bushes (`SimWorld.Bushes`). Reserve, take a basket, nearest available with a kind filter, regrow. `Version` ignores reservations. |
-| `BushScatter`, `BushRegrowSystem` | New-game scatter with the seeded random: forage bushes, then stools and reed beds. Operations phase: regrow after 14 days. |
-| `ForagingSystem` | Operations phase. Per Working camp: sweep, one open `task.forage` per idle forager, reserve a bush, plan baskets. Stateless. |
+| `BushScatter`, `BushRegrowSystem` | New-game scatter with the seeded random: forage bushes, then stools and reed beds. Operations phase: refills emptied bushes. |
+| `ForagingSystem` | Operations phase. Per Working camp: one open `task.forage` per idle forager, reserve a bush, plan baskets. Stateless. |
 | `ForagingStores` | The own hut store only (0044; never a granary or the camp) and room after pending deposits. |
 | `ForagingStatus` | Computed status: Working, Paused, MissingHut, NoWorkers, NoBushes, StorageFull. |
 | `StepRunnerSystem.Forage.cs` | Steps: `WalkTo` bush, `Work` per basket (`PickBasket` makes one item on the carrier), `WalkTo` store, `DepositForage`. |
@@ -35,13 +35,14 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 - Only the camp's own hut store (0044). Never a granary, never the camp food store (FD-12). Granary store families collect
   from the hut store (`markets.md`, `StoreFamilySystem`).
 - Room = free space minus items promised to unfinished forage tasks. Hut full means Storage full and no new tasks (FD-23b).
-- A granary operation has no work region, so foraging skips it by type.
+- A basket loan (T-565, MAT-50..54): `Kit/KitLoans` reserves one kit basket at plan time. The load is 2 × `HandCarryItems`.
+  `ReleaseFinished` frees it when the task ends (`kit.md`).
 
 ## How to extend
 
-- **New bush kind:** add it to `BushKind`, its tuning case in `BushKinds`, the kind check in `BushesSection`, and a filter
+- **New bush kind:** add it to `BushKind`, its regrow case in `BushKinds.RegrowDays`, the kind check in `BushesSection`, and a filter
   at each nearest-available call. Foraging asks only for Berries and Mushrooms.
-- **Balancing:** `SimTuning` `BushBaskets`, `BushRegrowDays`, `ForagerMinAge`, `ForagerHutCapacity`, `GatherMinutesPerBasket`,
+- **Balancing:** `SimTuning` `BushBaskets`, `BushRegrowDays` (14), `ForagerMinAge`, `ForagerHutCapacity`, `GatherMinutesPerBasket`,
   `HandCarryItems`. All are placeholders until playtested.
 
 ## Gotchas
@@ -49,12 +50,8 @@ hut store, if it has room. Design: `design/food.md` (FD-20..24). Decisions 0043,
 - The hut store is the camp's own food store. `PlaceModule` sizes it from `ForagerHutCapacity`.
 - Bush reservations do not move `Bushes.Version`, so `BushRenderer` does not redraw on a reservation.
 - Bushes are not in the baked map (FD-20). They come from the new-game scatter, then from the save.
-
-## Basket loan (T-565, MAT-50..54)
-
-- `Kit/KitLoans` reserves one kit basket at plan time (owner `-3_000_000 - taskId`). The load is 2 × `HandCarryItems`, else
-  normal. `ReleaseFinished` frees it when the task ends. Details: `kit.md`.
-- A trip plans from one bush, so 20 needs the bush, hut-store room and a free basket. The scenario test sets `BushBaskets` 25 and `ForagerHutCapacity` 200 so a 20 carry fits.
+- A trip plans from one bush, so a 20-basket carry needs the bush, hut-store room and a free basket.
+  The scenario test sets `BushBaskets` 25 and `ForagerHutCapacity` 200 so a 20 carry fits.
 
 ## Tests
 

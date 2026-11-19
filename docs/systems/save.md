@@ -17,8 +17,6 @@
 
 Magic `LLSV`, int32 version (`SaveWriter.CurrentVersion`; every change bumps it, decision 0038), the header, then sections as int32 id + length. `SimSave.Read` requires the exact list order (decision 0034).
 
-Core is written first. Then, in this order:
-
 | Order | Id | Section | Holds |
 |---|---|---|---|
 | 0 | 1 | Core | Tick, pause, random state, tuning (incl. deconstruct shares, forager, market, timber/workshop, storage yard, hand-carry, coppice/weaver/wattle and reed tuning), road and area catalogs, entry point, settlement log (T-498). |

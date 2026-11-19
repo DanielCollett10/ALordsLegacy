@@ -56,7 +56,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
   Each keeps journals, and `Audit()` checks that the sums agree.
 - **Determinism:** no static mutable state, no `DateTime.Now`, no `System.Random`. `SimRandom` is a seeded
   PCG in Sim code. Geometry is integer millimetres (`PointMm`), with distances as doubles.
-- **Tuning:** every balancing number is in `SimTuning`. Sim code never hard-codes one. The save stores the
+- **Tuning:** every balancing number is in `SimTuning`. Sim code should never hard-code one. Known exceptions: module recipes (`ModuleTypes`) and the weaver and wattle recipes (`WorkshopDef`), tracked as M19 and M20 debt. The save stores the
   tuning the world was created with.
 
 ## Data flow
@@ -124,5 +124,5 @@ editor load. Each `GameSceneTests.GameSceneHas...` PlayMode test checks the wiri
 ## Not built yet
 
 The Supplies market on the storage yard (ST-10) is a greyed placeholder: no household buys General goods yet (`systems/storage.md`). Also not built: tier 2 houses that use beams (PL-11b); towns and several markets (MKT-01, MKT-07); spoilage (FOOD-A11); extra houses
-and backyards; artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
+and backyards; grown grain from fields (MAT-31) and carts (MAT-35); artisan build steps (PPL-42); a walk-to-site step for builders; clearing trees as a job (BLD-10-C). The design
 status is in `docs/design/`, and open gaps per milestone are in `docs/milestones/`.

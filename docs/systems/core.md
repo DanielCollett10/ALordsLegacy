@@ -45,6 +45,7 @@ The Unity `SimConfig` asset builds it once at start (decision 0019). The save st
 
 - Commands run while paused, so `OnCommandApplied` can fire while the world is paused. Tests can pass their own system list.
 - `SimTuning.StartingOxen` is not read; the start layout's `OxCount` creates the oxen.
+- Module recipes and sizes (`ModuleTypes`) and the weaver and wattle recipes (`WorkshopDef`) are static data and do not read `SimTuning`. See `thatch.md`, `workshops.md`.
 - Obsolete catalog-less overloads and static `Find` lookups remain for the Unity layer. Sim code uses `world.RoadTypes` / `world.AreaTypes` (decision 0019).
 
 ## Tests

@@ -65,4 +65,7 @@ recipes, hand fetch), 0052 (kit stores). Owner answers: houses stay at 10 logs (
 house panel (free in M21; renovation costs, house tier 2 and artisans come after M21, HL-22, HL-23, HL-25); yards collect only workshop output (ST-42; 18/11 changed to any free output); workshops keep an input
 reserve (PL-30; 18/11 changed from 20 to a player-set number, default 5, PL-30b). A UI tidy-up with embedded panels comes in a later milestone, once the owner plans a layout.
 
+> Implementation note (M20 line above, "houses become 5 logs"): the code keeps 10 logs (MAT-40b). The later owner answer
+> ("houses stay at 10 logs") is what the code follows. Not changed here.
+
 Not deferred, already working: "branch from a road creates a junction" (checked on replay; see roads.md).

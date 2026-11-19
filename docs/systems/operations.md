@@ -10,13 +10,13 @@ area-less operation (decision 0041). It creates the tasks its families do and tr
 
 | Type | Role |
 |---|---|
-| `OperationTypeDef`, `OperationTypes` | Static types: `Woodcutting`, `Foraging`, `Coppice`, `Thatching`, `Granary` (area-less, 2 slots, decision 0041, `FindByModule`), `StorageYard` (area-less, 2 slots), and the hewing, sawing, weaving and wattling operations via `WorkshopOf` (area-less, 1 slot). Not on a catalog (decision 0019). |
+| `OperationTypeDef`, `OperationTypes` | Static types: `Woodcutting`, `Foraging`, `Coppice`, `Thatching`, `Granary` (area-less, 2 slots, `FindByModule`), `StorageYard` (area-less, 2 slots), and the workshops via `WorkshopOf` (area-less, 1 slot). Not on a catalog (decision 0019). |
 | `Operation`, `OperationRegistry` | Id, type, area, module footprints, families, oxen, work area, paused flag. Every change bumps `Version`. |
-| `OperationStatus` | `Of(world, op)`, computed never stored: Working / Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull, NoRoomAtMarket, WaitingForPlanks (granary). `Reported` adds WaitingForOx (display only). |
-| `WoodcuttingSystem` | Operations phase. Keeps one Open `task.fell_tree` per idle adult worker, aimed at the nearest free standing tree in the work region. |
+| `OperationStatus` | `Of(world, op)`, computed never stored: Working / Paused, MissingHut, MissingStorage, NoWorkers, NoTrees, StorageFull, NoRoomAtMarket, WaitingForPlanks. `Reported` adds WaitingForOx (display only). |
+| `WoodcuttingSystem` | Operations phase. One Open `task.fell_tree` per idle adult worker, aimed at the nearest free standing tree in the work region. |
 | `FellingOutcome` | After fell: tree Felled. On the last step: Stump plus logs (`floor(trunk ÷ StandardLogLengthM)`) in an operation pile. |
-| `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` for each own pile with logs: 1 to `OxLoadLogs` (1) per trip, any pile size (T-491). Early fetch off; each felled length is its own pile. Sunset wind-down leaves an operation pile. |
-| `Workshops/WorkshopSystem` | Operations phase, after `ConstructionSystem`. Fetch and work tasks for the workshops. See `workshops.md`. |
+| `HaulSystem` (+ `.Early.cs`) | Operations phase, last. Opens `task.haul_logs` per own pile: 1 to `OxLoadLogs` (1) per trip. Sunset wind-down leaves an operation pile. |
+| `Workshops/WorkshopSystem` | Operations phase, after `ConstructionSystem`. See `workshops.md`. |
 | `ModulePlacement`, `DraftModulePlacement` | Pure previews. The draft variant checks polygon and ghosts not yet in the world (decision 0037). |
 | `DesignateOperation`, `PlaceModules` | Commands: area + ordered modules (new operation), or modules for Expand. All or nothing. |
 | `DeconstructOperation` | Marks every module; the area goes when the last one is gone. |
@@ -25,43 +25,34 @@ area-less operation (decision 0041). It creates the tasks its families do and tr
 
 ## Area-less and special operations
 
-- **Foraging camp** (`OperationTypes.Foraging`, `area.foraging`): a forager hut, no log storage, 300 m work circle (`foraging.md`).
-- **Coppice hut** (`OperationTypes.Coppice`, `area.coppice` plus `area.work_coppice`): a hut and a work area; `CoppiceSystem` opens
-  `task.coppice` (`coppice.md`).
-- **Thatcher's hut** (`OperationTypes.Thatching`): a hut, a work area and a sheaf store; `ThatchingSystem` and `SheafCollecting`
-  (`thatch.md`).
-- **Storage yard** (`OperationTypes.StorageYard`): no area, one hut, 2 family slots; `YardFamilySystem` plans the trips (`storage.md`).
-- **Granary** (`OperationTypes.Granary`): no area (`AreaId` 0), the granary footprint as its hut, 2 family slots.
-  `SetGranarySupplies` sets `Operation.SuppliesMarket` (MK-10..12, T-458). Its families run `StoreFamilySystem` (`markets.md`).
+- **Foraging camp** (`area.foraging`): a forager hut, no log storage, 300 m work circle (`foraging.md`).
+- **Coppice hut** (`area.coppice` plus `area.work_coppice`): `CoppiceSystem` opens `task.coppice` (`coppice.md`).
+- **Thatcher's hut** (`OperationTypes.Thatching`): a hut, a work area, and a sheaf store. `ThatchingSystem` and `SheafCollecting` (`thatch.md`).
+- **Storage yard**: no area, one hut, 2 family slots. `YardFamilySystem` plans the trips (`storage.md`).
+- **Granary**: no area (`AreaId` 0), the granary footprint as its hut. `SetGranarySupplies` sets `SuppliesMarket` (`markets.md`).
 
 ## Lifecycle
 
 1. **Designate:** `OperationDraftTool` (area, then module ghosts in `OperationDraft`) → one `DesignateOperation` on Confirm.
-2. **Modules:** Expand (`PlaceModules`) adds modules to an existing operation. Footprint added, trees under it cleared. An
-   empty recipe is built at once; else it is a construction site (`construction.md`). `RemoveModule` drops an unbuilt one.
-3. **Assign:** `AssignFamily` sets the family's `WorkplaceId`. Nothing is automatic. Refused for an unbuilt hut (CN-04b) and for a family in passage (Arriving or Leaving, M16).
+2. **Modules:** Expand (`PlaceModules`) adds modules to an existing operation. An empty recipe is built at once; else it is a
+   construction site (`construction.md`). `RemoveModule` drops an unbuilt one.
+3. **Assign:** `AssignFamily` sets the family's `WorkplaceId`. Nothing is automatic. Refused for an unbuilt hut (CN-04b) and for a family in passage (M16).
    `UnassignFamily` cancels the family's unfinished tasks.
-4. **Work:** felling tasks open per idle worker, then are dispatched and stepped (`tasks.md`). Timber stages come from the effective `ProcessDefs.Timber` stages.
-5. **Haul:** ground logs go to storage by ox. Early fetch can start once a full load is near. At sunset a haul still on
-   its way is wound down as an operation pile where the ox stands.
-6. **Pause, work area:** `PauseOperation` / `ResumeOperation`, `SetWorkArea`, `UseDefaultWorkArea`.
-7. **Deconstruct:** `DeconstructOperation` marks every module; the area and operation go with the last one.
+4. **Work and haul:** felling tasks open per idle worker, then are dispatched and stepped (`tasks.md`). Ground logs go to storage by ox.
+   At sunset a haul still on its way is wound down as an operation pile.
+5. **Pause, work area, deconstruct:** `PauseOperation` / `ResumeOperation`, `SetWorkArea`, `UseDefaultWorkArea`.
+   `DeconstructOperation` marks every module. The area and operation go with the last one.
 
 ## Rules
 
-- Felling stops when `LogLoad` (piles, storage, carried logs, reserved room, no double counting) reaches storage capacity; it restarts when logs leave storage or a second storage adds capacity (to 40).
+- Felling stops when `LogLoad` (piles, storage, carried logs, reserved room, no double counting) reaches storage capacity.
+  It restarts when logs leave storage or a second storage adds capacity (to 40).
 - `DeleteArea` refuses an operation area that still has modules ("Deconstruct its buildings first", CN-58), and a plot that still has a house ("Deconstruct the house first", HM-14b).
-
-## Extending
-
-- A new operation type is an `OperationTypeDef` plus area types in `AreaTypes`. A new status reason goes in `OperationStatus.Of`. Compute status, never store it.
-
-## Gotchas
-
-- `OperationStatus.Of` gates felling. Footprint and operation ids share the ledger owner field, so `RemoveModule` guards against an operation seeing a site's pile as its own. Oxen stands hold `OxCapacity` = 1 (camp stand unlimited).
+- Status is computed, never stored (`OperationStatus.Of`). Footprint and operation ids share the ledger owner field, so `RemoveModule`
+  guards against a site's pile looking like an operation's. Oxen stands hold `OxCapacity` 1 (camp stand unlimited).
 
 ## Tests
 
 `Sim.Tests/Operations/` (`Woodcutting*`, `Foraging`, `CoppiceTests`, `OperationStatus`, `OperationCommand`, `Haul*`, `Ox*`, `LogLoad`,
-`DeconstructOperation`), `Scenarios/BasketChainScenarioTests` (coppice, weaver, wattle yard, yard, kit), `Sim.Tests/Commands/`,
-`Sim.Tests/Processes/`. Unity (EditMode): `OperationPanelTests`, `OperationDraft*Tests`.
+`DeconstructOperation`, `Thatching*`), `Scenarios/BasketChainScenarioTests`, `Sim.Tests/Commands/`, `Sim.Tests/Processes/`.
+Unity (EditMode): `OperationDraft*Tests`. PlayMode: `OperationPanelTests`, `ThatcherUiTests`.

@@ -17,6 +17,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | HM-05 | Confirm creates the plot and the house construction site in one command (like BT-16). Trees under the plot are cleared (BLD-10-A) | PROPOSED |
 | HM-06 | House recipe: **10 logs, 720** worker-minutes (CON-A1 720). Tier 1, logs only (HSE-23) | DECIDED (owner 15/11/2026; values PLACEHOLDER) |
 
+> Implementation note (HM-01, HM-06): the recipe is now 10 logs, 10 thatch and 10 wattle panels, 720 min (MAT-40). The build bar
+> and the plot gate check the whole recipe, not only logs. An unbuilt site placed before M20 keeps the logs-only recipe (MAT-40b).
+
 ## Moving in
 
 | ID | Rule | Tag |
