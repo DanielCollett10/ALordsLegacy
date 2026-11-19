@@ -239,6 +239,25 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHasM21DaubFenceWiring()
+        {
+            // T-594: the daub pit build entry (T-593) and the house panel with fence, needs and Upgrade; the top bar reads levels.
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+            var tools = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            MonoBehaviour daub = null;
+            foreach (var t in tools) if (t.name == "DaubPitTool") daub = t;
+            Assert.IsNotNull(daub, "DaubPitTool missing from the scene (run LordsLegacy/Scenes/Generate Game scene).");
+            AssertNoNullRefs(daub);
+            var house = Object.FindFirstObjectByType<LordsLegacy.Game.HousePanelView>();
+            Assert.IsNotNull(house, "HousePanelView missing from the scene.");
+            AssertNoNullRefs(house);
+            Assert.IsNotNull(Object.FindFirstObjectByType<LordsLegacy.Game.TopBarController>(), "TopBarController missing.");
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneHasM15MarketAndPlotOverlayWired()
         {
             var load = SceneManager.LoadSceneAsync("Game");

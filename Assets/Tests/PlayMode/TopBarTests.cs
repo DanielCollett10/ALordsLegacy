@@ -133,6 +133,9 @@ namespace LordsLegacy.Tests.PlayMode
             StringAssert.Contains("Arriving: 0", _bar.PopulationTooltip);
             StringAssert.Contains("Leaving: 1", _bar.PopulationTooltip);
             StringAssert.Contains("Next family:", _bar.PopulationTooltip);
+            // T-594: households by level (HL-26). Both families start at level 1 (HL-20).
+            StringAssert.Contains("Households by level:\n", _bar.PopulationTooltip);
+            StringAssert.Contains("Level 1 " + LordsLegacy.Sim.Homes.HouseholdLevels.All[0].Name + ": 2", _bar.PopulationTooltip);
             Assert.IsFalse(_bar.PopulationTipShown);
             _bar.ShowPopulationTip();
             Assert.IsTrue(_bar.PopulationTipShown);
