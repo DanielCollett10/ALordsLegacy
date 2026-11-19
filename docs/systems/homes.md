@@ -16,17 +16,17 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 | `DesignatePlot` | `Commands/DesignatePlot.cs` | Plot, house site and Empty home in one all-or-nothing `Apply`. |
 | `HousePlacement`, `HousePlacementResult` | `Areas/HousePlacement.cs` | Pure: puts the 6 × 8 m house on the longest road-frontage edge, 1 m back. |
 | `AreaTypes.Plot` (`area.plot`) | `Areas/AreaTypes.cs` | Building, 4–8 points, 60–400 m², 10° max slope, needs road frontage. |
-| `ModuleTypes.House` | `Footprints/ModuleTypes.cs` | 6 × 8 m, blocks movement, recipe 10 logs / 720 worker-minutes. |
+| `ModuleTypes.House` | `Footprints/ModuleTypes.cs` | 6 × 8 m, blocks movement. Recipe 10 logs + 10 thatch + 10 panels, 720 min (MAT-40). |
+| `SiteMaterials`, `BuildCost` | `Construction/` | Shortfall text for the whole recipe ("Not enough thatch (have 0, need 10)"). |
 | `HomesSection` | `Save/Sections/HomesSection.cs` | Save section id 8 (see `save.md`). |
-| `HousePanelView`, `PlotTool` | `Assets/Game/UI/HousePanel/`, `Assets/Game/Tools/` | Unity side: house panel and the build-bar plot tool. |
+| `HousePanelView`, `PlotTool` | `Assets/Game/UI/HousePanel/`, `Assets/Game/Tools/` | Unity side: house panel (delivery lines while unbuilt) and the plot tool. |
 
 ## Lifecycle
 
 1. **Plot:** `PlotTool` (build bar `house`) draws the plot with `AreaTool` and shows the house ghost from `HousePlacement`.
-   Confirm sends `DesignatePlot`. Validate refuses an invalid plot, no room, or fewer logs than the recipe ("Not enough logs").
-   Trees under the plot are cleared.
-2. **Build:** the house is a construction site with logs reserved. Its deliver and build tasks use owner `HouseOwnerId` (-1)
-   and pool oxen (`construction.md`).
+   Confirm sends `DesignatePlot`. The Sim refuses an invalid plot, no room, or any short recipe item. Trees under the plot are cleared.
+2. **Build:** the site reserves logs, thatch and panels. Its deliver and build tasks use owner `HouseOwnerId` (-1) and
+   pool oxen (`construction.md`).
 3. **Move in:** when the house is Built, `MoveInSystem` picks a Homeless family with members. Families with a workplace
    come first, nearest workplace to the house; else the lowest family id. Home point becomes the house access point; larder food moves in (`Larders.OnMoveIn`).
 4. **Live:** the routine has a housed family mill about its house access point, not the camp (`RoutineSystem`), and commute
@@ -43,18 +43,15 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 
 ## Gotchas
 
-- The tent spot is not saved: an evicted family's home point is the camp fire. With no camp it is `RoughSleep.Spot` (market centre,
-  else the old fire spot `World.RoughSleepSpot`, saved in Structures, v18). Status text `RoughSleep.Status`; the Game panel still says "(camp)".
-- The plot's refusals come from `AreaValidator` ("A plot must face a road", "Too small for a house") before `HousePlacement`
-  runs. `HousePlacementResult.Text` is always "No room for the house".
+- The tent spot is not saved: an evicted family's home point is the camp fire. With no camp it is `RoughSleep.Spot`.
+- An unbuilt house placed before M20 keeps the logs-only recipe (`ModuleTypes.HouseLogRecipe`, `SiteRecipe`, MAT-40b).
+- The plot's own refusals come from `AreaValidator` ("A plot must face a road", "Too small for a house") before `HousePlacement`.
 - `MoveInSystem` retries every tick, so an Empty house fills as soon as a Homeless family exists. Families with no members never move in.
 - Houses are footprints, so `ModuleRenderer` draws them, but they are not operation modules (HM-20).
-- House deconstruct tasks have owner -1, not an operation id. Keep that in mind when reading the task board.
 
 ## Tests
 
-- Sim: `Sim.Tests/Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`
-  (evict, plot refusal, cancel). `Sim.Tests/Areas/HousePlacementTests`, `PlotTypeTests`. `Sim.Tests/People/RoutineSystemTests` (housed mill), `Sim.Tests/Start/NoCampTests` (rough sleep).
-- Unity: EditMode `BuildEntryStateTests`, `VisualRegistryTests`. PlayMode `PlotToolTests`, `HousePanelTests`, `HouseVisualsTests`,
-  `ToolControllerTests`, `GameSceneTests` (house wiring).
+- Sim: `Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`
+  (recipe, reservations, shortfall, hand carry, old-site recipe). `Areas/HousePlacementTests`, `PlotTypeTests`.
+- Unity PlayMode: `PlotToolTests`, `HousePlotGateTests` (greyed entry, refusal text), `HousePanelTests`, `HouseVisualsTests`, `GameSceneTests`.
 - Gap: no round-trip test saves a house with a family (see `save.md`).

@@ -6,7 +6,7 @@ Start with [`architecture.md`](architecture.md) for the big picture and [`../CLA
 - [`design/`](design/README.md): the designer's rules and why (owned by the human; agents read it).
 - [`decisions/`](decisions/): short records of technical decisions, `NNNN-title.md`. Read before re-arguing one.
 - [`milestones/`](milestones/): what each finished milestone shipped and what it left open.
-- Suite-run results go in `test-runs/<milestone>.md` when recorded (`M12-T-401.md` so far; M19's is pending).
+- Suite-run results go in `test-runs/<milestone>.md` when recorded (`M12-T-401.md` so far; M19 and M20 are pending).
 - [`unity-mcp.md`](unity-mcp.md): how agents drive the Unity Editor.
 
 ## Systems
@@ -17,7 +17,7 @@ One line per system. The doc says how it fits together; folders are where the co
 |---|---|---|---|
 | Sim core | Root `SimWorld`, fixed system order, seeded random, balancing numbers. | [systems/core.md](systems/core.md) | `Assets/Sim/Core`, `Assets/Sim/Tuning` |
 | Time | Ticks to game calendar, sunrise and sunset, real-time pacing. | [systems/time.md](systems/time.md) | `Assets/Sim/Time` |
-| Map and terrain | Baked terrain and tree data the Sim reads; the bake pipeline. | [systems/map-and-terrain.md](systems/map-and-terrain.md) | `Assets/Sim/Terrain`, `Assets/Sim/Map`, `Assets/StreamingAssets/Maps` |
+| Map and terrain | Baked terrain and tree data the Sim reads; the bake pipeline. | [systems/map-and-terrain.md](systems/map-and-terrain.md) | `Assets/Sim/Terrain`, `Assets/Sim/Map`, `Assets/StreamingAssets/Maps`, `Assets/Game/Authoring` |
 | Geometry | Exact integer-mm polygons, polylines, boolean ops, spatial index. | [systems/geometry.md](systems/geometry.md) | `Assets/Sim/Geometry`, `Assets/Sim/ThirdParty` |
 | Commands | The only way to change Sim state: validate, apply, log. | [systems/commands.md](systems/commands.md) | `Assets/Sim/Commands` |
 | Roads | Freeform road network, validation, cutting and node moves. | [systems/roads.md](systems/roads.md) | `Assets/Sim/Roads` |
@@ -36,11 +36,11 @@ One line per system. The doc says how it fits together; folders are where the co
 | Storage | Storage yard for General goods (planks, beams): families move goods in on an ordered job list, sites and sawpits draw from it. | [systems/storage.md](systems/storage.md) | `Assets/Sim/Operations` (`Yard*`, `StorageYardReport`), `Assets/Sim/Operations/Workshops/InputReserve.cs`, `Assets/Game/UI/StorageYardPanel` |
 | Coppice | Coppice hut: a family cuts hazel and willow rods from stools in its work area into the hut's own store. | [systems/coppice.md](systems/coppice.md) | `Assets/Sim/Coppice` |
 | Kit | Baskets claimed by forager huts and granaries; a carrier who borrows one carries twice as much. | [systems/kit.md](systems/kit.md) | `Assets/Sim/Kit` |
-| Thatch | Thatcher's hut: reed cut from reed beds, cured as stooks, carried home as sheaves. | [systems/thatch.md](systems/thatch.md) | `Assets/Sim/Thatch`, `ThatcherHut` in `Assets/Sim/Footprints` |
+| Thatch | Thatcher's hut: reed cut from reed beds, cured as stooks, carried home as sheaves. | [systems/thatch.md](systems/thatch.md) | `Assets/Sim/Thatch`, `ThatcherHut` in `Assets/Sim/Footprints`, `Assets/Game/Visuals/StookRenderer.cs` |
 | Footprints | Placed buildings, stands and standalone structures: rectangles, access points, recipes. | [systems/footprints.md](systems/footprints.md) | `Assets/Sim/Footprints` |
 | Inventory | Ledger of items (logs, food, planks, beams) by location, with reservations, journals and audit. | [systems/inventory.md](systems/inventory.md) | `Assets/Sim/Inventory` |
 | Construction | Sites that reserve every recipe item, take logs by ox and planks by hand, and build over time. | [systems/construction.md](systems/construction.md) | `Assets/Sim/Construction`, `Assets/Sim/Operations/ConstructionSystem.cs` |
-| Homes | House plots along roads, a house built from logs, one homeless family moves in and out. | [systems/homes.md](systems/homes.md) | `Assets/Sim/Homes`, `Assets/Sim/Commands/DesignatePlot.cs`, `Assets/Sim/Areas/HousePlacement.cs` |
+| Homes | House plots along roads, a house built from logs, thatch and panels; one homeless family moves in and out. | [systems/homes.md](systems/homes.md) | `Assets/Sim/Homes`, `Assets/Sim/Commands/DesignatePlot.cs`, `Assets/Sim/Areas/HousePlacement.cs` |
 | Start layout | The first camp, built through the normal commands. | [systems/start-layout.md](systems/start-layout.md) | `Assets/Sim/Start`, `Assets/Game/Config` |
 | Save and load | Byte-exact save sections, map check, Esc menu, autosave, scene reload. | [systems/save.md](systems/save.md) | `Assets/Sim/Save`, `Assets/Game/Saving`, `Assets/Game/UI/GameMenu` |
 | Unity host | `SimHost` owns the world and pacer; SimConfig and start-layout assets. | [systems/unity-host.md](systems/unity-host.md) | `Assets/Game/Bootstrap`, `Assets/Game/Config` |
