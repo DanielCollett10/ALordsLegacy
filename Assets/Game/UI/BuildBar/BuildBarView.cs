@@ -80,6 +80,9 @@ namespace LordsLegacy.Game
                 string reason = e.DisabledReason(_host.World);
                 if (!string.IsNullOrEmpty(reason)) return (false, reason);
             }
+            // T-581: a full-recipe entry (the house) asks the Sim's affordability query, so thatch and panels gate it too.
+            if (e.Recipe != null && AvailableLogs == null && _host != null && _host.IsInitialized)
+                return BuildEntryState.OfRecipe(_host.World, e.Recipe, e.Tooltip);
             if (e.CostLogs == null) return (true, e.Tooltip);
             var gate = BuildEntryState.Of(e.CostLogs(), AvailableNow());
             return gate.Enabled ? (true, e.Tooltip) : (false, gate.Tooltip);

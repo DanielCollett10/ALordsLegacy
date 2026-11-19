@@ -37,7 +37,7 @@ namespace LordsLegacy.Sim.Construction
         public string Text { get; }
 
         /// <summary>Player-facing item name: "item.wattle_panel" becomes "wattle panels"; "thatch" stays "thatch".</summary>
-        private static string DisplayName(string itemId)
+        public static string DisplayName(string itemId)
         {
             string name = itemId.StartsWith("item.", StringComparison.Ordinal) ? itemId.Substring(5) : itemId;
             name = name.Replace('_', ' ');

@@ -110,6 +110,34 @@ namespace LordsLegacy.Tests.EditMode
         }
 
         [Test]
+        public void ThatchFieldsReachTuningAndCommittedAssetHoldsDefaults()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<SimConfig>(SimConfigGenerator.AssetPath);
+            Assert.IsNotNull(asset, "Run LordsLegacy/Config/Create default SimConfig");
+            var d = new SimTuning();
+            var a = asset.BuildTuning();
+            Assert.AreEqual(d.ReedBedCount, a.ReedBedCount); Assert.AreEqual(d.ReedSheavesPerCut, a.ReedSheavesPerCut);
+            Assert.AreEqual(d.ReedRegrowDays, a.ReedRegrowDays); Assert.AreEqual(d.ThatchCureDays, a.ThatchCureDays);
+            Assert.AreEqual(d.ThatcherHutStore, a.ThatcherHutStore); Assert.AreEqual(d.ThatcherHutLogs, a.ThatcherHutLogs);
+            Assert.AreEqual(d.ThatcherHutWidthM, a.ThatcherHutWidthM, Eps); Assert.AreEqual(d.HandCarryThatch, a.HandCarryThatch);
+
+            var cfg = ScriptableObject.CreateInstance<SimConfig>();
+            try
+            {
+                cfg.reedBedCount = 11; cfg.reedSheavesPerCut = 12; cfg.reedRegrowDays = 13; cfg.thatchCutMinutesPerBundle = 14;
+                cfg.thatchOffSeasonFactor = 15; cfg.thatchCureDays = 16; cfg.thatcherHutStore = 17; cfg.thatcherHutWidthM = 18f;
+                cfg.thatcherHutDepthM = 19f; cfg.thatcherHutLogs = 20; cfg.thatcherHutMinutes = 21; cfg.handCarryThatch = 22;
+                var t = cfg.BuildTuning();
+                Assert.AreEqual(11, t.ReedBedCount); Assert.AreEqual(12, t.ReedSheavesPerCut); Assert.AreEqual(13, t.ReedRegrowDays);
+                Assert.AreEqual(14, t.ThatchCutMinutesPerBundle); Assert.AreEqual(15, t.ThatchOffSeasonFactor);
+                Assert.AreEqual(16, t.ThatchCureDays); Assert.AreEqual(17, t.ThatcherHutStore);
+                Assert.AreEqual(18, t.ThatcherHutWidthM, Eps); Assert.AreEqual(19, t.ThatcherHutDepthM, Eps);
+                Assert.AreEqual(20, t.ThatcherHutLogs); Assert.AreEqual(21, t.ThatcherHutMinutes); Assert.AreEqual(22, t.HandCarryThatch);
+            }
+            finally { Object.DestroyImmediate(cfg); }
+        }
+
+        [Test]
         public void DefaultSimConfigBuildsCodeAreaCatalog()
         {
             var cfg = ScriptableObject.CreateInstance<SimConfig>();
