@@ -32,7 +32,8 @@ namespace LordsLegacy.Game
 
         private VisualElement _panel;
         private Label _delivery, _title, _state, _household, _members, _access, _larder, _hungry, _message;
-        private Button _priority, _deconstruct, _close;
+        private Label _level, _fence, _needs;
+        private Button _priority, _deconstruct, _close, _buildFence, _upgrade;
         private bool _subscribed;
 
         /// <summary>True while the panel is shown.</summary>
@@ -74,6 +75,24 @@ namespace LordsLegacy.Game
         /// <summary>True while the Deconstruct button is visible.</summary>
         public bool DeconstructVisible => _deconstruct != null && _deconstruct.style.display.value != DisplayStyle.None;
 
+        /// <summary>Household level line, e.g. "Level 1: Settled household"; empty for an empty house.</summary>
+        public string LevelText => _level?.style.display.value == DisplayStyle.Flex ? _level.text : "";
+
+        /// <summary>Fence line: "Fence: no fence", "Fence: fence 45%" or "Fence: fence built".</summary>
+        public string FenceText => _fence?.text ?? "";
+
+        /// <summary>Needs checklist, one "[x] Label: reason" or "[ ] Label: reason" line per need; empty when none shown.</summary>
+        public string NeedsText => _needs?.style.display.value == DisplayStyle.Flex ? _needs.text : "";
+
+        /// <summary>True while the Build fence button is visible (house built, no fence yet).</summary>
+        public bool BuildFenceVisible => _buildFence != null && _buildFence.style.display.value != DisplayStyle.None;
+
+        /// <summary>True while the Upgrade button is visible (the house has a household with a next level).</summary>
+        public bool UpgradeVisible => _upgrade != null && _upgrade.style.display.value != DisplayStyle.None;
+
+        /// <summary>True while the Upgrade button can be pressed (HouseReport.UpgradeAvailable).</summary>
+        public bool UpgradeEnabled => _upgrade != null && _upgrade.enabledSelf;
+
         /// <summary>The panel element, for layout checks.</summary>
         public VisualElement PanelElement => _panel;
 
@@ -98,6 +117,36 @@ namespace LordsLegacy.Game
             var site = host.World.Construction.Get(id);
             if (site == null) return;
             Run(new SetSitePriority(id, site.Priority == ConstructionPriority.High ? ConstructionPriority.Normal : ConstructionPriority.High));
+        }
+
+        /// <summary>Build fence button: sends <see cref="BuildFence"/> for the selected house.</summary>
+        public void ClickBuildFence()
+        {
+            var host = Host();
+            var agents = Agents();
+            if (host == null || !host.IsInitialized || agents == null || !agents.HasHouse) return;
+            Run(new BuildFence(agents.SelectedHouseId));
+        }
+
+        /// <summary>Upgrade button: sends <see cref="UpgradeHousehold"/> for the selected house's family (ignored while disabled).</summary>
+        public void ClickUpgrade()
+        {
+            var host = Host();
+            var agents = Agents();
+            if (host == null || !host.IsInitialized || agents == null || !agents.HasHouse || !UpgradeEnabled) return;
+            HomeRecord home = host.World.Homes.Get(agents.SelectedHouseId);
+            if (home == null || home.FamilyId == 0) return;
+            Run(new UpgradeHousehold(home.FamilyId));
+        }
+
+        /// <summary>Needs checklist text for a report: a tick box and the reason per need, then any blocker.</summary>
+        public static string NeedsLines(HouseReport report)
+        {
+            var sb = new StringBuilder("To reach level " + report.Needs.NextLevel + ":");
+            foreach (NeedStatus n in report.Needs.Needs)
+                sb.Append('\n').Append(n.Met ? "[x] " : "[ ] ").Append(n.Label).Append(": ").Append(n.Reason);
+            if (report.UpgradeBlocker != null) sb.Append('\n').Append("Cannot upgrade: ").Append(report.UpgradeBlocker);
+            return sb.ToString();
         }
 
         /// <summary>Deconstruct button: asks to confirm, then sends MarkForDeconstruction (an unbuilt site is cancelled at once).</summary>
@@ -212,6 +261,9 @@ namespace LordsLegacy.Game
                 _members.style.display = DisplayStyle.None;
                 _larder.style.display = DisplayStyle.None;
                 _hungry.style.display = DisplayStyle.None;
+                _level.style.display = DisplayStyle.None;
+                _needs.style.display = DisplayStyle.None;
+                _upgrade.style.display = DisplayStyle.None;
             }
             else
             {
@@ -235,7 +287,26 @@ namespace LordsLegacy.Game
                 string status = Sim.Growth.GrowthReport.StatusOf(world, family.Id);
                 _hungry.text = status ?? "";
                 _hungry.style.display = status != null ? DisplayStyle.Flex : DisplayStyle.None;
+                HouseReport report = HouseReport.Of(world, family.Id);
+                _level.text = "Level " + report.Level + ": " + report.LevelName;
+                _level.style.display = DisplayStyle.Flex;
+                bool hasNext = report.Needs.NextLevel != 0;
+                _needs.text = hasNext ? NeedsLines(report) : "Highest level reached";
+                _needs.style.display = DisplayStyle.Flex;
+                _upgrade.style.display = hasNext ? DisplayStyle.Flex : DisplayStyle.None;
+                _upgrade.SetEnabled(report.UpgradeAvailable);
             }
+
+            FenceState fence = HouseFence.StateOf(world, home);
+            string fenceText = fence == FenceState.Built ? "fence built" : "no fence";
+            if (fence == FenceState.Building)
+            {
+                ConstructionProgress prog = ConstructionProgress.Of(world, home.FenceFootprintId);
+                fenceText = "fence " + (int)Math.Floor((prog == null ? 0 : prog.Fraction) * 100) + "%";
+            }
+            _fence.text = "Fence: " + fenceText;
+            _buildFence.style.display = fence == FenceState.None && world.IsBuilt(id) && world.Deconstruction.Get(id) == null
+                ? DisplayStyle.Flex : DisplayStyle.None;
 
             var site = world.Construction.Get(id);
             _priority.style.display = site != null ? DisplayStyle.Flex : DisplayStyle.None;
@@ -334,10 +405,20 @@ namespace LordsLegacy.Game
             _hungry = MakeLabel("house-hungry", 12, true);
             _hungry.style.color = new Color(1f, 0.55f, 0.45f);
             _hungry.style.display = DisplayStyle.None;
+            _level = MakeLabel("house-level", 12, true);
+            _level.style.display = DisplayStyle.None;
+            _fence = MakeLabel("house-fence", 12, false);
+            _needs = MakeLabel("house-needs", 12, false);
+            _needs.style.display = DisplayStyle.None;
             _message = MakeLabel("house-message", 12, false);
             _message.style.color = new Color(1f, 0.55f, 0.45f);
             _message.style.display = DisplayStyle.None;
 
+            _buildFence = MakeButton("house-build-fence", "Build fence");
+            _buildFence.clicked += ClickBuildFence;
+            _upgrade = MakeButton("house-upgrade", "Upgrade");
+            _upgrade.clicked += ClickUpgrade;
+            _upgrade.SetEnabled(false);
             _priority = MakeButton("house-priority", "High priority: off");
             _priority.clicked += ClickPriority;
             _deconstruct = MakeButton("house-deconstruct", "Deconstruct");
@@ -345,6 +426,7 @@ namespace LordsLegacy.Game
 
             _panel.Add(_title); _panel.Add(_state); _panel.Add(_delivery); _panel.Add(_household); _panel.Add(_members);
             _panel.Add(_access); _panel.Add(_hungry); _panel.Add(_larder);
+            _panel.Add(_level); _panel.Add(_fence); _panel.Add(_needs); _panel.Add(_buildFence); _panel.Add(_upgrade);
             _panel.Add(_priority); _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);
             root.Add(holder);

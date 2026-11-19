@@ -29,6 +29,8 @@ namespace LordsLegacy.Game.Tools
         public const string WeaverToolId = "weaver";
         /// <summary>Build bar id of the wattle yard entry (T-569).</summary>
         public const string WattleYardToolId = "wattle-yard";
+        /// <summary>Build bar id of the daub pit entry (T-593).</summary>
+        public const string DaubPitToolId = "daub-pit";
         /// <summary>Build bar id of the storage yard entry (T-549).</summary>
         public const string StorageYardToolId = "storage-yard";
         /// <summary>Degrees one Q / E press turns the ghost.</summary>

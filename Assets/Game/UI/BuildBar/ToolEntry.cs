@@ -81,6 +81,8 @@ namespace LordsLegacy.Game
                     () => ModuleTypes.Weaver.ConstructionRecipe.Logs),
                 new ToolEntry(LordsLegacy.Game.Tools.StructureTool.WattleYardToolId, "Wattle yard", true, "Place a wattle yard: hazel and willow rods into wattle panels",
                     () => ModuleTypes.WattleYard.ConstructionRecipe.Logs),
+                new ToolEntry(LordsLegacy.Game.Tools.StructureTool.DaubPitToolId, "Daub pit", true, "Place a daub pit: earth and water into daub for houses",
+                    () => ModuleTypes.DaubPit.ConstructionRecipe.Logs),
             };
         }
     }

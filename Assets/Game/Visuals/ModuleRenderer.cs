@@ -48,6 +48,7 @@ namespace LordsLegacy.Game.Visuals
                 case ModuleTypes.SawpitId: return VisualSizes.ModuleSawpit;
                 case ModuleTypes.WeaverId: return VisualSizes.ModuleWeaver;
                 case ModuleTypes.WattleYardId: return VisualSizes.ModuleWattleYard;
+                case ModuleTypes.DaubPitId: return VisualSizes.ModuleDaubPit;
                 case ModuleTypes.StorageYardId: return VisualSizes.ModuleStorageYard;
                 default: return VisualSizes.ModuleLogStorage;
             }
@@ -179,8 +180,92 @@ namespace LordsLegacy.Game.Visuals
                     max = Vector3.Max(max, p + new Vector3(r, box.y + 1f, r));
                 }
             }
+            _fenceCount = 0;
+            AddFences(world, ref min, ref max);
             _bounds = new Bounds();
-            if (_count > 0) _bounds.SetMinMax(min, max);
+            if (_count > 0 || _fenceCount > 0) _bounds.SetMinMax(min, max);
+        }
+
+        /// <summary>Fence segments and gate posts currently drawn for built house fences (T-593). For tests.</summary>
+        public int FenceInstanceCount => _fenceCount;
+
+        private int _fenceCount;
+
+        // Built fences only: a fence under construction does not block yet (HL-12) and shows the scaffold instead.
+        private void AddFences(LordsLegacy.Sim.Core.SimWorld world, ref Vector3 min, ref Vector3 max)
+        {
+            foreach (var home in world.Homes.All)
+            {
+                if (home.FenceFootprintId == 0 || world.Footprints.Get(home.FenceFootprintId) == null
+                    || world.Construction.Get(home.FenceFootprintId) != null) continue;
+                var plot = world.Areas.Get(home.PlotAreaId);
+                if (plot == null) continue;
+                var line = LordsLegacy.Sim.Areas.FenceLine.Of(plot);
+                float panel = Mathf.Max(0.5f, (float)world.Tuning.FencePanelLengthM);
+                foreach (var run in line.Runs)
+                    for (int k = 0; k + 1 < run.Count; k++)
+                    {
+                        Vector2 a = new Vector2((float)run[k].XMetres, (float)run[k].ZMetres);
+                        Vector2 b = new Vector2((float)run[k + 1].XMetres, (float)run[k + 1].ZMetres);
+                        int pieces = Mathf.Max(1, Mathf.CeilToInt((b - a).magnitude / panel - 0.001f));
+                        for (int i = 0; i < pieces; i++)
+                            AddFencePiece(world, VisualSizes.FenceSegment, Vector2.Lerp(a, b, (i + 0.5f) / pieces),
+                                b - a, (b - a).magnitude / pieces, ref min, ref max);
+                    }
+                if (line.HasFrontage) AddGate(world, plot, line, ref min, ref max);
+            }
+        }
+
+        // Two posts either side of the access point along the frontage edge: the gap between them is the open gate.
+        private void AddGate(LordsLegacy.Sim.Core.SimWorld world, LordsLegacy.Sim.Areas.AreaRecord plot,
+            LordsLegacy.Sim.Areas.FenceLine line, ref Vector3 min, ref Vector3 max)
+        {
+            var outline = plot.ShapeOrderOutline(out int[] starts);
+            Vector2 acc = new Vector2((float)line.AccessPoint.XMetres, (float)line.AccessPoint.ZMetres);
+            Vector2 dir = Vector2.right;
+            float best = float.MaxValue;
+            for (int e = 0; e < starts.Length; e++)
+            {
+                if (plot.Shape.Edges[e].Kind != LordsLegacy.Sim.Areas.AreaEdgeKind.FollowsRoad) continue;
+                int end = e + 1 < starts.Length ? starts[e + 1] : outline.Length;
+                for (int k = starts[e]; k < end; k++)
+                {
+                    var p0 = outline[k % outline.Length]; var p1 = outline[(k + 1) % outline.Length];
+                    Vector2 a = new Vector2((float)p0.XMetres, (float)p0.ZMetres), b = new Vector2((float)p1.XMetres, (float)p1.ZMetres);
+                    Vector2 d = b - a;
+                    if (d.sqrMagnitude < 1e-6f) continue;
+                    float t = Mathf.Clamp01(Vector2.Dot(acc - a, d) / d.sqrMagnitude);
+                    float dist = (a + d * t - acc).sqrMagnitude;
+                    if (dist < best) { best = dist; dir = d.normalized; }
+                }
+            }
+            float half = Mathf.Max(0.5f, (float)world.Tuning.FencePanelLengthM * 0.5f);
+            AddFencePiece(world, VisualSizes.FenceGatePost, acc - dir * half, dir, 0.2f, ref min, ref max);
+            AddFencePiece(world, VisualSizes.FenceGatePost, acc + dir * half, dir, 0.2f, ref min, ref max);
+        }
+
+        private void AddFencePiece(LordsLegacy.Sim.Core.SimWorld world, string vid, Vector2 at, Vector2 dir, float length,
+            ref Vector3 min, ref Vector3 max)
+        {
+            var box = VisualSizes.Of(vid);
+            var p = new Vector3(at.x, world.Terrain.HeightAt(at.x, at.y), at.y);
+            float yaw = -Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            Matrix4x4 m;
+            if (registry != null && registry.TryGet(vid, out var def))
+            {
+                var mb = def.Mesh != null ? def.Mesh.bounds : new Bounds(Vector3.zero, Vector3.one);
+                // Segments are stretched to their length along the run; posts keep their own width.
+                float lx = vid == VisualSizes.FenceSegment ? length : box.x;
+                var s = new Vector3(lx / Mathf.Max(0.001f, mb.size.x), box.y * def.Scale / Mathf.Max(0.001f, mb.size.y),
+                    box.z / Mathf.Max(0.001f, mb.size.z));
+                m = Matrix4x4.TRS(new Vector3(p.x, p.y - mb.min.y * s.y, p.z), Quaternion.Euler(0f, yaw, 0f), s);
+            }
+            else m = Matrix4x4.identity;
+            if (!_byVisual.TryGetValue(vid, out var list)) { list = new List<Matrix4x4>(); _byVisual[vid] = list; }
+            list.Add(m);
+            _fenceCount++;
+            min = Vector3.Min(min, p - new Vector3(length, 1f, length));
+            max = Vector3.Max(max, p + new Vector3(length, box.y + 1f, length));
         }
     }
 }

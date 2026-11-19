@@ -344,6 +344,8 @@ namespace LordsLegacy.EditorTools.Scenes
             // T-569: weaver and wattle yard.
             CreateStructureTool("WeaverTool", LordsLegacy.Game.Tools.StructureTool.WeaverToolId, LordsLegacy.Sim.Footprints.ModuleTypes.WeaverId, host, panel);
             CreateStructureTool("WattleYardTool", LordsLegacy.Game.Tools.StructureTool.WattleYardToolId, LordsLegacy.Sim.Footprints.ModuleTypes.WattleYardId, host, panel);
+            // T-593: daub pit.
+            CreateStructureTool("DaubPitTool", LordsLegacy.Game.Tools.StructureTool.DaubPitToolId, LordsLegacy.Sim.Footprints.ModuleTypes.DaubPitId, host, panel);
             // T-549: storage yard.
             CreateStructureTool("StorageYardTool", LordsLegacy.Game.Tools.StructureTool.StorageYardToolId, LordsLegacy.Sim.Footprints.ModuleTypes.StorageYardId, host, panel);
             return last;
