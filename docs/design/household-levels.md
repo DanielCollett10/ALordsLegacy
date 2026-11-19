@@ -38,3 +38,9 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 
 > Note (HL-22, HL-23): the player always orders the upgrade (HSE-20). M21 has the button without a cost; the
 > renovation cost joins it later, so no level 2 household ever skips the button.
+
+> Implementation note (HL-22): needs are not checked once a day. `HouseholdNeedsReport` derives them on each read, for the
+> panel and for `UpgradeHousehold`, so they are always current and there is no daily job. The owner decides which to keep.
+
+> Implementation note (HL-01): the daub pit uses a 3 m yard, like the workshops, not the granary's 5 m. Its recipe (4 logs,
+> 240 min) and size are hard-coded in `ModuleTypes.DaubPit`, not read from `SimTuning`. Output (HL-02) is tuned.
