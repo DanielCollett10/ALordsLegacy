@@ -54,6 +54,19 @@ namespace LordsLegacy.Sim.Tests.Growth
             Assert.AreEqual("The Smith family is leaving: hungry for 30 days", w.SettlementLog.Entries.Last().Text);
         }
 
+        [Test]
+        public void Begin_WritesADepartureEntryUnderGrowth()
+        {
+            var w = SimWorld.FromMapData(Flat(), new SimTuning());
+            Family f = w.People.AddFamily(1, "Smith", 10, 10);
+            w.People.AddCitizen(10, "C", Sex.Male, Adult, 1, 10, 10);
+            f.HungryDays = 30;
+            FamilyDeparture.Begin(w, 1);
+            var growth = w.Log.Snapshot(LogCategory.Growth);
+            Assert.AreEqual(1, growth.Count);
+            StringAssert.Contains("departure: family 1 Smith leaving", growth[0].Text);
+        }
+
         // ---- house ----
 
         [Test]

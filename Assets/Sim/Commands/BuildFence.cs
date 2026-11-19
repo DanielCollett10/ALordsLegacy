@@ -51,6 +51,7 @@ namespace LordsLegacy.Sim.Commands
             var site = new ConstructionSite(fpId, world.Inventory.GetOrAddSite(fpId).Id);
             site.ReservationIds.AddRange(ids);
             world.Construction.Add(site);
+            ConstructionLog.Reserved(world, site.FootprintId);
             world.Footprints.Add(fpId, ModuleTypes.Fence, line.AccessPoint, 0);
             world.Homes.SetFence(home, fpId);
             return CommandResult.Accepted(created: new long[] { fpId });

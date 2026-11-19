@@ -54,6 +54,7 @@ namespace LordsLegacy.Sim.Growth
 
             f.Passage = FamilyPassage.Leaving;
             world.SettlementLog.Add(world.Tick, "The " + f.Surname + " family is leaving: hungry for " + f.HungryDays + " days");
+            world.Log.Write(LogCategory.Growth, "departure: family " + f.Id + " " + f.Surname + " leaving, hungry " + f.HungryDays + " days");
         }
 
         private static PointMm DropPoint(SimWorld world, Family f)

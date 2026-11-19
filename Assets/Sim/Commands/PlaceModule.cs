@@ -56,6 +56,7 @@ namespace LordsLegacy.Sim.Commands
                     return CommandResult.Rejected(CommandRejectCode.NotAllowed, SiteMaterials.Shortfall(world, type.ConstructionRecipe) ?? "Not enough materials");
                 site.ReservationIds.AddRange(ids);
                 world.Construction.Add(site);
+                ConstructionLog.Reserved(world, site.FootprintId);
             }
             Footprint fp = world.Footprints.Add(fpId, type, Centre, RotationDegrees);
             world.Operations.AddModule(OperationId, fp.Id);

@@ -66,6 +66,18 @@ namespace LordsLegacy.Sim.Tests.Growth
         }
 
         [Test]
+        public void Arrival_WritesAGrowthEntryToSimLog()
+        {
+            SimWorld w = Make(200, out int free);
+            Family n = StepUntilArrival(w);
+            Assert.IsNotNull(n);
+            var growth = w.Log.Snapshot(LogCategory.Growth);
+            Assert.AreEqual(1, growth.Count);
+            StringAssert.Contains("arrival: family " + n.Id + " " + n.Surname, growth[0].Text);
+            StringAssert.Contains("house " + free, growth[0].Text);
+        }
+
+        [Test]
         public void AllowedDawn_FamilyArrives_ReservesHouse_AndLogsIt()
         {
             SimWorld w = Make(200, out int free);

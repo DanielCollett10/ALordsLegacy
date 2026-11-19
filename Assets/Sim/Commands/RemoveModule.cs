@@ -90,6 +90,7 @@ namespace LordsLegacy.Sim.Commands
                 }
             }
             world.Construction.Remove(site.FootprintId);
+            ConstructionLog.Cancelled(world, site.FootprintId);
         }
 
         /// <inheritdoc />

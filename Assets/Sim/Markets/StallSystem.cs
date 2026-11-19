@@ -86,6 +86,7 @@ namespace LordsLegacy.Sim.Markets
                 {
                     foreach (int resId in new List<int>(site.ReservationIds)) inv.Release(resId);
                     world.Construction.Remove(id);
+                    ConstructionLog.Cancelled(world, id);
                     Drop(inv, inv.Get(site.LedgerLocationId), fp);
                 }
                 world.Deconstruction.Remove(id);
@@ -159,6 +160,7 @@ namespace LordsLegacy.Sim.Markets
             if (ids == null) return 0;
             site.ReservationIds.AddRange(ids);
             world.Construction.Add(site);
+            ConstructionLog.Reserved(world, site.FootprintId);
             // The stall's front (local -Z) faces the aisle, which lies on the slot's +v side (StallGrid).
             double ux = slot.Stall[1].X - slot.Stall[0].X, uz = slot.Stall[1].Z - slot.Stall[0].Z;
             double rotation = Math.Atan2(-uz, -ux) * 180.0 / Math.PI;

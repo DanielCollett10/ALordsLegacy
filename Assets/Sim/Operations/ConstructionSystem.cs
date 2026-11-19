@@ -40,7 +40,10 @@ namespace LordsLegacy.Sim.Operations
                 LedgerLocation loc = world.Inventory.Get(site.LedgerLocationId);
                 if (loc == null) continue;
                 if (site.State == ConstructionState.Delivering && AnyDelivered(world, site, recipe))
+                {
                     site.State = ConstructionState.Building; // CN-23: from the first item on site
+                    ConstructionLog.Building(world, site.FootprintId);
+                }
                 int owner = OwnerOf(world, site.FootprintId);
                 if (site.State == ConstructionState.Building && !ConstructionProgress.TryFinish(world, site, recipe))
                     ManageBuilders(world, site, fp, owner);
