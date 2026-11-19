@@ -47,6 +47,9 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | Forage bush, full / empty (berry and mushroom alike) | `BushRenderer` | Built-in sphere, green / brown material |
 | Hazel stool, with rods / cut (T-568) | `BushRenderer` | Built-in cylinder 0.9 × 1.6 m olive green / 0.7 × 0.35 m brown stump while regrowing |
 | Willow stool, with rods / cut (T-568) | `BushRenderer` | Built-in cylinder 1.0 × 2.0 m yellow-green / 0.7 × 0.35 m pale stump while regrowing |
+| Reed bed, full / cut (T-580) | `BushRenderer` | Built-in cylinder 1.6 × 1.8 m green / 1.2 × 0.25 m pale stubble while regrowing |
+| Thatch stook, green / dry (T-580) | `StookRenderer` | Built-in cylinder 0.9 × 1.2 m green per `CuringRegistry` stook / straw-yellow per ground pile of thatch |
+| Thatcher's hut (T-580) | `ModuleRenderer.VisualIdOf` | No own model: draws the woodcutting hut box |
 | Coppice hut (T-568) | `ModuleRenderer.VisualIdOf` | No own model: draws the woodcutting hut box |
 | Forager hut (own model) | `ModuleRenderer.VisualIdOf` | Reuses woodcutting hut |
 | Granary (own model) | `ModuleRenderer.VisualIdOf` | Falls back to log storage |

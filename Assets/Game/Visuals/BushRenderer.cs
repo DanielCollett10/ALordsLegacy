@@ -26,7 +26,18 @@ namespace LordsLegacy.Game.Visuals
         public const float CutHeightM = 0.35f;
 
         // Batch slots: forage full / empty, then hazel and willow stools with rods / cut.
-        private const int SlotFull = 0, SlotEmpty = 1, SlotHazelFull = 2, SlotHazelCut = 3, SlotWillowFull = 4, SlotWillowCut = 5, SlotCount = 6;
+        private const int SlotFull = 0, SlotEmpty = 1, SlotHazelFull = 2, SlotHazelCut = 3, SlotWillowFull = 4, SlotWillowCut = 5, SlotReedFull = 6, SlotReedCut = 7, SlotCount = 8;
+
+        /// <summary>Height in metres of a reed bed with sheaves to cut (placeholder, T-580).</summary>
+        public const float ReedFullHeightM = 1.8f;
+        /// <summary>Height in metres of a cut reed bed while it regrows.</summary>
+        public const float ReedCutHeightM = 0.25f;
+
+        /// <summary>Reed beds drawn full (green, tall) in the last build. For tests.</summary>
+        public int ReedFullCount => _lists[SlotReedFull].Count;
+
+        /// <summary>Reed beds drawn cut (short stubble) in the last build. For tests.</summary>
+        public int ReedCutCount => _lists[SlotReedCut].Count;
 
         private readonly List<Matrix4x4>[] _lists = MakeLists();
         private readonly Material[] _mats = new Material[SlotCount];
@@ -59,7 +70,14 @@ namespace LordsLegacy.Game.Visuals
         /// <summary>Sets the SimHost (for code that adds the component at run time).</summary>
         public void Configure(SimHost simHost) { host = simHost; _builtVersion = -1; }
 
-        private void Update() { Refresh(); }
+        private void Update() { Refresh(); EnsureStooks(); }
+
+        // Thatch stooks are drawn by a sibling component, added here so the scene file does not change (T-580).
+        private void EnsureStooks()
+        {
+            var stooks = GetComponent<StookRenderer>();
+            if (stooks == null) { stooks = gameObject.AddComponent<StookRenderer>(); stooks.Configure(host); }
+        }
 
         /// <summary>Rebuilds if the Sim bushes changed, then draws both batches.</summary>
         public void Refresh()
@@ -95,6 +113,15 @@ namespace LordsLegacy.Game.Visuals
                     m = Matrix4x4.TRS(p, Quaternion.identity, new Vector3(w, h * 0.5f, w));
                     slot = willow ? (full ? SlotWillowFull : SlotWillowCut) : (full ? SlotHazelFull : SlotHazelCut);
                 }
+                else if (b.Kind == LordsLegacy.Sim.Foraging.BushKind.ReedBed)
+                {
+                    // Reed bed: a wide, tall green clump; short pale stubble while cut and regrowing.
+                    float h = full ? ReedFullHeightM : ReedCutHeightM;
+                    float w = full ? 1.6f : 1.2f;
+                    p = new Vector3(b.X, world.Terrain.HeightAt(b.X, b.Z) + h * 0.5f, b.Z);
+                    m = Matrix4x4.TRS(p, Quaternion.identity, new Vector3(w, h * 0.5f, w));
+                    slot = full ? SlotReedFull : SlotReedCut;
+                }
                 else
                 {
                     float size = full ? FullSizeM : EmptySizeM;
@@ -120,6 +147,8 @@ namespace LordsLegacy.Game.Visuals
             if (_mats[SlotHazelCut] == null) _mats[SlotHazelCut] = MakeMaterial(new Color(0.4f, 0.28f, 0.14f));
             if (_mats[SlotWillowFull] == null) _mats[SlotWillowFull] = MakeMaterial(new Color(0.75f, 0.7f, 0.25f));
             if (_mats[SlotWillowCut] == null) _mats[SlotWillowCut] = MakeMaterial(new Color(0.7f, 0.6f, 0.4f));
+            if (_mats[SlotReedFull] == null) _mats[SlotReedFull] = MakeMaterial(new Color(0.25f, 0.6f, 0.35f));
+            if (_mats[SlotReedCut] == null) _mats[SlotReedCut] = MakeMaterial(new Color(0.6f, 0.55f, 0.35f));
         }
 
         private static Material MakeMaterial(Color c)
