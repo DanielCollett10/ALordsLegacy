@@ -179,9 +179,9 @@ namespace LordsLegacy.Sim.Footprints
         /// <summary>Id of the daub pit (HL-01).</summary>
         public const string DaubPitId = "module.daub_pit";
 
-        /// <summary>Daub pit: 4 x 4 m, blocks movement, clears trees, 3 m yard, 4 logs / 240 worker-minutes (HL-01).</summary>
+        /// <summary>Daub pit: 4 x 4 m, blocks movement, clears trees, 5 m yard like the granary, 4 logs / 240 worker-minutes (HL-01, owner 19/11/2026).</summary>
         public static readonly FootprintTypeDef DaubPit =
-            new FootprintTypeDef(DaubPitId, 4000, 4000, true, true, recipe: new ConstructionRecipe(4, 240), yardMarginMm: 3000);
+            new FootprintTypeDef(DaubPitId, 4000, 4000, true, true, recipe: new ConstructionRecipe(4, 240), yardMarginMm: 5000);
 
         /// <summary>Id of the fence footprint (decision 0053).</summary>
         public const string FenceId = "footprint.fence";
