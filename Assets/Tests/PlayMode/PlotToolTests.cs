@@ -47,7 +47,14 @@ namespace LordsLegacy.Tests.PlayMode
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { PointMm.FromMetres(20, 50), PointMm.FromMetres(80, 50) },
                 new[] { PointMm.FromMetres(20, 50), PointMm.FromMetres(50, 50), PointMm.FromMetres(80, 50) });
-            if (logs > 0) w.Inventory.Produce(w.Inventory.AddStockpile(PointMm.FromMetres(60, 40)), Items.Log, logs);
+            if (logs > 0)
+            {
+                // The house recipe needs logs, thatch and wattle panels (MAT-40), so stock all three.
+                var pile = w.Inventory.AddStockpile(PointMm.FromMetres(60, 40));
+                w.Inventory.Produce(pile, Items.Log, logs);
+                w.Inventory.Produce(pile, Items.Thatch, logs);
+                w.Inventory.Produce(pile, Items.WattlePanel, logs);
+            }
             _camGo = new GameObject("TestCam");
             _cam = _camGo.AddComponent<Camera>();
             _cam.orthographic = true; _cam.orthographicSize = 60f;
