@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="simlog-overlay" class="simlog" picking-mode="Ignore">
+        <ui:Label name="simlog-title" class="simlog__title" text="Sim log (F5)" picking-mode="Ignore" />
+        <ui:VisualElement name="simlog-toggles" class="simlog__toggles" picking-mode="Ignore" />
+        <ui:VisualElement name="simlog-entries" class="simlog__entries" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

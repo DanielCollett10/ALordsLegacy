@@ -50,6 +50,7 @@ namespace LordsLegacy.EditorTools.Scenes
             CreateAgentSelection(host);
             CreateDebugOverlay(host);
             CreateMessageLog(host);
+            CreateSimLogOverlay(host);
             CreateSunController(host, light, topBar);
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -469,6 +470,17 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(c, "_picker", Object.FindFirstObjectByType<GroundPicker>());
             SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/DebugOverlay/DebugOverlay.uxml"));
             SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/DebugOverlay/DebugOverlay.uss"));
+            return go;
+        }
+
+        /// <summary>Adds the F5 Sim log overlay UIDocument and view, wired to SimHost (T-630).</summary>
+        public static GameObject CreateSimLogOverlay(SimHost host)
+        {
+            var go = CreateUiDocument("SimLogOverlay", "Assets/Game/UI/SimLogOverlay/SimLogOverlay.uxml");
+            var c = go.AddComponent<SimLogOverlayView>();
+            SetRef(c, "_host", host);
+            SetRef(c, "_visualTree", Load<UnityEngine.UIElements.VisualTreeAsset>("Assets/Game/UI/SimLogOverlay/SimLogOverlay.uxml"));
+            SetRef(c, "_styleSheet", Load<UnityEngine.UIElements.StyleSheet>("Assets/Game/UI/SimLogOverlay/SimLogOverlay.uss"));
             return go;
         }
 
