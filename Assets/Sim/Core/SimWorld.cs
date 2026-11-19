@@ -36,6 +36,9 @@ namespace LordsLegacy.Sim.Core
         /// <summary>Calendar date and time for the current tick (named Now to avoid UnityEngine.Time).</summary>
         public GameTime Now => _calendar.At(Tick);
 
+        /// <summary>Calendar date and time at any tick, e.g. when a curing stook is ready (T-576).</summary>
+        public GameTime TimeAt(long tick) => _calendar.At(tick);
+
         /// <summary>True while the simulation is paused; <see cref="Step"/> does nothing.</summary>
         public bool Paused { get; private set; }
 

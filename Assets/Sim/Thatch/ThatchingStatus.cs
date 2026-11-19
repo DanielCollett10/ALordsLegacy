@@ -30,5 +30,20 @@ namespace LordsLegacy.Sim.Thatch
 
         /// <summary>True in December, January and February: the full cutting rate (MAT-34).</summary>
         public static bool IsWinter(SimWorld world) => world.Now.Season == Calendar.Season.Winter;
+
+        /// <summary>
+        /// The panel text for a thatcher's status (MAT-39e): "Cutting" in winter, "Cutting (slow season)" otherwise,
+        /// "No reed beds", "Store full"; every other state uses <see cref="OperationText"/>.
+        /// </summary>
+        public static string TextOf(SimWorld world, OperationState s)
+        {
+            switch (s)
+            {
+                case OperationState.Working: return IsWinter(world) ? "Cutting" : "Cutting (slow season)";
+                case OperationState.NoBushes: return "No reed beds";
+                case OperationState.StorageFull: return "Store full";
+                default: return OperationText.Of(s);
+            }
+        }
     }
 }
