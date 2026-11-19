@@ -6,7 +6,8 @@ move orders (decision 0022, `docs/design/movement.md`).
 ## Key types and files
 
 - `NavGrid` (`Assets/Sim/Navigation/`, `SimWorld.Nav`, never null): cells of `NavCellSizeM` (2 m) over the terrain bounds.
-  Per cell: `IsBlocked` (slope over `MaxWalkSlopeDeg`, or centre inside a movement-blocking footprint) and
+  Per cell: `IsBlocked` (slope over `MaxWalkSlopeDeg`, centre inside a movement-blocking footprint, or crossed by the
+  `FenceLine` of a Built house fence, rasterised 4-connected, T-587; the fence marker never blocks) and
   `SpeedMultiplier` (highest road multiplier, else 1). `Version` bumps when any cell changes. No map = no cells.
 - `NavSyncSystem`: first in the sync phase, and also runs on `OnCommandApplied`. The first `Sync` is a full build; later
   ones diff road segment and footprint ids and recompute only the cells under changed items.

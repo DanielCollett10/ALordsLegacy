@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using LordsLegacy.Sim.Areas;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Geometry;
 using LordsLegacy.Sim.Roads;
@@ -27,6 +29,7 @@ namespace LordsLegacy.Sim.Navigation
             public BoundsMm Bounds;
             public PointMm[] Polygon;
             public double Multiplier;
+            public HashSet<long> Cells; // fence items only: packed (ix, iz) of every cell the fence line crosses
         }
 
         private readonly double _maxSlopeDeg;
@@ -35,7 +38,9 @@ namespace LordsLegacy.Sim.Navigation
         private readonly float[] _multiplier;
         private readonly Dictionary<int, Item> _roads = new Dictionary<int, Item>();
         private readonly Dictionary<int, Item> _footprints = new Dictionary<int, Item>();
+        private readonly Dictionary<int, Item> _fences = new Dictionary<int, Item>();
         private bool _built;
+        private int _constructionVersion;
         private int _roadVersion;
         private int _footprintVersion;
 
@@ -99,7 +104,8 @@ namespace LordsLegacy.Sim.Navigation
         public void Sync(SimWorld world)
         {
             if (world == null) throw new ArgumentNullException(nameof(world));
-            if (_built && world.Roads.Version == _roadVersion && world.Footprints.Version == _footprintVersion) return;
+            if (_built && world.Roads.Version == _roadVersion && world.Footprints.Version == _footprintVersion
+                && world.Construction.Version == _constructionVersion) return;
 
             bool changed = false;
             bool firstBuild = !_built;
@@ -108,6 +114,7 @@ namespace LordsLegacy.Sim.Navigation
                 ComputeSlope(world.Terrain);
                 CollectRoads(world, null);
                 CollectFootprints(world, null);
+                CollectFences(world, null);
                 RecomputeRect(0, 0, Width - 1, Depth - 1);
                 _built = true;
                 changed = true;
@@ -117,6 +124,7 @@ namespace LordsLegacy.Sim.Navigation
                 var dirty = new List<BoundsMm>();
                 CollectRoads(world, dirty);
                 CollectFootprints(world, dirty);
+                CollectFences(world, dirty);
                 foreach (BoundsMm b in dirty)
                 {
                     int x0 = Math.Max(0, CellX(b.Min.XMetres)), x1 = Math.Min(Width - 1, CellX(b.Max.XMetres));
@@ -126,6 +134,7 @@ namespace LordsLegacy.Sim.Navigation
             }
             _roadVersion = world.Roads.Version;
             _footprintVersion = world.Footprints.Version;
+            _constructionVersion = world.Construction.Version;
             if (firstBuild && _restoredVersion >= 0) Version = _restoredVersion;
             else if (changed) Version++;
         }
@@ -204,6 +213,69 @@ namespace LordsLegacy.Sim.Navigation
             Diff(_footprints, current, dirty);
         }
 
+        // Built fences (decision 0053, HL-12): each blocks the cells its FenceLine passes through. Fences under
+        // construction do not block. Keyed by fence footprint id; the footprint object is the identity.
+        private void CollectFences(SimWorld world, List<BoundsMm> dirty)
+        {
+            var current = new Dictionary<int, Item>();
+            foreach (HomeRecord home in world.Homes.All)
+            {
+                int id = home.FenceFootprintId;
+                if (id == 0 || current.ContainsKey(id)) continue;
+                Footprint fp = world.Footprints.Get(id);
+                if (fp == null || !world.IsBuilt(id)) continue;
+                if (_fences.TryGetValue(id, out Item old) && ReferenceEquals(old.Source, fp)) { current[id] = old; continue; }
+                AreaRecord plot = world.Areas.Get(home.PlotAreaId);
+                if (plot == null) continue;
+                var cells = new HashSet<long>();
+                int minX = int.MaxValue, minZ = int.MaxValue, maxX = int.MinValue, maxZ = int.MinValue;
+                foreach (IReadOnlyList<PointMm> run in FenceLine.Of(plot).Runs)
+                {
+                    if (run.Count == 1) Mark(cells, run[0], run[0]);
+                    for (int k = 0; k + 1 < run.Count; k++) Mark(cells, run[k], run[k + 1]);
+                }
+                if (cells.Count == 0) continue;
+                foreach (long key in cells)
+                {
+                    int cx = (int)(key >> 32), cz = (int)(key & 0xffffffffL);
+                    minX = Math.Min(minX, cx); maxX = Math.Max(maxX, cx);
+                    minZ = Math.Min(minZ, cz); maxZ = Math.Max(maxZ, cz);
+                }
+                current[id] = new Item
+                {
+                    Source = fp, Cells = cells,
+                    Bounds = new BoundsMm(
+                        new PointMm(ToMm(OriginX + minX * CellSizeM), ToMm(OriginZ + minZ * CellSizeM)),
+                        new PointMm(ToMm(OriginX + (maxX + 1) * CellSizeM), ToMm(OriginZ + (maxZ + 1) * CellSizeM))),
+                };
+            }
+            Diff(_fences, current, dirty);
+        }
+
+        private static long Key(int ix, int iz) => ((long)ix << 32) | (uint)iz;
+
+        // Adds every cell the segment a-b passes through. Steps one axis at a time, so the cells are 4-connected.
+        private void Mark(HashSet<long> cells, PointMm a, PointMm b)
+        {
+            double x = (a.XMetres - OriginX) / CellSizeM, z = (a.ZMetres - OriginZ) / CellSizeM;
+            double ex = (b.XMetres - OriginX) / CellSizeM, ez = (b.ZMetres - OriginZ) / CellSizeM;
+            int cx = (int)Math.Floor(x), cz = (int)Math.Floor(z);
+            int endX = (int)Math.Floor(ex), endZ = (int)Math.Floor(ez);
+            cells.Add(Key(cx, cz));
+            double dx = ex - x, dz = ez - z;
+            int sx = dx > 0 ? 1 : -1, sz = dz > 0 ? 1 : -1;
+            double tx = dx == 0 ? double.PositiveInfinity : ((dx > 0 ? cx + 1 : cx) - x) / dx;
+            double tz = dz == 0 ? double.PositiveInfinity : ((dz > 0 ? cz + 1 : cz) - z) / dz;
+            double ddx = dx == 0 ? double.PositiveInfinity : sx / dx, ddz = dz == 0 ? double.PositiveInfinity : sz / dz;
+            int guard = Math.Abs(endX - cx) + Math.Abs(endZ - cz);
+            for (int i = 0; i < guard; i++)
+            {
+                if (tx < tz) { cx += sx; tx += ddx; }
+                else { cz += sz; tz += ddz; }
+                cells.Add(Key(cx, cz));
+            }
+        }
+
         // Recomputes the cells in the inclusive range from the slope flags and all applied items. True if any changed.
         private bool RecomputeRect(int x0, int z0, int x1, int z1)
         {
@@ -211,7 +283,7 @@ namespace LordsLegacy.Sim.Navigation
             var rect = new BoundsMm(
                 new PointMm(ToMm(OriginX + x0 * CellSizeM), ToMm(OriginZ + z0 * CellSizeM)),
                 new PointMm(ToMm(OriginX + (x1 + 1) * CellSizeM), ToMm(OriginZ + (z1 + 1) * CellSizeM)));
-            List<Item> roads = Overlapping(_roads, rect), blockers = Overlapping(_footprints, rect);
+            List<Item> roads = Overlapping(_roads, rect), blockers = Overlapping(_footprints, rect), fences = Overlapping(_fences, rect);
             bool changed = false;
             for (int iz = z0; iz <= z1; iz++)
             {
@@ -222,6 +294,8 @@ namespace LordsLegacy.Sim.Navigation
                     bool blocked = _slopeBlocked[idx];
                     for (int i = 0; i < blockers.Count && !blocked; i++)
                         if (blockers[i].Bounds.Contains(c) && Polygons.Contains(blockers[i].Polygon, c)) blocked = true;
+                    for (int i = 0; i < fences.Count && !blocked; i++)
+                        if (fences[i].Cells.Contains(Key(ix, iz))) blocked = true;
                     double mult = 1.0;
                     for (int i = 0; i < roads.Count; i++)
                         if (roads[i].Multiplier > mult && roads[i].Bounds.Contains(c) && Polygons.Contains(roads[i].Polygon, c))
