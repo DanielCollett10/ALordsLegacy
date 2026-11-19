@@ -157,6 +157,8 @@ namespace LordsLegacy.Game
         [Tooltip("HL-02 daub one family makes per day at the daub pit")] [Range(1, 100)] public int daubPerDay = 10;
         [Tooltip("HL-02 most daub the daub pit's store holds")] [Range(1, 1000)] public int daubPitStore = 20;
         [Tooltip("HL-04 daub in the camp General goods store at the start")] [Range(0, 10000)] public int startingDaub = 90;
+        [Tooltip("HL-12 length in metres one fence panel covers")] [Range(0.5f, 10f)] public float fencePanelLengthM = 2f;
+        [Tooltip("HL-12 worker-minutes to build one fence panel")] [Range(1, 600)] public int fenceMinutesPerPanel = 20;
         [Tooltip("MAT-22 hazel rods one wattle panel takes")] [Range(1, 100)] public int wattleHazelPerPanel = 6;
         [Tooltip("MAT-22 willow rods one wattle panel takes")] [Range(1, 100)] public int wattleWillowPerPanel = 2;
         [Tooltip("MAT-22 wattle panels one family makes per day")] [Range(1, 100)] public int wattlePanelsPerDay = 5;
@@ -246,6 +248,7 @@ namespace LordsLegacy.Game
             WattlePanelsPerDay = wattlePanelsPerDay, WattleHazelStock = wattleHazelStock,
             WattleWillowStock = wattleWillowStock, WattlePanelStore = wattlePanelStore,
             HandCarryDaub = handCarryDaub, DaubPerDay = daubPerDay, DaubPitStore = daubPitStore, StartingDaub = startingDaub,
+            FencePanelLengthM = D(fencePanelLengthM), FenceMinutesPerPanel = fenceMinutesPerPanel,
             ForagerHutBasketSlots = foragerHutBasketSlots, GranaryBasketSlots = granaryBasketSlots,
             ReedBedCount = reedBedCount, ReedSheavesPerCut = reedSheavesPerCut, ReedRegrowDays = reedRegrowDays,
             ThatchCutMinutesPerBundle = thatchCutMinutesPerBundle, ThatchOffSeasonFactor = thatchOffSeasonFactor,

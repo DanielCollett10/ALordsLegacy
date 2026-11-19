@@ -208,6 +208,8 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.DaubPerDay);
             w.WriteInt32(t.DaubPitStore);
             w.WriteInt32(t.StartingDaub); // T-584
+            w.WriteDouble(t.FencePanelLengthM); // T-585
+            w.WriteInt32(t.FenceMinutesPerPanel);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -337,6 +339,8 @@ namespace LordsLegacy.Sim.Save.Sections
             t.DaubPerDay = r.ReadInt32();
             t.DaubPitStore = r.ReadInt32();
             t.StartingDaub = r.ReadInt32(); // T-584
+            t.FencePanelLengthM = r.ReadDouble(); // T-585
+            t.FenceMinutesPerPanel = r.ReadInt32();
             return t;
         }
 

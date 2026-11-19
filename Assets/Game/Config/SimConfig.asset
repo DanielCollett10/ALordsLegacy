@@ -101,6 +101,8 @@ MonoBehaviour:
   daubPerDay: 10
   daubPitStore: 20
   startingDaub: 90
+  fencePanelLengthM: 2
+  fenceMinutesPerPanel: 20
   foragerHutBasketSlots: 5
   granaryBasketSlots: 2
   reedBedCount: 20

@@ -412,6 +412,12 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Most daub the daub pit's store holds. Unit: daub. Rule: HL-02 (PROPOSED, tuning).</summary>
         public int DaubPitStore { get; set; } = 20;
 
+        /// <summary>Length of fence one wattle panel covers. Unit: metres. Rule: HL-12 (PROPOSED, tuning; decision 0053).</summary>
+        public double FencePanelLengthM { get; set; } = 2.0;
+
+        /// <summary>Worker-minutes to build one fence panel. Unit: minutes. Rule: HL-12 (PROPOSED, tuning; decision 0053).</summary>
+        public int FenceMinutesPerPanel { get; set; } = 20;
+
         /// <summary>Most baskets a person carries by hand on one trip. Unit: baskets. Rule: MAT-23 (PROPOSED, tuning).</summary>
         public int HandCarryBaskets { get; set; } = 5;
 
