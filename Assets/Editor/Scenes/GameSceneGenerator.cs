@@ -238,9 +238,11 @@ namespace LordsLegacy.EditorTools.Scenes
                 new[] { "ForagerAreaTool", "forager-draw", LordsLegacy.Sim.Areas.AreaTypes.ForagingId },
                 new[] { "CoppiceWorkAreaTool", "coppice-work", LordsLegacy.Sim.Areas.AreaTypes.CoppiceWorkId },
                 new[] { "CoppiceAreaTool", "coppice-draw", LordsLegacy.Sim.Areas.AreaTypes.CoppiceId },
+                new[] { "ThatcherWorkAreaTool", "thatcher-work", LordsLegacy.Sim.Areas.AreaTypes.ThatchingWorkId },
+                new[] { "ThatcherAreaTool", "thatcher-draw", LordsLegacy.Sim.Areas.AreaTypes.ThatchingId },
             };
             GameObject last = null;
-            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null, foragerDraw = null, coppiceDraw = null;
+            LordsLegacy.Game.Tools.AreaTool woodcutterDraw = null, foragerDraw = null, coppiceDraw = null, thatcherDraw = null;
             foreach (var d in defs)
             {
                 last = new GameObject(d[0]);
@@ -248,6 +250,7 @@ namespace LordsLegacy.EditorTools.Scenes
                 if (d[1] == "woodcutter-draw") woodcutterDraw = tool;
                 if (d[1] == "forager-draw") foragerDraw = tool;
                 if (d[1] == "coppice-draw") coppiceDraw = tool;
+                if (d[1] == "thatcher-draw") thatcherDraw = tool;
                 SetString(tool, "_toolId", d[1]);
                 SetString(tool, "_typeId", d[2]);
                 SetRef(tool, "_host", host);
@@ -290,6 +293,17 @@ namespace LordsLegacy.EditorTools.Scenes
             SetRef(coppiceTool, "_panel", panel);
             SetRef(coppiceTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
             SetRef(coppiceTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
+            // T-580: the "thatcher" build bar entry runs the same draft tool for the thatching operation (hut only).
+            var thatcherTool = new GameObject("ThatcherDraftTool").AddComponent<LordsLegacy.Game.Tools.OperationDraftTool>();
+            SetString(thatcherTool, "_toolId", LordsLegacy.Game.Tools.OperationDraftTool.ThatcherToolId);
+            SetString(thatcherTool, "_operationTypeId", LordsLegacy.Sim.Operations.OperationTypes.ThatchingId);
+            SetRef(thatcherTool, "_host", host);
+            SetRef(thatcherTool, "_picker", Object.FindFirstObjectByType<GroundPicker>());
+            SetRef(thatcherTool, "_areaTool", thatcherDraw);
+            SetRef(thatcherTool, "_areas", ar);
+            SetRef(thatcherTool, "_panel", panel);
+            SetRef(thatcherTool, "_topBar", Object.FindFirstObjectByType<TopBarController>());
+            SetRef(thatcherTool, "_controller", Object.FindFirstObjectByType<LordsLegacy.Game.Tools.ToolController>());
             // T-408: the "house" build bar entry draws a plot with the composed plot AreaTool and shows the house ghost.
             var plotArea = new GameObject("PlotAreaTool").AddComponent<LordsLegacy.Game.Tools.AreaTool>();
             SetString(plotArea, "_toolId", "plot-draw");

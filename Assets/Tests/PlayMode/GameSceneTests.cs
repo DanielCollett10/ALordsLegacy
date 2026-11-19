@@ -207,7 +207,7 @@ namespace LordsLegacy.Tests.PlayMode
             yield return load;
             yield return null;
             var tools = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
-            foreach (string name in new[] { "CoppiceWorkAreaTool", "CoppiceAreaTool", "CoppiceDraftTool", "WeaverTool", "WattleYardTool" })
+            foreach (string name in new[] { "CoppiceWorkAreaTool", "CoppiceAreaTool", "CoppiceDraftTool", "ThatcherWorkAreaTool", "ThatcherAreaTool", "ThatcherDraftTool", "WeaverTool", "WattleYardTool" })
             {
                 MonoBehaviour found = null;
                 foreach (var t in tools) if (t.name == name) found = t;
