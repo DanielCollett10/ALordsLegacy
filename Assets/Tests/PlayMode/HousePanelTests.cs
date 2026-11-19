@@ -6,6 +6,7 @@ using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Food;
 using LordsLegacy.Sim.Geometry;
+using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.Inventory;
 using LordsLegacy.Sim.Map;
 using LordsLegacy.Sim.People;
@@ -278,6 +279,102 @@ namespace LordsLegacy.Tests.PlayMode
             yield return null;
             Assert.AreEqual("", _house.HungryText);
             LogAssert.NoUnexpectedReceived();
+        }
+
+        // Moves the Archer family into the finished house and selects it (T-593).
+        private Family HouseArchers()
+        {
+            var w = _host.World;
+            var family = w.People.FindFamily(1);
+            w.Construction.Remove(_houseId);
+            Assert.IsTrue(w.Homes.MoveIn(w.Homes.Get(_houseId), family));
+            var goods = w.Inventory.AddGoodsStore(M(65, 40));
+            w.Inventory.Produce(goods, Items.WattlePanel, 40);
+            _agents.SelectHouse(_houseId);
+            return family;
+        }
+
+        private static void SetFood(Family f, int types) => f.GetType().GetProperty("AllotmentFoodTypes").SetValue(f, types);
+
+        [UnityTest]
+        public IEnumerator BuildFenceButtonSendsBuildFenceAndShowsProgress()
+        {
+            var w = _host.World;
+            HouseArchers();
+            yield return null;
+            Assert.IsTrue(_house.BuildFenceVisible, "A built house with no fence offers Build fence.");
+            Assert.AreEqual("Fence: no fence", _house.FenceText);
+            Assert.AreEqual("Level 1: " + HouseReport.Of(w, 1).LevelName, _house.LevelText);
+            StringAssert.Contains("[ ] Fenced plot: no fence", _house.NeedsText);
+            _house.ClickBuildFence();
+            yield return null;
+            Assert.AreNotEqual(0, w.Homes.Get(_houseId).FenceFootprintId, "BuildFence linked a fence footprint.");
+            Assert.AreEqual("", _house.MessageText);
+            Assert.IsFalse(_house.BuildFenceVisible);
+            StringAssert.StartsWith("Fence: fence ", _house.FenceText);
+            StringAssert.Contains("%", _house.FenceText);
+            w.Construction.Remove(w.Homes.Get(_houseId).FenceFootprintId);
+            yield return null;
+            Assert.AreEqual("Fence: fence built", _house.FenceText);
+            StringAssert.Contains("[x] Fenced plot: fence built", _house.NeedsText);
+        }
+
+        [UnityTest]
+        public IEnumerator UpgradeButtonIsEnabledOnlyWhenEligibleAndClickRaisesTheLevel()
+        {
+            var w = _host.World;
+            var family = HouseArchers();
+            SetFood(family, w.Tuning.DiverseFoodTypes);
+            yield return null;
+            Assert.IsTrue(_house.UpgradeVisible);
+            Assert.IsFalse(_house.UpgradeEnabled, "No fence yet: not eligible.");
+            _house.ClickUpgrade();
+            Assert.AreEqual(1, family.Level, "A disabled Upgrade button sends nothing.");
+
+            _house.ClickBuildFence();
+            w.Construction.Remove(w.Homes.Get(_houseId).FenceFootprintId);
+            yield return null;
+            Assert.IsTrue(_house.UpgradeEnabled, "Fence built and diverse food: eligible.");
+            _house.ClickUpgrade();
+            yield return null;
+            Assert.AreEqual(2, family.Level);
+            StringAssert.StartsWith("Level 2", _house.LevelText);
+            Assert.IsFalse(_house.UpgradeVisible, "Level 2 is the top level in M21.");
+            Assert.AreEqual("", _house.MessageText);
+        }
+
+        [UnityTest]
+        public IEnumerator BuiltFenceIsDrawnAlongItsLineWithAnOpenGate()
+        {
+            var w = _host.World;
+            HouseArchers();
+            var rendererGo = new GameObject("Modules");
+            var renderer = rendererGo.AddComponent<LordsLegacy.Game.Visuals.ModuleRenderer>();
+            renderer.Configure(_host);
+            renderer.Refresh();
+            Assert.AreEqual(0, renderer.FenceInstanceCount);
+            _house.ClickBuildFence();
+            renderer.Refresh();
+            Assert.AreEqual(0, renderer.FenceInstanceCount, "A fence under construction is not drawn as a fence.");
+            w.Construction.Remove(w.Homes.Get(_houseId).FenceFootprintId);
+            renderer.Refresh();
+            int expected = 0;
+            var line = FenceLine.Of(w.Areas.Get(_plotId));
+            foreach (var run in line.Runs)
+                for (int k = 0; k + 1 < run.Count; k++)
+                    expected += Mathf.Max(1, Mathf.CeilToInt((float)(run[k].DistanceTo(run[k + 1]) / 1000.0 / w.Tuning.FencePanelLengthM) - 0.001f));
+            Assert.AreEqual(expected + 2, renderer.FenceInstanceCount, "One piece per panel length plus two gate posts.");
+            Object.DestroyImmediate(rendererGo);
+            yield return null;
+        }
+
+        [Test]
+        public void BuildBarOffersTheDaubPit()
+        {
+            var e = System.Array.Find(ToolEntry.Defaults(), x => x.Id == LordsLegacy.Game.Tools.StructureTool.DaubPitToolId);
+            Assert.IsNotNull(e);
+            Assert.AreEqual("Daub pit", e.Label);
+            Assert.AreEqual(LordsLegacy.Sim.Footprints.ModuleTypes.DaubPit.ConstructionRecipe.Logs, e.CostLogs());
         }
 
         [UnityTest]

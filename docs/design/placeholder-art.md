@@ -34,6 +34,9 @@ Columns: **Id** = visual id (`Assets/Game/Visuals/Definitions/<id>.asset`). **Bo
 | `visual.module.storage_yard` | Storage yard (T-549) | 8 × 0.8 × 6 | `ModuleRenderer` | Placeholder |
 | `visual.module.weaver` | Weaver (T-569) | 6 × 2 × 4 | `ModuleRenderer` | Placeholder |
 | `visual.module.wattle_yard` | Wattle yard (T-569) | 6 × 1.6 × 4 | `ModuleRenderer` | Placeholder |
+| `visual.module.daub_pit` | Daub pit (T-593) | 4 × 0.6 × 4 | `ModuleRenderer` | Placeholder |
+| `visual.fence.segment` | Wattle fence piece along a built house's fence line, one per panel length (T-593) | 2 × 1.2 × 0.12 | `ModuleRenderer` | Placeholder |
+| `visual.fence.gate_post` | Two posts either side of the always-open gate at the frontage access point (T-593) | 0.2 × 1.5 × 0.2 | `ModuleRenderer` | Placeholder |
 | `visual.item.beam_stack` | Beams in a hewing station's store; height grows with fill | 1.2 × 0.5 × 0.6 | `ModuleRenderer` | Placeholder |
 | `visual.item.plank_stack` | Planks in a sawpit's store; height grows with fill | 1.2 × 0.4 × 0.6 | `ModuleRenderer` | Placeholder |
 | `visual.construction.scaffold` | Building site scaffold | footprint × 2.6 | `ConstructionRenderer` | Placeholder |

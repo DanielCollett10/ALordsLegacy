@@ -86,7 +86,10 @@ namespace LordsLegacy.EditorTools.Visuals
             (VisualSizes.ModuleSawpit, "Cube.fbx", new Color(0.62f, 0.5f, 0.3f), 1f),
             (VisualSizes.ModuleWeaver, "Cube.fbx", new Color(0.55f, 0.6f, 0.3f), 1f),
             (VisualSizes.ModuleWattleYard, "Cube.fbx", new Color(0.5f, 0.42f, 0.28f), 1f),
-            (VisualSizes.ModuleStorageYard, "Cube.fbx", new Color(0.58f, 0.52f, 0.42f), 1f),
+            (VisualSizes.ModuleDaubPit, "Cube.fbx", new Color(0.45f, 0.36f, 0.26f), 1f),
+            (VisualSizes.FenceSegment, "Cube.fbx", new Color(0.6f, 0.48f, 0.3f), 1f),
+            (VisualSizes.FenceGatePost, "Cube.fbx", new Color(0.4f, 0.3f, 0.18f), 1f),
+            (VisualSizes.ModuleStorageYard,"Cube.fbx", new Color(0.58f, 0.52f, 0.42f), 1f),
             (VisualSizes.ItemBeamStack, "Cube.fbx", new Color(0.55f, 0.38f, 0.2f), 1f),
             (VisualSizes.ItemPlankStack, "Cube.fbx", new Color(0.82f, 0.68f, 0.42f), 1f),
         };
