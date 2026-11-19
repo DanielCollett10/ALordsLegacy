@@ -100,6 +100,7 @@ MonoBehaviour:
   handCarryDaub: 2
   daubPerDay: 10
   daubPitStore: 20
+  startingDaub: 90
   foragerHutBasketSlots: 5
   granaryBasketSlots: 2
   reedBedCount: 20

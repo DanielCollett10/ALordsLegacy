@@ -54,6 +54,7 @@ namespace LordsLegacy.Sim.Start
 
             world.Inventory.Produce(generalStore, Items.Thatch, StartingThatch);
             world.Inventory.Produce(generalStore, Items.WattlePanel, StartingPanels);
+            if (world.Tuning.StartingDaub > 0) world.Inventory.Produce(generalStore, Items.Daub, world.Tuning.StartingDaub); // HL-04
 
             world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), stockpileSpot,
                 ToWorld(layout, layout.OxStand), stockpile)

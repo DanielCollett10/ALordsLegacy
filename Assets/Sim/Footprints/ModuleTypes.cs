@@ -58,8 +58,8 @@ namespace LordsLegacy.Sim.Footprints
             new FootprintTypeDef(OxenStandId, 3000, 3000, false, true, oxCapacity: 1, recipe: new ConstructionRecipe(1, 60));
 
         /// <summary>
-        /// House: 6 × 8 m, blocks movement, clears trees, 10 logs + 10 thatch + 10 wattle panels / 720 worker-minutes
-        /// (HM-04, HM-06, MAT-40, MAT-40b).
+        /// House: 6 × 8 m, blocks movement, clears trees, 10 logs + 10 thatch + 10 wattle panels + 10 daub / 720 worker-minutes
+        /// (HM-04, HM-06, MAT-40, MAT-40b, HL-04).
         /// </summary>
         public static readonly FootprintTypeDef House =
             new FootprintTypeDef(HouseId, 6000, 8000, true, true, recipe: new ConstructionRecipe(new[]
@@ -67,10 +67,22 @@ namespace LordsLegacy.Sim.Footprints
                 new KeyValuePair<string, int>(Inventory.Items.Log.Id, 10),
                 new KeyValuePair<string, int>(Inventory.Items.Thatch.Id, 10),
                 new KeyValuePair<string, int>(Inventory.Items.WattlePanel.Id, 10),
+                new KeyValuePair<string, int>(Inventory.Items.Daub.Id, 10),
             }, 720));
 
         /// <summary>The house's old recipe, 10 logs / 720 worker-minutes. Only an unbuilt house placed before thatch and panels keeps it (MAT-40b); see <c>SiteRecipe</c>.</summary>
         public static readonly ConstructionRecipe HouseLogRecipe = new ConstructionRecipe(10, 720);
+
+        /// <summary>
+        /// The house's recipe before daub (MAT-40): 10 logs + 10 thatch + 10 panels / 720 worker-minutes. An unbuilt house placed
+        /// before daub (HL-04) keeps it; see <c>SiteRecipe</c>.
+        /// </summary>
+        public static readonly ConstructionRecipe HouseNoDaubRecipe = new ConstructionRecipe(new[]
+        {
+            new KeyValuePair<string, int>(Inventory.Items.Log.Id, 10),
+            new KeyValuePair<string, int>(Inventory.Items.Thatch.Id, 10),
+            new KeyValuePair<string, int>(Inventory.Items.WattlePanel.Id, 10),
+        }, 720);
 
         /// <summary>
         /// Granary: 8 × 6 m building that blocks movement, with a walkable 5 m yard (plot 18 × 16 m), clears trees,

@@ -16,7 +16,7 @@ using NUnit.Framework;
 
 namespace LordsLegacy.Sim.Tests.Homes
 {
-    /// <summary>The house recipe is 10 logs + 10 thatch + 10 panels (T-577, MAT-40, MAT-40b, MAT-43); old sites keep logs only.</summary>
+    /// <summary>The house recipe is 10 logs + 10 thatch + 10 panels + 10 daub (T-577, MAT-40, MAT-40b, MAT-43, HL-04); old sites keep logs only.</summary>
     public class HouseMaterialsTests
     {
         private const long Adult = -4_000_000;
@@ -51,26 +51,44 @@ namespace LordsLegacy.Sim.Tests.Homes
             w.Construction.Get(house).ReservationIds.Select(id => w.Inventory.GetReservation(id))
                 .Where(r => r.ItemId == item.Id).Sum(r => r.Count);
 
+        // HL-04, acceptance: "New house sites need 10 logs + 10 thatch + 10 panels + 10 daub; older sites keep their recipe".
         [Test]
-        public void HouseRecipe_IsTenLogsTenThatchTenPanels_In720Minutes()
+        public void HouseRecipe_IsTenLogsTenThatchTenPanelsTenDaub_In720Minutes()
         {
             ConstructionRecipe r = ModuleTypes.House.ConstructionRecipe;
             Assert.AreEqual(10, r.Items[Items.Log.Id]);
             Assert.AreEqual(10, r.Items[Items.Thatch.Id]);
             Assert.AreEqual(10, r.Items[Items.WattlePanel.Id]);
-            Assert.AreEqual(3, r.Items.Count);
+            Assert.AreEqual(10, r.Items[Items.Daub.Id]);
+            Assert.AreEqual(4, r.Items.Count);
             Assert.AreEqual(720, r.BuildWorkerMinutes);
         }
 
         [Test]
-        public void NewHouseSite_ReservesLogsThatchAndPanels_AndUsesTheNewRecipe()
+        public void NewHouseSite_ReservesLogsThatchPanelsAndDaub_AndUsesTheNewRecipe()
         {
             SimWorld w = Make(out _);
             int house = Place(w);
             Assert.AreEqual(10, Reserved(w, house, Items.Log));
             Assert.AreEqual(10, Reserved(w, house, Items.Thatch));
             Assert.AreEqual(10, Reserved(w, house, Items.WattlePanel));
+            Assert.AreEqual(10, Reserved(w, house, Items.Daub));
             Assert.AreSame(ModuleTypes.House.ConstructionRecipe, SiteRecipe.Of(w, w.Footprints.Get(house)));
+        }
+
+        // HL-04 refusal: with no daub in stock the placement is refused and the text names daub.
+        [Test]
+        public void Placement_WithoutDaub_IsRefusedNamingDaub()
+        {
+            SimWorld w = Make(out LedgerLocation goods);
+            w.Inventory.Consume(goods, Items.Daub, 10);
+            int road = w.Roads.Segments.First().Id;
+            var shape = new AreaShape(
+                new[] { M(30, 51.25), M(50, 51.25), M(50, 61.25), M(30, 61.25) },
+                new[] { AreaEdge.FollowsRoad(road, RoadSide.Left), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() });
+            CommandResult r = w.Execute(new DesignatePlot(shape));
+            Assert.IsTrue(r.IsRejected);
+            Assert.AreEqual("Not enough daub (have 0, need 10)", r.Text);
         }
 
         [Test]
@@ -103,9 +121,23 @@ namespace LordsLegacy.Sim.Tests.Homes
             Assert.IsTrue(carries.All(t => t.OwnerOperationId == DeconstructionWork.HouseOwnerId), "odd-jobbers carry");
         }
 
-        // Pipeline: only commands and ticks. Thatch and panels leave the General store by hand carry and are built in.
+        // HL-04: daub is hand-carried too, at HandCarryDaub (2) a trip, so 10 daub is five trips.
         [Test]
-        public void Pipeline_PlaceHouse_ThroughTicksOnly_ConsumesAllThreeMaterialsAndBuilds()
+        public void Daub_IsHandCarried_TwoATrip_FiveTrips()
+        {
+            SimWorld w = Make(out _);
+            int house = Place(w);
+            w.Step(1);
+            var carries = w.Tasks.All.Where(t => t.Def.Id == ConstructionTaskDefs.CarryId && t.SiteFootprintId == house).ToList();
+            int[] daubTrips = carries.Select(t => t.Def.Steps.First(s => s.Kind == StepKind.DepositItems))
+                .Where(s => s.ItemId == Items.Daub.Id).Select(s => s.Count).ToArray();
+            Assert.AreEqual(5, daubTrips.Length, "five daub trips");
+            Assert.IsTrue(daubTrips.All(n => n == w.Tuning.HandCarryDaub), "two daub a trip");
+        }
+
+        // Pipeline: only commands and ticks. Thatch, panels and daub leave the General store by hand carry and are built in.
+        [Test]
+        public void Pipeline_PlaceHouse_ThroughTicksOnly_ConsumesAllFourMaterialsAndBuilds()
         {
             SimWorld w = Make(out LedgerLocation goods);
             int house = Place(w);
@@ -113,6 +145,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             Assert.IsTrue(w.IsBuilt(house), "the house was built");
             Assert.AreEqual(0, goods.CountOf(Items.Thatch.Id));
             Assert.AreEqual(0, goods.CountOf(Items.WattlePanel.Id));
+            Assert.AreEqual(0, goods.CountOf(Items.Daub.Id));
             Assert.IsNull(w.Inventory.Audit());
         }
 
@@ -135,7 +168,51 @@ namespace LordsLegacy.Sim.Tests.Homes
             Assert.IsTrue(w.IsBuilt(house), "built from logs alone");
             Assert.AreEqual(10, goods.CountOf(Items.Thatch.Id), "thatch untouched");
             Assert.AreEqual(10, goods.CountOf(Items.WattlePanel.Id), "panels untouched");
+            Assert.AreEqual(10, goods.CountOf(Items.Daub.Id), "daub untouched");
             Assert.AreEqual(0, w.Tasks.All.Count(t => t.Def.Id == ConstructionTaskDefs.CarryId && t.State != TaskState.Done && t.State != TaskState.Cancelled));
+        }
+
+        // HL-04, "older sites keep their recipe": a site placed in the thatch era holds logs, thatch and panels but no daub.
+        // It keeps the 3-item recipe and is built without ever asking for daub.
+        [Test]
+        public void ThatchEraSite_HoldingLogsThatchAndPanelsButNoDaub_KeepsTheThreeItemRecipe_AndIsBuilt()
+        {
+            SimWorld w = Make(out LedgerLocation goods);
+            int house = Place(w);
+            ConstructionSite site = w.Construction.Get(house);
+            foreach (int id in site.ReservationIds.ToList())
+            {
+                if (w.Inventory.GetReservation(id).ItemId != Items.Daub.Id) continue;
+                w.Inventory.Release(id);
+                site.ReservationIds.Remove(id);
+            }
+            ConstructionRecipe r = SiteRecipe.Of(w, w.Footprints.Get(house));
+            Assert.AreSame(ModuleTypes.HouseNoDaubRecipe, r);
+            Assert.AreEqual(3, r.Items.Count);
+            Assert.IsFalse(r.Items.ContainsKey(Items.Daub.Id));
+            Assert.AreEqual(720, r.BuildWorkerMinutes);
+            for (int i = 0; i < MaxTicks && w.Construction.Get(house) != null; i++) w.Step(1);
+            Assert.IsTrue(w.IsBuilt(house), "built on the 3-item recipe");
+            Assert.AreEqual(0, goods.CountOf(Items.Thatch.Id), "thatch used");
+            Assert.AreEqual(0, goods.CountOf(Items.WattlePanel.Id), "panels used");
+            Assert.AreEqual(10, goods.CountOf(Items.Daub.Id), "daub untouched");
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        // The derivation must not mistake a new site for an old one: a new site holds daub from placement to the end of the build.
+        [Test]
+        public void NewSite_KeepsTheDaubRecipeAtEveryTickOfItsBuild()
+        {
+            SimWorld w = Make(out _);
+            int house = Place(w);
+            int ticks = 0;
+            for (; ticks < MaxTicks && w.Construction.Get(house) != null; ticks++)
+            {
+                Assert.AreSame(ModuleTypes.House.ConstructionRecipe, SiteRecipe.Of(w, w.Footprints.Get(house)), "tick " + ticks);
+                w.Step(1);
+            }
+            Assert.IsTrue(w.IsBuilt(house));
+            Assert.Greater(ticks, 0);
         }
 
         [Test]
