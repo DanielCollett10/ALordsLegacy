@@ -17,6 +17,12 @@ MVP-1-01 where they disagree.
 
 ## The camp hands over and goes (owner 16/11/2026, M15)
 
+> **Amended M22b (owner direction 19/11/2026); these lines win over CMP-20, CMP-21, CMP-23 and CMP-24 below:**
+> - **CMP-20a** Citizens eat from the camp until a **built market and a built granary both exist**. That is the handover. The granary's Supplies market toggle no longer triggers it.
+> - **CMP-21a** At the handover everyone eats from the market. Granary families carry the camp's food into a granary, as in CMP-21.
+> - **CMP-23a** The camp stays while any family is homeless. Once all are housed **and** the handover has happened, the camp is removed.
+> - **CMP-24a** At removal the camp's contents drop as **three grouped ground piles**: food, General goods, construction goods. Ground piles of General goods are valid construction sources. Granary families collect the food pile. Pool oxen move to an Oxen post if one has room. If none does, they **linger where they are** (no stand) until a stand or post with room exists.
+
 | ID | Rule | Tag |
 | --- | --- | --- |
 | CMP-20 | **Food handover:** once a **built granary supplies the market** (markets.md MK-10), the camp stops being a food supply. From the next Sunday, households get food only from the market (MKT-05) | DECIDED (owner 16/11/2026: switch at once, no waiting for stock) |

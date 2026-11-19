@@ -26,7 +26,7 @@ Font: Inter (fallback system sans), 12-14 px. Mouse-driven PC UI; buttons about 
 | ID | Element | Rule | Tag |
 | --- | --- | --- | --- |
 | UIW-01 | Top bar | Full width, 44 px, left to right: date/season/year/time (e.g. "Mon 1 Mar · Spring · Year 1 · 06:14"), Citizens, Food (days), Construction (Logs · Beams · Planks), Goods, then speed buttons, then Light and Snapping toggles | DECIDED |
-| UIW-02 | Speed buttons | Pause, 1x, 2x, 4x, 8x, 16x, 32x, 64x; the active speed is highlighted | DECIDED (64x needs owner confirmation against Tech Spec CLK rules) |
+| UIW-02 | Speed buttons | Pause, 1x, 2x, 4x, 8x, 16x, 32x, 64x; the active speed is highlighted. 64x confirmed by the owner 19/11/2026 (gdd-amendments TIME-A3) | DECIDED |
 | UIW-03 | Light / Snapping | Two toggle buttons at the far right: "Steady light", "Snapping: On/Off" | DECIDED |
 | UIW-04 | Message bar | Top left under the top bar, about 360 px wide. Newest message at the top. Each message shows for 30 seconds then fades. Never blocks clicks on the world | DECIDED |
 | UIW-05 | Cursor readout | Bottom left: x, z, height (m), slope (degrees) | DECIDED |
@@ -49,13 +49,13 @@ Hovering a top bar item opens its detail panel directly underneath; moving the m
 | ID | Bar | Buttons | Tag |
 | --- | --- | --- | --- |
 | UIW-20 | Agriculture | "Nothing implemented yet" (disabled) | DECIDED |
-| UIW-21 | Logistics | Oxen post, Granary, Storage yard, Market | DECIDED |
-| UIW-22 | Processing | Sawyers yard, Hewing station, Wattle yard | DECIDED |
-| UIW-23 | Gathering | Woodcutter, Forager, Coppice hut, Daub pit, Clay pit | DECIDED |
+| UIW-21 | Logistics | Oxen post, Granary, Storage yard, Market. Oxen post: a standalone shared oxen stand for the village pool (later stable, large stable); the oxen stand module stays tied to its operation | DECIDED (owner confirmed 19/11/2026) |
+| UIW-22 | Processing | Sawyers yard, Hewing station, Wattle yard, Weaver. "Sawyers yard" replaces "Sawpit" in all UI text | DECIDED |
+| UIW-23 | Gathering | Woodcutter, Forager, Coppice hut, Thatcher's hut, Daub pit, Clay pit (greyed "Coming later" until it exists) | DECIDED |
 | UIW-24 | Road, House | Direct tools; no building bar | DECIDED |
 | UIW-25 | Buttons generated from definitions | Each bar's buttons come from building definitions, not hard-coded | DECIDED |
 
-**Right-click order (UIW-26, DECIDED):**
+**Right-click order (UIW-26, DECIDED; full contract in `design/ui.md` UIT-01..05, which also covers Backspace and Escape and pops one placement step at a time):**
 1. While placing a building, right-click cancels the placement.
 2. With a building tool selected and nothing being placed, right-click deselects that building (e.g. Sawyers yard).
 3. The next right-click closes the category (e.g. Processing).
@@ -104,8 +104,8 @@ Same template, with no Modules tab, no work area and no expansion.
 
 | Section | Content | Tag |
 | --- | --- | --- |
-| Families (n / slots) | Hauler family slot(s), with Assign / Remove; hint line explaining what they haul | DECIDED (1 slot each PROPOSED) |
-| Stored | Two-column grid of item and amount; only item types that exist in the game are listed (granary: Berries, Mushrooms, Meat; storage yard: Logs, Beams, Planks) | DECIDED |
+| Families (n / slots) | Hauler family slots, with Assign / Remove; hint line explaining what they haul. **2 slots each** (owner 19/11/2026) | DECIDED |
+| Stored | Two-column grid of item and amount; only item types that exist in the game are listed (granary: Berries, Mushrooms, Meat; storage yard: **General goods only**, e.g. Beams, Planks, Thatch, Panels, Baskets, Daub. Logs stay at the woodcutter or as input items) | DECIDED |
 | Capacity | Total / reserved / available of capacity, with a progress bar | DECIDED |
 | Building | High priority: On/Off, Pause, Deconstruct (granary / storage yard) | DECIDED |
 
@@ -116,11 +116,16 @@ Modal box with a message and Yes / No buttons (Yes highlighted).
 | Case | Message | Tag |
 | --- | --- | --- |
 | Unbuilt, no resources used | Cancel this unbuilt "X"? The site will be removed at once. | DECIDED |
-| Under construction, resources used | Cancel building "X"? The site will be removed and half the resources used returned. | DECIDED |
-| Built | Deconstruct "X"? Half its building materials return to the nearest storage. | PROPOSED (matches GDD BLD-11) |
+| Under construction, resources used | Cancel building "X"? Materials already delivered are dropped on the site as a pile; nothing is refunded. | DECIDED (owner 19/11/2026, CN-50..58 as built) |
+| Built | Deconstruct "X"? Half its building materials are dropped beside it as a pile anyone can collect. | DECIDED (owner 19/11/2026; nothing moves to storage automatically) |
 
 ## 10. Open questions
 
-- [ ] Oxen (n) button on production panels: confirm it shows oxen assigned to the building, and what clicking it does.
-- [ ] 64x speed: confirm, and update Tech Spec CLK and P5 prototype targets (64x doubles the simulation load of 32x).
+- [x] Oxen (n) button: kept on the General tab as built for now (owner 19/11/2026).
+- [x] 64x speed: confirmed (owner 19/11/2026); TIME-A3 amended.
 - [ ] Should granary and storage yard panels show a single "General" tab header for consistency?
+
+## 11. Not in this spec (owner 19/11/2026)
+
+Tool tooltips from `ToolInfo` (ui.md UIS-05), the alert badge, the "No road access" line, the Demolish road button
+(UIT-04), and the house, market, citizen, thatcher and daub-pit panels. They follow this template (ui.md UIS-03).

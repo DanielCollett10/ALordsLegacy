@@ -11,7 +11,7 @@ Tags: DECIDED = owner agreed. PROPOSED = lead's default, owner may change. OPEN 
 | ID | Rule | Tag |
 | --- | --- | --- |
 | HM-01 | Build bar **House plot**: draws a plot with the area tool (4–8 points, bends, snapping). Disabled while logs < the house recipe (BT-02) | PROPOSED |
-| HM-02 | A plot needs **road frontage**: at least one edge snapped flush to a road (HSE-01, AREA-05). Otherwise refused: *A plot must face a road* | DECIDED |
+| HM-02 | **Replaced M22b by road-access.md HP-01..05 (no road needed; front edge from the first two nodes).** Was: a plot needs **road frontage**: at least one edge snapped flush to a road (HSE-01, AREA-05). Otherwise refused: *A plot must face a road* | DECIDED |
 | HM-03 | Plot area **60–400 m²** (HSE plot sizes, PLACEHOLDER). Too small: *Too small for a house*. In M13 extra space is just garden, with no use yet | PROPOSED |
 | HM-04 | The **house is placed for the player** on the frontage edge: a 6 × 8 m footprint (PLACEHOLDER), centred on the longest frontage edge, its long side along the road, set 1 m back. While drawing, the house shows as a ghost; if it can't fit, *No room for the house* | PROPOSED |
 | HM-05 | Confirm creates the plot and the house construction site in one command (like BT-16). Trees under the plot are cleared (BLD-10-A) | PROPOSED |

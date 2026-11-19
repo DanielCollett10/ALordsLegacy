@@ -86,7 +86,8 @@ Roads treat static footprints as obstacles and show static areas while drawing. 
 - Wattle fence variety; ground-clearance stage; alert when no oxen are free for building.
 - Post-World: regional map, imperfect information, military, regional transport and trade routes, administration.
 
-## Open
+## Open (resolved 19/11/2026)
 
-1. Owner confirmation of the Oxen post reading above.
-2. Owner objection to any of the road access and camp defaults above.
+1. Oxen post: confirmed. It is a building (not a module) and works as an oxen stand for the whole town. Oxen with no stand, post or workplace linger where they were left.
+2. Road access: the defaults stand, with two changes. **Everyone** uses roads, not only goods carriers: someone off the road heads to the nearest road first. Gatherers go by road to the point nearest their target, then leave it freely. Alleys **do** give access to a backyard house. Rules are in `design/road-access.md`, and the M23a pathing covers everyone.
+3. Test area tools go in a Debug category. Pinned panels are capped at 4. M22a stays one milestone.

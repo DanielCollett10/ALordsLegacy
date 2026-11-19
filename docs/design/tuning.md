@@ -11,7 +11,7 @@ is in the GDD or `gdd-amendments.md` (IDs in the last column).
 | --- | --- | --- | --- |
 | Sim tick | 1 | game minute | CLK-01, decision 0004 |
 | RealMinutesPerGameDayAt1x | 30 (was 15) | real minutes | TIME-A2, MOV-20 |
-| Speeds | 1, 2, 4, 8, 16, 32 | × | TIME-A3 |
+| Speeds | 1, 2, 4, 8, 16, 32, 64 (64 from M22a) | × | TIME-A3 |
 | DaysPerYear | 365 | days | TIME-01 |
 | Start | 1 Mar, Year 1, 06:00, Monday | | gdd-amendments Time |
 | Min / max daylight | 8 / 16 | game hours | TIME-A5 |
