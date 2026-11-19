@@ -18,8 +18,9 @@ properties (follow the mirror rule).
 
 | ID | Rule | Tag |
 | --- | --- | --- |
-| RA-10 | A **non-gatherer** (workshop, granary, storage yard, market, oxen post) without access does not work: it creates no tasks and its assigned families stay assigned but wait (they don't take odd jobs; PROPOSED). Status: *No road access* | DECIDED |
-| RA-11 | A **gatherer** (woodcutter, forager, coppice hut, thatcher's hut) without access keeps working into its own store. Nothing is carried out of it to storage, and store families don't collect from it | DECIDED |
+| RA-10 | A **non-gatherer** (workshop, granary, storage yard, market, oxen post) without access does not work: it creates no tasks. Its assigned families stay assigned (their slots are kept) but do **odd jobs** until access returns, then go back to work (owner 19/11/2026). Status: *No road access* | DECIDED |
+| RA-11 | A **gatherer** (woodcutter, forager, coppice hut, thatcher's hut) **always works** into its own store, access or not. Granary and storage yard families collect from it **only when both buildings' orbs touch the same connected road network**. Otherwise its store fills and it stops at *Storage full* as today (owner 19/11/2026) | DECIDED |
+| RA-11b | "Same network" means the same connected group of road segments. Each building's network is derived along with RA-01 (not saved). Any collection or delivery between two buildings (yard, granary, workshop fetch) uses this same test | DECIDED (extension to workshop fetches PROPOSED) |
 | RA-12 | A **house** without access is still built, but no new family moves in. A family already living there stays (no eviction). The house panel shows *No road access* | DECIDED |
 | RA-13 | Access is re-checked whenever roads, plots or buildings change. Getting access back takes effect at once | DECIDED |
 
