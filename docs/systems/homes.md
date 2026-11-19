@@ -16,7 +16,7 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 | `DesignatePlot` | `Commands/DesignatePlot.cs` | Plot, house site and Empty home in one all-or-nothing `Apply`. |
 | `HousePlacement`, `HousePlacementResult` | `Areas/HousePlacement.cs` | Pure: puts the 6 × 8 m house on the longest road-frontage edge, 1 m back. |
 | `AreaTypes.Plot` (`area.plot`) | `Areas/AreaTypes.cs` | Building, 4–8 points, 60–400 m², 10° max slope, needs road frontage. |
-| `ModuleTypes.House` | `Footprints/ModuleTypes.cs` | 6 × 8 m, blocks movement. Recipe 10 logs + 10 thatch + 10 panels, 720 min (MAT-40). |
+| `ModuleTypes.House` | `Footprints/ModuleTypes.cs` | 6 × 8 m, blocks movement. Recipe 10 logs + 10 thatch + 10 panels + 10 daub, 720 min (MAT-40, HL-04). |
 | `SiteMaterials`, `BuildCost` | `Construction/` | Shortfall text for the whole recipe ("Not enough thatch (have 0, need 10)"). |
 | `HomesSection` | `Save/Sections/HomesSection.cs` | Save section id 8 (see `save.md`). |
 | `HousePanelView`, `PlotTool` | `Assets/Game/UI/HousePanel/`, `Assets/Game/Tools/` | Unity side: house panel (delivery lines while unbuilt) and the plot tool. |
