@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Arrivals;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.People;
 
 namespace LordsLegacy.Sim.Growth
@@ -25,6 +26,8 @@ namespace LordsLegacy.Sim.Growth
         /// couple), or null when one would be let in.
         /// </summary>
         public string ArrivalReason { get; private set; }
+        /// <summary>Households by level for the top bar tooltip (HL-26).</summary>
+        public HouseholdLevelCounts Levels { get; private set; }
 
         private GrowthReport() { }
 
@@ -40,6 +43,7 @@ namespace LordsLegacy.Sim.Growth
                 else if (f.Passage == FamilyPassage.Leaving) r.Leaving++;
             }
             r.ArrivalReason = ArrivalRules.Check(world, Probe).Reason;
+            r.Levels = HouseholdLevelCounts.Of(world);
             return r;
         }
 
