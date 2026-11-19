@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LordsLegacy.Sim.Core;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.People;
 
@@ -28,6 +29,7 @@ namespace LordsLegacy.Sim.Save.Sections
                 w.WriteInt32(h.PlotAreaId);
                 w.WriteInt32(h.FamilyId);
                 w.WriteInt32(h.ReservedForFamilyId); // T-504
+                w.WriteInt32(h.FenceFootprintId); // T-586, decision 0053
             }
         }
 
@@ -36,14 +38,19 @@ namespace LordsLegacy.Sim.Save.Sections
         {
             try
             {
-                int n = r.ReadCount(16);
+                int n = r.ReadCount(20);
                 for (int i = 0; i < n; i++)
                 {
-                    int house = r.ReadInt32(), plot = r.ReadInt32(), fam = r.ReadInt32(), reserved = r.ReadInt32();
+                    int house = r.ReadInt32(), plot = r.ReadInt32(), fam = r.ReadInt32(), reserved = r.ReadInt32(), fence = r.ReadInt32();
+                    if (fence != 0)
+                    {
+                        Footprint ff = world.Footprints.Get(fence);
+                        if (ff == null || ff.Type.Id != ModuleTypes.FenceId) throw new SaveFormatException("Home " + house + " has a bad fence " + fence + ".");
+                    }
                     if (reserved < 0 || (reserved != 0 && fam != 0)) throw new SaveFormatException("Home " + house + " has a bad reservation " + reserved + ".");
                     if (world.Footprints.Get(house) == null) throw new SaveFormatException("Home " + house + " has no house footprint.");
                     if (world.Areas.Get(plot) == null) throw new SaveFormatException("Home " + house + " has missing plot " + plot + ".");
-                    world.Homes.Restore(house, plot, fam, reserved);
+                    world.Homes.Restore(house, plot, fam, reserved, fence);
                     if (fam == 0) continue;
                     Family f = world.People.FindFamily(fam);
                     if (f == null) throw new SaveFormatException("Home " + house + " has missing family " + fam + ".");

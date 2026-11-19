@@ -53,6 +53,7 @@ namespace LordsLegacy.Sim.Homes
             HomeRecord home = world.Homes.Get(houseFootprintId);
             if (home == null) return null;
             Evict(world, houseFootprintId);
+            HouseFence.Remove(world, home); // HL-13: the fence goes with its house
             int plot = home.PlotAreaId;
             world.Homes.Remove(houseFootprintId);
             world.Areas.Remove(plot);

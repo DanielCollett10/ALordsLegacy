@@ -67,7 +67,7 @@ namespace LordsLegacy.Sim.Commands
             return f != null ? f.Type.Id + " " + s.FootprintId : "site " + s.FootprintId;
         }
 
-        private static void ReleaseSite(SimWorld world, ConstructionSite site, Footprint fp)
+        internal static void ReleaseSite(SimWorld world, ConstructionSite site, Footprint fp)
         {
             Ledger inv = world.Inventory;
             foreach (int rid in site.ReservationIds) inv.Release(rid);
