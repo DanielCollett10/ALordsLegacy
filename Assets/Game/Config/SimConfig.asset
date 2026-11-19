@@ -99,6 +99,18 @@ MonoBehaviour:
   wattlePanelStore: 20
   foragerHutBasketSlots: 5
   granaryBasketSlots: 2
+  reedBedCount: 20
+  reedSheavesPerCut: 8
+  reedRegrowDays: 90
+  thatchCutMinutesPerBundle: 30
+  thatchOffSeasonFactor: 4
+  thatchCureDays: 7
+  thatcherHutStore: 40
+  thatcherHutWidthM: 6
+  thatcherHutDepthM: 4
+  thatcherHutLogs: 8
+  thatcherHutMinutes: 480
+  handCarryThatch: 1
   roadTypes:
   - id: road.dirt_path
     widthM: 2.5

@@ -31,6 +31,27 @@ namespace LordsLegacy.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GameSceneHousePlotEntryFollowsTheRecipeQuery()
+        {
+            var load = SceneManager.LoadSceneAsync("Game");
+            Assert.IsNotNull(load, "Game scene is not in Build Settings.");
+            yield return load;
+            yield return null;
+
+            var bar = Object.FindFirstObjectByType<BuildBarView>();
+            var host = Object.FindFirstObjectByType<SimHost>();
+            Assert.IsNotNull(bar, "BuildBarView missing.");
+            Assert.IsTrue(host != null && host.IsInitialized, "SimHost should be initialised.");
+            var check = LordsLegacy.Sim.Construction.BuildCost.Check(host.World, LordsLegacy.Sim.Footprints.ModuleTypes.House.ConstructionRecipe);
+            Assert.AreEqual(check.IsAffordable, bar.IsEntryEnabled("house"), "House plot gate must equal the Sim affordability query.");
+            var button = bar.GetButton("house");
+            Assert.IsNotNull(button, "House plot button missing.");
+            StringAssert.Contains("Thatch: ", button.tooltip);
+            StringAssert.Contains("Wattle panels: ", button.tooltip);
+            if (!check.IsAffordable) StringAssert.StartsWith(check.Text, button.tooltip);
+        }
+
+        [UnityTest]
         public IEnumerator GameSceneHasEveryM1PieceWired()
         {
             var load = SceneManager.LoadSceneAsync("Game");

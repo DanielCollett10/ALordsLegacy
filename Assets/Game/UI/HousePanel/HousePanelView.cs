@@ -6,6 +6,7 @@ using LordsLegacy.Sim.Commands;
 using LordsLegacy.Sim.Construction;
 using LordsLegacy.Sim.Core;
 using LordsLegacy.Sim.Food;
+using LordsLegacy.Sim.Footprints;
 using LordsLegacy.Sim.Homes;
 using LordsLegacy.Sim.Markets;
 using LordsLegacy.Sim.People;
@@ -30,7 +31,7 @@ namespace LordsLegacy.Game
         [SerializeField] private ToolController _controller;
 
         private VisualElement _panel;
-        private Label _title, _state, _household, _members, _access, _larder, _hungry, _message;
+        private Label _delivery, _title, _state, _household, _members, _access, _larder, _hungry, _message;
         private Button _priority, _deconstruct, _close;
         private bool _subscribed;
 
@@ -42,6 +43,9 @@ namespace LordsLegacy.Game
 
         /// <summary>State line text, e.g. "Building 40%".</summary>
         public string StateText => _state?.text ?? "";
+
+        /// <summary>Per-item delivery lines ("Logs: 3 / 10") while Delivering; empty otherwise.</summary>
+        public string DeliveryText => _delivery?.style.display.value == DisplayStyle.Flex ? _delivery.text : "";
 
         /// <summary>Household line text: "Household: Archer" or "Empty".</summary>
         public string HouseholdText => _household?.text ?? "";
@@ -138,6 +142,25 @@ namespace LordsLegacy.Game
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Delivery lines for an unbuilt house still delivering (T-581): the site's recipe, one "Name: delivered / needed"
+        /// line per item. Empty when the house is built or its site has started building. Pure read of the Sim.
+        /// </summary>
+        public static string DeliveryLines(SimWorld world, int houseId)
+        {
+            ConstructionSite site = world.Construction.Get(houseId);
+            Footprint fp = site == null ? null : world.Footprints.Get(houseId);
+            if (fp == null || site.State != ConstructionState.Delivering) return "";
+            var sb = new StringBuilder();
+            foreach (var kv in SiteRecipe.Of(world, fp).Items)
+            {
+                if (sb.Length > 0) sb.Append('\n');
+                sb.Append(ItemLabel(RecipeAffordability.DisplayName(kv.Key))).Append(": ")
+                    .Append(ConstructionProgress.DeliveredOf(world, site, kv.Key)).Append(" / ").Append(kv.Value);
+            }
+            return sb.ToString();
+        }
+
         /// <summary>Display name for an item id, e.g. "item.meat" → "Meat".</summary>
         private static string ItemLabel(string id)
         {
@@ -174,7 +197,11 @@ namespace LordsLegacy.Game
             if (home == null || world.Footprints.Get(id) == null) { _panel.style.display = DisplayStyle.None; return; }
 
             _title.text = "House";
-            _state.text = "State: " + OperationPanelView.BuildStateText(world, id);
+            string delivery = DeliveryLines(world, id);
+            // While delivering, the per-item lines below replace the logs-only count.
+            _state.text = "State: " + (delivery.Length > 0 ? "Delivering" : OperationPanelView.BuildStateText(world, id));
+            _delivery.text = delivery;
+            _delivery.style.display = delivery.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             // MK-44: re-read every frame, so it follows market placement, removal and the food handover.
             _access.text = "Market access: " + MarketRange.AccessText(world, id);
             Family family = home.FamilyId != 0 ? world.People.FindFamily(home.FamilyId) : null;
@@ -297,6 +324,8 @@ namespace LordsLegacy.Game
 
             _title = MakeLabel("house-title", 15, true);
             _state = MakeLabel("house-state", 12, false);
+            _delivery = MakeLabel("house-delivery", 12, false);
+            _delivery.style.display = DisplayStyle.None;
             _household = MakeLabel("house-household", 12, false);
             _members = MakeLabel("house-members", 12, false);
             _access = MakeLabel("house-market-access", 12, false);
@@ -314,7 +343,7 @@ namespace LordsLegacy.Game
             _deconstruct = MakeButton("house-deconstruct", "Deconstruct");
             _deconstruct.clicked += ClickDeconstruct;
 
-            _panel.Add(_title); _panel.Add(_state); _panel.Add(_household); _panel.Add(_members);
+            _panel.Add(_title); _panel.Add(_state); _panel.Add(_delivery); _panel.Add(_household); _panel.Add(_members);
             _panel.Add(_access); _panel.Add(_hungry); _panel.Add(_larder);
             _panel.Add(_priority); _panel.Add(_deconstruct); _panel.Add(_message); _panel.Add(_close);
             holder.Add(_panel);

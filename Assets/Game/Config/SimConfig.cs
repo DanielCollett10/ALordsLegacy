@@ -162,6 +162,20 @@ namespace LordsLegacy.Game
         [Tooltip("MAT-53 baskets the forager hut keeps as kit, one per slot")] [Range(0, 100)] public int foragerHutBasketSlots = 5;
         [Tooltip("MAT-53 baskets the granary keeps as kit, one per family slot")] [Range(0, 100)] public int granaryBasketSlots = 2;
 
+        [Header("Thatch and thatcher's hut (M20, th-1; MAT-30..39a, MAT-02; PROPOSED tuning)")]
+        [Tooltip("MAT-39a reed beds scattered on low ground at new game")] [Range(0, 1000)] public int reedBedCount = 20;
+        [Tooltip("MAT-34 sheaves one cut takes from a reed bed")] [Range(1, 100)] public int reedSheavesPerCut = 8;
+        [Tooltip("MAT-34 days an emptied reed bed takes to regrow")] [Range(0, 3650)] public int reedRegrowDays = 90;
+        [Tooltip("MAT-35 game minutes to cut one bundle of reed in winter")] [Range(1, 600)] public int thatchCutMinutesPerBundle = 30;
+        [Tooltip("MAT-35 how many times slower cutting is out of season")] [Range(1, 20)] public int thatchOffSeasonFactor = 4;
+        [Tooltip("MAT-38 days a stook cures before the sheaves are dry")] [Range(0, 365)] public int thatchCureDays = 7;
+        [Tooltip("MAT-30 most thatch sheaves a thatcher hut stores")] [Range(1, 1000)] public int thatcherHutStore = 40;
+        [Tooltip("MAT-30 thatcher hut footprint width, metres")] [Range(1f, 100f)] public float thatcherHutWidthM = 6f;
+        [Tooltip("MAT-30 thatcher hut footprint depth, metres")] [Range(1f, 100f)] public float thatcherHutDepthM = 4f;
+        [Tooltip("MAT-30 logs a thatcher hut takes to build")] [Range(0, 100)] public int thatcherHutLogs = 8;
+        [Tooltip("MAT-30 game minutes a thatcher hut takes to build")] [Range(1, 100000)] public int thatcherHutMinutes = 480;
+        [Tooltip("MAT-02 most thatch sheaves a person carries by hand on one trip")] [Range(1, 100)] public int handCarryThatch = 1;
+
         /// <summary>One module type's construction recipe (CN-02).</summary>
         [Serializable]
         public sealed class ModuleRecipeConfig
@@ -228,6 +242,11 @@ namespace LordsLegacy.Game
             WattlePanelsPerDay = wattlePanelsPerDay, WattleHazelStock = wattleHazelStock,
             WattleWillowStock = wattleWillowStock, WattlePanelStore = wattlePanelStore,
             ForagerHutBasketSlots = foragerHutBasketSlots, GranaryBasketSlots = granaryBasketSlots,
+            ReedBedCount = reedBedCount, ReedSheavesPerCut = reedSheavesPerCut, ReedRegrowDays = reedRegrowDays,
+            ThatchCutMinutesPerBundle = thatchCutMinutesPerBundle, ThatchOffSeasonFactor = thatchOffSeasonFactor,
+            ThatchCureDays = thatchCureDays, ThatcherHutStore = thatcherHutStore,
+            ThatcherHutWidthM = D(thatcherHutWidthM), ThatcherHutDepthM = D(thatcherHutDepthM),
+            ThatcherHutLogs = thatcherHutLogs, ThatcherHutMinutes = thatcherHutMinutes, HandCarryThatch = handCarryThatch,
         };
 
         /// <summary>Builds the road catalog from these values.</summary>
