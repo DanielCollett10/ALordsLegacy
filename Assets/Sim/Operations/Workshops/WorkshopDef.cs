@@ -174,8 +174,17 @@ namespace LordsLegacy.Sim.Operations.Workshops
         {
             if (t == null) throw new ArgumentNullException(nameof(t));
             return new WorkshopDef("workshop.weaving",
-                new[] { new RecipeInput(Items.WillowRod, 6, CarryClass.Hand, 30) },
-                new[] { new RecipeOutput(Items.Basket, 1) }, 4, 30, 10, Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
+                new[] { new RecipeInput(Items.WillowRod, Math.Max(1, t.WeaverWillowPerBasket), CarryClass.Hand, Math.Max(1, t.WeaverWillowStock)) },
+                new[] { new RecipeOutput(Items.Basket, 1) }, Math.Max(1, t.WeaverBasketsPerDay), Math.Max(1, t.WeaverWillowStock),
+                Math.Max(1, t.WeaverBasketStore), Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
+        }
+
+        /// <summary>Daub pit (HL-01, HL-02): no input, 10 daub per family-day, store 20. Light work from the forager age.</summary>
+        public static WorkshopDef Daubing(SimTuning t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            return new WorkshopDef("workshop.daubing", new RecipeInput[0],
+                new[] { new RecipeOutput(Items.Daub, 1) }, Math.Max(1, t.DaubPerDay), 1, Math.Max(1, t.DaubPitStore), Math.Max(1, t.HandCarryDaub)).WithMinWorkAge(t.ForagerMinAge);
         }
 
         /// <summary>Wattle yard (MAT-22): 6 hazel + 2 willow rods to 1 panel, 5 panels per family-day, inputs 30 hazel and 10 willow, store 20.</summary>
@@ -185,10 +194,11 @@ namespace LordsLegacy.Sim.Operations.Workshops
             return new WorkshopDef("workshop.wattling",
                 new[]
                 {
-                    new RecipeInput(Items.HazelRod, 6, CarryClass.Hand, 30),
-                    new RecipeInput(Items.WillowRod, 2, CarryClass.Hand, 10)
+                    new RecipeInput(Items.HazelRod, Math.Max(1, t.WattleHazelPerPanel), CarryClass.Hand, Math.Max(1, t.WattleHazelStock)),
+                    new RecipeInput(Items.WillowRod, Math.Max(1, t.WattleWillowPerPanel), CarryClass.Hand, Math.Max(1, t.WattleWillowStock))
                 },
-                new[] { new RecipeOutput(Items.WattlePanel, 1) }, 5, 30, 20, Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
+                new[] { new RecipeOutput(Items.WattlePanel, 1) }, Math.Max(1, t.WattlePanelsPerDay), Math.Max(1, t.WattleHazelStock),
+                Math.Max(1, t.WattlePanelStore), Math.Max(1, t.HandCarryRods)).WithMinWorkAge(t.ForagerMinAge);
         }
     }
 }

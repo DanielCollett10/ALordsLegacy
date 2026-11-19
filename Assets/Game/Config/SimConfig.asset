@@ -97,6 +97,9 @@ MonoBehaviour:
   wattleHazelStock: 30
   wattleWillowStock: 10
   wattlePanelStore: 20
+  handCarryDaub: 2
+  daubPerDay: 10
+  daubPitStore: 20
   foragerHutBasketSlots: 5
   granaryBasketSlots: 2
   reedBedCount: 20

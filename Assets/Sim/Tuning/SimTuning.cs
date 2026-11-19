@@ -400,6 +400,15 @@ namespace LordsLegacy.Sim.Tuning
         /// <summary>Most thatch sheaves a person carries by hand on one trip. Unit: sheaves. Rule: MAT-02 (DECIDED).</summary>
         public int HandCarryThatch { get; set; } = 1;
 
+        /// <summary>Most daub a person carries by hand on one trip. Unit: daub. Rule: HL-01 (PROPOSED, tuning).</summary>
+        public int HandCarryDaub { get; set; } = 2;
+
+        /// <summary>Daub one family makes per day at the daub pit. Unit: daub per day. Rule: HL-02 (PROPOSED, tuning).</summary>
+        public int DaubPerDay { get; set; } = 10;
+
+        /// <summary>Most daub the daub pit's store holds. Unit: daub. Rule: HL-02 (PROPOSED, tuning).</summary>
+        public int DaubPitStore { get; set; } = 20;
+
         /// <summary>Most baskets a person carries by hand on one trip. Unit: baskets. Rule: MAT-23 (PROPOSED, tuning).</summary>
         public int HandCarryBaskets { get; set; } = 5;
 

@@ -147,6 +147,15 @@ namespace LordsLegacy.Sim.Operations
             logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
             familySlots: 1, defaultWorkRadiusM: 0);
 
+        /// <summary>Id of the daub pit operation.</summary>
+        public const string DaubingId = "operation.daubing";
+
+        /// <summary>Daub pit: an area-less operation that owns the pit footprint as its hut, 1 family slot (HL-01).</summary>
+        public static readonly OperationTypeDef Daubing = new OperationTypeDef(
+            DaubingId, buildingAreaTypeId: null, workAreaTypeId: null, hutTypeId: ModuleTypes.DaubPitId, hutCount: 1,
+            logStorageTypeId: null, minLogStorageCount: 0, oxenStandTypeId: null, maxOxenStands: 0,
+            familySlots: 1, defaultWorkRadiusM: 0);
+
         /// <summary>The workshop def an operation type carries (decision 0047), or null for a non-workshop type.</summary>
         public static Workshops.WorkshopDef WorkshopOf(string operationTypeId, Tuning.SimTuning t)
         {
@@ -155,6 +164,7 @@ namespace LordsLegacy.Sim.Operations
             if (operationTypeId == SawingId) return Workshops.WorkshopDef.Sawing(t);
             if (operationTypeId == WeavingId) return Workshops.WorkshopDef.Weaving(t);
             if (operationTypeId == WattlingId) return Workshops.WorkshopDef.Wattling(t);
+            if (operationTypeId == DaubingId) return Workshops.WorkshopDef.Daubing(t);
             return null;
         }
 
@@ -165,11 +175,12 @@ namespace LordsLegacy.Sim.Operations
             if (moduleTypeId == ModuleTypes.SawpitId) return SawingId;
             if (moduleTypeId == ModuleTypes.WeaverId) return WeavingId;
             if (moduleTypeId == ModuleTypes.WattleYardId) return WattlingId;
+            if (moduleTypeId == ModuleTypes.DaubPitId) return DaubingId;
             return null;
         }
 
         /// <summary>All operation types.</summary>
-        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, Weaving, Wattling, StorageYard, Coppice, Thatching };
+        public static readonly IReadOnlyList<OperationTypeDef> All = new[] { Woodcutting, Foraging, Granary, Hewing, Sawing, Weaving, Wattling, Daubing, StorageYard, Coppice, Thatching };
 
         /// <summary>Finds the operation type drawn in this building area type, or null if none.</summary>
         public static OperationTypeDef FindByBuildingArea(string areaTypeId)

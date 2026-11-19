@@ -204,6 +204,9 @@ namespace LordsLegacy.Sim.Save.Sections
             w.WriteInt32(t.ThatcherHutLogs);
             w.WriteInt32(t.ThatcherHutMinutes);
             w.WriteInt32(t.HandCarryThatch);
+            w.WriteInt32(t.HandCarryDaub); // T-583
+            w.WriteInt32(t.DaubPerDay);
+            w.WriteInt32(t.DaubPitStore);
         }
 
         private static SimTuning ReadTuning(SaveReader r)
@@ -329,6 +332,9 @@ namespace LordsLegacy.Sim.Save.Sections
             t.ThatcherHutLogs = r.ReadInt32();
             t.ThatcherHutMinutes = r.ReadInt32();
             t.HandCarryThatch = r.ReadInt32();
+            t.HandCarryDaub = r.ReadInt32(); // T-583
+            t.DaubPerDay = r.ReadInt32();
+            t.DaubPitStore = r.ReadInt32();
             return t;
         }
 

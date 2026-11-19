@@ -44,13 +44,11 @@ the coppice hut or yard store nearest first (`RodFinder`). Decision 0051 named a
 
 ## Gaps and follow-ups
 
-- **Weaver and wattle numbers are hard-coded** in `WorkshopDef.Weaving` (6 rods, 4 a day, stores 30 and 10) and `Wattling`
-  (6 hazel and 2 willow, 5 a day, stores 30, 10 and 20). The `Weaver*` and `Wattle*` tuning fields (T-570) are saved and
-  shown in SimConfig, but no code reads them. Owner decision; see the implementation note in `design/materials.md`.
+- Weaver, wattle and daub numbers come from `SimTuning` (`Weaver*`, `Wattle*`, `DaubPerDay`, `DaubPitStore`, `HandCarryDaub`); T-583 wired them.
 - Unity: `WorkshopPanelView` (via `AgentPicker.SelectWorkshop`) shows the report, Assign/Unassign/Deconstruct and the reserve field
   (focus only on click, T-602). The granary panel shows "Waiting for planks".
-- A site that loses a carried load at sunset drops it on a pile it owns (open from M18).
-- Stall builds need an odd-jobber family; with every family assigned, build tasks stay open.
+- **Daub pit** (T-583): `WorkshopDef.Daubing`, no input, 10 a day, store 20, hand load 2 (all tuning). Never fetches; status is No workers or Store full only. Sites take daub from its store; yards ignore it (ST-42b). `DaubPitTests`. Build-bar entry is hl-9.
+- A site that loses a carried load at sunset drops it on a pile it owns (open from M18). Stall builds need an odd-jobber family; with every family assigned, build tasks stay open.
 
 ## Tests
 

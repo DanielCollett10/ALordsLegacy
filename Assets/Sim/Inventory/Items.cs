@@ -38,10 +38,13 @@ namespace LordsLegacy.Sim.Inventory
         /// <summary>A sheaf of cut reed, cured then used for thatch (MAT-02).</summary>
         public static readonly ItemDef Thatch = new ItemDef("item.thatch", ItemCategory.General);
 
+        /// <summary>Daub made at the daub pit from local earth and water (HL-01).</summary>
+        public static readonly ItemDef Daub = new ItemDef("item.daub", ItemCategory.General);
+
         /// <summary>All built-in items.</summary>
         public static IReadOnlyList<ItemDef> All { get; } = new[]
         {
-            Log, Meat, Berries, Mushrooms, Plank, Beam, WillowRod, HazelRod, Basket, WattlePanel, Thatch,
+            Log, Meat, Berries, Mushrooms, Plank, Beam, WillowRod, HazelRod, Basket, WattlePanel, Thatch, Daub,
         };
 
         /// <summary>Finds an item by id, or null.</summary>
