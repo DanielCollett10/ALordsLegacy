@@ -30,15 +30,21 @@ namespace LordsLegacy.Game
         /// string when it can. Null means no such gate. The market uses it for MK-04.
         /// </summary>
         public Func<SimWorld, string> DisabledReason { get; }
+        /// <summary>
+        /// Full item recipe the entry costs (house: logs, thatch, wattle panels). When set and the Sim is up, the bar gates and
+        /// words the tooltip from <see cref="BuildEntryState.OfRecipe"/> instead of the logs-only <see cref="CostLogs"/>.
+        /// </summary>
+        public ConstructionRecipe Recipe { get; }
 
         /// <summary>Build bar id of the Market entry (MK-01).</summary>
         public const string MarketToolId = "market";
 
         /// <summary>Creates an entry. Pass <paramref name="costLogs"/> to gate it on available logs.</summary>
         public ToolEntry(string id, string label, bool enabled, string tooltip = "", Func<int> costLogs = null,
-            Func<SimWorld, string> disabledReason = null)
+            Func<SimWorld, string> disabledReason = null, ConstructionRecipe recipe = null)
         {
             Id = id; Label = label; Enabled = enabled; Tooltip = tooltip ?? ""; CostLogs = costLogs; DisabledReason = disabledReason;
+            Recipe = recipe;
         }
 
         /// <summary>The M3 entry list (ui.md UIB-02).</summary>
@@ -62,7 +68,7 @@ namespace LordsLegacy.Game
                 new ToolEntry(LordsLegacy.Game.Tools.StructureTool.StorageYardToolId, "Storage yard", true, "Place a storage yard: holds village goods",
                     () => ModuleTypes.StorageYard.ConstructionRecipe.Logs),
                 new ToolEntry("house", "House plot", true, "Draw a plot on a road; odd-jobbers build the house",
-                    () => ModuleTypes.House.ConstructionRecipe.Logs),
+                    () => ModuleTypes.House.ConstructionRecipe.Logs, null, ModuleTypes.House.ConstructionRecipe),
                 new ToolEntry("granary", "Granary", true, "Place a granary with its 5 m yard",
                     () => ModuleTypes.Granary.ConstructionRecipe.Logs),
                 new ToolEntry(MarketToolId, "Market", true, "Draw the town's market; its stall slots are shown (free)",

@@ -42,6 +42,10 @@ namespace LordsLegacy.Tests.PlayMode
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
             w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, 20);
+            // The house recipe also needs thatch and wattle panels, General items held in a goods store (MAT-40).
+            var goods = w.Inventory.AddGoodsStore(M(60, 40));
+            w.Inventory.Produce(goods, Items.Thatch, 20);
+            w.Inventory.Produce(goods, Items.WattlePanel, 20);
             var family = w.People.AddFamily(1, "Archer", 10, 10);
             w.People.AddCitizen(1, "Alda", Sex.Female, -4_000_000, 1, 10, 10);
             w.People.AddCitizen(2, "Bran", Sex.Male, -4_000_000, 1, 10, 10);
@@ -122,6 +126,23 @@ namespace LordsLegacy.Tests.PlayMode
             Assert.AreEqual(_houseId, viaPlot);
             Assert.IsNotNull(_host.World.Areas.Get(_plotId));
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator DeliveringHouseListsEachItemDeliveredOverNeeded()
+        {
+            _agents.SelectHouse(_houseId);
+            yield return null;
+            Assert.AreEqual("State: Delivering", _house.StateText);
+            Assert.AreEqual("Logs: 0 / 10\nThatch: 0 / 10\nWattle panels: 0 / 10", _house.DeliveryText);
+            // Put some of each on the site: the lines follow the site's ledger.
+            var site = _host.World.Construction.Get(_houseId);
+            var loc = _host.World.Inventory.Get(site.LedgerLocationId);
+            _host.World.Inventory.Produce(loc, Items.Log, 4);
+            _host.World.Inventory.Produce(loc, Items.Thatch, 3);
+            yield return null;
+            Assert.AreEqual("Logs: 4 / 10\nThatch: 3 / 10\nWattle panels: 0 / 10", _house.DeliveryText);
+            Assert.Greater(_house.PanelElement.worldBound.width, 0f);
         }
 
         [UnityTest]
