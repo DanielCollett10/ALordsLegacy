@@ -131,5 +131,6 @@ Every `ITool` implements the contract through one shared step (`ToolController.B
 | UIS-01 | **Every building panel uses the shared template** (`MVPv2_UI_Wireframe_Spec.md` section 5, UIW-30..33): movable box, title "Name n", status line, Pin and Close, sections with upper-case headings, General / Modules tabs where the building has modules, the construction view (UIW-50) while unbuilt. A panel that cannot fit the template needs a decision record before it is built | DECIDED |
 | UIS-02 | Panels read `*Report` read models only (never `SimWorld` collections directly), so a known/reported state layer can be added later | DECIDED |
 | UIS-03 | The template also covers panels the spec does not draw: house, market, citizen, thatcher, daub pit. The consistency audit (M22a) lists each panel against the spec | DECIDED |
-| UIS-04 | One unpinned panel at a time: selecting something else replaces it. Pinned panels stay until closed. At most 4 pinned panels; pinning a 5th unpins the oldest | PROPOSED |
+| UIS-04 | One unpinned panel at a time: selecting something else replaces it. Pinned panels stay until closed. At most 4 pinned panels; pinning a 5th unpins the oldest | DECIDED (owner 19/11/2026) |
+| UIS-06 | **Debug category**: Test area and Test work area sit in a Debug category on the category bar, shown only in editor and development builds | DECIDED (owner 19/11/2026) |
 | UIS-05 | Every tool button and building has a tooltip built from `ToolInfo` (cost, needs, produces), shown through one shared tooltip service | DECIDED |

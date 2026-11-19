@@ -49,7 +49,7 @@ Hovering a top bar item opens its detail panel directly underneath; moving the m
 | ID | Bar | Buttons | Tag |
 | --- | --- | --- | --- |
 | UIW-20 | Agriculture | "Nothing implemented yet" (disabled) | DECIDED |
-| UIW-21 | Logistics | Oxen post, Granary, Storage yard, Market. Oxen post: a standalone shared oxen stand for the village pool (later stable, large stable); the oxen stand module stays tied to its operation | DECIDED (post reading to be confirmed by the owner) |
+| UIW-21 | Logistics | Oxen post, Granary, Storage yard, Market. Oxen post: a standalone shared oxen stand for the village pool (later stable, large stable); the oxen stand module stays tied to its operation | DECIDED (owner confirmed 19/11/2026) |
 | UIW-22 | Processing | Sawyers yard, Hewing station, Wattle yard, Weaver. "Sawyers yard" replaces "Sawpit" in all UI text | DECIDED |
 | UIW-23 | Gathering | Woodcutter, Forager, Coppice hut, Thatcher's hut, Daub pit, Clay pit (greyed "Coming later" until it exists) | DECIDED |
 | UIW-24 | Road, House | Direct tools; no building bar | DECIDED |
