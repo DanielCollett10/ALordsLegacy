@@ -59,6 +59,9 @@ namespace LordsLegacy.Sim.People
 
         internal void ClearAllotment() => _allotment.Clear();
 
+        /// <summary>Distinct food types in the family's last Sunday allotment (HL-21, HSE-12); 0 when nothing was allotted. Set when the allotment is reserved; survives the trip. Saved by the Food section.</summary>
+        public int AllotmentFoodTypes { get; internal set; }
+
         private readonly List<int> _allotment = new List<int>();
 
         /// <summary>True while the family has no house (it lives at the camp).</summary>

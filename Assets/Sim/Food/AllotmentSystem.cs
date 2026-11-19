@@ -86,6 +86,7 @@ namespace LordsLegacy.Sim.Food
                     if (left <= 1e-9) full.Add(e.Value.Id);
                 }
             }
+            foreach (Family f in families) f.AllotmentFoodTypes = FoodTypesAllotted(world, f);
             int ok = 0, short_ = 0;
             foreach (Family f in families)
             {
@@ -128,6 +129,18 @@ namespace LordsLegacy.Sim.Food
                 len += Math.Sqrt(dx * dx + dz * dz);
             }
             return len;
+        }
+
+        // HL-21: distinct food items in this week's reservations (0 when nothing was allotted).
+        private static int FoodTypesAllotted(SimWorld world, Family f)
+        {
+            var types = new HashSet<string>();
+            foreach (int rid in f.AllotmentReservationIds)
+            {
+                Reservation r = world.Inventory.GetReservation(rid);
+                if (r != null) types.Add(r.ItemId);
+            }
+            return types.Count;
         }
 
         private static double Held(SimWorld world, Family f)

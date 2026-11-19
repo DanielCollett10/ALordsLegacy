@@ -163,5 +163,76 @@ namespace LordsLegacy.Sim.Tests.Food
             Assert.AreEqual(3, back.Camp.FoodStoreLocation.ReservedOf(Items.Meat.Id));
             Assert.IsNull(SaveDiff.FirstDifference(first, SimSave.Write(back, "s", 1, map.MapId, map.ContentHash)));
         }
+
+        // T-589 (HL-21, HSE-12): the family's food-type count is recorded when its Sunday allotment is reserved.
+        [Test]
+        public void FoodTypes_OneTypeAllotted_RecordsOne()
+        {
+            SimWorld w = World(new SimTuning { StartingMeat = 20 });
+            Family f = Add(w, 1, 10);
+            Allot(w);
+            Assert.AreEqual(1, f.AllotmentFoodTypes);
+        }
+
+        [Test]
+        public void FoodTypes_TwoTypesAllotted_RecordsTwo()
+        {
+            SimWorld w = World(new SimTuning { StartingMeat = 20 });
+            w.Inventory.Produce(w.Camp.FoodStoreLocation, Items.Berries, 20);
+            Family f = Add(w, 1, 10);
+            Allot(w);
+            Assert.AreEqual(2, f.AllotmentFoodTypes);
+        }
+
+        [Test]
+        public void FoodTypes_HouseholdOutOfRange_RecordsZero_InRangeRecordsOne()
+        {
+            SimWorld w = World(new SimTuning { MarketRangeM = 50, StartingMeat = 20 });
+            Family near = Add(w, 1, 20), far = Add(w, 2, 80);
+            Allot(w);
+            Assert.AreEqual(1, near.AllotmentFoodTypes);
+            Assert.AreEqual(0, far.AllotmentFoodTypes, "nothing allotted: 0 types");
+        }
+
+        [Test]
+        public void FoodTypes_EmptyStore_RecordsZero()
+        {
+            SimWorld w = World(new SimTuning { StartingMeat = 0 });
+            Family f = Add(w, 1, 10);
+            Allot(w);
+            Assert.AreEqual(0, f.AllotmentReservationIds.Count);
+            Assert.AreEqual(0, f.AllotmentFoodTypes, "nothing allotted: 0 types");
+        }
+
+        [Test]
+        public void FoodTypes_SundayDawn_ThroughRealTicks_RecordsTwo()
+        {
+            SimWorld sun = World(new SimTuning { StartWeekday = Weekday.Sunday, StartingMeat = 20 });
+            sun.Inventory.Produce(sun.Camp.FoodStoreLocation, Items.Berries, 20);
+            Family f = Add(sun, 1, 10);
+            for (int i = 0; i < 60 * 24 && f.AllotmentReservationIds.Count == 0; i++) sun.Step(1);
+            Assert.Greater(f.AllotmentReservationIds.Count, 0, "dawn allotment ran");
+            Assert.AreEqual(2, f.AllotmentFoodTypes);
+        }
+
+        [Test]
+        public void FoodTypes_SurvivesSaveLoad_AndBytesAreIdentical()
+        {
+            MapData map = SyntheticMap.CreateRamp();
+            SimWorld w = World(new SimTuning { StartingMeat = 20 });
+            w.Inventory.Produce(w.Camp.FoodStoreLocation, Items.Berries, 20);
+            Family f = Add(w, 1, 10);
+            Allot(w);
+            byte[] first = SimSave.Write(w, "s", 1, map.MapId, map.ContentHash);
+            SimWorld back = SimSave.Read(first, map);
+            Assert.AreEqual(2, back.People.FindFamily(1).AllotmentFoodTypes);
+            Assert.IsNull(SaveDiff.FirstDifference(first, SimSave.Write(back, "s", 1, map.MapId, map.ContentHash)));
+        }
+
+        [Test]
+        public void FoodTypes_SaveVersion_IsAtLeast41()
+        {
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 41);
+        }
     }
 }
