@@ -7,7 +7,7 @@ using LordsLegacy.Sim.People;
 namespace LordsLegacy.Sim.Save.Sections
 {
     /// <summary>
-    /// The Food save section (T-415, decision 0034, id 9, version 9; T-464 adds the FoodHandedOver flag after the camp store id; T-418 adds each family's Sunday trip carrier id; T-417 adds each family's Sunday allotment reservation ids; T-465 adds the last Sunday served/short counts after that flag; T-416 adds each family's carried rations and Hungry flag): the camp food store location id, each family's
+    /// The Food save section (T-415, decision 0034, id 9, version 9; T-464 adds the FoodHandedOver flag after the camp store id; T-418 adds each family's Sunday trip carrier id; T-417 adds each family's Sunday allotment reservation ids; T-465 adds the last Sunday served/short counts after that flag; T-416 adds each family's carried rations and Hungry flag; T-589 adds each family's allotment food-type count after its reservation ids):the camp food store location id, each family's
     /// larder id and each house's larder id. The food itself is in the Ledger section; this only links to it.
     /// Read after Homes (houses) and Population (families); ids are checked to be FoodStore locations.
     /// </summary>
@@ -33,6 +33,7 @@ namespace LordsLegacy.Sim.Save.Sections
             foreach (Family f in fams) { w.WriteInt32(f.Id); w.WriteInt32(f.LarderLocationId); w.WriteDouble(f.CarriedRations); w.WriteBool(f.IsHungry); w.WriteInt32(f.HungryDays); w.WriteInt32(f.TripCarrierId);
                 w.WriteInt32(f.AllotmentReservationIds.Count);
                 foreach (int rid in f.AllotmentReservationIds) w.WriteInt32(rid);
+                w.WriteInt32(f.AllotmentFoodTypes); // T-589
             }
             w.WriteInt32(world.Homes.Count);
             foreach (HomeRecord h in world.Homes.All) { w.WriteInt32(h.HouseFootprintId); w.WriteInt32(h.LarderLocationId); }
@@ -75,6 +76,9 @@ namespace LordsLegacy.Sim.Save.Sections
                     if (world.Inventory.GetReservation(rid) == null) throw new SaveFormatException("Family " + id + " allotment reservation " + rid + " is missing.");
                     f.AddAllotment(rid);
                 }
+                int foodTypes = r.ReadInt32(); // T-589
+                if (foodTypes < 0) throw new SaveFormatException("Family " + id + " has bad allotment food types.");
+                f.AllotmentFoodTypes = foodTypes;
                 if (loc != 0) CheckLarder(world, loc, "Family " + id + " larder");
                 f.LarderLocationId = loc;
                 f.CarriedRations = carried;
