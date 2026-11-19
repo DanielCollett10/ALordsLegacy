@@ -50,7 +50,7 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 - Houses are footprints, so `ModuleRenderer` draws them, but they are not operation modules (HM-20).
 
 ## Fence (T-586, decision 0053)
-`HomeRecord.FenceFootprintId` (0 = none, saved in Homes, save v39). `HouseFence.StateOf` gives None / Building / Built. `HouseRemoval.RemoveWithPlot` removes the fence: site cancelled, or built panels refunded by `DeconstructRefundShare` as a ground pile at the marker. `SiteRecipe` derives the fence recipe from the plot.
+`HomeRecord.FenceFootprintId` (0 = none, saved in Homes, save v39). `HouseFence.StateOf` gives None / Building / Built. `HouseRemoval.RemoveWithPlot` removes the fence: site cancelled, or built panels refunded by `DeconstructRefundShare` as a ground pile at the marker. `SiteRecipe` derives the fence recipe from the plot. Read only (T-591): `HouseReport.Of` (house panel: fence state and progress, level, needs, Upgrade availability and blocker); `HouseholdLevelCounts.Of` (families by level, HL-26).
 
 ## Tests
 
