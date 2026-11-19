@@ -9,8 +9,6 @@ namespace LordsLegacy.Sim.Inventory
     /// </summary>
     public static class HandLoads
     {
-        /// <summary>Daub a person carries by hand per trip (HL-01). A constant, not tuning, so the save format is unchanged.</summary>
-        public const int DaubPerTrip = 2;
 
         /// <summary>
         /// Items one person carries by hand per trip, or null when the item has no hand load:
@@ -27,7 +25,7 @@ namespace LordsLegacy.Sim.Inventory
             if (item.Id == Items.Basket.Id) return tuning.HandCarryBaskets;
             if (item.Id == Items.WattlePanel.Id) return tuning.HandCarryPanels;
             if (item.Id == Items.Thatch.Id) return tuning.HandCarryThatch;
-            if (item.Id == Items.Daub.Id) return DaubPerTrip;
+            if (item.Id == Items.Daub.Id) return tuning.HandCarryDaub;
             return item.Category == ItemCategory.General ? tuning.HandCarryItems : (int?)null;
         }
     }

@@ -77,6 +77,34 @@ namespace LordsLegacy.Sim.Tests.Workshops
         }
 
         [Test]
+        public void WorkshopDefs_ReadTheirNumbersFromTuning()
+        {
+            var t = new SimTuning
+            {
+                DaubPerDay = 7, DaubPitStore = 9, HandCarryDaub = 3,
+                WeaverWillowPerBasket = 5, WeaverBasketsPerDay = 3, WeaverWillowStock = 25, WeaverBasketStore = 8,
+                WattleHazelPerPanel = 4, WattleWillowPerPanel = 3, WattlePanelsPerDay = 6, WattleHazelStock = 22,
+                WattleWillowStock = 12, WattlePanelStore = 15
+            };
+            WorkshopDef d = WorkshopDef.Daubing(t);
+            Assert.AreEqual(7, d.BatchesPerFamilyDay);
+            Assert.AreEqual(9, d.OutputCapacity);
+            Assert.AreEqual(3, HandLoads.For(Items.Daub, t));
+            WorkshopDef wv = WorkshopDef.Weaving(t);
+            Assert.AreEqual(5, wv.Inputs[0].Count);
+            Assert.AreEqual(3, wv.BatchesPerFamilyDay);
+            Assert.AreEqual(25, wv.StockCapacityOf(wv.Inputs[0]));
+            Assert.AreEqual(8, wv.OutputCapacity);
+            WorkshopDef wt = WorkshopDef.Wattling(t);
+            Assert.AreEqual(4, wt.Inputs[0].Count);
+            Assert.AreEqual(3, wt.Inputs[1].Count);
+            Assert.AreEqual(6, wt.BatchesPerFamilyDay);
+            Assert.AreEqual(22, wt.StockCapacityOf(wt.Inputs[0]));
+            Assert.AreEqual(12, wt.StockCapacityOf(wt.Inputs[1]));
+            Assert.AreEqual(15, wt.OutputCapacity);
+        }
+
+        [Test]
         public void Type_FourByFour_FourLogs240Min_OneFamilySlot()
         {
             FootprintTypeDef t = ModuleTypes.Find(ModuleTypes.DaubPitId);
