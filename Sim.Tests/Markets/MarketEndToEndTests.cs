@@ -82,6 +82,7 @@ namespace LordsLegacy.Sim.Tests.Markets
                 foreach (int res in w.Construction.Get(house).ReservationIds.ToList()) w.Inventory.Release(res); // the site never consumes its logs
                 w.Construction.Remove(house);
             }
+            Start.NoCampTests.UseHouseGoodsUp(w); // T-577: the starting thatch and panels would keep the camp store from emptying (ST-30)
             Assert.IsTrue(w.Execute(new DesignateArea(AreaShape.Straight(new[] { M(10, 10), M(30, 10), M(30, 30), M(10, 30) }), AreaTypes.MarketId)).IsAccepted);
 
             var fx = new Fx { W = w, Map = map };

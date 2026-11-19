@@ -34,7 +34,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning());
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
-            if (logs > 0) w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, logs);
+            if (logs > 0) Support.HouseStock.Add(w, M(60, 40), logs);
             for (int i = 0; i < oxen; i++) w.People.AddOx(50 + i, "Ox" + i, 40, 45);
             return w;
         }

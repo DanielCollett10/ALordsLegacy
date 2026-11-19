@@ -36,5 +36,5 @@ the commands for the camp.
 
 ## Tests
 
-`Sim.Tests/Start/StartLayoutTests.cs`, `Start/MapExitsTests.cs`, `Start/NoCampTests.cs`, `Start/CampGeneralStoreTests.cs` (10 planks, no beams), `Sim.Tests/Scenarios/BuildItFirstScenarioTests.cs`. Unity:
+`Sim.Tests/Start/StartLayoutTests.cs`, `Start/MapExitsTests.cs`, `Start/NoCampTests.cs`, `Start/CampGeneralStoreTests.cs` (10 planks, 90 thatch, 90 panels, no beams; `StartLayoutApplier.StartingThatch/StartingPanels`, MAT-36), `Sim.Tests/Scenarios/BuildItFirstScenarioTests.cs`. Unity:
 `Assets/Tests/EditMode/StartLayoutConfigTests.cs`, `Assets/Tests/PlayMode/HutFromStartTests.cs`.

@@ -30,7 +30,7 @@ namespace LordsLegacy.Sim.Tests.Growth
             var w = SimWorld.FromMapData(SyntheticMap.CreateRamp(), new SimTuning());
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
-            w.Inventory.Produce(w.Inventory.AddStockpile(M(60, 40)), Items.Log, 40);
+            Support.HouseStock.Add(w, M(60, 40), 40);
             w.EntryPoint = M(20, 50);
             return w;
         }

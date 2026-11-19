@@ -12,6 +12,11 @@ namespace LordsLegacy.Sim.Start
     /// <summary>Fills a new world from a <see cref="StartLayout"/> (CMP-01..07, WORLD-08-A).</summary>
     public static class StartLayoutApplier
     {
+        /// <summary>Thatch in the camp General store at the start (MAT-36): nine houses' worth.</summary>
+        public const int StartingThatch = 90;
+        /// <summary>Wattle panels in the camp General store at the start (MAT-36).</summary>
+        public const int StartingPanels = 90;
+
         /// <summary>
         /// Adds the camp footprint (removing trees under it), draws the trunk road through
         /// <see cref="DrawRoad"/>, adds the camp stockpile (a ledger Stockpile at the stockpile spot, filled with
@@ -46,6 +51,9 @@ namespace LordsLegacy.Sim.Start
 
             LedgerLocation generalStore = world.Inventory.AddGoodsStore(stockpileSpot);
             if (world.Tuning.StartingPlanks > 0) world.Inventory.Produce(generalStore, Items.Plank, world.Tuning.StartingPlanks);
+
+            world.Inventory.Produce(generalStore, Items.Thatch, StartingThatch);
+            world.Inventory.Produce(generalStore, Items.WattlePanel, StartingPanels);
 
             world.Camp = new CampInfo(fpId, ToWorld(layout, layout.Fire), stockpileSpot,
                 ToWorld(layout, layout.OxStand), stockpile)

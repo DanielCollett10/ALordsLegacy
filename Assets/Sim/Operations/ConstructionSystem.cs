@@ -319,7 +319,7 @@ namespace LordsLegacy.Sim.Operations
                 ItemDef item = r == null ? null : Items.Find(r.ItemId);
                 if (item == null) { site.ReservationIds.RemoveAt(at); continue; }
                 bool isLog = item.Id == Items.Log.Id;
-                int load = Math.Max(1, isLog ? world.Tuning.OxLoadLogs : world.Tuning.HandCarryPlanks);
+                int load = Math.Max(1, isLog ? world.Tuning.OxLoadLogs : HandLoads.For(item, world.Tuning) ?? world.Tuning.HandCarryPlanks);
                 LedgerLocation source = world.Inventory.Get(r.LocationId);
                 int n = Math.Min(load, r.Count);
                 int remainder = r.Count - n;

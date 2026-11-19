@@ -40,6 +40,16 @@ namespace LordsLegacy.Sim.Tests.Start
         }
 
         [Test]
+        public void NewGame_GeneralStoreHoldsNinetyThatchAndNinetyPanels()
+        {
+            SimWorld w = NewGame(Map());
+            LedgerLocation general = w.Camp.GeneralStoreLocation;
+            Assert.AreEqual(90, general.CountOf(Items.Thatch.Id));
+            Assert.AreEqual(90, general.CountOf(Items.WattlePanel.Id));
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        [Test]
         public void StartingPlanks_TuningSetsTheStock()
         {
             SimWorld w = NewGame(Map(), new SimTuning { StartHour = 8, StartingPlanks = 4 });
@@ -75,7 +85,7 @@ namespace LordsLegacy.Sim.Tests.Start
             LedgerLocation general = w.Camp.GeneralStoreLocation;
             int generalId = general.Id;
             int logs = w.Camp.StockpileLocation.CountOf(Items.Log.Id);
-            w.Inventory.Consume(general, Items.Plank, general.CountOf(Items.Plank.Id));
+            NoCampTests.UsePlanksUp(w);
             w.FoodHandedOver = true;
             Assert.IsTrue(CampRemovalSystem.TryRemove(w));
             Assert.IsNull(w.Camp);
