@@ -24,6 +24,7 @@ namespace LordsLegacy.Sim.Tasks
                 { Foraging.ForagingSystem.ForageTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { Coppice.CoppiceSystem.CoppiceTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { Thatch.ThatchingSystem.CutReedTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
+                { Thatch.SheafCollecting.CollectTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { Food.FoodTripSystem.FetchFoodTaskId, (EligibilityPolicy.OwnerFamily, RequiredResource.None) },
                 { Markets.StoreFamilySystem.StockStallTaskId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
                 { HandHaulTaskDefs.HaulId, (EligibilityPolicy.AssignedFamilyOnly, RequiredResource.None) },
