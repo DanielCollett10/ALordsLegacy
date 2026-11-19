@@ -76,10 +76,15 @@ namespace LordsLegacy.Game
             return sb.ToString();
         }
 
-        /// <summary>Builds the population tooltip from a growth report.</summary>
-        public static string PopulationTooltipOf(Sim.Growth.GrowthReport r) =>
-            "Families: " + r.Families + "\nArriving: " + r.Arriving + "\nLeaving: " + r.Leaving + "\nNext family: "
-            + (r.ArrivalReason ?? "would be let in");
+        /// <summary>Builds the population tooltip from a growth report: family counts, then households by level (HL-26).</summary>
+        public static string PopulationTooltipOf(Sim.Growth.GrowthReport r)
+        {
+            string text = "Families: " + r.Families + "\nArriving: " + r.Arriving + "\nLeaving: " + r.Leaving + "\nNext family: "
+                + (r.ArrivalReason ?? "would be let in");
+            if (r.Levels != null && r.Levels.Lines.Count > 0)
+                text += "\nHouseholds by level:\n" + r.Levels.TooltipText;
+            return text;
+        }
 
         /// <summary>Sets the SimHost to read from (for code that creates the component). Call before enabling.</summary>
         public void SetHost(SimHost host) { _host = host; }
