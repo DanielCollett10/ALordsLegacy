@@ -83,6 +83,7 @@ namespace LordsLegacy.Sim.Growth
                 world.Inventory.Produce(larder, item, (int)Math.Ceiling(perKind / item.RationsPerItem));
 
             world.SettlementLog.Add(world.Tick, "The " + fam.Surname + " family has arrived");
+            world.Log.Write(LogCategory.Growth, "arrival: family " + fam.Id + " " + fam.Surname + ", " + plan.Members.Count + " members, house " + check.HouseId);
         }
 
         // The plan-independent parts of ArrivalRules.Check: entry point, a free working house, hunger window, gap.

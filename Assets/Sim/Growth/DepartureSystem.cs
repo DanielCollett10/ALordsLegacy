@@ -61,6 +61,7 @@ namespace LordsLegacy.Sim.Growth
             world.People.RemoveCitizen(c.Id);
             if (f.MemberIds.Count > 0) return;
             int larder = f.LarderLocationId;
+            world.Log.Write(LogCategory.Growth, "departure: family " + f.Id + " " + f.Surname + " left the map");
             world.People.RemoveFamily(f.Id);
             if (larder != 0) world.Inventory.RemoveEmptyLocation(larder);
         }

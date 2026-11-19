@@ -57,6 +57,7 @@ namespace LordsLegacy.Sim.Commands
             CommandResult area = new DesignateArea(Shape, AreaTypes.PlotId).Apply(world);
             if (area.IsRejected) throw new InvalidOperationException("DesignatePlot: plot refused after validation: " + area.Text);
             world.Construction.Add(site);
+            ConstructionLog.Reserved(world, site.FootprintId);
             Footprint fp = world.Footprints.Add(fpId, type, h.Centre, h.RotationDegrees);
             int plotId = (int)area.Created[0];
             Food.Larders.ForHome(world, world.Homes.Add(fp.Id, plotId));

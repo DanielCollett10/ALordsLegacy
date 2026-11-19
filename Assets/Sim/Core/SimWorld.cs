@@ -146,9 +146,10 @@ namespace LordsLegacy.Sim.Core
             CommandLog.Append(Tick, command);
             CommandResult result = command.Validate(this);
             if (result == null) throw new InvalidOperationException("Validate returned null for " + command.GetType().Name);
-            if (result.IsRejected) return result;
+            if (result.IsRejected) { LogRefused(command, result); return result; }
             result = command.Apply(this);
             if (result == null) throw new InvalidOperationException("Apply returned null for " + command.GetType().Name);
+            if (result.IsRejected) LogRefused(command, result);
             if (result.IsAccepted)
             {
                 for (int s = 0; s < _systems.Length; s++) _systems[s].OnCommandApplied(this, result);

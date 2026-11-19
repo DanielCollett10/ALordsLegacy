@@ -38,6 +38,7 @@ namespace LordsLegacy.Sim.Tasks
             if (oxOpen) CancelTasksOfGoneOxen(world);
             RunPass(world, helpers: false, oxOpen);
             RunPass(world, helpers: true, oxOpen);
+            LogNoWorker(world);
         }
 
         /// <inheritdoc />
@@ -100,7 +101,19 @@ namespace LordsLegacy.Sim.Tasks
                 if (best.Target.HasValue && !world.Tasks.Reserve(best.Id, best.Target.Value)) continue;
                 if (!world.Tasks.Assign(best.Id, c.Id)) continue;
                 world.Tasks.Start(best.Id);
+                LogAssigned(world, best, c);
             }
+        }
+
+        // T-629: debug log only; never changes state.
+        private static void LogAssigned(SimWorld world, TaskRecord t, Citizen c) =>
+            world.Log.Write(LogCategory.Tasks, "task " + t.Id + " (" + t.Def.Id + ") assigned to citizen " + c.Id + " " + c.Name +
+                (t.OxId.HasValue ? ", ox " + t.OxId.Value : string.Empty));
+
+        private static void LogNoWorker(SimWorld world)
+        {
+            foreach (TaskRecord t in world.Tasks.InState(TaskState.Open))
+                world.Log.Write(LogCategory.Tasks, "task " + t.Id + " (" + t.Def.Id + ") skipped: no worker");
         }
 
         // Walking time (minutes) from the citizen to the job of an Open task, and whether the task can be offered to
@@ -231,7 +244,7 @@ namespace LordsLegacy.Sim.Tasks
                     Citizen c = world.People.FindCitizen(id);
                     if (c == null || c.Activity == Activity.Sleeping || !IsIdle(world, c)) continue;
                     if (c.AgeYears(world.Tick, world.Tuning.AgeingRate) < OperationStatus.WorkingAgeYears) continue;
-                    if (world.Tasks.Assign(t.Id, c.Id)) world.Tasks.Start(t.Id);
+                    if (world.Tasks.Assign(t.Id, c.Id)) { world.Tasks.Start(t.Id); LogAssigned(world, t, c); }
                     break;
                 }
             }
