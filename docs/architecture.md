@@ -42,7 +42,7 @@ This split lets the 2D view be swapped for 3D without touching the Sim.
 - **Storage yard** (`systems/storage.md`, decisions 0054, 0055): a General goods store. Yard families plan hand and ox trips
   from an ordered list of `IYardJobSource`s. The workshop input reserve (`InputReserve`) gates fetches by storage total.
 - **Passage and settlement log** (decision 0045): `Family.Passage` (None, Arriving, Leaving) marks families walking in or out;
-  readers check `IsInPassage`. `SettlementLog` on `SimWorld` keeps the last 20 (tick, text) entries, saved in the Core section.
+  readers check `IsInPassage`. `SettlementLog` on `SimWorld` keeps the last 20 (tick, text) entries, saved in the Core section. `SimLog` (`world.Log`, decision 0058, T-628) is a separate debug ring buffer of (tick, category, text), 2000 entries, per-category on/off, not saved and never read by rules.
 - **Two-step removal:** a built module is marked, then a task takes it down over time (decision 0039). Unbuilt things are removed at once.
 - **Queries:** tools and views ask pure queries before committing (`RoadValidator.Validate`,
   `AreaValidator.Validate`, `ModulePlacement.Preview`, `PlacementRules`). They return previews and refusal
