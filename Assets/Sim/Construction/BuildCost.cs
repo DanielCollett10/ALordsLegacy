@@ -57,6 +57,25 @@ namespace LordsLegacy.Sim.Construction
             return ConstructionSources.Available(world, Items.Log) >= logs;
         }
 
+        /// <summary>
+        /// Affordability of a full recipe (all items, decision 0046) from construction sources (CN-11: total − reserved,
+        /// site-owned piles excluded). Items are checked in item-id order; the first short one is returned with its have
+        /// and need. Reserved stock is not counted as available. An empty recipe is affordable.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">The world or recipe is null.</exception>
+        public static RecipeAffordability Check(SimWorld world, ConstructionRecipe recipe)
+        {
+            if (world == null) throw new ArgumentNullException(nameof(world));
+            if (recipe == null) throw new ArgumentNullException(nameof(recipe));
+            foreach (var kv in recipe.Items)
+            {
+                ItemDef item = Items.Find(kv.Key);
+                int have = item == null ? 0 : ConstructionSources.Available(world, item);
+                if (have < kv.Value) return new RecipeAffordability(kv.Key, have, kv.Value);
+            }
+            return RecipeAffordability.Affordable;
+        }
+
         private static int LogsOf(string moduleTypeId)
         {
             FootprintTypeDef type = ModuleTypes.Find(moduleTypeId);

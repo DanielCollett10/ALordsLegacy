@@ -40,21 +40,7 @@ namespace LordsLegacy.Sim.Construction
         /// </summary>
         public static string Shortfall(SimWorld world, ConstructionRecipe recipe)
         {
-            if (world == null) throw new System.ArgumentNullException(nameof(world));
-            if (recipe == null) throw new System.ArgumentNullException(nameof(recipe));
-            foreach (var kv in recipe.Items)
-            {
-                ItemDef item = Items.Find(kv.Key);
-                int have = item == null ? 0 : ConstructionSources.Available(world, item);
-                if (have < kv.Value) return "Not enough " + Plural(kv.Key) + " (have " + have + ", need " + kv.Value + ")";
-            }
-            return null;
-        }
-
-        private static string Plural(string itemId)
-        {
-            string name = itemId.StartsWith("item.") ? itemId.Substring(5) : itemId;
-            return name + "s";
+            return BuildCost.Check(world, recipe).Text;
         }
     }
 }
