@@ -12,7 +12,7 @@
 | `FamilyDeparture.Begin` | Unassigns, fails open tasks, drops carried loads, releases allotments, evicts the house (larder food stays), sets `Passage = Leaving`, logs. |
 | `ArrivalSystem` | Routine phase, after departure. Walks Arriving families to their house and moves them in on the first arrival (or makes them Homeless). At dawn, after cheap pre-checks, tries one new family. |
 | `ArrivalRules` | Pure. `Check` returns Allowed with a house id, or a reason. Order: free reachable working house with no Homeless family waiting; food for `ArrivalFoodDays`; no hunger for `ArrivalNoHungerDays`; gap `ArrivalGapDays`. |
-| `GrowthReport` | Read only. `Of` gives counts and `ArrivalReason` (a probe couple). `StatusOf` gives "Hungry (n / 30 days)", "Leaving (hungry)", "Arriving" or null. |
+| `GrowthReport` | Read only. `Of` gives counts and `ArrivalReason` (a probe couple). `StatusOf` gives "Hungry (n / 30 days)", "Leaving (hungry)", "Arriving" or null. `Levels` gives households by level (`HouseholdLevelCounts`, HL-26; T-591). |
 | `FamilyGenerator`, `FamilyPlan`, `ArrivalCatalog` | Pure. Make-up, surname, names and ages from seeded `SimRandom` and catalog data (defaults in code). |
 | `MapExits` | Pure. Edge = terrain bounds within `MapEdgeToleranceM`. `Nearest` is a road node on the edge, else the nearest walkable edge point. `ComputeEntry` is the trunk road's end. Derived, never saved. |
 | `FamilyPassage` | `None`, `Arriving`, `Leaving` on `Family.Passage`. Readers call `Family.IsInPassage`. |
@@ -51,7 +51,7 @@ Passage (Population), `ReservedForFamilyId` (Homes), `LastArrivalTick`, `EntryPo
 
 ## Tests
 
-`Sim.Tests/Growth/`: ArrivalRules, ArrivalSystem, DepartureSystem, FamilyDeparture, GrowthReport (order, status, counts, `EndToEnd_FamilyMovesIn_ThenNoFood_EveryoneLeaves_PopulationZero`), PassageFoodHomeMarketReaders. Also `Arrivals/FamilyGeneratorTests`, `People/FamilyPassageTests`, `People/PassageWorkReadersTests`, `Core/SettlementLogTests`, `Start/MapExitsTests`, `Save/CoreSectionTests`. Unity PlayMode: `CitizenPanelTests`, `HousePanelTests`, `MessageLogTests`, `TopBarTests`, `PeopleRendererTests`, `GameSceneTests`.
+`Sim.Tests/Growth/`: ArrivalRules, ArrivalSystem, DepartureSystem, FamilyDeparture, GrowthReport (order, status, counts, `EndToEnd_FamilyMovesIn_ThenNoFood_EveryoneLeaves_PopulationZero`), PassageFoodHomeMarketReaders. Homes: `HouseReportTests`, `HouseholdLevelCountsTests`. Also `Arrivals/FamilyGeneratorTests`, `People/FamilyPassageTests`, `People/PassageWorkReadersTests`, `Core/SettlementLogTests`, `Start/MapExitsTests`, `Save/CoreSectionTests`. Unity PlayMode: `CitizenPanelTests`, `HousePanelTests`, `MessageLogTests`, `TopBarTests`, `PeopleRendererTests`, `GameSceneTests`.
 
 ## Gaps
 
