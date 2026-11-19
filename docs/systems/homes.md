@@ -57,4 +57,4 @@ fenced, and its household can rise to level 2 (decisions 0040, 0053, 0061). Desi
 - Sim: `Homes/HouseholdLevel*Tests`, `HouseReportTests`, `UpgradeHouseholdTests`, `BuildFenceTests`, `DesignatePlotTests`,
   `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`; `Areas/FenceLineTests`, `Navigation/FenceNavTests`, `Food/AllotmentTests`.
 - End to end: `Scenarios/DaubFenceLevel2ScenarioTests` (daub, house, fence, level 2; audited, saved mid-fence).
-- Unity: PlayMode `HousePanelTests`, `TopBarTests`, `GameSceneTests`. Gap: no round-trip test with a house and family.
+- Unity: PlayMode `HousePanelTests`, `TopBarTests`, `GameSceneTests`. Round trip with house, fence and level 2 family: `DaubFenceLevel2ScenarioTests` (T-626).
