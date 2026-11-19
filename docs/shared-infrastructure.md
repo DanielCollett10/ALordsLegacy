@@ -24,7 +24,7 @@ Copies of code are found by `pwsh Tools/dup-scan.ps1` (jscpd, decision 0062); ru
 | Placement yes or no | `PlacementRules`, `ModulePlacement`, `DraftModulePlacement` | decision 0028 |
 | Removing trees under something | `TreeClearing` | systems/forestry.md |
 | Road access, same network (M22d) | `RoadAccess` | design/road-access.md |
-| Debug trace | `SimLog` (M22a); player messages use `SettlementLog` | decision 0058 |
+| Debug trace | `SimLog` via `world.Log` (`Assets/Sim/Core/SimLog.cs`, T-628; not saved, never read by rules); player messages use `SettlementLog` | decision 0058 |
 | Randomness | `SimRandom` (seeded) | decision 0025 |
 | Anything a panel shows | a `*Report.Of(world, id)` read model *tested* | ui.md UIS-02 |
 
