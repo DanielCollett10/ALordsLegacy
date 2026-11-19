@@ -25,7 +25,8 @@ namespace LordsLegacy.Sim.Tests.Scenarios
     /// house is fenced, the household is fed two food types and becomes eligible, and UpgradeHousehold makes it level 2.
     /// After the fence is built a family member leaving for work never crosses the fence line. Audited every tick; a save
     /// taken while the fence is still being built is byte-identical on a round trip. Everything runs through real commands
-    /// and Sim ticks (no Build or SetState shortcut).
+    /// and Sim ticks (no Build or SetState shortcut). At the end the level 2 household is saved with its built fence and
+    /// loaded: the bytes match and HouseReport and HouseholdNeedsReport answer the same (T-626).
     /// </summary>
     [TestFixture]
     public class DaubFenceLevel2ScenarioTests
@@ -152,6 +153,8 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             byte[] first = Bytes(w, map);
             SimWorld back = SimSave.Read(first, map);
             CollectionAssert.AreEqual(first, Bytes(back, map), "save mid-fence is byte-identical");
+            Assert.AreEqual(FenceState.Building, HouseReport.Of(back, fam.Id).Fence, "fence still under construction after load");
+            Assert.AreEqual(Report(w, fam.Id), Report(back, fam.Id), "reports agree after loading a mid-fence save");
             for (int i = 0; i < 300; i++) { w.Step(1); back.Step(1); Check(w); Check(back); }
             CollectionAssert.AreEqual(Bytes(w, map), Bytes(back, map), "original and loaded stay identical");
 
@@ -203,6 +206,36 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             Assert.IsTrue(up.IsAccepted, up.Text);
             Assert.AreEqual(2, fam.Level);
             Check(w);
+
+            // 6. The level 2 household with a built fence and its recorded food types saves and loads byte-exactly; the
+            // HouseReport and HouseholdNeedsReport answers are the same after load.
+            Assert.GreaterOrEqual(fam.AllotmentFoodTypes, 2, "food types recorded before the save");
+            string beforeReports = Report(w, fam.Id);
+            byte[] done = Bytes(w, map);
+            SimWorld loaded = SimSave.Read(done, map);
+            Check(loaded);
+            CollectionAssert.AreEqual(done, Bytes(loaded, map), "level 2 save with a built fence is byte-identical");
+            Family loadedFam = loaded.People.FindFamily(fam.Id);
+            Assert.AreEqual(2, loadedFam.Level, "level survives the load");
+            Assert.AreEqual(fam.AllotmentFoodTypes, loadedFam.AllotmentFoodTypes, "allotment food types survive the load");
+            Assert.AreEqual(home.FenceFootprintId, loaded.Homes.Get(house).FenceFootprintId, "fence link survives the load");
+            Assert.AreEqual(FenceState.Built, HouseFence.StateOf(loaded, loaded.Homes.Get(house)));
+            Assert.AreEqual(beforeReports, Report(loaded, fam.Id), "HouseReport and HouseholdNeedsReport agree after load");
+        }
+
+        // One line per field of HouseReport and HouseholdNeedsReport, so a load that changes any answer fails the test.
+        private static string Report(SimWorld w, int familyId)
+        {
+            HouseReport h = HouseReport.Of(w, familyId);
+            HouseholdNeedsReport n = HouseholdNeedsReport.Of(w, familyId);
+            var parts = new List<string>
+            {
+                h.FamilyId.ToString(), h.HouseFootprintId.ToString(), h.Level.ToString(), h.LevelName, h.Fence.ToString(),
+                h.FenceProgress.ToString("R"), h.FenceText, h.UpgradeAvailable.ToString(), h.UpgradeBlocker ?? "",
+                n.FamilyId.ToString(), n.Level.ToString(), n.NextLevel.ToString(), n.Eligible.ToString(), n.Blocker ?? "",
+            };
+            parts.AddRange(n.Needs.Select(x => x.Kind + "|" + x.Label + "|" + x.Met + "|" + x.Reason));
+            return string.Join("\n", parts);
         }
     }
 }
