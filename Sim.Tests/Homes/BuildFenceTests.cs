@@ -239,7 +239,7 @@ namespace LordsLegacy.Sim.Tests.Homes
             int fence = Fence(w, house);
             w.Step(400); // some panels carried, fence not finished
             Assert.AreEqual(FenceState.Building, HouseFence.StateOf(w, w.Homes.Get(house)));
-            Assert.AreEqual(39, SaveWriter.CurrentVersion);
+            Assert.GreaterOrEqual(SaveWriter.CurrentVersion, 39);
             byte[] first = SimSave.Write(w, "s", 1, map.MapId, map.ContentHash);
             SimWorld back = SimSave.Read(first, map);
             Assert.AreEqual(fence, back.Homes.Get(house).FenceFootprintId);

@@ -54,7 +54,7 @@ point moves to the house; a family with a house is no longer Homeless (homes.md 
 
 ## Tests
 
-- Sim: `Homes/BuildFenceTests`, `Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`
+- Sim: `Homes/HouseholdLevelTests` (`HouseholdLevels` defs, `Family.Level`, save v40), `Homes/BuildFenceTests`, `Homes/DesignatePlotTests` (move-in rules), `HouseConstructionTests`, `HouseDeconstructionTests`, `HouseMaterialsTests`
   (recipe, reservations, shortfall, hand carry, old-site recipe). `Areas/HousePlacementTests`, `PlotTypeTests`.
 - Unity PlayMode: `PlotToolTests`, `HousePlotGateTests` (greyed entry, refusal text), `HousePanelTests`, `HouseVisualsTests`, `GameSceneTests`.
 - Gap: no round-trip test saves a house with a family (see `save.md`).

@@ -173,7 +173,7 @@ namespace LordsLegacy.Sim.Tests.Save
             // CoreSection writes one entry per writable SimTuning property. Bump this number only together with
             // CoreSection's tuning writer/reader; EverySimTuningProperty_RoundTrips shows which one is missing.
             int writable = typeof(SimTuning).GetProperties().Count(p => p.CanWrite);
-            Assert.AreEqual(126, writable,"SimTuning changed: update CoreSection and this count");
+            Assert.AreEqual(127, writable,"SimTuning changed: update CoreSection and this count");
         }
     }
 }

@@ -70,6 +70,15 @@ namespace LordsLegacy.Sim.People
         /// <summary>True while the family is Arriving or Leaving. Readers that hand out work, food trips or houses check this.</summary>
         public bool IsInPassage => Passage != FamilyPassage.None;
 
+        /// <summary>Household level (HL-20): starts at 1, never drops (HSE-10), kept when moving house. Saved by the Population section.</summary>
+        public int Level { get; internal set; } = 1;
+
+        /// <summary>Raises the level. A lower or equal level is ignored, so the level never drops (HSE-10).</summary>
+        internal void RaiseLevel(int level)
+        {
+            if (level > Level) Level = level;
+        }
+
         internal void AddMember(int citizenId) => _memberIds.Add(citizenId);
 
         internal void RemoveMember(int citizenId) => _memberIds.Remove(citizenId);
