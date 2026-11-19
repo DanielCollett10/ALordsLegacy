@@ -92,6 +92,8 @@ namespace LordsLegacy.Tests.EditMode
                 Assert.AreEqual(d.DaubPitStore, t0.DaubPitStore, "default: daub pit store");
                 Assert.AreEqual(d.StartingDaub, t0.StartingDaub, "default: starting daub (HL-04)");
                 Assert.AreEqual(90, t0.StartingDaub);
+                Assert.AreEqual(d.FencePanelLengthM, t0.FencePanelLengthM, Eps, "default: fence panel length (HL-12)");
+                Assert.AreEqual(d.FenceMinutesPerPanel, t0.FenceMinutesPerPanel, "default: fence minutes per panel (HL-12)");
                 cfg.hazelStoolCount = 11; cfg.willowStoolCount = 12; cfg.coppiceRodsPerCut = 13; cfg.coppiceRegrowDays = 14;
                 cfg.coppiceMinutesPerRod = 15; cfg.coppiceHutStorePerKind = 16; cfg.handCarryRods = 17;
                 cfg.handCarryBaskets = 18; cfg.handCarryPanels = 19; cfg.weaverWillowPerBasket = 20;
@@ -100,6 +102,7 @@ namespace LordsLegacy.Tests.EditMode
                 cfg.wattleHazelStock = 27; cfg.wattleWillowStock = 28; cfg.wattlePanelStore = 29;
                 cfg.foragerHutBasketSlots = 30; cfg.granaryBasketSlots = 31;
                 cfg.handCarryDaub = 32; cfg.daubPerDay = 33; cfg.daubPitStore = 34; cfg.startingDaub = 35;
+                cfg.fencePanelLengthM = 3.5f; cfg.fenceMinutesPerPanel = 36;
                 var t = cfg.BuildTuning();
                 Assert.AreEqual(11, t.HazelStoolCount); Assert.AreEqual(12, t.WillowStoolCount);
                 Assert.AreEqual(13, t.CoppiceRodsPerCut); Assert.AreEqual(14, t.CoppiceRegrowDays);
@@ -112,6 +115,7 @@ namespace LordsLegacy.Tests.EditMode
                 Assert.AreEqual(28, t.WattleWillowStock); Assert.AreEqual(29, t.WattlePanelStore);
                 Assert.AreEqual(30, t.ForagerHutBasketSlots); Assert.AreEqual(31, t.GranaryBasketSlots);
                 Assert.AreEqual(32, t.HandCarryDaub); Assert.AreEqual(33, t.DaubPerDay); Assert.AreEqual(34, t.DaubPitStore); Assert.AreEqual(35, t.StartingDaub);
+                Assert.AreEqual(3.5, t.FencePanelLengthM, Eps); Assert.AreEqual(36, t.FenceMinutesPerPanel);
             }
             finally { Object.DestroyImmediate(cfg); }
         }
@@ -128,6 +132,7 @@ namespace LordsLegacy.Tests.EditMode
             Assert.AreEqual(d.ThatcherHutStore, a.ThatcherHutStore); Assert.AreEqual(d.ThatcherHutLogs, a.ThatcherHutLogs);
             Assert.AreEqual(d.ThatcherHutWidthM, a.ThatcherHutWidthM, Eps); Assert.AreEqual(d.HandCarryThatch, a.HandCarryThatch);
             Assert.AreEqual(d.StartingDaub, a.StartingDaub, "committed asset holds the default starting daub (HL-04)");
+            Assert.AreEqual(d.FencePanelLengthM, a.FencePanelLengthM, Eps); Assert.AreEqual(d.FenceMinutesPerPanel, a.FenceMinutesPerPanel);
 
             var cfg = ScriptableObject.CreateInstance<SimConfig>();
             try

@@ -183,6 +183,18 @@ namespace LordsLegacy.Sim.Footprints
         public static readonly FootprintTypeDef DaubPit =
             new FootprintTypeDef(DaubPitId, 4000, 4000, true, true, recipe: new ConstructionRecipe(4, 240), yardMarginMm: 3000);
 
+        /// <summary>Id of the fence footprint (decision 0053).</summary>
+        public const string FenceId = "footprint.fence";
+
+        /// <summary>
+        /// Fence: a 1 × 1 m marker at the plot's frontage access point (<see cref="Areas.FenceLine.AccessPoint"/>). It clears
+        /// no trees and does not block movement; the fence blocks along its derived line, not the marker (decision 0053, HL-12).
+        /// The recipe depends on the plot, so it is built per fence by <see cref="Areas.FenceLine.Recipe"/>; this type's
+        /// own recipe is empty. Deliberately not in <see cref="All"/> (it is not a placeable module), but <see cref="Find"/> knows it.
+        /// </summary>
+        public static readonly FootprintTypeDef Fence =
+            new FootprintTypeDef(FenceId, Areas.FenceLine.MarkerSizeMm, Areas.FenceLine.MarkerSizeMm, false, false);
+
         /// <summary>All module types.</summary>
         public static readonly IReadOnlyList<FootprintTypeDef> All = new[] { WoodcuttingHut, LogStorage, OxenStand, House, Granary, ForagerHut, MarketStall, HewingStation, Sawpit, Weaver, WattleYard, StorageYard, CoppiceHut, ThatcherHut, DaubPit };
 
@@ -190,7 +202,7 @@ namespace LordsLegacy.Sim.Footprints
         public static FootprintTypeDef Find(string id)
         {
             for (int i = 0; i < All.Count; i++) if (All[i].Id == id) return All[i];
-            return null;
+            return id == FenceId ? Fence : null;
         }
     }
 }
