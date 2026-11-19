@@ -36,12 +36,14 @@ namespace LordsLegacy.Sim.Construction
         /// <summary>Refusal text for the short item, or null when affordable.</summary>
         public string Text { get; }
 
-        /// <summary>Player-facing item name: "item.wattle_panel" becomes "wattle panels"; "thatch" stays "thatch".</summary>
+        /// <summary>
+        /// Player-facing item name: "item.wattle_panel" becomes "wattle panels"; "thatch" and "daub" are mass nouns and stay as they are.
+        /// </summary>
         public static string DisplayName(string itemId)
         {
             string name = itemId.StartsWith("item.", StringComparison.Ordinal) ? itemId.Substring(5) : itemId;
             name = name.Replace('_', ' ');
-            return name == "thatch" ? name : name + "s";
+            return name == "thatch" || name == "daub" ? name : name + "s";
         }
     }
 }

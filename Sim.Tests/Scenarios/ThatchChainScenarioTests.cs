@@ -154,6 +154,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             Assert.IsTrue(w.IsBuilt(yard), "yard built");
             LedgerLocation yardStore = w.Inventory.FindGoodsStore(yard);
             w.Inventory.Produce(yardStore, Items.WattlePanel, 10);
+            w.Inventory.Produce(yardStore, Items.Daub, 10); // HL-04: the house also needs daub
 
             w.Roads.AddSegment(RoadTypes.DirtPathId, CurveKind.CatmullRomCentripetal,
                 new[] { M(20, 50), M(80, 50) }, new[] { M(20, 50), M(50, 50), M(80, 50) });
@@ -170,6 +171,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             StepAudited(w, 40000, () => w.IsBuilt(house));
             Assert.IsTrue(w.IsBuilt(house), "house built");
             Assert.AreEqual(0, yardStore.CountOf(Items.WattlePanel.Id), "panels came from the yard");
+            Assert.AreEqual(0, yardStore.CountOf(Items.Daub.Id), "daub came from the yard");
             Assert.AreEqual(hutThatchBefore - 10, r.Store.CountOf(Items.Thatch.Id), "the house took its 10 thatch from the hut store");
         }
     }

@@ -75,7 +75,8 @@ namespace LordsLegacy.Sim.Tests.Homes
             int house = (int)r.Created[1];
             Assert.AreEqual(ModuleTypes.HouseId, w.Footprints.Get(house).Type.Id);
             Assert.IsNotNull(w.Construction.Get(house));
-            Assert.AreEqual(30, w.Construction.Get(house).ReservationIds.Sum(id => w.Inventory.GetReservation(id).Count));
+            // HL-04: the site reserves 10 each of logs, thatch, panels and daub, 40 in all.
+            Assert.AreEqual(40, w.Construction.Get(house).ReservationIds.Sum(id => w.Inventory.GetReservation(id).Count));
             HomeRecord h = w.Homes.Get(house);
             Assert.AreEqual((int)r.Created[0], h.PlotAreaId);
             Assert.AreEqual(0, h.FamilyId);
@@ -100,7 +101,8 @@ namespace LordsLegacy.Sim.Tests.Homes
             SimWorld w = Make(9);
             CommandResult r = w.Execute(new DesignatePlot(Plot(w, 30)));
             Assert.IsTrue(r.IsRejected);
-            Assert.AreEqual("Not enough logs (have 9, need 10)", r.Text); // text from SiteMaterials.Shortfall (T-515)
+            // Every item has 9 of 10; daub is first in id order (HL-04). Text from SiteMaterials.Shortfall (T-515).
+            Assert.AreEqual("Not enough daub (have 9, need 10)", r.Text);
             Assert.AreEqual(0, w.Areas.All.Count());
             Assert.AreEqual(0, w.Footprints.Count);
             Assert.AreEqual(0, w.Homes.Count);

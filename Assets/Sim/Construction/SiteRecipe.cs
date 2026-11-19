@@ -25,8 +25,10 @@ namespace LordsLegacy.Sim.Construction
             ConstructionSite site = world.Construction.Get(fp.Id);
             if (site == null) return fp.Type.ConstructionRecipe;
             if (stall) return HoldsLogs(world, site) ? ModuleTypes.MarketStallLogRecipe : fp.Type.ConstructionRecipe;
-            // T-577, MAT-40b: a house placed before thatch and panels holds logs but neither of those.
-            bool old = HoldsLogs(world, site) && !Holds(world, site, Items.Thatch.Id) && !Holds(world, site, Items.WattlePanel.Id);
+            // T-577, MAT-40b: a house placed before thatch and panels holds logs but none of those. HL-04: daub is newer
+            // still, so a site holding any of the four items is on the current recipe.
+            bool old = HoldsLogs(world, site) && !Holds(world, site, Items.Thatch.Id) && !Holds(world, site, Items.WattlePanel.Id)
+                && !Holds(world, site, Items.Daub.Id);
             return old ? ModuleTypes.HouseLogRecipe : fp.Type.ConstructionRecipe;
         }
 

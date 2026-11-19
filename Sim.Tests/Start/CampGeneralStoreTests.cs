@@ -49,6 +49,27 @@ namespace LordsLegacy.Sim.Tests.Start
             Assert.IsNull(w.Inventory.Audit());
         }
 
+        // HL-04, "The camp starts with 90 daub": the General store holds exactly 90 daub at the start.
+        [Test]
+        public void NewGame_GeneralStoreHoldsNinetyDaub()
+        {
+            SimWorld w = NewGame(Map());
+            Assert.AreEqual(90, w.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
+            Assert.AreEqual(StartLayoutApplier.StartingDaub, w.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
+            Assert.IsNull(w.Inventory.Audit());
+        }
+
+        [Test]
+        public void CampWithDaub_RoundTripsTheNinetyDaub()
+        {
+            MapData map = Map();
+            SimWorld w = NewGame(map);
+            byte[] first = SimSave.Write(w, "s", 1, map.MapId, map.ContentHash);
+            SimWorld loaded = SimSave.Read(first, map);
+            Assert.AreEqual(90, loaded.Camp.GeneralStoreLocation.CountOf(Items.Daub.Id));
+            CollectionAssert.AreEqual(first, SimSave.Write(loaded, "s", 1, map.MapId, map.ContentHash));
+        }
+
         [Test]
         public void StartingPlanks_TuningSetsTheStock()
         {
