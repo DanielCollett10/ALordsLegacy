@@ -13,7 +13,9 @@ using LordsLegacy.Sim.People;
 using LordsLegacy.Sim.Roads;
 using LordsLegacy.Sim.Save;
 using LordsLegacy.Sim.Start;
+using LordsLegacy.Sim.Tasks;
 using LordsLegacy.Sim.Terrain;
+using LordsLegacy.Sim.Thatch;
 using LordsLegacy.Sim.Tuning;
 using NUnit.Framework;
 
@@ -67,7 +69,7 @@ namespace LordsLegacy.Sim.Tests.Scenarios
         private sealed class Run { public SimWorld W; public Operation Op; public LedgerLocation Store; public long CutStart; }
 
         /// <summary>Builds a thatcher's hut by command, staffs it with family 1 and puts one reed bed in its work area.</summary>
-        private static Run BuildHut(MapData map, int month)
+        private static Run BuildHut(MapData map, int month, int bundles = 8, bool startAtMorning = false)
         {
             SimWorld w = Start(map, month);
             AreaShape area = AreaShape.Straight(new[] { M(30, 20), M(60, 20), M(60, 40), M(30, 40) });
@@ -79,7 +81,8 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             Assert.NotNull(op);
             StepAudited(w, 6 * 1440, () => w.IsBuilt(hut));
             Assert.IsTrue(w.IsBuilt(hut), "hut built");
-            w.Bushes.Add(40, 25, BushKind.ReedBed, 8);
+            if (startAtMorning) StepAudited(w, 2 * 1440, () => w.Tick % 1440 == 0); // tick 0 is 06:00
+            w.Bushes.Add(40, 25, BushKind.ReedBed, bundles);
             Assert.IsTrue(w.Execute(new AssignFamily(op.Id, 1)).IsAccepted);
             return new Run { W = w, Op = op, Store = w.Inventory.FindGoodsStore(hut), CutStart = w.Tick };
         }
@@ -91,15 +94,33 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             return r.W.Tick - r.CutStart;
         }
 
+        /// <summary>Ticks from the first cut task going Active to the first stook: the cutting itself, after any wait for daylight.</summary>
+        private static long CutTicks(Run r)
+        {
+            long started = -1;
+            for (int i = 0; i < 4 * 1440 && r.W.Curing.Count == 0; i++)
+            {
+                r.W.Step(1);
+                Check(r.W);
+                if (started < 0 && r.W.Tasks.All.Any(t => t.Def.Id == ThatchingSystem.CutReedTaskId && t.State == TaskState.Active))
+                    started = r.W.Tick;
+            }
+            Assert.Greater(r.W.Curing.Count, 0, "a stook stands");
+            Assert.GreaterOrEqual(started, 0, "the cut task went Active");
+            return r.W.Tick - started;
+        }
+
         [Test]
         public void Summer_CutsFourTimesSlower_ThanDecember()
         {
             MapData map = Map();
-            Run winter = BuildHut(map, 12);
-            Run summer = BuildHut(map, 7);
-            long wTicks = TicksToFirstStook(winter), sTicks = TicksToFirstStook(summer);
-            TestContext.Out.WriteLine("winter " + wTicks + " summer " + sTicks);
-            Assert.GreaterOrEqual(sTicks, wTicks * 3, "summer cut is at least about 4 times slower");
+            // Two beds per season, both cut from 06:00 so no night or sleep falls inside; the walk is the same for both, so the
+            // difference between a 4-bundle and a 2-bundle cut is exactly two bundles of cutting.
+            long wDiff = CutTicks(BuildHut(map, 12, 4, true)) - CutTicks(BuildHut(map, 12, 2, true));
+            long sDiff = CutTicks(BuildHut(map, 7, 4, true)) - CutTicks(BuildHut(map, 7, 2, true));
+            TestContext.Out.WriteLine("winter two bundles " + wDiff + " summer two bundles " + sDiff);
+            Assert.AreEqual(2 * 30, wDiff, 2, "winter: 30 minutes a bundle");
+            Assert.AreEqual(4 * wDiff, sDiff, 4, "summer cutting is 4 times slower");
         }
 
         [Test]
@@ -140,12 +161,16 @@ namespace LordsLegacy.Sim.Tests.Scenarios
             var shape = new AreaShape(
                 new[] { M(30, 51.25), M(50, 51.25), M(50, 61.25), M(30, 61.25) },
                 new[] { AreaEdge.FollowsRoad(road, RoadSide.Left), AreaEdge.Straight(), AreaEdge.Straight(), AreaEdge.Straight() });
+            // Stand the thatchers down so no new sheaves arrive while the house is built: the store count can only fall.
+            Assert.IsTrue(w.Execute(new UnassignFamily(r.Op.Id, 1)).IsAccepted);
+            int hutThatchBefore = r.Store.CountOf(Items.Thatch.Id);
             CommandResult hr = w.Execute(new DesignatePlot(shape));
             Assert.IsTrue(hr.IsAccepted, hr.Text);
             int house = (int)hr.Created[1];
             StepAudited(w, 40000, () => w.IsBuilt(house));
             Assert.IsTrue(w.IsBuilt(house), "house built");
             Assert.AreEqual(0, yardStore.CountOf(Items.WattlePanel.Id), "panels came from the yard");
+            Assert.AreEqual(hutThatchBefore - 10, r.Store.CountOf(Items.Thatch.Id), "the house took its 10 thatch from the hut store");
         }
     }
 }
